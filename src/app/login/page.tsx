@@ -127,6 +127,11 @@ export default function LoginPage() {
                     <Link href="/babybase/register" className="text-xs font-bold text-pink-500 hover:text-pink-600 transition-colors">
                         アカウントをお持ちでない方はこちら
                     </Link>
+                    <div className="mt-8 pt-4 border-t border-slate-50">
+                        <Link href="/admin" className="text-[10px] font-bold text-slate-300 hover:text-slate-400 transition-colors">
+                            管理者ログイン
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>

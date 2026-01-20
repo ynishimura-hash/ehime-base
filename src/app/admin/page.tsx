@@ -8,6 +8,7 @@ import {
     Search, ArrowUpRight, BarChart3, Clock, Star
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function AdminDashboardPage() {
     const { users, companies, jobs, interactions, activeRole, courses, fetchCourses } = useAppStore();
@@ -18,19 +19,52 @@ export default function AdminDashboardPage() {
         }
     }, [courses.length, fetchCourses]);
 
+    const [password, setPassword] = React.useState('');
+    const { loginAs } = useAppStore();
+
     if (activeRole !== 'admin') {
+        const handleAdminLogin = () => {
+            // Simple dev-mode password check
+            if (password === 'admin123') {
+                loginAs('admin');
+                toast.success('管理者としてログインしました');
+            } else {
+                toast.error('パスワードが間違っています');
+            }
+        };
+
         return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
                 <div className="max-w-md w-full text-center space-y-6">
-                    <div className="bg-red-50 text-red-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto border border-red-100 shadow-xl shadow-red-900/5">
+                    <div className="bg-slate-900 text-white w-20 h-20 rounded-full flex items-center justify-center mx-auto shadow-xl shadow-slate-900/20">
                         <ShieldCheck size={40} />
                     </div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Access Denied</h1>
-                    <p className="text-slate-500 font-bold leading-relaxed">
-                        このページにアクセスするための権限がありません。管理者アカウントでログインしてください。
-                    </p>
-                    <Link href="/" className="inline-block bg-slate-900 text-white font-black px-8 py-4 rounded-2xl hover:bg-slate-800 transition-all active:scale-95 shadow-2xl shadow-slate-900/20">
-                        ホームに戻る
+                    <div>
+                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Admin Console</h1>
+                        <p className="text-slate-500 font-bold mt-2">
+                            システム管理者専用エリアです。
+                        </p>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                        <input
+                            type="password"
+                            placeholder="管理者パスワード"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                            onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()}
+                        />
+                        <button
+                            onClick={handleAdminLogin}
+                            className="w-full bg-slate-900 text-white font-black py-3 rounded-xl hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-900/20"
+                        >
+                            認証する
+                        </button>
+                    </div>
+
+                    <Link href="/" className="inline-block text-slate-400 font-bold text-sm hover:text-slate-600">
+                        ← サイトに戻る
                     </Link>
                 </div>
             </div>

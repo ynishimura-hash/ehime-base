@@ -28,6 +28,13 @@ create policy "Users can insert their own profile." on profiles
 create policy "Users can update own profile." on profiles
   for update using ((select auth.uid()) = id);
 
+-- 管理者は全てのプロフィールを更新可能
+create policy "Admins can update any profile." on profiles
+  for update using (
+    exists (select 1 from profiles where id = (select auth.uid()) and user_type = 'admin')
+  );
+
+
 -- 組織・団体テーブル（旧: 企業テーブル）
 -- 企業だけでなく、学校、コミュニティも含む
 create table organizations (
@@ -49,6 +56,13 @@ alter table organizations enable row level security;
 create policy "Organizations are viewable by everyone." on organizations
   for select using (true);
 
+-- 管理者は全ての組織を更新・削除可能
+create policy "Admins can update any organization." on organizations
+  for all using (
+    exists (select 1 from profiles where id = (select auth.uid()) and user_type = 'admin')
+  );
+
+
 -- 組織メンバー管理テーブル（新規）
 create table organization_members (
   id uuid default gen_random_uuid() primary key,
@@ -65,6 +79,13 @@ alter table organization_members enable row level security;
 -- 所属メンバーは自分の所属情報を見れる
 create policy "Members can view own membership." on organization_members
   for select using ((select auth.uid()) = user_id);
+
+-- 管理者は全てのメンバーシップを操作可能
+create policy "Admins can manage all memberships." on organization_members
+  for all using (
+    exists (select 1 from profiles where id = (select auth.uid()) and user_type = 'admin')
+  );
+
 
 -- 求人・クエストテーブル
 create table jobs (
@@ -84,13 +105,49 @@ alter table jobs enable row level security;
 create policy "Jobs are viewable by everyone." on jobs
   for select using (true);
 
+-- 管理者は全ての求人を操作可能
+create policy "Admins can manage all jobs." on jobs
+  for all using (
+    exists (select 1 from profiles where id = (select auth.uid()) and user_type = 'admin')
+  );
+
+
+-- 動画・メディア一括管理用テーブル（新規）
+create table media_library (
+  id uuid default gen_random_uuid() primary key,
+  filename text not null, -- 元のファイル名
+  storage_path text not null, -- Supabase Storage内のパス
+  public_url text not null, -- 公開URL
+  
+  -- 紐付け情報（後から設定可能）
+  organization_id uuid references organizations(id),
+  job_id uuid references jobs(id),
+  
+  description text, -- 動画の説明メモ
+  
+  uploaded_by uuid references profiles(id), -- アップロード者
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table media_library enable row level security;
+
+-- 全員閲覧可能（動画自体は公開前提）
+create policy "Media is viewable by everyone." on media_library
+  for select using (true);
+
+-- 管理者は自由に操作可能
+create policy "Admins can manage media." on media_library
+  for all using (
+    exists (select 1 from profiles where id = (select auth.uid()) and user_type = 'admin')
+  );
+
 
 -- お気に入り（ブックマーク）テーブル
 create table bookmarks (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references profiles(id) on delete cascade not null, -- 保存したユーザー
   item_id uuid not null, -- 対象のID（求人ID、記事IDなど）
-  item_type text not null check (item_type in ('job', 'company', 'article', 'course')), -- 対象の種類
+  item_type text not null check (item_type in ('job', 'organization', 'article', 'course')), -- 対象の種類
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   unique (user_id, item_id, item_type) -- 同じものを二重に登録できないようにする
 );
@@ -153,6 +210,8 @@ begin
 end;
 $$ language plpgsql security definer;
 
+-- トリガーの再作成（エラー防止のためDropしてから）
+drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();

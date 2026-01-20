@@ -5,11 +5,12 @@ import { useAppStore } from '@/lib/appStore';
 import {
     Building2, Briefcase, GraduationCap,
     Search, Edit3, Trash2, Eye,
-    Plus, ChevronLeft, Upload
+    Plus, ChevronLeft, Upload, Video, FileVideo
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { createClient } from '@/utils/supabase/client';
 
 function AdminManagementContent() {
     const searchParams = useSearchParams();
@@ -17,7 +18,76 @@ function AdminManagementContent() {
     const currentTab = searchParams.get('tab') || 'companies';
     const { companies, jobs, activeRole, courses, fetchCourses, addCourses } = useAppStore();
     const [searchQuery, setSearchQuery] = useState('');
+
     const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const videoInputRef = React.useRef<HTMLInputElement>(null);
+    const [mediaItems, setMediaItems] = useState<any[]>([]);
+    const [uploading, setUploading] = useState(false);
+    const supabase = createClient();
+
+    React.useEffect(() => {
+        if (currentTab === 'media') {
+            fetchMedia();
+        }
+    }, [currentTab]);
+
+    const fetchMedia = async () => {
+        const { data, error } = await supabase
+            .from('media_library')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching media:', error);
+            toast.error('メディア情報の取得に失敗しました');
+        } else {
+            setMediaItems(data || []);
+        }
+    };
+
+    const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        try {
+            // 1. Upload to Storage
+            const { error: uploadError } = await supabase.storage
+                .from('videos')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            // 2. Get Public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('videos')
+                .getPublicUrl(filePath);
+
+            // 3. Save to Database
+            const { error: dbError } = await supabase
+                .from('media_library')
+                .insert({
+                    filename: file.name,
+                    storage_path: filePath,
+                    public_url: publicUrl,
+                    // uploaded_by: user.id // Supabase Auth user ID would go here
+                });
+
+            if (dbError) throw dbError;
+
+            toast.success('動画をアップロードしました');
+            fetchMedia();
+        } catch (error) {
+            console.error('Upload error:', error);
+            toast.error('アップロードに失敗しました');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     React.useEffect(() => {
         if (courses.length === 0) {
@@ -245,6 +315,81 @@ function AdminManagementContent() {
         </div>
     );
 
+    const renderMedia = () => (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-black text-slate-900">メディア(動画)管理</h2>
+                <div className="flex gap-2">
+                    <input
+                        type="file"
+                        accept="video/*"
+                        className="hidden"
+                        ref={videoInputRef}
+                        onChange={handleVideoUpload}
+                    />
+                    <button
+                        onClick={() => videoInputRef.current?.click()}
+                        disabled={uploading}
+                        className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {uploading ? <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" /> : <Upload size={18} />}
+                        動画をアップロード
+                    </button>
+                </div>
+            </div>
+            <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm p-6">
+                {mediaItems.length === 0 ? (
+                    <div className="text-center py-20 text-slate-400 font-bold">
+                        <FileVideo size={48} className="mx-auto mb-4 opacity-20" />
+                        動画はまだアップロードされていません
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {mediaItems.map((item) => (
+                            <div key={item.id} className="group relative rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
+                                <video src={item.public_url} className="w-full aspect-video object-cover" controls />
+                                <div className="p-4">
+                                    <p className="font-black text-slate-800 text-sm truncate" title={item.filename}>
+                                        {item.filename}
+                                    </p>
+                                    <p className="text-[10px] text-slate-400 font-bold mt-1">
+                                        {new Date(item.created_at).toLocaleDateString()}
+                                    </p>
+                                    <div className="mt-3 flex items-center justify-between">
+                                        <button
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(item.public_url);
+                                                toast.success('URLをコピーしました');
+                                            }}
+                                            className="text-xs font-black text-blue-600 hover:underline"
+                                        >
+                                            URLコピー
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                if (!confirm('本当に削除しますか？')) return;
+                                                const { error } = await supabase.from('media_library').delete().eq('id', item.id);
+                                                if (error) {
+                                                    toast.error('削除に失敗しました');
+                                                } else {
+                                                    toast.success('削除しました');
+                                                    fetchMedia();
+                                                }
+                                            }}
+                                            className="text-xs font-black text-red-400 hover:text-red-600"
+                                        >
+                                            削除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+
     return (
         <div className="min-h-screen bg-slate-50">
             <div className="max-w-7xl mx-auto px-6 py-10">
@@ -272,12 +417,19 @@ function AdminManagementContent() {
                         >
                             <GraduationCap size={16} className="inline mr-2" /> Eラーニング
                         </button>
+                        <button
+                            onClick={() => router.push('?tab=media')}
+                            className={`px-8 py-3.5 rounded-3xl text-sm font-black transition-all ${currentTab === 'media' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:bg-white/50'}`}
+                        >
+                            <Video size={16} className="inline mr-2" /> 動画管理
+                        </button>
                     </div>
 
                     <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
                         {currentTab === 'companies' && renderCompanies()}
                         {currentTab === 'jobs' && renderJobs()}
                         {currentTab === 'learning' && renderLearning()}
+                        {currentTab === 'media' && renderMedia()}
                     </div>
                 </main>
             </div>

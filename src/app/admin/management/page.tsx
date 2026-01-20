@@ -771,7 +771,20 @@ function AdminManagementContent() {
             setEditingItem(null);
         } catch (error: any) {
             console.error(error);
-            toast.error(error.message || '保存に失敗しました');
+            let message = error.message || '保存に失敗しました';
+
+            // Translate common errors
+            if (message.includes('column') && message.includes('does not exist')) {
+                message = `データベースのカラム不足です。\nSQLを実行して項目を追加してください。\n(${message})`;
+            } else if (message.includes('duplicate key')) {
+                message = 'データが重複しています。';
+            } else if (message.includes('violates check constraint')) {
+                message = 'データの形式が正しくありません (選択肢など)。';
+            } else if (message.includes('permission denied')) {
+                message = '権限がありません。サービスロールキー設定を確認してください。';
+            }
+
+            toast.error(message);
         }
     };
 

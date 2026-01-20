@@ -14,7 +14,13 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '@/lib/appStore';
 
-// ... (keep sidebarItems)
+const sidebarItems = [
+    { name: 'ダッシュボード', icon: LayoutDashboard, href: '/dashboard/company' },
+    { name: '企業情報編集', icon: Building2, href: '/dashboard/company/profile' },
+    { name: '求人・クエスト管理', icon: Briefcase, href: '/dashboard/company/jobs/new' }, // Simplified: just go to new/list for now
+    { name: 'スカウト', icon: Users, href: '/dashboard/company/scout' },
+    { name: 'メッセージ', icon: MessageSquare, href: '/dashboard/company/messages' },
+];
 
 export default function CompanyDashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();

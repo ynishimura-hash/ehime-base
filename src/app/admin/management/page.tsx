@@ -34,6 +34,8 @@ function AdminManagementContent() {
     const [editingItem, setEditingItem] = useState<any | null>(null);
     const [editMode, setEditMode] = useState<'user' | 'company' | 'job' | null>(null);
     const [actionType, setActionType] = useState<'create' | 'edit'>('edit');
+    const [modalTab, setModalTab] = useState<'basic' | 'detail' | 'activity' | 'analysis'>('basic');
+    const [relatedData, setRelatedData] = useState<any>({ applications: [], logs: [], bookmarks: [], courses: [] });
 
     const usersFileInputRef = React.useRef<HTMLInputElement>(null);
     const companiesFileInputRef = React.useRef<HTMLInputElement>(null);
@@ -57,6 +59,29 @@ function AdminManagementContent() {
     const fetchUsers = async () => {
         const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
         if (!error && data) setRealUsers(data);
+    };
+
+    const fetchRelatedData = async (userId: string) => {
+        // Fetch Course Progress
+        const { data: courses } = await supabase.from('course_progress').select('*, courses(*)').eq('user_id', userId);
+
+        // Fetch Job Applications (assuming applications table exists, or using a placeholder join if not)
+        // If 'applications' table doesn't exist yet, this will fail silently or return error. 
+        // We wrap in try catch or check error.
+        const { data: applications } = await supabase.from('applications').select('*, jobs(*)').eq('user_id', userId);
+
+        // Fetch Bookmarks
+        const { data: bookmarks } = await supabase.from('bookmarks').select('*').eq('user_id', userId);
+
+        // Fetch View Logs
+        const { data: logs } = await supabase.from('view_logs').select('*').eq('user_id', userId).order('viewed_at', { ascending: false }).limit(20);
+
+        setRelatedData({
+            courses: courses || [],
+            applications: applications || [],
+            bookmarks: bookmarks || [],
+            logs: logs || []
+        });
     };
 
     const fetchCompanies = async () => {
@@ -247,7 +272,7 @@ function AdminManagementContent() {
                         <Upload size={18} /> CSV登録
                     </button>
                     <button
-                        onClick={() => { setEditingItem({}); setEditMode('user'); setActionType('create'); }}
+                        onClick={() => { setEditingItem({}); setEditMode('user'); setActionType('create'); setModalTab('basic'); }}
                         className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all"
                     >
                         <Plus size={18} /> 新規追加
@@ -296,7 +321,13 @@ function AdminManagementContent() {
                                 </td>
                                 <td className="px-6 py-4 text-right">
                                     <button
-                                        onClick={() => { setEditingItem(user); setEditMode('user'); setActionType('edit'); }}
+                                        onClick={() => {
+                                            setEditingItem(user);
+                                            setEditMode('user');
+                                            setActionType('edit');
+                                            setModalTab('basic');
+                                            fetchRelatedData(user.id);
+                                        }}
                                         className="p-2 text-slate-400 hover:text-blue-600"
                                     >
                                         <Edit3 size={18} />
@@ -647,7 +678,18 @@ function AdminManagementContent() {
                         .from('profiles')
                         .update({
                             full_name: editingItem.full_name,
-                            user_type: editingItem.user_type
+                            user_type: editingItem.user_type,
+                            first_name: editingItem.first_name,
+                            last_name: editingItem.last_name,
+                            phone: editingItem.phone,
+                            dob: editingItem.dob,
+                            gender: editingItem.gender,
+                            company_name: editingItem.company_name,
+                            department: editingItem.department,
+                            university: editingItem.university,
+                            faculty: editingItem.faculty,
+                            bio: editingItem.bio,
+                            tags: editingItem.tags
                         })
                         .eq('id', editingItem.id);
                     if (error) throw error;

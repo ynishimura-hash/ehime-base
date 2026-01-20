@@ -4,10 +4,15 @@ const MODEL_NAME = 'gemini-2.0-flash-001';
 
 export async function POST(req: Request) {
     try {
+        // Gemini API Key from Vercel Environment Variables
+        // Note: Adding a key in Vercel UI requires a NEW DEPLOYMENT to take effect.
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
-            console.error('[AI Analysis] GEMINI_API_KEY is not defined');
-            return NextResponse.json({ error: 'API Key not configured' }, { status: 500 });
+            console.error('[AI Analysis] GEMINI_API_KEY is not defined in process.env');
+            return NextResponse.json({
+                error: 'API Key not configured',
+                tip: 'Vercelの環境設定でGEMINI_API_KEYを追加した後、Redeployを必ず実行してください。'
+            }, { status: 500 });
         }
 
         const body = await req.json().catch(() => null);

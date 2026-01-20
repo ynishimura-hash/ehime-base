@@ -1,5 +1,26 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: Request) {
+    const { searchParams } = new URL(req.url);
+    const isDebug = searchParams.get('debug') === 'true';
+
+    if (isDebug) {
+        const key = process.env.GEMINI_API_KEY;
+        return NextResponse.json({
+            status: 'debug_mode',
+            hasKey: !!key,
+            keyLength: key ? key.length : 0,
+            maskedKey: key ? `${key.substring(0, 4)}...${key.substring(key.length - 4)}` : 'none',
+            envKeys: Object.keys(process.env).filter(k => k.includes('API') || k.includes('KEY')),
+            timestamp: new Date().toISOString()
+        });
+    }
+
+    return NextResponse.json({ message: 'AI Analysis Endpoint' });
+}
+
 const MODEL_NAME = 'gemini-2.0-flash-001';
 
 export async function POST(req: Request) {

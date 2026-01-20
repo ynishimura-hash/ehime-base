@@ -61,6 +61,17 @@ export default function CompanyDashboardOverview() {
                     <h3 className="text-lg font-black text-slate-800 mb-1">求人・クエスト管理</h3>
                     <p className="text-sm text-slate-500 font-medium">掲載中の求人の編集や<br />新規作成はこちら</p>
                 </Link>
+
+                <Link href="/dashboard/company/progress" className="block bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl group-hover:bg-indigo-100 transition-colors">
+                            <TrendingUp size={24} />
+                        </div>
+                        <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">Analytics</span>
+                    </div>
+                    <h3 className="text-lg font-black text-slate-800 mb-1">学習進捗管理</h3>
+                    <p className="text-sm text-slate-500 font-medium">社員のe-ラーニング受講状況<br />と成長を可視化</p>
+                </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

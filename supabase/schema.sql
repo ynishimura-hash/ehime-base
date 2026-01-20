@@ -215,3 +215,41 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+
+-- 組織への招待（リンク発行）テーブル
+create table organization_invitations (
+  id uuid default gen_random_uuid() primary key,
+  organization_id uuid references organizations(id) on delete cascade not null,
+  token text not null unique,
+  email text, -- 特定のメールアドレス向けの場合
+  role text check (role in ('admin', 'member')) default 'member',
+  expires_at timestamp with time zone not null,
+  created_by uuid references profiles(id),
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  is_used boolean default false
+);
+
+alter table organization_invitations enable row level security;
+
+-- 同じ組織のメンバーは招待情報を確認できる
+create policy "Members can view invitations." on organization_invitations
+  for select using (
+    exists (
+      select 1 from organization_members
+      where organization_members.organization_id = organization_invitations.organization_id
+      and organization_members.user_id = (select auth.uid())
+    )
+  );
+
+-- 管理者または組織メンバーは招待を作成可能
+create policy "Members can create invitations." on organization_invitations
+  for insert with check (
+    exists (
+      select 1 from organization_members
+      where organization_members.organization_id = organization_invitations.organization_id
+      and organization_members.user_id = (select auth.uid())
+      and organization_members.role = 'admin'
+    )
+  );
+

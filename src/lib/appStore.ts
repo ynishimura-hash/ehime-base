@@ -174,6 +174,20 @@ interface AppState {
     getChatSettingsHelper: (ownerId: string, chatId: string) => ChatSettings | undefined;
     isLessonCompleted: (lessonId: string) => boolean;
     getLastViewedLesson: () => string | undefined;
+
+    // Invitation Actions
+    invitations: Invitation[];
+    createInvitation: (orgId: string, role?: 'admin' | 'member') => string; // Returns token
+    consumeInvitation: (token: string, userId: string) => boolean;
+}
+
+export interface Invitation {
+    id: string;
+    organizationId: string;
+    token: string;
+    role: 'admin' | 'member';
+    expiresAt: number;
+    isUsed: boolean;
 }
 
 // --- Initial Data ---
@@ -317,6 +331,38 @@ export const useAppStore = create<AppState>()(
             }),
             setCompactMode: (isCompact) => set({ isCompactMode: isCompact }),
             setLessonSidebarOpen: (isOpen) => set({ isLessonSidebarOpen: isOpen }),
+
+            // Helper for invitations (Mock Implementation)
+            invitations: [],
+            createInvitation: (orgId, role = 'member') => {
+                const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                const newInv: Invitation = {
+                    id: `inv_${Date.now()}`,
+                    organizationId: orgId,
+                    token,
+                    role,
+                    expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+                    isUsed: false
+                };
+                set(s => ({ invitations: [...s.invitations, newInv] }));
+                return token;
+            },
+            consumeInvitation: (token, userId) => {
+                const state = get();
+                const inv = state.invitations.find(i => i.token === token && !i.isUsed && i.expiresAt > Date.now());
+                if (!inv) return false;
+
+                // Mark as used
+                set(s => ({
+                    invitations: s.invitations.map(i => i.id === inv.id ? { ...i, isUsed: true } : i)
+                }));
+
+                // Add to organization logic (In a real app, this would be a DB insert)
+                // Assuming we have a way to link user to company in 'users' array or separate store
+                // For now, let's just toast success as the actual persistence handles it via Supabase later
+                toast.success('組織に参加しました！');
+                return true;
+            },
 
             // User Actions
             loginAs: (role) => set({

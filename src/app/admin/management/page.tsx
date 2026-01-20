@@ -667,9 +667,26 @@ function AdminManagementContent() {
         try {
             if (editMode === 'user') {
                 if (actionType === 'create') {
-                    // Create logic
-                    const { error } = await supabase.from('profiles').insert([editingItem]);
-                    if (error) throw error;
+                    // Create logic using Admin API
+                    const defaultPassword = 'tempPassword123!'; // We should probably ask for password or generate one
+                    // Ideally we add a password field to the modal for creation
+                    // For now, we use a default temporary password and notify
+
+                    const response = await fetch('/api/admin/users', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: editingItem.email,
+                            password: editingItem.password || defaultPassword,
+                            profile: editingItem
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'User creation failed');
+                    }
+
                     toast.success('ユーザーを作成しました');
                     fetchUsers();
                 } else {
@@ -803,14 +820,28 @@ function AdminManagementContent() {
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">メールアドレス</label>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">メールアドレス {actionType === 'edit' && '(参照のみ)'}</label>
                                             <input
                                                 type="text"
-                                                className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-500 cursor-not-allowed"
+                                                className={`w-full border border-slate-200 rounded-xl px-4 py-3 font-bold ${actionType === 'edit' ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : 'bg-slate-50 text-slate-900'}`}
                                                 value={editingItem.email || ''}
-                                                readOnly
+                                                readOnly={actionType === 'edit'}
+                                                onChange={e => actionType === 'create' && setEditingItem({ ...editingItem, email: e.target.value })}
+                                                placeholder="メールアドレス"
                                             />
                                         </div>
+                                        {actionType === 'create' && (
+                                            <div>
+                                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">初期パスワード</label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                                    value={editingItem.password || ''}
+                                                    onChange={e => setEditingItem({ ...editingItem, password: e.target.value })}
+                                                    placeholder="未入力の場合: tempPassword123!"
+                                                />
+                                            </div>
+                                        )}
                                         <div>
                                             <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">電話番号</label>
                                             <input

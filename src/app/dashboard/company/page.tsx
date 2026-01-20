@@ -1,7 +1,8 @@
 "use client";
 
 import React from 'react';
-import { Users, Heart, Eye, MessageSquare, TrendingUp, Zap } from 'lucide-react';
+import Link from 'next/link';
+import { Users, Heart, Eye, MessageSquare, TrendingUp, Zap, Briefcase } from 'lucide-react';
 import { useAppStore } from '@/lib/appStore';
 
 export default function CompanyDashboardOverview() {
@@ -46,6 +47,20 @@ export default function CompanyDashboardOverview() {
                         </div>
                     </div>
                 ))}
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Link href="/dashboard/company/jobs" className="block bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-100 transition-colors">
+                            <Briefcase size={24} />
+                        </div>
+                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">New</span>
+                    </div>
+                    <h3 className="text-lg font-black text-slate-800 mb-1">求人・クエスト管理</h3>
+                    <p className="text-sm text-slate-500 font-medium">掲載中の求人の編集や<br />新規作成はこちら</p>
+                </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

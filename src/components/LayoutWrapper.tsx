@@ -64,6 +64,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
     // Check if we are in Company Dashboard or Baby Base
     const isCompanyDashboard = pathname?.startsWith('/dashboard/company');
+    const isAdminDashboard = pathname?.startsWith('/admin');
     const isBabyBase = pathname?.startsWith('/babybase');
     const isPublicPage = pathname === '/' || pathname === '/welcome' || pathname?.startsWith('/login');
 
@@ -98,7 +99,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         </nav>
     );
 
-    if (isCompanyDashboard || isPublicPage || isBabyBase) {
+    if (isCompanyDashboard || isPublicPage || isBabyBase || isAdminDashboard) {
         return <>{children}</>;
     }
 

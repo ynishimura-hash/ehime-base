@@ -136,6 +136,10 @@ interface AppState {
     // Interaction Actions
     addInteraction: (interaction: Omit<Interaction, 'timestamp'>) => void;
     removeInteraction: (type: Interaction['type'], fromId: string, toId: string) => void;
+    // Job Actions
+    addJob: (job: Job) => void;
+    updateJob: (jobId: string, updates: Partial<Job>) => void;
+    deleteJob: (jobId: string) => void;
 
     // Settings Actions
     updateChatSettings: (ownerId: string, chatId: string, settings: Partial<ChatSettings>) => void;
@@ -426,6 +430,18 @@ export const useAppStore = create<AppState>()(
                 interactions: state.interactions.filter(i =>
                     !(i.type === type && i.fromId === fromId && i.toId === toId)
                 )
+            })),
+
+            addJob: (job) => set((state) => ({
+                jobs: [job, ...state.jobs]
+            })),
+
+            updateJob: (jobId, updates) => set((state) => ({
+                jobs: state.jobs.map((j) => (j.id === jobId ? { ...j, ...updates } : j))
+            })),
+
+            deleteJob: (jobId) => set((state) => ({
+                jobs: state.jobs.filter((j) => j.id !== jobId)
             })),
 
             updateChatSettings: (ownerId, chatId, newSettings) => set(state => {

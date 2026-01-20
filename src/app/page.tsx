@@ -83,17 +83,17 @@ export default function HomePage() {
         </div>
 
         {/* Hero Content Overlay */}
-        <div className="absolute inset-0 flex flex-col justify-center items-center px-6 z-10">
-          <div className="w-full text-center mb-8 flex flex-col items-center">
-            <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase mb-6 animate-bounce">
+        <div className="absolute inset-0 flex flex-col justify-center items-center px-4 md:px-6 z-10 pt-20 md:pt-0">
+          <div className="w-full text-center mb-6 md:mb-8 flex flex-col items-center">
+            <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase mb-4 md:mb-6 animate-bounce">
               <Sparkles size={12} />
               New Experience in Ehime
             </div>
-            <h1 className="text-3xl md:text-[3.2rem] lg:text-6xl xl:text-7xl font-black text-white mb-4 tracking-tight leading-tight drop-shadow-2xl">
+            <h1 className="text-2xl md:text-[3.2rem] lg:text-6xl xl:text-7xl font-black text-white mb-2 md:mb-4 tracking-tight leading-tight drop-shadow-2xl">
               愛媛で、<span className="text-blue-400">「働く」の枠</span>を超えていく。
             </h1>
-            <p className="text-slate-200 text-lg font-bold md:text-xl drop-shadow-lg">
-              非対称なマッチングが、あなたの新しいキャリアを拓く
+            <p className="text-slate-200 text-sm md:text-xl font-bold drop-shadow-lg leading-relaxed">
+              非対称なマッチングが、<br className="md:hidden" />あなたの新しいキャリアを拓く
             </p>
           </div>
 
@@ -102,36 +102,36 @@ export default function HomePage() {
             onSubmit={handleSearch}
             className="w-full max-w-4xl bg-white p-2 md:p-3 rounded-2xl md:rounded-[32px] shadow-2xl flex flex-col md:flex-row items-stretch gap-2"
           >
-            <div className="flex-1 flex items-center gap-3 px-4 border-b md:border-b-0 md:border-r border-slate-100 py-3 md:py-0">
-              <Search className="text-blue-500" size={24} />
+            <div className="flex-1 flex items-center gap-2 md:gap-3 px-3 md:px-4 border-b md:border-b-0 md:border-r border-slate-100 py-2 md:py-0">
+              <Search className="text-blue-500 flex-shrink-0" size={20} />
               <input
                 type="text"
-                placeholder="フリーワードで検索 (例: 農業, IT, カフェ)"
-                className="w-full bg-transparent border-none focus:ring-0 font-bold text-slate-700 placeholder:text-slate-400"
+                placeholder="フリーワード検索"
+                className="w-full bg-transparent border-none focus:ring-0 font-bold text-slate-700 placeholder:text-slate-400 text-sm md:text-base"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="relative flex-1 flex items-center gap-3 px-4 border-b md:border-b-0 md:border-r border-slate-100 py-3 md:py-0">
-              <MapPin className="text-slate-400" size={24} />
+            <div className="relative flex-1 flex items-center gap-2 md:gap-3 px-3 md:px-4 border-b md:border-b-0 md:border-r border-slate-100 py-2 md:py-0">
+              <MapPin className="text-slate-400 flex-shrink-0" size={20} />
               <select
                 value={selectedArea}
                 onChange={(e) => setSelectedArea(e.target.value)}
-                className="w-full bg-transparent border-none focus:ring-0 focus:outline-none font-bold text-slate-700 appearance-none"
+                className="w-full bg-transparent border-none focus:ring-0 focus:outline-none font-bold text-slate-700 appearance-none text-sm md:text-base pr-8"
               >
                 <option value="all">すべてのエリア</option>
                 <option value="chuyo">中予（松山市・伊予市など）</option>
                 <option value="toyo">東予（今治市・西条市など）</option>
                 <option value="nanyo">南予（宇和島市・八幡浜市など）</option>
               </select>
-              <ChevronRight className="text-slate-400 absolute right-3" size={18} style={{ transform: 'rotate(90deg)' }} />
+              <ChevronRight className="text-slate-400 absolute right-3 pointer-events-none" size={16} style={{ transform: 'rotate(90deg)' }} />
             </div>
-            <div className="relative flex-1 flex items-center gap-3 px-4 border-b md:border-b-0 md:border-r border-slate-100 py-3 md:py-0">
-              <Briefcase className="text-slate-400" size={24} />
+            <div className="relative flex-1 flex items-center gap-2 md:gap-3 px-3 md:px-4 border-b md:border-b-0 md:border-r border-slate-100 py-2 md:py-0">
+              <Briefcase className="text-slate-400 flex-shrink-0" size={20} />
               <select
                 value={selectedIndustry}
                 onChange={(e) => setSelectedIndustry(e.target.value)}
-                className="w-full bg-transparent border-none focus:ring-0 focus:outline-none font-bold text-slate-700 appearance-none"
+                className="w-full bg-transparent border-none focus:ring-0 focus:outline-none font-bold text-slate-700 appearance-none text-sm md:text-base pr-8"
               >
                 <option value="all">すべての業種</option>
                 <option value="IT・システム開発">IT・システム開発</option>
@@ -142,14 +142,14 @@ export default function HomePage() {
                 <option value="医療・福祉">医療・福祉</option>
                 <option value="その他">その他</option>
               </select>
-              <ChevronRight className="text-slate-400 absolute right-3" size={18} style={{ transform: 'rotate(90deg)' }} />
+              <ChevronRight className="text-slate-400 absolute right-3 pointer-events-none" size={16} style={{ transform: 'rotate(90deg)' }} />
             </div>
             <button
               type="submit"
-              className="bg-blue-600 text-white px-8 py-3 md:py-0 rounded-xl md:rounded-2xl font-black hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/20 active:scale-95"
+              className="bg-blue-600 text-white px-8 py-2.5 md:py-0 rounded-xl md:rounded-2xl font-black hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/20 active:scale-95 text-sm md:text-base shrink-0"
             >
-              検索する
-              <ChevronRight size={20} />
+              検索
+              <ChevronRight size={18} />
             </button>
           </form>
 

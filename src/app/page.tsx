@@ -90,7 +90,7 @@ export default function HomePage() {
               New Experience in Ehime
             </div>
             <h1 className="text-2xl md:text-[3.2rem] lg:text-6xl xl:text-7xl font-black text-white mb-2 md:mb-4 tracking-tight leading-tight drop-shadow-2xl">
-              愛媛で、<span className="text-blue-400">「働く」の枠</span>を超えていく。
+              愛媛で、<span className="text-blue-400">「働く」の枠</span>を<br className="block md:hidden" />超えていく。
             </h1>
             <p className="text-slate-200 text-sm md:text-xl font-bold drop-shadow-lg leading-relaxed">
               非対称なマッチングが、<br className="md:hidden" />あなたの新しいキャリアを拓く
@@ -189,20 +189,20 @@ export default function HomePage() {
             <Link
               key={item.label}
               href={item.href}
-              className="relative bg-white p-6 rounded-[32px] shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:-translate-y-2 transition-all group border border-slate-100/50 overflow-hidden"
+              className="relative bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:-translate-y-2 transition-all group border border-slate-100/50 overflow-hidden min-h-[160px] md:min-h-0 flex flex-col justify-between"
             >
               {/* Background illustration */}
-              <div className="absolute top-1/2 -translate-y-1/2 right-4 w-40 h-40 opacity-100 transition-opacity">
+              <div className="absolute -bottom-2 -right-2 md:top-1/2 md:-translate-y-1/2 md:right-4 w-24 h-24 md:w-40 md:h-40 opacity-80 md:opacity-100 transition-opacity">
                 <img src={item.illustration} alt="" className="w-full h-full object-contain" />
               </div>
 
               {/* Content */}
               <div className="relative z-10">
-                <div className={`${item.color} w-12 h-12 rounded-2xl text-white flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
-                  <item.icon size={26} />
+                <div className={`${item.color} w-10 h-10 md:w-12 md:h-12 rounded-2xl text-white flex items-center justify-center mb-3 md:mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
+                  <item.icon size={22} className="md:w-6 md:h-6" />
                 </div>
-                <div className="font-black text-slate-800 text-lg mb-1">{item.label}</div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.desc}</div>
+                <div className="font-black text-slate-800 text-base md:text-lg mb-0.5 md:mb-1">{item.label}</div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">{item.desc}</div>
               </div>
             </Link>
           ))}

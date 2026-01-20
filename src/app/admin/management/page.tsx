@@ -79,8 +79,9 @@ function AdminManagementContent() {
     };
 
     const fetchCompanies = async () => {
-        const { data, error } = await supabase.from('companies').select('*').order('created_at', { ascending: false });
-        if (!error && data) setRealCompanies(data);
+        const { data, error } = await supabase.from('organizations').select('*').eq('type', 'company').order('created_at', { ascending: false });
+        if (error) console.error(error);
+        else setRealCompanies(data || []);
     };
 
     const fetchJobs = async () => {
@@ -117,6 +118,7 @@ function AdminManagementContent() {
     const [youtubeUrl, setYoutubeUrl] = useState('');
     const [linkTargetType, setLinkTargetType] = useState<'none' | 'company' | 'job' | 'quest'>('none');
     const [linkTargetId, setLinkTargetId] = useState('');
+    const [showMediaModal, setShowMediaModal] = useState(false);
 
 
     // ... (Keep DB Fields Definitions as they are) ... (Wait, I replaced them in previous step, so I should just focus on executeCsvImport)
@@ -261,7 +263,7 @@ function AdminManagementContent() {
                 if (csvTargetType === 'company') {
                     if (!item.name) { errorCount++; continue; }
 
-                    const { error } = await supabase.from('companies').insert([item]);
+                    const { error } = await supabase.from('organizations').insert([{ ...item, type: 'company' }]);
                     if (error) { console.error(error); errorCount++; } else { successCount++; }
 
                 } else if (csvTargetType === 'job') {
@@ -269,10 +271,10 @@ function AdminManagementContent() {
 
                     // Find company ID if company_name provided
                     if (item.company_name) {
-                        const { data: company } = await supabase.from('companies').select('id').eq('name', item.company_name).single();
-                        if (company) item.company_id = company.id;
+                        const { data: company } = await supabase.from('organizations').select('id').eq('name', item.company_name).eq('type', 'company').single();
+                        if (company) item.organization_id = company.id;
                     }
-                    if (!item.company_id && realCompanies.length > 0) {
+                    if (!item.organization_id && realCompanies.length > 0) {
                         // Fallback: Use first company or admin company? For now, skip if no link.
                         // Or create without company.
                     }
@@ -832,7 +834,7 @@ function AdminManagementContent() {
                 // created_at is default
             };
 
-            if (linkTargetType === 'company' && linkTargetId) item.company_id = linkTargetId;
+            if (linkTargetType === 'company' && linkTargetId) item.organization_id = linkTargetId;
             if ((linkTargetType === 'job' || linkTargetType === 'quest') && linkTargetId) item.job_id = linkTargetId;
 
             const { error: dbError } = await supabase.from('media_library').insert([item]);
@@ -853,16 +855,17 @@ function AdminManagementContent() {
         }
     };
 
-    const renderMedia = () => (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-black text-slate-900">メディア(動画)管理</h2>
-            </div>
+    const renderMediaModal = () => (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-[2rem] w-full max-w-2xl p-8 max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-bold text-lg text-slate-700">新規動画追加</h3>
+                    <button onClick={() => setShowMediaModal(false)} className="p-2 hover:bg-slate-100 rounded-full">
+                        <X size={24} className="text-slate-400" />
+                    </button>
+                </div>
 
-            {/* Upload / Add Area */}
-            <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm mb-8">
-                <h3 className="font-bold text-lg mb-4 text-slate-700">新規動画追加</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-6">
                     <div>
                         <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">動画タイプ</label>
                         <div className="flex gap-4 mb-4">
@@ -911,7 +914,6 @@ function AdminManagementContent() {
                                 <option value="job">求人</option>
                                 <option value="quest">クエスト</option>
                             </select>
-
                             {linkTargetType !== 'none' && (
                                 <select
                                     className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold text-sm text-slate-700"
@@ -931,7 +933,7 @@ function AdminManagementContent() {
                     </div>
                 </div>
 
-                <div className="flex justify-end mt-6">
+                <div className="flex justify-end mt-8">
                     <button
                         onClick={handleMediaSubmit}
                         disabled={uploading}
@@ -941,6 +943,20 @@ function AdminManagementContent() {
                         保存する
                     </button>
                 </div>
+            </div>
+        </div>
+    );
+
+    const renderMedia = () => (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-black text-slate-900">メディア(動画)管理</h2>
+                <button
+                    onClick={() => setShowMediaModal(true)}
+                    className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all shadow-lg shadow-blue-200"
+                >
+                    <Plus size={18} /> 新規動画追加
+                </button>
             </div>
 
             <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm p-6">
@@ -1727,6 +1743,7 @@ function AdminManagementContent() {
                 </main>
 
                 {editingItem && renderEditModal()}
+                {showMediaModal && renderMediaModal()}
             </div>
         </div>
     );

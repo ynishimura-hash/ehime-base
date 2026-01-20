@@ -801,6 +801,7 @@ function AdminManagementContent() {
             let publicUrl = '';
             let filename = '';
             let type = 'file';
+            let storageFilePath = '';
 
             if (videoLinkType === 'file') {
                 const file = videoInputRef.current?.files?.[0];
@@ -808,15 +809,15 @@ function AdminManagementContent() {
 
                 filename = file.name;
                 const fileExt = file.name.split('.').pop();
-                const filePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+                storageFilePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
 
                 const { error: uploadError } = await supabase.storage
                     .from('videos')
-                    .upload(filePath, file);
+                    .upload(storageFilePath, file);
 
                 if (uploadError) throw uploadError;
 
-                const { data } = supabase.storage.from('videos').getPublicUrl(filePath);
+                const { data } = supabase.storage.from('videos').getPublicUrl(storageFilePath);
                 publicUrl = data.publicUrl;
             } else {
                 // YouTube
@@ -824,12 +825,14 @@ function AdminManagementContent() {
                 publicUrl = youtubeUrl;
                 filename = 'YouTube Video'; // Or fetch title if possible, for now static or user input
                 type = 'youtube';
+                storageFilePath = 'youtube'; // Dummy value for NOT NULL constraint
             }
 
             // Insert into DB
             const item: any = {
                 filename,
                 public_url: publicUrl,
+                storage_path: storageFilePath,
                 type,
                 // created_at is default
             };

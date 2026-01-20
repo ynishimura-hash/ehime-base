@@ -7,13 +7,57 @@ import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
 import { Reel } from '@/lib/dummyData';
 import { Film, Play, Search, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
+
+// Helper for YouTube ID
+const getYouTubeID = (url: string) => {
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[7].length === 11) ? match[7] : '';
+};
+
 
 function ReelsContent() {
     const searchParams = useSearchParams();
     const { companies, jobs } = useAppStore();
+    const [mediaReels, setMediaReels] = useState<any[]>([]);
+    const supabase = createClient();
 
-    // Aggregate all reels from companies and jobs
-    const allReels: { reel: Reel, entityName: string, entityId: string, type: 'company' | 'job', companyId?: string }[] = [];
+    // Fetch Media Library
+    useEffect(() => {
+        const fetchMedia = async () => {
+            const { data, error } = await supabase
+                .from('media_library')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (data) {
+                // Transform to Reel format
+                const items = data.map((item: any) => ({
+                    reel: {
+                        id: item.id,
+                        url: item.type === 'youtube' ? `https://www.youtube.com/embed/${getYouTubeID(item.public_url)}` : item.public_url,
+                        title: item.filename || 'No Title', // Use filename or description
+                        likes: 0,
+                        comments: 0,
+                        shares: 0,
+                        type: item.type === 'youtube' ? 'youtube' : 'file'
+                    },
+                    entityName: item.company_id
+                        ? (companies.find(c => c.id === item.company_id)?.name || 'Company')
+                        : (item.job_id ? 'Job/Quest' : 'Official'),
+                    entityId: item.company_id || item.job_id || 'admin',
+                    type: item.company_id ? 'company' : (item.job_id ? 'job' : 'company'), // Default to company type for now or generic
+                    companyId: item.company_id
+                }));
+                setMediaReels(items);
+            }
+        };
+        fetchMedia();
+    }, [companies]);
+
+    // Aggregate all reels from companies and jobs + Media Library
+    const allReels: { reel: Reel, entityName: string, entityId: string, type: 'company' | 'job', companyId?: string }[] = [...mediaReels];
 
     companies.forEach(company => {
         if (company.reels) {
@@ -29,12 +73,9 @@ function ReelsContent() {
     });
 
     jobs.forEach(job => {
-        const company = companies.find(c => c.id === job.companyId);
-        // If jobs have specific reels in the future, we add them here.
-        // Currently, we might show company reels linked to jobs, but to avoid duplicates in a specific "feed", 
-        // we should probably just stick to unique sources. 
-        // For now, let's just list company reels as that's what we populated.
+        // jobs logic (currently empty for dummy data reels, but media_library might cover this)
     });
+
 
     // Reel State
     const [isReelModalOpen, setIsReelModalOpen] = useState(false);

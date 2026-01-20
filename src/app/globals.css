@@ -3,13 +3,60 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --accent-foreground: 222.2 47.4 11.2;
+  --eis-yellow: #FFCC00;
+  --eis-navy: #1A365D;
+  
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+
+  /* Baby Base Tokens */
+  --bb-pink: 350 100% 96%;
+  --bb-pink-dark: 350 80% 60%;
+  --bb-mint: 160 60% 96%;
+  --bb-mint-dark: 160 50% 40%;
+  --bb-cream: 40 60% 98%;
+  --bb-warm-gray: 30 20% 40%;
+ 
+  --border: 214.3 31.8% 91.4%;
+  /* Pastel Categories */
+  --cat-orange: #FFE4BC;
+  --cat-cream: #FFF7D1;
+  --cat-green: #D7E7C0;
+  --cat-mint: #D1F3F0;
+  --cat-blue: #C6D6F8;
+  --cat-purple: #E0C7E8;
+  --cat-pink: #EBBAC9;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-eis-yellow: var(--eis-yellow);
+  --color-eis-navy: var(--eis-navy);
+  --color-cat-orange: var(--cat-orange);
+  --color-cat-cream: var(--cat-cream);
+  --color-cat-green: var(--cat-green);
+  --color-cat-mint: var(--cat-mint);
+  --color-cat-blue: var(--cat-blue);
+  --color-cat-purple: var(--cat-purple);
+  --color-cat-pink: var(--cat-pink);
+  --font-sans: 'Inter', 'Noto Sans JP', sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .bg-bb-gradient {
+    background: linear-gradient(135deg, hsl(var(--bb-pink)) 0%, hsl(var(--bb-cream)) 100%);
+  }
+  .bg-bb-soft {
+    background-color: hsl(var(--bb-cream));
+  }
+  .rounded-bb {
+    border-radius: 2.5rem;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,3 +71,4 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+html, body { overscroll-behavior-y: none; }

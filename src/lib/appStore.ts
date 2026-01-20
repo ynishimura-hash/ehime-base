@@ -1,0 +1,555 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { Company, Job, COMPANIES, JOBS } from './dummyData';
+import { Course } from './dummyData';
+import { UserAnalysis } from './types/analysis';
+import { LifePlanInput } from './money-simulation/types';
+import { MomProfile, ChildProfile, Specialist, BabyBaseEvent, LearningArticle, SpecialistPost } from './types/babybase';
+import { BB_SPECIALISTS, BB_EVENTS, BB_ARTICLES, BB_POSTS } from './babybaseData';
+import { useGameStore } from './gameStore';
+import { toast } from 'sonner';
+
+// --- Types ---
+
+export interface User {
+    id: string;
+    name: string;
+    age: number;
+    university?: string;
+    faculty?: string;
+    bio: string;
+    tags: string[];
+    image: string;
+    isOnline: boolean;
+    // New fields
+    department?: string;
+    graduationYear?: string;
+    workHistory?: { company: string, role: string, duration: string, description: string }[];
+    qualifications?: string[];
+    skills?: { name: string, level: 'beginner' | 'intermediate' | 'advanced' }[];
+    portfolioUrl?: string;
+    desiredConditions?: {
+        salary?: string;
+        location?: string[];
+        industry?: string[];
+        employmentType?: string[];
+    };
+    birthDate?: string;
+    publicValues?: number[]; // 公開設定にされたValueCardのID
+}
+
+export interface Attachment {
+    id: string;
+    type: 'image' | 'file';
+    url: string;
+    name: string;
+    size?: string;
+}
+
+export interface Message {
+    id: string;
+    senderId: string; // 'u_yuji' or 'c_eis' etc.
+    text: string;
+    timestamp: number;
+    isRead: boolean;
+    attachment?: Attachment;
+    replyToId?: string;
+}
+
+export interface ChatThread {
+    id: string;
+    companyId: string;
+    userId: string;
+    messages: Message[];
+    updatedAt: number;
+}
+
+export interface Interaction {
+    type: 'like_company' | 'like_job' | 'like_user' | 'apply' | 'scout';
+    fromId: string; // userId or companyId
+    toId: string; // companyId, jobId, or userId
+    timestamp: number;
+    metadata?: any; // e.g., scout message
+}
+
+export interface ChatSettings {
+    ownerId: string; // userId or companyId
+    chatId: string;
+    isPinned: boolean;
+    isBlocked: boolean;
+    isUnreadManual: boolean;
+    priority: 'high' | 'medium' | 'low' | null;
+    memo: string;
+    alias: string;
+}
+
+interface AppState {
+    // Current Session Mode
+    authStatus: 'guest' | 'authenticated';
+    activeRole: 'seeker' | 'company' | 'admin';
+    personaMode: 'seeker' | 'reskill';
+    currentUserId: string;
+    currentCompanyId: string;
+
+    // Data Registry
+    users: User[];
+    companies: Company[];
+    jobs: Job[];
+    courses: Course[];
+
+    // Self-Analysis results
+    userAnalysis: UserAnalysis;
+    chats: ChatThread[];
+    interactions: Interaction[];
+    chatSettings: ChatSettings[];
+    completedLessonIds: string[];
+    lastViewedLessonIds: string[];
+
+    // Chat Preferences
+    chatSortBy: 'date' | 'priority';
+    chatFilterPriority: ('high' | 'medium' | 'low')[];
+    isCompactMode: boolean;
+    isLessonSidebarOpen: boolean;
+    lastMoneySimulationInput: LifePlanInput | null;
+
+    // Baby Base Data
+    momProfile: MomProfile | null;
+    bbSpecialists: Specialist[];
+    bbEvents: BabyBaseEvent[];
+    bbArticles: LearningArticle[];
+    bbPosts: SpecialistPost[];
+
+    // Actions
+    loginAs: (role: 'seeker' | 'company' | 'admin') => void;
+    logout: () => void;
+    switchRole: (role: 'seeker' | 'company' | 'admin') => void;
+    setPersonaMode: (mode: 'seeker' | 'reskill') => void;
+    updateUser: (userId: string, updates: Partial<User>) => void;
+    toggleInteraction: (type: Interaction['type'], fromId: string, toId: string, metadata?: any) => void;
+
+    // Chat Actions
+    sendMessage: (threadId: string, senderId: string, text: string, attachment?: Attachment, replyToId?: string) => void;
+    deleteMessage: (threadId: string, messageId: string) => void;
+    createChat: (companyId: string, userId: string, initialMessage?: string) => string; // returns threadId
+    markAsRead: (threadId: string, readerId: string) => void;
+
+    // Interaction Actions
+    addInteraction: (interaction: Omit<Interaction, 'timestamp'>) => void;
+    removeInteraction: (type: Interaction['type'], fromId: string, toId: string) => void;
+
+    // Settings Actions
+    updateChatSettings: (ownerId: string, chatId: string, settings: Partial<ChatSettings>) => void;
+
+    // Chat Preference Actions
+    setChatSortBy: (sortBy: 'date' | 'priority') => void;
+    toggleChatFilterPriority: (priority: 'high' | 'medium' | 'low') => void;
+    setCompactMode: (isCompact: boolean) => void;
+    setLessonSidebarOpen: (isOpen: boolean) => void;
+
+    // e-Learning Actions
+    completeLesson: (lessonId: string) => void;
+    updateLastViewedLesson: (lessonId: string) => void;
+    fetchCourses: () => Promise<void>;
+    addCourses: (newCourses: Partial<Course>[]) => Promise<void>;
+
+    // Analysis Actions
+    setAnalysisResults: (results: Partial<UserAnalysis>) => void;
+    setDiagnosisScore: (questionId: number, score: number) => void;
+    toggleFortuneIntegration: () => void;
+    togglePublicValue: (valueId: number) => void;
+    setMoneySimulationInput: (input: LifePlanInput) => void;
+
+    // Baby Base Actions
+    updateMomProfile: (updates: Partial<MomProfile>) => void;
+    addChild: (child: ChildProfile) => void;
+    removeChild: (childId: string) => void;
+    getChat: (threadId: string) => ChatThread | undefined;
+    getUserChats: (userId: string) => ChatThread[];
+    getCompanyChats: (companyId: string) => ChatThread[];
+    hasInteraction: (type: Interaction['type'], fromId: string, toId: string) => boolean;
+    getChatSettingsHelper: (ownerId: string, chatId: string) => ChatSettings | undefined;
+    isLessonCompleted: (lessonId: string) => boolean;
+    getLastViewedLesson: () => string | undefined;
+}
+
+// --- Initial Data ---
+const INITIAL_USERS: User[] = [
+    {
+        id: 'u_yuji',
+        name: '西村 裕二',
+        age: 29,
+        university: '愛媛大学',
+        faculty: '法文学部（既卒）',
+        bio: '「愛媛を面白くする」ために活動中。営業、企画、コミュニティ運営など幅広く経験。次はIT×教育の領域で、若者の可能性を広げる事業に挑戦したいと考えています。',
+        tags: ['事業開発', 'コミュニティマネジメント', '営業'],
+        image: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop',
+        isOnline: true,
+        birthDate: '1995-05-15'
+    },
+    {
+        id: 'u_hanako',
+        name: '松山 花子',
+        age: 24,
+        university: '東京の某IT企業',
+        faculty: '営業部',
+        bio: '東京でSaaS営業を経験。愛媛へのUターンを検討中。',
+        tags: ['法人営業', 'SaaS', 'カスタマーサクセス'],
+        image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop',
+        isOnline: false,
+    },
+    {
+        id: 'u4',
+        name: '田中 健太',
+        age: 21,
+        university: '愛媛大学',
+        faculty: '法文学部',
+        bio: '【Uターン希望】東京のベンチャー企業での長期インターン経験あり。地元愛媛の企業で、営業としてバリバリ働きたいです。フットワークの軽さには自信があります！',
+        tags: ['営業志望', 'Uターン', '体育会系'],
+        image: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=200',
+        isOnline: false,
+    },
+    {
+        id: 'u5',
+        name: '鈴木 明日香',
+        age: 22,
+        university: '松山大学',
+        faculty: '経営学部',
+        bio: 'デザイン思考を用いた課題解決に興味があります。サークルでは広報を担当し、SNS運用でフォロワーを2000人増やしました。クリエイティブな仕事に挑戦したいです。',
+        tags: ['デザイン', 'SNS運用', '広報'],
+        image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200',
+        isOnline: true,
+    },
+    {
+        id: 'u6',
+        name: '佐藤 翔太',
+        age: 23,
+        university: '愛媛大学',
+        faculty: '工学部 情報工学科',
+        bio: 'AI・機械学習を研究中。Python/TensolFlow触れます。地元の製造業のDX化に技術で貢献したいと考えています。ハッカソン優勝経験あり。',
+        tags: ['エンジニア', 'Python', 'AI'],
+        image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=200',
+        isOnline: false,
+    },
+    {
+        id: 'u7',
+        name: '高橋 美咲',
+        age: 21,
+        university: '聖カタリナ大学',
+        faculty: '人間健康福祉学部',
+        bio: '人と話すことが大好きで、接客アルバイトを3年間続けています。福祉業界だけでなく、サービス業全般に興味があります。明るさと笑顔は誰にも負けません！',
+        tags: ['接客', 'コミュニケーション', '福祉'],
+        image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200',
+        isOnline: true,
+    },
+    {
+        id: 'u8',
+        name: '伊藤 拓也',
+        age: 20,
+        university: '愛媛大学',
+        faculty: '社会共創学部',
+        bio: '地域活性化ボランティアに参加し、多世代の方と協働する楽しさを知りました。まだやりたいことは明確ではありませんが、色々な企業の話を聞いてみたいです。',
+        tags: ['地域活性化', 'ボランティア', '好奇心旺盛'],
+        image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200',
+        isOnline: false,
+    },
+    {
+        id: 'u9',
+        name: '渡辺 結衣',
+        age: 22,
+        university: '松山東雲女子大学',
+        faculty: '人文科学部',
+        bio: '英語の教員免許取得見込みです。教育業界だけでなく、グローバルに展開する愛媛の企業で、語学力を活かした仕事がしたいです。',
+        tags: ['英語', 'グローバル', '教職'],
+        image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200',
+        isOnline: false,
+    }
+];
+
+
+export const useAppStore = create<AppState>()(
+    persist(
+        (set, get) => ({
+            authStatus: 'guest',
+            activeRole: 'seeker',
+            personaMode: 'seeker',
+            currentUserId: 'u_yuji',
+            currentCompanyId: 'c_eis',
+
+            users: INITIAL_USERS,
+            companies: COMPANIES,
+            jobs: JOBS,
+            courses: [], // Will be fetched via API
+
+            userAnalysis: {},
+
+            chats: [],
+            interactions: [],
+            chatSettings: [],
+
+            // Chat Preferences Defaults
+            chatSortBy: 'date',
+            chatFilterPriority: ['high', 'medium', 'low'],
+            isCompactMode: false,
+            completedLessonIds: [],
+            lastViewedLessonIds: [],
+            isLessonSidebarOpen: true,
+            lastMoneySimulationInput: null,
+
+            // Baby Base Init
+            momProfile: null,
+            bbSpecialists: BB_SPECIALISTS,
+            bbEvents: BB_EVENTS,
+            bbArticles: BB_ARTICLES,
+            bbPosts: BB_POSTS,
+
+            setChatSortBy: (sortBy) => set({ chatSortBy: sortBy }),
+            toggleChatFilterPriority: (priority) => set((state) => {
+                const current = state.chatFilterPriority;
+                if (current.includes(priority)) {
+                    return { chatFilterPriority: current.filter(p => p !== priority) };
+                } else {
+                    return { chatFilterPriority: [...current, priority] };
+                }
+            }),
+            setCompactMode: (isCompact) => set({ isCompactMode: isCompact }),
+            setLessonSidebarOpen: (isOpen) => set({ isLessonSidebarOpen: isOpen }),
+
+            // User Actions
+            loginAs: (role) => set({
+                authStatus: 'authenticated',
+                activeRole: role,
+                // Ensure correct ID is set when logging in (simple mock logic)
+                currentUserId: role === 'admin' ? 'u_admin' : 'u_yuji',
+                currentCompanyId: 'c_eis',
+            }),
+            logout: () => set({
+                authStatus: 'guest',
+                currentUserId: '',
+                currentCompanyId: ''
+            }),
+
+            updateUser: (userId: string, updates: Partial<User>) => {
+                set((state) => ({
+                    users: state.users.map((u) => (u.id === userId ? { ...u, ...updates } : u)),
+                }));
+            },
+            switchRole: (role) => set({ activeRole: role }),
+            setPersonaMode: (mode) => set({ personaMode: mode }),
+
+            // Generic Interaction
+            toggleInteraction: (type, fromId, toId, metadata) => {
+                set((state) => {
+                    const exists = state.interactions.find(
+                        i => i.type === type && i.fromId === fromId && i.toId === toId
+                    );
+                    if (exists) {
+                        return { interactions: state.interactions.filter(i => i !== exists) };
+                    }
+                    const newInteraction: Interaction = {
+                        type, fromId, toId, metadata, timestamp: Date.now()
+                    };
+                    return { interactions: [...state.interactions, newInteraction] };
+                });
+            },
+
+            sendMessage: (threadId, senderId, text, attachment, replyToId) => set((state) => ({
+                chats: state.chats.map(chat => {
+                    if (chat.id !== threadId) return chat;
+                    return {
+                        ...chat,
+                        messages: [...chat.messages, {
+                            id: `msg_${Date.now()} `,
+                            senderId,
+                            text,
+                            timestamp: Date.now(),
+                            isRead: false,
+                            attachment,
+                            replyToId
+                        }],
+                        updatedAt: Date.now()
+                    };
+                })
+            })),
+
+            deleteMessage: (threadId, messageId) => set((state) => ({
+                chats: state.chats.map(chat => {
+                    if (chat.id !== threadId) return chat;
+                    return {
+                        ...chat,
+                        messages: chat.messages.filter(m => m.id !== messageId),
+                        updatedAt: Date.now() // Optional: update timestamp on delete? Maybe not.
+                    };
+                })
+            })),
+
+            createChat: (companyId, userId, initialMessage) => {
+                const state = get();
+                const existing = state.chats.find(c => c.companyId === companyId && c.userId === userId);
+                if (existing) return existing.id;
+
+                const newId = `chat_${Date.now()} `;
+                const newChat: ChatThread = {
+                    id: newId,
+                    companyId,
+                    userId,
+                    messages: initialMessage ? [{
+                        id: `msg_${Date.now()} `,
+                        senderId: get().activeRole === 'company' ? companyId : userId,
+                        // simple heuristic: if created by company, sender is companyId
+                        text: initialMessage,
+                        timestamp: Date.now(),
+                        isRead: false
+                    }] : [],
+                    updatedAt: Date.now()
+                };
+
+                set(s => ({ chats: [newChat, ...s.chats] }));
+                return newId;
+            },
+
+            markAsRead: (threadId, readerId) => set(state => ({
+                chats: state.chats.map(chat => {
+                    if (chat.id !== threadId) return chat;
+                    // Mark messages NOT sent by reader as read
+                    const updatedMessages = chat.messages.map(m =>
+                        m.senderId !== readerId ? { ...m, isRead: true } : m
+                    );
+                    return { ...chat, messages: updatedMessages };
+                })
+            })),
+
+            addInteraction: (interaction) => set(state => ({
+                interactions: [...state.interactions, { ...interaction, timestamp: Date.now() }]
+            })),
+
+            removeInteraction: (type, fromId, toId) => set(state => ({
+                interactions: state.interactions.filter(i =>
+                    !(i.type === type && i.fromId === fromId && i.toId === toId)
+                )
+            })),
+
+            updateChatSettings: (ownerId, chatId, newSettings) => set(state => {
+                const existingIndex = state.chatSettings.findIndex(cs => cs.ownerId === ownerId && cs.chatId === chatId);
+                if (existingIndex > -1) {
+                    const updated = [...state.chatSettings];
+                    updated[existingIndex] = { ...updated[existingIndex], ...newSettings };
+                    return { chatSettings: updated };
+                } else {
+                    const newItem: ChatSettings = {
+                        ownerId, chatId, isPinned: false, isBlocked: false, isUnreadManual: false, priority: 'medium', memo: '', alias: '', ...newSettings
+                    };
+                    return { chatSettings: [...state.chatSettings, newItem] };
+                }
+            }),
+
+            completeLesson: (lessonId) => {
+                set(state => ({
+                    completedLessonIds: state.completedLessonIds.includes(lessonId)
+                        ? state.completedLessonIds
+                        : [...state.completedLessonIds, lessonId]
+                }));
+
+                // Bridge to Game: Grant rewards if game is initialized
+                const gameStore = useGameStore.getState();
+                if (gameStore.isInitialized) {
+                    gameStore.addExperience(50);
+                    gameStore.updateStats({ skill: useGameStore.getState().stats.skill + 2 });
+                    toast.success('e-ラーニング完了報酬！ゲームの経験値+50、技術+2を獲得しました。', {
+                        icon: '🏆',
+                        duration: 5000
+                    });
+                }
+            },
+
+            updateLastViewedLesson: (lessonId) => set(state => ({
+                lastViewedLessonIds: [lessonId, ...state.lastViewedLessonIds.filter(id => id !== lessonId)].slice(0, 10)
+            })),
+
+            fetchCourses: async () => {
+                try {
+                    const response = await fetch('/api/elearning');
+                    const data = await response.json();
+                    set({ courses: data });
+                } catch (error) {
+                    console.error('Failed to fetch courses:', error);
+                }
+            },
+
+            addCourses: async (newCourses) => {
+                try {
+                    const response = await fetch('/api/elearning', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(newCourses)
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        // Refresh courses after adding
+                        get().fetchCourses();
+                    }
+                } catch (error) {
+                    console.error('Failed to add courses:', error);
+                }
+            },
+
+            getChat: (threadId) => get().chats.find(c => c.id === threadId),
+            getUserChats: (userId) => get().chats.filter(c => c.userId === userId).sort((a, b) => b.updatedAt - a.updatedAt),
+            getCompanyChats: (companyId) => get().chats.filter(c => c.companyId === companyId).sort((a, b) => b.updatedAt - a.updatedAt),
+
+            setAnalysisResults: (results) => set(state => ({
+                userAnalysis: { ...state.userAnalysis, ...results }
+            })),
+            setDiagnosisScore: (questionId, score) => set(state => {
+                const diagnosisScores = { ...state.userAnalysis.diagnosisScores, [questionId]: score };
+                // Logic to update selectedValues based on scores could go here or in a separate hook
+                return {
+                    userAnalysis: { ...state.userAnalysis, diagnosisScores }
+                };
+            }),
+            toggleFortuneIntegration: () => set(state => ({
+                userAnalysis: { ...state.userAnalysis, isFortuneIntegrated: !state.userAnalysis.isFortuneIntegrated }
+            })),
+            togglePublicValue: (valueId) => set(state => {
+                const current = state.userAnalysis.publicValues || [];
+                const updated = current.includes(valueId)
+                    ? current.filter(id => id !== valueId)
+                    : current.length < 5 ? [...current, valueId] : current;
+
+                // Sync with users array
+                const users = state.users.map(u =>
+                    u.id === state.currentUserId ? { ...u, publicValues: updated } : u
+                );
+
+                return {
+                    users,
+                    userAnalysis: { ...state.userAnalysis, publicValues: updated }
+                };
+            }),
+            setMoneySimulationInput: (input) => set({ lastMoneySimulationInput: input }),
+            hasInteraction: (type, fromId, toId) => get().interactions.some(i =>
+                i.type === type && i.fromId === fromId && i.toId === toId
+            ),
+            getChatSettingsHelper: (ownerId, chatId) => get().chatSettings.find(cs => cs.ownerId === ownerId && cs.chatId === chatId),
+            isLessonCompleted: (lessonId) => get().completedLessonIds.includes(lessonId),
+            getLastViewedLesson: () => get().lastViewedLessonIds[0],
+
+            // Baby Base Action Implementations
+            updateMomProfile: (updates) => set((state) => ({
+                momProfile: state.momProfile ? { ...state.momProfile, ...updates } : { userId: state.currentUserId, children: [], location: '', interests: [], ...updates }
+            })),
+            addChild: (child) => set((state) => ({
+                momProfile: state.momProfile
+                    ? { ...state.momProfile, children: [...state.momProfile.children, child] }
+                    : { userId: state.currentUserId, children: [child], location: '', interests: [] }
+            })),
+            removeChild: (childId) => set((state) => ({
+                momProfile: state.momProfile
+                    ? { ...state.momProfile, children: state.momProfile.children.filter(c => c.id !== childId) }
+                    : null
+            })),
+        }),
+        {
+            name: 'eis-app-store-v3',
+        }
+    )
+);

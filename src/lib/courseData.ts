@@ -1,0 +1,6773 @@
+export const COURSES_DATA = [
+  {
+    "id": "16",
+    "title": "リスキル大学講座アーカイブ",
+    "description": "リスキル大学の講座のアーカイブになります。",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "ビジネス",
+    "level": "初級",
+    "duration": "不明",
+    "image": "https://images.unsplash.com/photo-1454165833767-02486835bcd4?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_16_0",
+        "courseId": "16",
+        "title": "講座アーカイブ",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_1075",
+            "curriculumId": "curr_16_0",
+            "title": "2025/10/15リスキル大学開講記念「リスキル大学」について",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/EPrvQQ5_m6M",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 1
+          },
+          {
+            "id": "lesson_1076",
+            "curriculumId": "curr_16_0",
+            "title": "2025/10/23最新AI活用戦略",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/srzfgDRG4Ew",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 2
+          },
+          {
+            "id": "lesson_1077",
+            "curriculumId": "curr_16_0",
+            "title": "2025/10/18たった一回で劇的に！お金の扱い方が変わる未来投資",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/A-xEnlOB0-Y",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 3
+          },
+          {
+            "id": "lesson_1078",
+            "curriculumId": "curr_16_0",
+            "title": "2025/11/08見方を変えれば、世界が変わる。〜デザイン思考で【デザイナーの目】を手に入れる120分〜 ",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Y6Zd3e0t1uw",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 4
+          },
+          {
+            "id": "lesson_1096",
+            "curriculumId": "curr_16_0",
+            "title": "2026/01/14_サラリーマンから独立する技術",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/W2dqWtRtVMg",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 999
+          },
+          {
+            "id": "lesson_1095",
+            "curriculumId": "curr_16_0",
+            "title": "2026/01/05_第３講　年収1,000万円を超えるクリエイターになるために＿_仕事とは、これからのクリエイティブについて その1",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/M86ArrVSSFE",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 999
+          },
+          {
+            "id": "lesson_1094",
+            "curriculumId": "curr_16_0",
+            "title": "2026/01/09_マネーリテラシー",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Y3ZNnYNtaIo",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 999
+          },
+          {
+            "id": "lesson_1093",
+            "curriculumId": "curr_16_0",
+            "title": "2025/12/23_第２講　年収1,000万円を超えるクリエイターになるために＿_経営者になるということ",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/hrAOXCuaMOg",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 999
+          },
+          {
+            "id": "lesson_1092",
+            "curriculumId": "curr_16_0",
+            "title": "2025/12/22_副業で活躍！AIバックオフィス実践セミナー〜Lark×業務効率化で今、必要とされる人材に！〜",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/HgFP79PRPVQ",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 999
+          },
+          {
+            "id": "lesson_1091",
+            "curriculumId": "curr_16_0",
+            "title": "2025/12/17_学んで損なし！Webライター入門編",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/bvxgjw1xg14",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 999
+          },
+          {
+            "id": "lesson_1090",
+            "curriculumId": "curr_16_0",
+            "title": "2025/12/151.年収1000万円を超えるクリエイターになるために-事業を興すということ、年収1000万円の壁-",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Y3609WHXFGM",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 999
+          },
+          {
+            "id": "lesson_1085",
+            "curriculumId": "curr_16_0",
+            "title": "2025/12/08年収1000万円を超えるクリエイターになるために",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/F4cfeyTB0TM",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 999
+          },
+          {
+            "id": "lesson_1084",
+            "curriculumId": "curr_16_0",
+            "title": "2025/12/03未来をデザイン！ライフデザインセミナー",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/moIS19siYyE",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 999
+          },
+          {
+            "id": "lesson_1083",
+            "curriculumId": "curr_16_0",
+            "title": "2025/11/19愛されマインド",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/4dJARs75jg0",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 999
+          },
+          {
+            "id": "lesson_1082",
+            "curriculumId": "curr_16_0",
+            "title": "2025/11/08見方を変えれば、世界が変わる。〜デザイン思考で【デザイナーの目】を手に入れる120分〜 ",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Y6Zd3e0t1uw",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 999
+          },
+          {
+            "id": "lesson_1081",
+            "curriculumId": "curr_16_0",
+            "title": "2025/11/10超好印象アップ-1分自己紹介と第一印象アップトレーニング-",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/8wq6OW2CeQA",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 999
+          },
+          {
+            "id": "lesson_1080",
+            "curriculumId": "curr_16_0",
+            "title": "2025/11/05あなたのキャリアの探し方",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/jLS9B3YQBBE",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 999
+          },
+          {
+            "id": "lesson_1079",
+            "curriculumId": "curr_16_0",
+            "title": "2025/10/31ショート動画の作り方講座",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Kof3ujUEIbk",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 999
+          }
+        ],
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "15",
+    "title": "ITパスポート",
+    "description": "ITパスポート試験の資格取得支援動画です。",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "資格試験",
+    "level": "初級",
+    "duration": "1ヶ月以上",
+    "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_15_0",
+        "courseId": "15",
+        "title": "企業活動",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_1068",
+            "curriculumId": "curr_15_0",
+            "title": "企業活動：経営・組織論①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/yFJNZ-0CG5U",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1068",
+                "question": "企業が活動を行う上で主要な経営資源とされるものは何でしょうか？",
+                "options": [
+                  "ヒト、モノ、カネ、情報",
+                  "ヒト、モノ、カネ、信用",
+                  "モノ、カネ、情報、組織",
+                  "ヒト、モノ、時間、空間"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解： １．ヒト、モノ、カネ、情報。解説：企業の活動を行う上で主要な経営資源は、ヒト（従業員やパートナー企業）、モノ（設備や商品）、カネ（資金調達や投資）、情報（市場動向や技術情報）の4つです。これらの資源を効果的に活用し、経営目標に向かって進むことが求められます。"
+              }
+            ],
+            "order": 1
+          },
+          {
+            "id": "lesson_1067",
+            "curriculumId": "curr_15_0",
+            "title": "企業活動：経営・組織論②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/3tYr-Zav6Ls",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1067",
+                "question": "PDCAサイクルの各ステップは何を指しますか？",
+                "options": [
+                  "Plan: 検証, Do: 実行, Check: 企画, Act: 改善",
+                  "Plan: 実行, Do: 検証, Check: 改善, Act: 企画",
+                  "Plan: 改善, Do: 企画, Check: 実行, Act: 検証",
+                  "Plan: 企画, Do: 実行, Check: 検証, Act: 改善"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．Plan: 企画, Do: 実行, Check: 検証, Act: 改善。解説:：PDCAサイクルは、Plan（計画）、Do（実行）、Check（チェック）、Act（改善）の順番で進行します。選択肢1, 3, 4はこれらの順序や内容が誤っています。"
+              }
+            ],
+            "order": 2
+          },
+          {
+            "id": "lesson_1066",
+            "curriculumId": "curr_15_0",
+            "title": "企業活動：経営・組織論③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/uWhrTQhvjXY",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1066",
+                "question": "階層型組織についての記述として正しいものを選びなさい。",
+                "options": [
+                  "階層型組織は、全従業員が平等に決定を下す組織形態である",
+                  "階層型組織では、各部門が独立して運営され、その利益責任を持つ",
+                  "階層型組織では、上位の管理者から下位の従業員へと指示が伝わる",
+                  "階層型組織では、従業員が直接製品やサービスに対する戦略を立てる"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．階層型組織では、上位の管理者から下位の従業員へと指示が伝わる。解説：階層型組織では、上位の管理者から下位の従業員へと指示が伝わります。明確な権限と責任があり、通常は明確な指揮系統と報告ラインが存在します。1, 2, 4の選択肢は階層型組織の特徴を正確に表現していません。"
+              }
+            ],
+            "order": 3
+          },
+          {
+            "id": "lesson_1065",
+            "curriculumId": "curr_15_0",
+            "title": "企業活動：業務分析・データ利活用①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/d3injoNKz2M",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1065",
+                "question": "データ駆動型社会を支え、人間の知的活動を拡張し、新たな価値創造を可能にしているのは何でしょうか。",
+                "options": [
+                  "AIの進化",
+                  "データ量の増加",
+                  "データ分析の高度化",
+                  "DXの推進"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．AIの進化。解説：AIの進化は、大量のデータを一瞬で処理できることから、データ駆動型社会を支え、人間の知的活動を拡張し、新たな価値創造を可能にしています。選択肢2のDXはITを活用してビジネスを変革する概念であり、選択肢3のデータ分析の高度化はAIの進化の結果とも言えます。選択肢4のデータ量の増加もAIの進化を可能にする一因ですが、直接的に新たな価値創造を可能にするものではありません。"
+              }
+            ],
+            "order": 4
+          },
+          {
+            "id": "lesson_1064",
+            "curriculumId": "curr_15_0",
+            "title": "企業活動：業務分析・データ利活用②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/AASnikS0KnU",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1064",
+                "question": "業務改善のために重要な情報収集の手法として適切でないものはどれでしょうか",
+                "options": [
+                  "アンケート",
+                  "ブレインストーミング",
+                  "フィールドワーク",
+                  "インタビュー"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：:４．ブレインストーミング。解説：選択肢1、2、3のアンケート、インタビュー、フィールドワークは情報収集の手法としてよく使用されます。一方で、ブレインストーミング（選択肢4）は新しいアイデアを出すための手法であり、情報収集には直接使用しません。"
+              }
+            ],
+            "order": 5
+          },
+          {
+            "id": "lesson_1063",
+            "curriculumId": "curr_15_0",
+            "title": "企業活動：業務分析・データ利活用③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/2BSwG2pLGvg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1063",
+                "question": "データの前処理とは何か。",
+                "options": [
+                  "データを削除する作業",
+                  "データを保存する作業",
+                  "データを集める作業",
+                  "データを整形し、クレンジングを行い、集計や分析が容易な形に変換する作業"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解： 2. データを整形し、クレンジングを行い、集計や分析が容易な形に変換する作業。解説：選択肢1は間違いです。前処理ではデータを削除するのではなく、適切に整形し分析しやすい形に変換します。選択肢2が正解です。前処理は、データを整形し、クレンジングを行い、集計や分析が容易な形に変換する作業を指します。選択肢3と4も間違いです。データを集める作業はデータ収集、データを保存する作業はデータストレージと呼ばれ、前処理とは異なります。"
+              }
+            ],
+            "order": 6
+          },
+          {
+            "id": "lesson_1062",
+            "curriculumId": "curr_15_0",
+            "title": "企業活動：業務分析・データ利活用④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/1DwSO-7FqzQ",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1062",
+                "question": "デシジョンツリーとは何をするためのツールでしょうか？",
+                "options": [
+                  "現実世界のシステムを数学的に表現するため",
+                  "特定の目的関数を最大化または最小化するための最適な解を見つけるため",
+                  "一連の選択肢とそれらがもたらす可能性のある結果を視覚化するため",
+                  "現実の状況や問題をコンピュータ上で再現し、それに対する行動の結果を試験するため"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．一連の選択肢とそれらがもたらす可能性のある結果を視覚化するため。解説：１．現実世界のシステムを数学的に表現するためのものはモデリングです。２．現実の状況や問題をコンピュータ上で再現し、それに対する行動の結果を試験するためのものはシミュレーションです。３．デシジョンツリーは、一連の選択肢とそれらがもたらす可能性のある結果を視覚化するツールです。４．特定の目的関数を最大化または最小化するための最適な解を見つけるためのものは最適化です。"
+              }
+            ],
+            "order": 7
+          },
+          {
+            "id": "lesson_1061",
+            "curriculumId": "curr_15_0",
+            "title": "企業活動：会計・財務",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/mysS6TTJhuM",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1061",
+                "question": "以下の選択肢の中で、粗利益を正しく説明しているものを選んでください。",
+                "options": [
+                  "売上高から販売に直接かかる原価を引いたもの",
+                  "企業が所有する価値のあるもの",
+                  "固定費を賄うための最低限の売上高",
+                  "粗利益から販売費や一般管理費などを引いたもの"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．売上高から販売に直接かかる原価を引いたもの。解説：粗利益は、売上高から販売に直接かかる原価を引いたものです（選択肢1）。営業利益は、粗利益から販売費や一般管理費などを引いたもの（選択肢2）。損益分岐点は、固定費を賄うための最低限の売上高を指します（選択肢3）。そして、企業が所有する価値のあるものを資産と呼びます（選択肢4）。"
+              }
+            ],
+            "order": 8
+          }
+        ],
+        "order": 1
+      },
+      {
+        "id": "curr_15_1",
+        "courseId": "15",
+        "title": "法務",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_1060",
+            "curriculumId": "curr_15_1",
+            "title": "法務：知的財産権①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/6vscpAQoLuM",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1060",
+                "question": "著作権法の目的は何でしょうか。",
+                "options": [
+                  "音楽、映画、漫画、コンピュータプログラムなど、人間の創造性によって生み出された知的創作物の保護と利用を調整する",
+                  "オンラインゲームのプレイを規制する",
+                  "インターネットの使用を監視する",
+                  "プログラミング言語の使用を制限する"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．音楽、映画、漫画、コンピュータプログラムなど、人間の創造性によって生み出された知的創作物の保護と利用を調整する。解説：１．正解。著作権法の主な目的は、創作物を作った人々の権利を保護し、その利用を調整することです。２．誤り。プログラミング言語の使用を制限する法律は存在しません。プログラミング言語自体が著作物ではなく、法律によって規制されるものではありません。３．誤り。インターネットの使用を監視する法律は、プライバシーやセキュリティに関する法律の一部となりますが、著作権法とは直接関係がありません。４．誤り。オンラインゲームのプレイは、ゲームの利用規約や、その他の法律によって規制される場合がありますが、著作権法の目的とは異なります。"
+              }
+            ],
+            "order": 9
+          },
+          {
+            "id": "lesson_1059",
+            "curriculumId": "curr_15_1",
+            "title": "法務：知的財産権②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/M8cuR502JSE",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1059",
+                "question": "特許法の対象となる要素を選んでください。",
+                "options": [
+                  "新規性、進歩性、実用性を有する発明",
+                  "新規性と独創性を有する形状、模様、色彩などのデザイン",
+                  "新規性と実用性を有する小型の発明",
+                  "商業的な手法やビジネスフロー自体"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解： １．新規性、進歩性、実用性を有する発明。解説：特許法は新規性、進歩性、実用性を有する発明を保護します(1)。商業的な手法やビジネスフロー自体はビジネスモデル特許の対象(2)、新規性と実用性を有する小型の発明は実用新案法の対象(3)、新規性と独創性を有する形状、模様、色彩などのデザインは意匠法の対象(4)となります。"
+              }
+            ],
+            "order": 10
+          },
+          {
+            "id": "lesson_1058",
+            "curriculumId": "curr_15_1",
+            "title": "法務：知的財産権③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ISYQXSatorY",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1058",
+                "question": "不正競争防止法は、企業の知識や情報を保護し、その不正な取得、使用、開示を防止します。不正競争防止法は主に何を保護することを目的としていますか。",
+                "options": [
+                  "特許情報と商標情報",
+                  "全て上記の通り",
+                  "製造方法とビジネスモデル",
+                  "顧客リストと購買履歴"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解： ４．全て上記の通り。解説：不正競争防止法は、技術情報（製造方法等）、ビジネスモデル、顧客情報（顧客リスト、購買履歴等）の保護を目的としています。特許情報や商標情報も重要な知的財産であり、それぞれの専用法である特許法や商標法によって保護されています。不正競争防止法は、これらすべての情報の不正な取得、使用、開示を防ぐために存在します。"
+              }
+            ],
+            "order": 11
+          },
+          {
+            "id": "lesson_1057",
+            "curriculumId": "curr_15_1",
+            "title": "法務：知的財産権④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Hot8yeZJggE",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1057",
+                "question": "ソフトウェアライセンスの種類について、ソフトウェアライセンスの一種である「ボリュームライセンス契約」の特徴として最も適切なものを選びなさい。",
+                "options": [
+                  "特定のソフトウェアを特定の条件下で使用する権利を許諾する契約",
+                  "クライアントがサーバのリソースにアクセスするためのライセンス",
+                  "特定の場所で無制限にソフトウェアを使用できるようにする契約",
+                  "一定数以上のライセンスを購入することで割引を受けることができる"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解： 2。解説：１．「利用許諾契約」の特徴です。２．「ボリュームライセンス契約」の特徴で、一定数以上のライセンスを購入することで割引を受けることができます。３．「サイトライセンス契約」の特徴で、特定の場所で無制限にソフトウェアを使用できるようにする契約です。４．「CAL（Client Access License）」の特徴で、クライアントがサーバのリソースにアクセスするためのライセンスです。"
+              }
+            ],
+            "order": 12
+          },
+          {
+            "id": "lesson_1056",
+            "curriculumId": "curr_15_1",
+            "title": "法務：セキュリティ関連法規①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/irGf4wQ-4kc",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1056",
+                "question": "「サイバーセキュリティ基本法」の主な目的は何でしょうか？",
+                "options": [
+                  "ICTの利用を制限すること",
+                  "個人情報の取り扱いの禁止",
+                  "サイバー攻撃の助長",
+                  "サイバーセキュリティ対策の強化と整備、関係機関の連携強化"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．サイバーセキュリティ対策の強化と整備、関係機関の連携強化。解説：サイバーセキュリティ基本法の主な目的は、情報セキュリティ対策の強化と整備、関係機関の連携強化です。1の選択肢はICTの利用を制限することではありません。この法律は、ICTの安全性を確保することを目指しています。また、3と4の選択肢は誤りです。この法律はサイバー攻撃の助長を目指していないし、個人情報の取り扱いを禁止するものでもありません。"
+              }
+            ],
+            "order": 13
+          },
+          {
+            "id": "lesson_1055",
+            "curriculumId": "curr_15_1",
+            "title": "法務：セキュリティ関連法規②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/e1PgHfXhDgw",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1055",
+                "question": "不正アクセスを防ぐために重要なものは何ですか？",
+                "options": [
+                  "強固なパスワードの設定、セキュリティソフトの利用、定期的なシステム更新",
+                  "システムの更新を避ける",
+                  "パスワードを共有する",
+                  "情報を公開する"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：1。解説：不正アクセスを防ぐためには、セキュリティを保つための適切な対策が必要です。これには強固なパスワードの設定、セキュリティソフトの利用、定期的なシステム更新が含まれます。情報を公開したり、パスワードを共有したり、システムの更新を避ける行為は逆にセキュリティリスクを高める可能性があります。"
+              }
+            ],
+            "order": 14
+          },
+          {
+            "id": "lesson_1054",
+            "curriculumId": "curr_15_1",
+            "title": "法務：セキュリティ関連法規③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/OxGVYZrrchQ",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1054",
+                "question": "個人情報保護法は、どのような情報に対して特に注意深い取り扱いを求めていますか？",
+                "options": [
+                  "趣味や特技に関する情報",
+                  "ソーシャルメディアのアカウント情報",
+                  "個人識別符号と要配慮個人情報",
+                  "ペットの種類や名前に関する情報"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．個人識別符号と要配慮個人情報。解説：個人識別符号は個人を特定できる符号（例：マイナンバー）を指し、要配慮個人情報は人の尊厳や権利、利益を害する可能性のある情報（例：病歴や犯罪歴）を指します。これらは不適切に取り扱われると大きな害を及ぼす可能性があるため、個人情報保護法ではこれらの情報の取扱いに特に注意を払うよう求めています。"
+              }
+            ],
+            "order": 15
+          },
+          {
+            "id": "lesson_1053",
+            "curriculumId": "curr_15_1",
+            "title": "法務：セキュリティ関連法規④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/HV7maxvssO0",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1053",
+                "question": "GDPRは、どの地域の個人データの保護を規制する法律でしょうか？",
+                "options": [
+                  "北米",
+                  "欧州連合（EU）",
+                  "アフリカ",
+                  "アジア"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．欧州連合（EU）。解説：GDPR（General Data Protection Regulation）は、欧州連合（EU）における個人データの保護を規制する法律です。そのため、選択肢4が正解となります。他の選択肢1、2、3の地域は、GDPRの直接の適用範囲外です。"
+              }
+            ],
+            "order": 16
+          },
+          {
+            "id": "lesson_1052",
+            "curriculumId": "curr_15_1",
+            "title": "法務：セキュリティ関連法規⑤",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ONZMGy3boqM",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1052",
+                "question": "情報セキュリティが目指す3つの目標は何でしょうか？",
+                "options": [
+                  "信頼性、可用性、完全性",
+                  "完全性、公平性、利用可能性",
+                  "機密性、信頼性、公平性",
+                  "機密性、完全性、利用可能性"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２． 機密性、完全性、利用可能性。解説：１．「信頼性」は情報セキュリティの目標の一つではありません。「機密性」、「完全性」、「利用可能性」が情報セキュリティの3つの目標です。２．これが正解です。「機密性」は情報への不正アクセスを防ぐこと、「完全性」は情報の正確性と完全性を保つこと、「利用可能性」は必要なときに情報にアクセスできることを指します。３．「公平性」は情報セキュリティの目標ではありません。正解は「機密性」、「完全性」、「利用可能性」です。４．「公平性」は情報セキュリティの目標ではありません。正解は「機密性」、「完全性」、「利用可能性」です。"
+              }
+            ],
+            "order": 17
+          },
+          {
+            "id": "lesson_1051",
+            "curriculumId": "curr_15_1",
+            "title": "法務：セキュリティ関連法規⑥",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/PBpNMENak2w",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1051",
+                "question": "サイバーセキュリティ経営ガイドラインが提供する指導内容に関して、どの選択肢が正しいでしょうか？",
+                "options": [
+                  "コンピュータウイルス対策基準とシステム管理基準",
+                  "情報システムのセキュリティポリシーの設定と情報資産の管理",
+                  "リスク認識、防御、検出、対応、回復",
+                  "ネットワークセキュリティと物理的セキュリティ"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．リスク認識、防御、検出、対応、回復。解説：サイバーセキュリティ経営ガイドラインは、組織全体がサイバーセキュリティに取り組むための指針で、リスク認識、防御、検出、対応、回復というサイバーセキュリティの5つの基本的な機能についての指導を提供します。"
+              }
+            ],
+            "order": 18
+          },
+          {
+            "id": "lesson_1050",
+            "curriculumId": "curr_15_1",
+            "title": "法務：労働関連・取引関連法規①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/nD7MmFmyETA",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1050",
+                "question": "労働契約についての質問。「労働契約法は労働者と雇用者間の契約を規定しています。」という文脈を考慮に入れて、次の選択肢の中から、労働契約法が主に規定している内容を選んでください。",
+                "options": [
+                  "労働者と雇用者の間の契約内容",
+                  "労働者派遣事業者の認可",
+                  "労働時間、休憩、休日",
+                  "労働者の最低賃金"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．労働者と雇用者の間の契約内容。解説：労働契約法は労働者と雇用者間の契約内容を規定しています。最低賃金や労働時間等は労働基準法、派遣労働に関する事項は労働者派遣法で規定されています。"
+              }
+            ],
+            "order": 19
+          },
+          {
+            "id": "lesson_1049",
+            "curriculumId": "curr_15_1",
+            "title": "法務：労働関連・取引関連法規②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/IhWczC5I5nI",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1049",
+                "question": "下請法についての記述として、最も適切なものはどれでしょうか？",
+                "options": [
+                  "下請事業者の権利を侵害する行為を防ぎ、不適切な商慣行を禁止している",
+                  "下請法は、金融サービス業界には適用されない",
+                  "主契約者の権利を保護するために存在する法律である",
+                  "下請法は製造業や建設業、情報産業だけに適用される"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．下請事業者の権利を侵害する行為を防ぎ、不適切な商慣行を禁止している。解説：下請法は、下請事業者の利益を保護し、不適切な商慣行により、下請事業者の権利を侵害することを防ぐために存在します。それは主に製造業や建設業、情報産業などに適用されますが、それ以外の業種にも適用される場合があるため、選択肢2と4は不正確です。選択肢3は主契約者の権利ではなく下請事業者の権利を保護するために存在するので誤りです。"
+              }
+            ],
+            "order": 20
+          },
+          {
+            "id": "lesson_1048",
+            "curriculumId": "curr_15_1",
+            "title": "法務：その他の法律・ガイドライン・情報論理①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/bLzKGajyFoc",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1048",
+                "question": "企業がコンプライアンスを遵守する理由として最も適切なものを選択してください。",
+                "options": [
+                  "社会からの信頼を得るため",
+                  "新製品を開発するため",
+                  "競合他社との競争を勝つため",
+                  "従業員の給与を上げるため"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．社会からの信頼を得るため。解説：企業がコンプライアンスを遵守する理由は、社会からの信頼を得て法的なトラブルを避けることにあります（選択肢1）。企業の給与水準（選択肢2）、競争戦略（選択肢3）、新製品の開発（選択肢4）は、直接的にはコンプライアンスと関連していません。"
+              }
+            ],
+            "order": 21
+          },
+          {
+            "id": "lesson_1047",
+            "curriculumId": "curr_15_1",
+            "title": "法務：その他の法律・ガイドライン・情報論理②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/41s17t8emRA",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1047",
+                "question": "情報倫理において重要なELSIは何の略でしょうか？",
+                "options": [
+                  "Environment, Lifestyle, Safety, Inclusion",
+                  "Ethical, Lifestyle, Social, Inclusion",
+                  "Economy, Lifestyle, Sustainability, Innovation",
+                  "Ethical, Legal, Social Issues"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．Ethical, Legal, Social Issues。解説：ELSIはEthical, Legal, and Social Issuesの略です。これは情報倫理に関連する倫理的、法的、社会的な問題を指します。それぞれの選択肢は以下の意味を持っています。１．環境、ライフスタイル、安全性、包含性。これは情報倫理の範囲外である可能性があります。２．倫理的、法的、社会的な問題。これは情報倫理における主要なテーマを反映しています。３．経済、ライフスタイル、持続可能性、イノベーション。これも情報倫理の範囲外である可能性があります。４．倫理的、ライフスタイル、社会的、包含性。これは情報倫理の一部を含む可能性がありますが、正確な定義ではありません。"
+              }
+            ],
+            "order": 22
+          },
+          {
+            "id": "lesson_1046",
+            "curriculumId": "curr_15_1",
+            "title": "法務：その他の法律・ガイドライン・情報論理③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/nYoZQaZNU-c",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1046",
+                "question": "コーポレートガバナンスの目的は何でしょうか？",
+                "options": [
+                  "企業の経営陣と従業員の行動規範を曖昧にすること",
+                  "不正行為を奨励すること",
+                  "企業価値を高めること",
+                  "企業の透明性を低下させること"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．企業価値を高めること。解説：コーポレートガバナンスの目的は、顧客や市場からの信頼を獲得し、企業価値を高めることです。1, 2, 4選択肢はコーポレートガバナンスの目的に反する内容となっています。"
+              }
+            ],
+            "order": 23
+          },
+          {
+            "id": "lesson_1045",
+            "curriculumId": "curr_15_1",
+            "title": "法務：その他の法律・ガイドライン・情報論理④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/oxkoK_8CLMM",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1045",
+                "question": "情報公開法の主な目的は何でしょうか？",
+                "options": [
+                  "市民の行政への関与を制限する",
+                  "個人情報の保護",
+                  "公の利益を保護し、行政の透明性を確保する",
+                  "政府の行動を制約する"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．公の利益を保護し、行政の透明性を確保する。解説：１．これは誤りです。情報公開法は市民の行政への関与を奨励します。２．情報公開法は政府の行動に透明性を求めますが、その主な目的は行動を制約することではありません。３．正解です。情報公開法は公の利益を保護し、行政の透明性を確保することを目的としています。４．情報公開法は個人情報を保護する要素を含んでいますが、その主な目的は個人情報の保護ではありません。"
+              }
+            ],
+            "order": 24
+          },
+          {
+            "id": "lesson_1044",
+            "curriculumId": "curr_15_1",
+            "title": "法務：標準化関連①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/6tB0PhehL8I",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1044",
+                "question": "デファクトスタンダードについて正しい説明はどれですか？",
+                "options": [
+                  "特定の産業分野の関連企業が集まって決めた標準",
+                  "業界団体や規格制定団体が作成した基準",
+                  "情報交換のための公式な規格や基準",
+                  "公式な基準ではないが、その使用が広く認知されている標準"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．公式な基準ではないが、その使用が広く認知されている標準。解説：デファクトスタンダードは公式な基準ではないものの、その使用が広く認知されており、事実上の標準となっているものを指します。選択肢1はフォーラム標準の説明で、選択肢3と4は一般的な公式標準の説明となります。"
+              }
+            ],
+            "order": 25
+          },
+          {
+            "id": "lesson_1043",
+            "curriculumId": "curr_15_1",
+            "title": "法務：標準化関連②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/HBYqKbXthRM",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1043",
+                "question": "ITと標準化に関する以下の記述のうち、最も適切なものは何ですか？",
+                "options": [
+                  "ITと標準化は互いに独立した存在である",
+                  "標準化はIT技術の進化を阻害する",
+                  "ITと標準化は、製品やサービスの相互運用性を保つために密接に関連している",
+                  "IT技術の進化には標準化が邪魔である"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３． ITと標準化は、製品やサービスの相互運用性を保つために密接に関連している。解説：１．ITと標準化は互いに密接に関連しており、独立した存在ではありません。２．逆に、IT技術の進化と新しいテクノロジーの登場に伴い、互換性を保つために標準化が必要となります。３．正解。ITと標準化は、各機器やソフトウェア間の互換性を保つために密接に関連しています。４．標準化により、製品やサービスが広範囲に普及し、多くの人々が利用できるようになります。標準化はIT技術の進化を阻害するものではなく、逆にその発展を支えます。"
+              }
+            ],
+            "order": 26
+          },
+          {
+            "id": "lesson_1042",
+            "curriculumId": "curr_15_1",
+            "title": "法務：標準化関連③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/RSSnmJsDink",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1042",
+                "question": "ISOが策定する規格の一つで、情報セキュリティマネジメントシステムに関するものは何ですか？",
+                "options": [
+                  "ISO 9000",
+                  "ISO/IEC 27000",
+                  "ISO 26000",
+                  "ISO 14000"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．ISO/IEC 27000。解説：ISO/IEC 27000は情報セキュリティマネジメントシステムに関する規格であり、情報セキュリティの管理と保証に関する基準を定めています。一方、ISO 9000は品質マネジメントシステム、ISO 14000は環境マネジメントシステム、ISO 26000は社会的責任に関する手引きとなっています。"
+              }
+            ],
+            "order": 27
+          }
+        ],
+        "order": 2
+      },
+      {
+        "id": "curr_15_2",
+        "courseId": "15",
+        "title": "経営戦略マネジメント",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_1041",
+            "curriculumId": "curr_15_2",
+            "title": "経営戦略マネジメント：経営戦略手法①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/X_XwrBMBhkc",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1041",
+                "question": "SWOT分析について正しい説明はどれでしょうか？",
+                "options": [
+                  "StrengthsとWeaknessesは企業の外部環境を、OpportunitiesとThreatsは企業の内部環境を評価します",
+                  "SWOT分析では、企業が持つ資源の価値、希少性、模倣可能性、組織の適合性を評価します",
+                  "SWOT分析では、企業の強みを最大限に活用し、弱みを改善または補完する戦略を立案します",
+                  "SWOT分析は主に製品ライフサイクルの管理に使用されます"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．SWOT分析では、企業の強みを最大限に活用し、弱みを改善または補完する戦略を立案します。解説：１．間違いです。SWOT分析では、Strengths（強み）とWeaknesses（弱み）は企業の内部環境を、Opportunities（機会）とThreats（脅威）は企業の外部環境を評価します。２．間違いです。SWOT分析は、経営戦略の立案に用いられ、製品ライフサイクルの管理にはPPM（Product Portfolio Management）が用いられます。３．正しいです。SWOT分析では、企業の強みを最大限に活用し、弱みを改善または補完する戦略を立案します。同時に、外部環境の機会を捉え、脅威から身を守る戦略も練ります。４．間違いです。企業が持つ資源の価値、希少性、模倣可能性、組織の適合性を評価するのはVRIO分析の特徴です。"
+              }
+            ],
+            "order": 1
+          },
+          {
+            "id": "lesson_1040",
+            "curriculumId": "curr_15_2",
+            "title": "経営戦略マネジメント：経営戦略手法②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ENZv81eDv4k",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1040",
+                "question": "以下のうち、\\経営戦略\\\"の定義に最も適しているのはどれでしょうか。\"",
+                "options": [
+                  "競争優位を獲得するための商品やサービスの特性",
+                  "企業が所有する唯一の強み",
+                  "企業が競争相手よりも優れていて、顧客に価値を提供する能力",
+                  "企業が生き残り、競争に勝つための長期的な計画"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．企業が生き残り、競争に勝つための長期的な計画。解説：１．これは競争優位の定義です。２．これが正しい答えで、経営戦略とは企業が生き残り、競争に勝つための長期的な計画です。３．これはコアコンピタンスの定義です。４．これもコアコンピタンスの定義の一部です。"
+              }
+            ],
+            "order": 2
+          },
+          {
+            "id": "lesson_1039",
+            "curriculumId": "curr_15_2",
+            "title": "経営戦略マネジメント：マーケティング①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/hOP6nXicKzQ",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1039",
+                "question": "マーケティングにおける4Pとは何を指しますか？",
+                "options": [
+                  "Product（製品）、Price（価格）、Place（場所）、Promotion（プロモーション）",
+                  "Product（製品）、Price（価格）、Place（場所）、Person（人）",
+                  "Price（価格）、Place（場所）、Promotion（プロモーション）、Profit（利益）",
+                  "Product（製品）、Person（人）、Place（場所）、Promotion（プロモーション）"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．Product（製品）、Price（価格）、Place（場所）、Promotion（プロモーション）。解説：4Pはマーケティングの基本的な考え方で、Product（製品）、Price（価格）、Place（場所）、Promotion（プロモーション）の4つの要素を指します。これらは企業が製品やサービスを市場に提供する際の重要な視点となります。"
+              }
+            ],
+            "order": 3
+          },
+          {
+            "id": "lesson_1038",
+            "curriculumId": "curr_15_2",
+            "title": "経営戦略マネジメント：マーケティング②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/g3ATO0nW9kM",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1038",
+                "question": "次のうち、セグメントマーケティングの特徴とはなんですか？",
+                "options": [
+                  "市場全体を同じように扱う",
+                  "複数のメディアを活用する",
+                  "顧客と直接コミュニケーションを行い、その反応を直接得る",
+                  "市場を細分化し、特定の顧客層に焦点を当てる"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．市場を細分化し、特定の顧客層に焦点を当てる。解説：セグメントマーケティングの特徴は市場を細分化し、特定の顧客層に焦点を当てることです。これにより、具体的な顧客のニーズに対応し、より効果的なマーケティングを行うことが可能となります。"
+              }
+            ],
+            "order": 4
+          },
+          {
+            "id": "lesson_1037",
+            "curriculumId": "curr_15_2",
+            "title": "経営戦略マネジメント：マーケティング③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/HlOOuLiByCI",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1037",
+                "question": "Webマーケティングの形式として誤っているものを選択してください。",
+                "options": [
+                  "オプトインメール広告",
+                  "ブロードキャスト広告",
+                  "SEO",
+                  "バナー広告"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．ブロードキャスト広告。解説：本文では、Webマーケティングの形式としてオプトインメール広告、バナー広告、SEOが挙げられていますが、ブロードキャスト広告は具体的には挙げられていません。ブロードキャスト広告は、テレビやラジオなどの一方通行のメディアを使用した広告であり、Webマーケティングの範囲には含まれません。"
+              }
+            ],
+            "order": 5
+          },
+          {
+            "id": "lesson_1036",
+            "curriculumId": "curr_15_2",
+            "title": "経営戦略マネジメント：マーケティング④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/97ox6q00gSc",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1036",
+                "question": "新製品を高価格で市場に導入し、次第に価格を下げていく価格設定手法は何と呼ばれますか？",
+                "options": [
+                  "スキミングプライシング",
+                  "コストプラスプライシング",
+                  "ダイナミックプライシング",
+                  "ペネトレーションプライシング"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．スキミングプライシング。解説：スキミングプライシングは新製品を高価格で市場に導入し、次第に価格を下げていく価格設定手法を指します。他の選択肢については、ペネトレーションプライシングは初めに低価格を設定し、市場浸透後に価格を上げていく手法、ダイナミックプライシングは市場の状況や消費者の行動に応じて価格を動的に変動させる手法、コストプラスプライシングは製品の生産コストに利益を上乗せして価格を設定する手法を指します。"
+              }
+            ],
+            "order": 6
+          },
+          {
+            "id": "lesson_1035",
+            "curriculumId": "curr_15_2",
+            "title": "経営戦略マネジメント：ビジネス戦略と目標・評価",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/dueEwdyG7y0",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1035",
+                "question": "企業のビジネス戦略を立案する際に重要な要素はどれでしょうか？",
+                "options": [
+                  "ミッションとビジョン",
+                  "企業の所在地",
+                  "企業のロゴ",
+                  "社員の年齢"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．ミッションとビジョン。解説：ビジネス戦略は、企業の存在目的であるミッションと、目指すべき未来の姿であるビジョンに基づいて立案されます。社員の年齢、企業のロゴ、所在地も企業の一部ですが、直接的なビジネス戦略の立案には関与しません。"
+              }
+            ],
+            "order": 7
+          },
+          {
+            "id": "lesson_1034",
+            "curriculumId": "curr_15_2",
+            "title": "経営戦略マネジメント：経営管理システム",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/LVIEce4DY1w",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1034",
+                "question": "次のうち、CRM（Customer Relationship Management）に関して最も正確な説明をしているのはどれでしょうか？",
+                "options": [
+                  "顧客データの収集と分析、マーケティング戦略の設定、営業活動の支援、サービス改善などを一元管理するシステム",
+                  "統計的な手法を用いて業務プロセスの品質を改善し、バリエーションを減らす手法",
+                  "組織全体が品質の改善に取り組む考え方",
+                  "製品の生産から消費者への配送まで、製品の供給プロセス全体を管理し効率化するシステム"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．顧客データの収集と分析、マーケティング戦略の設定、営業活動の支援、サービス改善などを一元管理するシステム。解説：１はCRMの正確な説明です。CRMは、顧客データの収集と分析、マーケティング戦略の設定、営業活動の支援、サービス改善などを一元管理するシステムです。２はSCM（Supply Chain Management）、３はTQC（Total Quality Control）またはTQM（Total Quality Management）、４はシックスシグマの説明です。"
+              }
+            ],
+            "order": 8
+          }
+        ],
+        "order": 3
+      },
+      {
+        "id": "curr_15_3",
+        "courseId": "15",
+        "title": "技術戦略マネジメント",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_1033",
+            "curriculumId": "curr_15_3",
+            "title": "技術戦略マネジメント：技術開発戦略の立案・技術開発計画",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/SV5TxWCy4pM",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1033",
+                "question": "技術開発計画に関して以下のうち正しいものは何でしょうか？",
+                "options": [
+                  "技術開発計画は、自社が保有する技術を評価する戦略である",
+                  "技術開発計画は、技術の価値を最大化し、企業のビジョンを具現化する役割がある",
+                  "技術開発計画は、新製品開発、技術提携、研究開発投資をガイドする役割がある",
+                  "技術開発計画は、技術戦略を基に、具体的な技術開発が進行するプロセスである"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．技術開発計画は、技術戦略を基に、具体的な技術開発が進行するプロセスである。解説：選択肢1は技術開発戦略の説明です。選択肢3も技術開発戦略の役割に関連しています。選択肢4はMOTの役割の説明です。したがって、正しいのは選択肢2で、技術開発計画は技術戦略を基に具体的な技術開発が進行するプロセスです。"
+              }
+            ],
+            "order": 9
+          }
+        ],
+        "order": 4
+      },
+      {
+        "id": "curr_15_4",
+        "courseId": "15",
+        "title": "ビジネスインダストリ",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_1032",
+            "curriculumId": "curr_15_4",
+            "title": "ビジネスインダストリ：ビジネスシステム①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/5SKBIbdtuEg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1032",
+                "question": "次のうち、流通情報システムの主な機能として正しいものは何ですか？",
+                "options": [
+                  "商品の売れ行きをリアルタイムで把握する",
+                  "金融サービスを提供する",
+                  "顧客のチェックアウト時間を短縮する",
+                  "商品の在庫管理から発注、配送までの一連の流れを管理する"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．商品の在庫管理から発注、配送までの一連の流れを管理する。解説：選択肢1はPOSシステム、選択肢3はセルフレジ、選択肢4は金融情報システムの機能になります。選択肢2のみが流通情報システムの主な機能で、商品の在庫管理から発注、配送までの一連の流れを管理します。"
+              }
+            ],
+            "order": 10
+          },
+          {
+            "id": "lesson_1031",
+            "curriculumId": "curr_15_4",
+            "title": "ビジネスインダストリ：ビジネスシステム②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/624kKv2EqaI",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1031",
+                "question": "住民基本台帳ネットワークシステムの主な目的は何でしょうか？",
+                "options": [
+                  "各地方自治体間の情報共有を促進すること。",
+                  "国民と行政の直接的なコミュニケーションを可能にすること。",
+                  "個々の国民の情報を一元的に管理すること。",
+                  "公共事業の入札・契約プロセスを電子化すること。"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．各地方自治体間の情報共有を促進すること。。解説：住民基本台帳ネットワークシステムは、各地方自治体間の情報共有を促進することで行政サービスの提供や行政判断の精度を向上させる役割を持っています。他の選択肢はそれぞれ電子入札システム、マイナンバーシステム、マイナポータルの目的であるため、この文脈では適切ではありません。"
+              }
+            ],
+            "order": 11
+          },
+          {
+            "id": "lesson_1030",
+            "curriculumId": "curr_15_4",
+            "title": "ビジネスインダストリ：ビジネスシステム③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ARAY1gcVFiA",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1030",
+                "question": "ソフトウェアパッケージの特徴とは何でしょうか？",
+                "options": [
+                  "開発時間の短縮、信頼性の向上、コスト削減",
+                  "信頼性の向上、コスト増加、開発時間の短縮",
+                  "開発時間の増加、信頼性の低下、コスト増加",
+                  "信頼性の低下、コスト削減、開発時間の増加"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．開発時間の短縮、信頼性の向上、コスト削減。解説：ソフトウェアパッケージの特徴としては、開発時間の短縮、信頼性の向上、コスト削減があります。開発者があらかじめパッケージとして提供することで、ユーザー企業が個別に開発する必要がなく、またその品質にも信頼が置けるからです。選択肢2, 3, 4はそれぞれソフトウェアパッケージの特性を誤って記述しています。"
+              }
+            ],
+            "order": 12
+          },
+          {
+            "id": "lesson_1029",
+            "curriculumId": "curr_15_4",
+            "title": "ビジネスインダストリ：ビジネスシステム④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/4v5RGaOz9vM",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1029",
+                "question": "AI（人工知能）はどのように大別されますか？",
+                "options": [
+                  "特化型AIと汎用AI",
+                  "無制限型AIと制限型AI",
+                  "定量型AIと定性型AI",
+                  "固定型AIと可動型AI"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．特化型AIと汎用AI。解説：AIは大きく2つに分けられます。特化型AIは特定のタスクを自動化するために開発され、一方で汎用AIは広範な問題を解決する能力を持つことを目指しています。"
+              }
+            ],
+            "order": 13
+          },
+          {
+            "id": "lesson_1028",
+            "curriculumId": "curr_15_4",
+            "title": "ビジネスインダストリ：エンジニアリングシステム①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/d0eq5BILQSw",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1028",
+                "question": "エンジニアリング分野における設計作業の効率化に大いに貢献しているITツールは何でしょうか？",
+                "options": [
+                  "CAD (Computer-Aided Design) ソフトウェア",
+                  "ビッグデータ解析ツール",
+                  "IoT (Internet of Things) デバイス",
+                  "CIM (Computer Integrated Manufacturing) システム"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．CAD (Computer-Aided Design) ソフトウェア。解説： CAD (Computer-Aided Design) ソフトウェアは、エンジニアリング分野における設計作業の効率化に大いに貢献しています。これを使用すると、複雑な形状の設計やシミュレーションが可能となり、設計作業が自動化されます。これにより、より精密で高度な設計が可能になります。"
+              }
+            ],
+            "order": 14
+          },
+          {
+            "id": "lesson_1027",
+            "curriculumId": "curr_15_4",
+            "title": "ビジネスインダストリ：エンジニアリングシステム②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/9gDtjBOLrzg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1027",
+                "question": "エンジニアリングシステムの一つであるCADの特性についての記述として最も適切なものは何ですか？",
+                "options": [
+                  "CADは3D設計を可能にし、設計時間の短縮と設計ミスの発生を増加させる",
+                  "CADは製品設計を支援するだけでなく、生産計画も一手に担当する",
+                  "CADは製品の形状や機能を詳細に検討でき、シミュレーションにより製品の性能を評価したり、設計改善の指針を得ることが可能である",
+                  "CADは2D設計のみを可能にする"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．CADは製品の形状や機能を詳細に検討でき、シミュレーションにより製品の性能を評価したり、設計改善の指針を得ることが可能である。解説： CADは3D設計を可能にし、設計時間を短縮し、設計ミスを減少させる（選択肢1は増加となっているため誤り）。また、CADは2D設計も可能であるが、その主な特性としては3D設計が挙げられるため、選択肢2は不完全である。選択肢4については、CADは製品設計を支援するシステムであり、生産計画を一手に担当するシステムではない。"
+              }
+            ],
+            "order": 15
+          },
+          {
+            "id": "lesson_1026",
+            "curriculumId": "curr_15_4",
+            "title": "ビジネスインダストリ：e-ビジネス①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/u7i6Gxs6Jsw",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1026",
+                "question": " 電子商取引の主な特徴\\n電子商取引（EC）の主な特徴として正しいものはどれでしょうか？",
+                "options": [
+                  "物理的な店舗を必要とし、資本投資が多い",
+                  "全ての取引が現金で行われる",
+                  "物理的な店舗を必要とせず、資本投資を抑えて事業に参入可能",
+                  "コスト削減が困難で、ビジネスモデルが限定される"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．物理的な店舗を必要とせず、資本投資を抑えて事業に参入可能。解説：ECの主な特徴は、物理的な店舗を必要とせず、資本投資を抑えて事業に参入できること（選択肢3）。これにより、店舗や店員にかかるコストを大幅に削減することが可能となります。選択肢1と2は誤りで、これらはECの特徴とは逆の特性を示しています。また、選択肢4も誤りで、ECでは多様な電子決済方法が利用され、全ての取引が現金で行われるわけではありません。"
+              }
+            ],
+            "order": 16
+          },
+          {
+            "id": "lesson_1025",
+            "curriculumId": "curr_15_4",
+            "title": "ビジネスインダストリ：e-ビジネス②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/AeS8RAos780",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1025",
+                "question": "電子商取引における主なリスクは何ですか？",
+                "options": [
+                  "システム障害、詐欺、個人情報の漏洩",
+                  "商品やサービスの売買、口座情報の一括管理",
+                  "マネーロンダリング防止、テロ資金供与防止",
+                  "スマートフォンの普及、ネットインフラの発達、システム障害"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．システム障害、詐欺、個人情報の漏洩。解説：選択肢1のシステム障害、詐欺、個人情報の漏洩は、電子商取引における主なリスクです。選択肢2のスマートフォンの普及、ネットインフラの発達は、電子商取引の拡大要因です。選択肢3は金融犯罪防止の手段、選択肢4はそれぞれの技術やサービスの特性です。"
+              }
+            ],
+            "order": 17
+          },
+          {
+            "id": "lesson_1024",
+            "curriculumId": "curr_15_4",
+            "title": "ビジネスインダストリ：IoTシステム・組込みシステム①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/GkrvbcCdsnQ",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1024",
+                "question": "以下のうち、IoT（Internet of Things）の特徴として正しいものはどれですか？",
+                "options": [
+                  "物と物がインターネットを通じて繋がり、モニタリングや制御、データ収集による最適化、自律化が可能となる",
+                  "IoTはネットワーク接続が必要ないモノを対象にしている",
+                  "IoTは主に個人のプライバシーを守るための技術である",
+                  "IoTはインターネットを介さずにモノ同士が直接通信する技術である"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．物と物がインターネットを通じて繋がり、モニタリングや制御、データ収集による最適化、自律化が可能となる。解説：１．この選択肢は、文章の中で述べられている通り、IoTの一般的な特徴を正確に述べています。２．IoTは、物と物がインターネットを通じて接続される技術であり、インターネットを介さない直接的な通信は含まれません。３．IoTは、様々な用途で利用されますが、その主要な目的は個人のプライバシー保護ではありません。４．IoTは、インターネットに接続できる様々なモノ（デバイス）を対象にしており、ネットワーク接続が必要ないモノは含まれません。"
+              }
+            ],
+            "order": 18
+          },
+          {
+            "id": "lesson_1023",
+            "curriculumId": "curr_15_4",
+            "title": "ビジネスインダストリ：IoTシステム・組込みシステム②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/V-SGOd6XaRs",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1023",
+                "question": "組込みシステムについての特徴は何ですか？",
+                "options": [
+                  "ユーザーが自由にプログラムを追加したり、システムの振る舞いを変更することが可能である",
+                  "ハードウェアに直接書き込まれ、電源を切っても消えない",
+                  "特定の目的を達成するために作られ、その目的に沿った限定的な機能を持つ",
+                  "一般的なパソコンと同じように、多機能であることが求められる"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．特定の目的を達成するために作られ、その目的に沿った限定的な機能を持つ。解説：１．組込みシステムはユーザーが自由にプログラムを追加したり、システムの振る舞いを変更することは基本的にありません。２．組込みシステムは特定の目的を達成するために作られ、その目的に沿った限定的な機能を持つという特性があります。３．正解。組込みシステムは特定の目的を達成するために作られ、その目的に沿った限定的な機能を持つという特性があります。４．これはファームウェアの特性であり、組込みシステム全体の特性ではありません。"
+              }
+            ],
+            "order": 19
+          }
+        ],
+        "order": 5
+      },
+      {
+        "id": "curr_15_5",
+        "courseId": "15",
+        "title": "システム戦略",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_1022",
+            "curriculumId": "curr_15_5",
+            "title": "システム戦略：情報システム戦略①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/1Mdu89ADKk0",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1022",
+                "question": "情報システム戦略の目的は何でしょうか？",
+                "options": [
+                  "ビジネスプロセスの改善",
+                  "すべて上記の通り",
+                  "効率的な情報処理",
+                  "競争優位性の確立"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．すべて上記の通り。解説：情報システム戦略の目的は、効率的な情報処理、ビジネスプロセスの改善、競争優位性の確立などを含みます。"
+              }
+            ],
+            "order": 1
+          },
+          {
+            "id": "lesson_1021",
+            "curriculumId": "curr_15_5",
+            "title": "システム戦略：情報システム戦略②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/aBctwbHni98",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1021",
+                "question": "戦略目標の特性について正しいものは何でしょうか？",
+                "options": [
+                  "抽象的で、不明確で、非測定可能で、達成不可能で、無期限",
+                  "抽象的で、明確で、測定可能で、達成可能で、無期限",
+                  "非具体的で、曖昧で、測定不可能で、達成不可能で、時限定",
+                  "具体的で、明確で、測定可能で、達成可能で、時限定"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．具体的で、明確で、測定可能で、達成可能で、時限定。解説：戦略目標は具体的で、明確で、測定可能で、達成可能で、時限定であるべきです。これにより組織全体の行動指針を決定し、全体の方向性に沿った行動や業務を指導することができます。"
+              }
+            ],
+            "order": 2
+          },
+          {
+            "id": "lesson_1020",
+            "curriculumId": "curr_15_5",
+            "title": "システム戦略：業務プロセス①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/xwitLwTKl4E",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1020",
+                "question": "モデリングとは何を目指す手法でしょうか？",
+                "options": [
+                  "業務の仕組みや業務プロセスを視覚的に表現する手法",
+                  "ビジネスプロセスの根本的な再設計を目指す手法",
+                  "システム内のデータの流れを視覚的に表現する手法",
+                  "データベースの構造を視覚的に表現する手法"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．業務の仕組みや業務プロセスを視覚的に表現する手法。解説：モデリングは業務の仕組みや業務プロセスを視覚的に表現する手法です。業務の全体像を捉え、その中での各要素の関連性や流れを明確にするために使用されます。データベースの構造を視覚的に表現する手法は、E-R図というモデリング手法です。システム内のデータの流れを視覚的に表現する手法は、DFDというモデリング手法です。ビジネスプロセスの根本的な再設計を目指す手法は、BPR（Business Process Reengineering）と呼ばれます。"
+              }
+            ],
+            "order": 3
+          },
+          {
+            "id": "lesson_1019",
+            "curriculumId": "curr_15_5",
+            "title": "システム戦略：業務プロセス②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/bEmzk1M9CDo",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1019",
+                "question": "業務改善や問題解決に必要な能力は何ですか？",
+                "options": [
+                  "分析力と思考力",
+                  "デザイン力とプレゼンテーション力",
+                  "コーディング力とネットワーク知識",
+                  "クリエイティブな思考力とコミュニケーション力"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．分析力と思考力。解説：業務改善や問題解決には、情報を理解し、それを用いて有効な戦略を構築するための分析力と思考力が必要です。"
+              }
+            ],
+            "order": 4
+          },
+          {
+            "id": "lesson_1018",
+            "curriculumId": "curr_15_5",
+            "title": "システム戦略：業務プロセス③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/lINmh1NVGyk",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1018",
+                "question": "システム化に関する以下の記述のうち、最も正確なものを選びなさい。",
+                "options": [
+                  "ソフトウェアパッケージは特定の業務を効率化します",
+                  "ネットワークの構築はリモートでの作業を可能にします",
+                  "情報システムの開発はコミュニケーションを円滑にします",
+                  "グループウェアの主な機能はリモートでの作業を可能にすることです"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．ネットワークの構築はリモートでの作業を可能にします。解説：１．ソフトウェアパッケージは即座に業務に組み込むことができますが、必ずしも特定の業務を効率化するわけではありません。２．グループウェアはコミュニケーションを円滑にするためのツールであり、直接リモート作業を可能にするものではありません。３．情報システムの開発は特定の業務を効率化しますが、直接的にコミュニケーションを円滑にするわけではありません。４．ネットワークの構築はリモートでの作業を可能にするものです。これは正確な記述です。"
+              }
+            ],
+            "order": 5
+          },
+          {
+            "id": "lesson_1017",
+            "curriculumId": "curr_15_5",
+            "title": "システム戦略：ソリューションビジネス①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/6lyLMQ4eIho",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1017",
+                "question": "ソリューションビジネスの基本的なプロセスについて、正しい順序であるものはどれでしょうか？",
+                "options": [
+                  "問題の理解 → 解決策の提案 → 解決策の実装 → 結果の評価と改善",
+                  "解決策の提案 → 問題の理解 → 解決策の実装 → 結果の評価と改善",
+                  "問題の理解 → 解決策の実装 → 解決策の提案 → 結果の評価と改善",
+                  "解決策の実装 → 問題の理解 → 解決策の提案 → 結果の評価と改善"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解： １．問題の理解 → 解決策の提案 → 解決策の実装 → 結果の評価と改善。解説：ソリューションビジネスのプロセスはまず問題の理解から始まり、その後解決策を提案し、解決策が採用されれば実装へ移り、最後に結果の評価と改善を行うという順序で進行します。"
+              }
+            ],
+            "order": 6
+          },
+          {
+            "id": "lesson_1016",
+            "curriculumId": "curr_15_5",
+            "title": "システム戦略：ソリューションビジネス②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/KO2bm6adjUc",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1016",
+                "question": "SI（System Integration）の目的について最も正しいのはどれでしょう？",
+                "options": [
+                  "複数の異なるシステム間で情報の共有や連携を難しくすること",
+                  "全てのシステムを新規に作り直すこと",
+                  "システムの独立性を強化すること",
+                  "情報システムを一体化し、システム間の情報共有や連携を容易にすること"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．情報システムを一体化し、システム間の情報共有や連携を容易にすること。解説：１．間違い。SIの目的は、むしろ情報の共有や連携を容易にすることです。２．正解。SIは複数の異なるシステムを一体化し、情報の共有や連携を容易にすることを目指します。３．間違い。SIの目的はシステム間の連携を強化することで、必然的にシステムの独立性は弱まります。４．間違い。既存のシステムを一体化することが目的であり、全てのシステムを新規に作り直すことは目指していません。"
+              }
+            ],
+            "order": 7
+          },
+          {
+            "id": "lesson_1015",
+            "curriculumId": "curr_15_5",
+            "title": "システム戦略：システム活用促進・評価①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/gpcCZ4232-U",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1015",
+                "question": "ITリテラシーとは何を指しますか？",
+                "options": [
+                  "コンピュータのハードウェアを設計する能力",
+                  "ネットワーキングの設定能力",
+                  "ソフトウェアのプログラミング能力",
+                  "情報技術（IT）を理解し、これを効果的に活用する能力"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．情報技術（IT）を理解し、これを効果的に活用する能力。解説：ITリテラシーとは情報技術（IT）を理解し、これを効果的に活用する能力のことを指します。これにはコンピュータのハードウェアやソフトウェアの理解、アプリケーションの使用能力、インターネット利用スキルなどが含まれます。選択肢1、3、4はITリテラシーの一部かもしれませんが、ITリテラシー全体を定義するものではありません。"
+              }
+            ],
+            "order": 8
+          },
+          {
+            "id": "lesson_1014",
+            "curriculumId": "curr_15_5",
+            "title": "システム戦略：システム活用促進・評価②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/8hjOnQN3IT8",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1014",
+                "question": "普及啓発の目的について最も適切なのは次のうちどれでしょうか。",
+                "options": [
+                  "新しい技術や情報を一部の人々に理解してもらうこと",
+                  "新しい技術や情報を全ての人々が完全に理解できるようにすること",
+                  "新しい技術や情報を限られた専門家にしか理解させないこと",
+                  "新しい技術や情報を広く人々に理解してもらい、使用や採用を増やすこと"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．新しい技術や情報を広く人々に理解してもらい、使用や採用を増やすこと。解説：普及啓発の目的は、新しい技術や情報を広く人々に理解してもらい、その使用や採用を増やすことです。選択肢1は、普及啓発の目的が「広く」理解してもらうことであるため、一部の人々に限定するのは適切ではありません。選択肢3は、普及啓発の目的が一部の専門家だけでなく一般の人々にも理解してもらうことなので不適切です。選択肢4は全ての人々が完全に理解できるという点が、普及啓発の実現可能な目標を超えています。"
+              }
+            ],
+            "order": 9
+          },
+          {
+            "id": "lesson_1013",
+            "curriculumId": "curr_15_5",
+            "title": "システム戦略：システム活用促進・評価③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/VtAmxu0aKPs",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1013",
+                "question": "情報システムの投資対効果を分析する一つの手法は何ですか？",
+                "options": [
+                  "利用者満足度調査",
+                  "レガシーシステムの廃棄",
+                  "費用対効果分析",
+                  "システムの安全性評価"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．費用対効果分析。解説： 費用対効果分析は、情報システムへの投資の価値を測定する一つの手法です。この分析により、投資されたコストに対して、そのシステムがどれほどの効果をもたらしたのかを定量的に評価します。この問題の他の選択肢では、それぞれ異なる評価の手法を示しています。"
+              }
+            ],
+            "order": 10
+          }
+        ],
+        "order": 6
+      },
+      {
+        "id": "curr_15_6",
+        "courseId": "15",
+        "title": "システム企画",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_1012",
+            "curriculumId": "curr_15_6",
+            "title": "システム企画：システム化計画",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/3rc_6q2KBfI",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1012",
+                "question": "システム化計画の主要なプロセスについて\\nシステム化計画の進行における主要なプロセスとして誤っているものはどれでしょうか？",
+                "options": [
+                  "対象業務の分析",
+                  "既存システムの継続使用",
+                  "スケジュールの設定",
+                  "情報システム戦略の立案"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．既存システムの継続使用。解説：1~3はシステム化計画の重要なプロセスを表していますが、4は新たなシステムの開発と直接関連していないため、この文脈では不適切です。"
+              }
+            ],
+            "order": 11
+          },
+          {
+            "id": "lesson_1011",
+            "curriculumId": "curr_15_6",
+            "title": "システム企画：要件定義",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Ljriqutrsy4",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1011",
+                "question": "以下の選択肢のうち、業務要件定義の目的を最も適切に説明しているのはどれでしょうか？",
+                "options": [
+                  "既存のシステムの問題点と効率化の余地を特定する",
+                  "システムが具体的にどのような機能を持つべきかを定義する",
+                  "システムの利用者から直接要求を聞き出す",
+                  "システムが果たすべき役割とその範囲を明確にし、期待される出力とその品質を決定する"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．システムが果たすべき役割とその範囲を明確にし、期待される出力とその品質を決定する。解説：１．これは現行業務の分析の目的です。２．正解。これが業務要件定義の主要な目的です。３．これは利用者の要求の調査の目的です。４．これは機能要件の定義の一部です。"
+              }
+            ],
+            "order": 12
+          },
+          {
+            "id": "lesson_1010",
+            "curriculumId": "curr_15_6",
+            "title": "システム企画：調達計画・実施①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/js83PU0wSmc",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1010",
+                "question": "以下のうち、調達の基本的な流れを正しく順番に並べたものはどれでしょうか。",
+                "options": [
+                  "提案依頼書（RFP）の作成と配付、情報提供依頼（RFI）の作成と配付、提案書及び見積書の入手、選定基準の作成、提案内容の比較評価、調達先の選定、契約締結、受入れ・検収",
+                  "情報提供依頼（RFI）の作成と配付、提案依頼書（RFP）の作成と配付、提案書及び見積書の入手、選定基準の作成、提案内容の比較評価、契約締結、調達先の選定、受入れ・検収",
+                  "提案依頼書（RFP）の作成と配付、情報提供依頼（RFI）の作成と配付、選定基準の作成、提案書及び見積書の入手、提案内容の比較評価、調達先の選定、受入れ・検収、契約締結",
+                  "情報提供依頼（RFI）の作成と配付、提案依頼書（RFP）の作成と配付、選定基準の作成、提案書及び見積書の入手、提案内容の比較評価、調達先の選定、契約締結、受入れ・検収"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．情報提供依頼（RFI）の作成と配付、提案依頼書（RFP）の作成と配付、選定基準の作成、提案書及び見積書の入手、提案内容の比較評価、調達先の選定、契約締結、受入れ・検収。解説：１．提案依頼書（RFP）は情報提供依頼（RFI）の後に作成されます。２．正しい調達の基本的な流れです。３．受入れ・検収は契約締結の後に行われます。４．契約締結は調達先の選定の後に行われます。"
+              }
+            ],
+            "order": 13
+          },
+          {
+            "id": "lesson_1009",
+            "curriculumId": "curr_15_6",
+            "title": "システム企画：調達計画・実施②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/i-Z08SlGbqI",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1009",
+                "question": "情報提供依頼の目的について最も正確に表しているのは次のうちどれでしょうか？",
+                "options": [
+                  "依頼を受けたベンダー企業の業績評価",
+                  "最新の技術動向や解決策を把握し、最適なシステム化戦略を構築する",
+                  "企業の内部ITシステムの導入プロセスを共有する",
+                  "ベンダー企業とのコミュニケーションの維持"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．最新の技術動向や解決策を把握し、最適なシステム化戦略を構築する。解説：この問題では情報提供依頼の目的を尋ねています。文章から、情報提供依頼の目的は「最新の技術動向や解決策を把握し、最適なシステム化戦略を構築する」ことです（選択肢4）。選択肢1、2、3は情報提供依頼の目的を正確に表していません。"
+              }
+            ],
+            "order": 14
+          },
+          {
+            "id": "lesson_1008",
+            "curriculumId": "curr_15_6",
+            "title": "システム企画：調達計画・実施③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/l4qkj_0qMmU",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1008",
+                "question": "提案依頼書に含まれる「導入システムの概要」には通常どのような内容が含まれますか？",
+                "options": [
+                  "導入するシステムの目的、機能、対象ユーザー",
+                  "ベンダー企業の評価基準、比較方法",
+                  "費用、導入時期、サポート体制",
+                  "導入するシステムの詳細、求めるサポート"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．導入するシステムの目的、機能、対象ユーザー。解説：「導入システムの概要」では、導入するシステムの目的、機能、対象ユーザー等が記載されます（選択肢1）。選択肢2は「提案依頼事項」、選択肢3は「調達条件」に関連します。選択肢4は提案依頼書の具体的な内容ではありません。"
+              }
+            ],
+            "order": 15
+          },
+          {
+            "id": "lesson_1007",
+            "curriculumId": "curr_15_6",
+            "title": "システム企画：調達計画・実施④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/grE8Ic9UDyI",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1007",
+                "question": "提案書の目的は何ですか？",
+                "options": [
+                  "ベンダー企業が自社の技術力、経験、知識を示し、依頼元に対して最適な解決策を提供する",
+                  "依頼元の問題を理解し、それに対する解決策を提供するためのツール",
+                  "依頼元に対する最適な解決策を見つけ出すための市場調査",
+                  "ベンダー企業の事業計画を宣伝する"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．ベンダー企業が自社の技術力、経験、知識を示し、依頼元に対して最適な解決策を提供する。解説：提案書はベンダー企業が自社の技術力、経験、知識を示し、依頼元に対して最適な解決策を提供するためのものです。選択肢2は提案書の目的ではありません。選択肢3は一部正しいですが、提案書は具体的な解決策を提供するものであり、市場調査そのものではありません。選択肢4も一部正しいですが、ベンダー企業の技術力や経験、知識を示すという重要な要素が欠けています。"
+              }
+            ],
+            "order": 16
+          },
+          {
+            "id": "lesson_1006",
+            "curriculumId": "curr_15_6",
+            "title": "システム企画：調達計画・実施⑤",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/9OSOYWkiafQ",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1006",
+                "question": " 見積書の重要性について正しいのは次のうちどれでしょうか？",
+                "options": [
+                  "システム開発の必要なツールやリソースの詳細を明記することで、クライアントとの透明性を確保する",
+                  "見積書は、作業内容と費用をあまり詳細に明示するべきではない",
+                  "具体的な金額と作業内容を示すことで、取引先との信頼関係を損なう可能性がある",
+                  "見積書は取引先の選定や発注内容の確認には必要ない"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．システム開発の必要なツールやリソースの詳細を明記することで、クライアントとの透明性を確保する。解説：１．正しい。文章によれば、システム開発の工程や、必要な人材、使用するツールやリソースの詳細まで、具体的にどのような費用が発生するのかを明記することで、クライアントとの透明性を確保します。２．誤り。見積書は取引先の選定や発注内容の確認にも必要とされます。３．誤り。具体的な金額と作業内容を示すことで、取引先との信頼関係を構築することが可能となります。４．誤り。作業内容と費用を詳細に明示することで、クライアントは何にどれだけの費用がかかるのか、またそれがいつまでに行われるのかを明確に理解することができます。"
+              }
+            ],
+            "order": 17
+          }
+        ],
+        "order": 7
+      },
+      {
+        "id": "curr_15_7",
+        "courseId": "15",
+        "title": "システム開発技術",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_1005",
+            "curriculumId": "curr_15_7",
+            "title": "システム開発技術：システム開発技術①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Ia_kQi_IlPM",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1005",
+                "question": "システム開発の初期段階で行われるシステム要件定義及びソフトウェア要件定義についての説明として、最も適切なものはどれでしょうか？",
+                "options": [
+                  "システムの全体像を設計する作業",
+                  "コードを作成し、単体テストを行う作業",
+                  "システムやソフトウェアに要求される機能や性能を明確にする作業",
+                  "具体的なソフトウェアの動作を設計する作業"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．システムやソフトウェアに要求される機能や性能を明確にする作業。解説：システム要件定義及びソフトウェア要件定義は、システムやソフトウェアに要求される機能や性能を明確にする作業です。選択肢1と2は設計段階の作業を示しており、選択肢4はプログラミング段階の作業を示しています。"
+              }
+            ],
+            "order": 1
+          },
+          {
+            "id": "lesson_1004",
+            "curriculumId": "curr_15_7",
+            "title": "システム開発技術：システム開発技術②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/QNnlyMANGEE",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1004",
+                "question": "ソフトウェアの開発規模に基づいて開発工数を見積る手法はどれでしょうか？",
+                "options": [
+                  "相対見積法",
+                  "バルク見積法",
+                  "ファンクションポイント法",
+                  "類推見積法"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．ファンクションポイント法。解説：１．相対見積法はタスク間の相対的な大小や複雑さを比較して見積もる方法です。２．類推見積法は過去の類似プロジェクトのデータを基に見積もる方法です。３．ファンクションポイント法はソフトウェアの機能の規模に基づいて開発工数を見積もる手法で正解です。４．バルク見積法は存在しない見積もり手法で、この問題のダミー選択肢です。"
+              }
+            ],
+            "order": 2
+          }
+        ],
+        "order": 8
+      },
+      {
+        "id": "curr_15_8",
+        "courseId": "15",
+        "title": "ソフトウェア開発管理技術",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_1003",
+            "curriculumId": "curr_15_8",
+            "title": "ソフトウェア開発管理技術：開発プロセス・手法①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/iUXFMibTSHI",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1003",
+                "question": "次のうち、構造化手法が推奨するアプローチは何ですか？",
+                "options": [
+                  "既存の問題を最初から完全に理解する",
+                  "単一の解決策を探求する",
+                  "すべての問題を一度に解決する",
+                  "大きな問題をより小さな単位に分解し、それぞれを順序立てて解決する"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．大きな問題をより小さな単位に分解し、それぞれを順序立てて解決する。解説：構造化手法は、大きな問題を小さな単位に分解し、それぞれを順序立てて解決することを推奨します。他の選択肢は構造化手法の主要な概念に反しています。"
+              }
+            ],
+            "order": 3
+          },
+          {
+            "id": "lesson_1002",
+            "curriculumId": "curr_15_8",
+            "title": "ソフトウェア開発管理技術：開発プロセス・手法②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/oWqPVodLC_w",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1002",
+                "question": "以下のうち、ウォーターフォールモデルの特性を最も正確に表しているものはどれですか？",
+                "options": [
+                  "開発を逐次的かつ反復的に行い、リスクを早期に検出する",
+                  "既存のソフトウェアを解析し、その構造を理解する",
+                  "開発初期に試作品を作り、それを基に要件定義を行う",
+                  "要件定義、設計、コーディング、テスト、保守のフェーズが一方向に進む"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．要件定義、設計、コーディング、テスト、保守のフェーズが一方向に進む。解説：ウォーターフォールモデルは、その名の通り、各フェーズが一方向に流れていく形式の開発モデルです。具体的には要件定義、設計、コーディング、テスト、保守のフェーズが一方向に進みます。"
+              }
+            ],
+            "order": 4
+          },
+          {
+            "id": "lesson_1001",
+            "curriculumId": "curr_15_8",
+            "title": "ソフトウェア開発管理技術：開発プロセス・手法③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/cKStVY_kDWM",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1001",
+                "question": "アジャイル開発手法の特徴として正しいものを選択してください。",
+                "options": [
+                  "ドキュメンテーションよりもソフトウェアの機能を重視する",
+                  "ユーザーとの協働を避ける",
+                  "プロジェクトの開発プロセスは最初に固定する",
+                  "変更を避ける"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．ドキュメンテーションよりもソフトウェアの機能を重視する。解説：アジャイル開発はソフトウェアの機能を重視し、変更を前提とする開発手法です。そのため、選択肢1が正しいです。選択肢2と3はウォーターフォール型の特徴であり、アジャイル開発ではこれらは否定されます。選択肢4は、アジャイル開発がユーザーとの協働を重視するため、間違いです。"
+              }
+            ],
+            "order": 5
+          },
+          {
+            "id": "lesson_1000",
+            "curriculumId": "curr_15_8",
+            "title": "ソフトウェア開発管理技術：開発プロセス・手法④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/QUiYLIYubJs",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_1000",
+                "question": "SLCP（Software Life Cycle Process）の目的は何でしょうか？",
+                "options": [
+                  "ソフトウェア開発とその取引の適正化",
+                  "テストの質向上",
+                  "デプロイメントの速度向上",
+                  "ソフトウェアのコーディング効率向上"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．ソフトウェア開発とその取引の適正化。解説：SLCPはソフトウェア開発とその取引の適正化を目指す共通フレームワークです。作業項目を一つ一つ定義し、それらを標準化することで、開発過程の透明性と予測可能性を向上させることが可能になります。"
+              }
+            ],
+            "order": 6
+          }
+        ],
+        "order": 9
+      },
+      {
+        "id": "curr_15_9",
+        "courseId": "15",
+        "title": "プロジェクトマネジメント",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_999",
+            "curriculumId": "curr_15_9",
+            "title": "プロジェクトマネジメント：プロジェクトマネジメント",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/GCaqMyEibjs",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_999",
+                "question": " プロジェクトマネジメントのツールについて説明してください。\\n次のうち、プロジェクト全体のタスクを細分化し、タスクの割り当てやスケジュール計画に役立つツールはどれでしょうか？",
+                "options": [
+                  "ガントチャート",
+                  "PERT図",
+                  "WBS（Work Breakdown Structure）",
+                  "アローダイアグラム"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．WBS（Work Breakdown Structure）。解説：１．ガントチャートはタスクのスケジュールと進捗を視覚化するツールであり、タスクの状況を一目で確認できますが、タスクを細分化するのはWBSです。２．アローダイアグラムはタスクとその依存関係を視覚化するツールであり、タスクの順序を理解し、スケジュールの衝突を防ぐのに役立ちますが、タスクを細分化するのはWBSです。３．WBS（Work Breakdown Structure）はプロジェクト全体のタスクを細分化し、全体像を理解しやすくするツールです。これによりタスクの割り当てやスケジュール計画が可能となります。４．PERT図はタスク間の依存関係を表示し、各タスクの最早開始可能時間と最遅開始可能時間を示すツールです。しかし、タスクを細分化するのはWBSです。"
+              }
+            ],
+            "order": 1
+          }
+        ],
+        "order": 10
+      },
+      {
+        "id": "curr_15_10",
+        "courseId": "15",
+        "title": "サービスマネジメント",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_998",
+            "curriculumId": "curr_15_10",
+            "title": "サービスマネジメント：サービスマネジメント①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/3H3sMqIAP8U",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_998",
+                "question": "サービスマネジメントのプロセスを正しい順序で選択してください。",
+                "options": [
+                  "設計、提供、改善、計画立案、移行",
+                  "提供、設計、移行、改善、計画立案",
+                  "計画立案、設計、移行、提供、改善",
+                  "計画立案、移行、設計、提供、改善"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．計画立案、設計、移行、提供、改善。解説：サービスマネジメントのプロセスは次の順番で進行します：計画立案、設計、移行、提供、改善。それぞれのフェーズはサービスの提供に必要なステップを表しています。"
+              }
+            ],
+            "order": 1
+          },
+          {
+            "id": "lesson_997",
+            "curriculumId": "curr_15_10",
+            "title": "サービスマネジメント：サービスマネジメント②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/FMIpllOitJE",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_997",
+                "question": "ITILは何を目的としたフレームワークですか？",
+                "options": [
+                  "ITリソースの浪費、サービス品質の低下、リスク管理の無視",
+                  "サービス提供の効率化、業務コストの増加、顧客満足度の低下",
+                  "業務プロセスの無視、ITリソースの最小化、サービス品質の向下、リスク管理の最大化",
+                  "業務プロセスの管理、ITリソースの最適化、サービス品質の向上、リスク管理の最小化"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．業務プロセスの管理、ITリソースの最適化、サービス品質の向上、リスク管理の最小化。解説：ITILは業務プロセスの管理、ITリソースの最適化、サービス品質の向上、リスク管理の最小化を目的としたフレームワークです。選択肢1、3、4はITILの目的とは逆の内容を表しています。"
+              }
+            ],
+            "order": 2
+          },
+          {
+            "id": "lesson_996",
+            "curriculumId": "curr_15_10",
+            "title": "サービスマネジメント：サービスマネジメント③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/X8FUbnQgUp8",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_996",
+                "question": "サービスレベル合意書（SLA）には主にどのような要素が含まれますか？",
+                "options": [
+                  "サービス範囲、パフォーマンス指標、ペナルティとインセンティブ",
+                  "プロジェクト計画、リスク管理、コミュニケーション",
+                  "予算、スケジュール、リソース",
+                  "サービス評価、品質改善、問題解決"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．サービス範囲、パフォーマンス指標、ペナルティとインセンティブ。解説：SLAの主要な要素としては「サービス範囲」「パフォーマンス指標」「ペナルティとインセンティブ」が挙げられます。選択肢2はSLAの役割や目的を示しています。選択肢3と4はプロジェクト管理の要素ですが、これらは直接的にSLAの要素ではありません。"
+              }
+            ],
+            "order": 3
+          },
+          {
+            "id": "lesson_995",
+            "curriculumId": "curr_15_10",
+            "title": "サービスマネジメント：サービスマネジメントシステム①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/MUVuK--Pwzs",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_995",
+                "question": "サービスマネジメントシステムの一部としての「サービス要求管理」の役割について最も正確に説明しているのは次のうちどれでしょうか？",
+                "options": [
+                  "顧客からのサービス要求を一元的に管理し、サービスの提供を円滑に進める役割を果たす",
+                  "サービスが確実に利用できるように、必要な対策を講じる役割を果たす",
+                  "予期せぬ問題やサービスの中断が発生した際に迅速な対応を可能にする役割を果たす",
+                  "サービスの品質を一定に保つための管理活動を行う"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．顧客からのサービス要求を一元的に管理し、サービスの提供を円滑に進める役割を果たす。解説：１．正解です。サービス要求管理の役割は、顧客からのサービス要求を効率的に扱うことで、サービスの提供を円滑に進めることが可能となります。２．サービスレベル管理の役割を説明しています。３．インシデント管理の役割を説明しています。４．サービス可用性管理の役割を説明しています。"
+              }
+            ],
+            "order": 4
+          },
+          {
+            "id": "lesson_994",
+            "curriculumId": "curr_15_10",
+            "title": "サービスマネジメント：サービスマネジメントシステム②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/2ZiiXCdH4fs",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_994",
+                "question": "サービスデスクの中心的な役割として適切なものは何ですか？",
+                "options": [
+                  "顧客の購買履歴の管理",
+                  "社員のスケジュール管理",
+                  "社内のコミュニケーション",
+                  "サービス要求管理"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．サービス要求管理。解説：サービスデスクの中心的な役割はサービス要求管理であり、問い合わせの記録、分類、優先度付け、実現、終了及び対応結果の記録などの一連の活動を行います（選択肢2）。これにより、利用者の問い合わせがスムーズに管理され、解決に繋げることが可能となります。選択肢1、3、4はサービスデスクの主な役割とは関係ありません。"
+              }
+            ],
+            "order": 5
+          },
+          {
+            "id": "lesson_993",
+            "curriculumId": "curr_15_10",
+            "title": "サービスマネジメント：ファシリティマネジメント①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/TAl4UbYcDTk",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_993",
+                "question": "システム環境整備の目的は何ですか？",
+                "options": [
+                  "業務の進行を遅らせること",
+                  "組織の業績を下げること",
+                  "IT環境を管理し、業務の円滑な進行を確保すること",
+                  "コンピュータやネットワークの故障を引き起こすこと"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．IT環境を管理し、業務の円滑な進行を確保すること。解説：システム環境整備は、コンピュータやネットワークなどのIT環境を管理し、業務の円滑な進行を確保する目的で行われます。それにより組織の業績を向上させ、業務停止や機密情報の漏洩などのトラブルを避けることができます。選択肢1,2,4はその目的に反するため、不正解となります。"
+              }
+            ],
+            "order": 6
+          },
+          {
+            "id": "lesson_992",
+            "curriculumId": "curr_15_10",
+            "title": "サービスマネジメント：ファシリティマネジメント②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Ba7Bn7TCB9E",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_992",
+                "question": "ファシリティマネジメントの主要な要素の一つは「設備のメンテナンス」です。これについての説明として最も適切なものは何でしょうか？",
+                "options": [
+                  "設備の維持と故障の防止のために定期的な点検や修理を行う",
+                  "空間を最大限に活用するための効率的なレイアウトを考える",
+                  "働く人々の安全を守るための事故防止策を講じる",
+                  "エネルギーの効率的な利用によりコスト削減と環境配慮を両立する"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．設備の維持と故障の防止のために定期的な点検や修理を行う。解説：設備のメンテナンスは、設備の維持と故障の防止のために定期的な点検や修理を行うことを指します（1）。エネルギーの効率的な利用によるコスト削減と環境配慮（2）、事故防止策による安全の確保（3）、効率的なレイアウトによる空間の最適化（4）もファシリティマネジメントの重要な要素ではありますが、「設備のメンテナンス」に直接関連するのは1の選択肢です。"
+              }
+            ],
+            "order": 7
+          }
+        ],
+        "order": 11
+      },
+      {
+        "id": "curr_15_11",
+        "courseId": "15",
+        "title": "システム監査",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_991",
+            "curriculumId": "curr_15_11",
+            "title": "システム監査：システム監査①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/1Go4kY0Lgo8",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_991",
+                "question": "監査人が保つべき2つの重要な性質は何でしょうか？",
+                "options": [
+                  "独立性と公正性",
+                  "コミュニケーション能力と説得力",
+                  "リスク許容度と決断力",
+                  "経験と技術知識"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．独立性と公正性。解説：選択肢1の独立性と公正性は、監査人が持つべき最も重要な性質で、その確保が監査の信頼性を保証します。選択肢2、3、4の性質も監査人に求められる能力ではありますが、監査人が本質的に保つべき性質としては、独立性と公正性が最も重要となります。"
+              }
+            ],
+            "order": 8
+          },
+          {
+            "id": "lesson_990",
+            "curriculumId": "curr_15_11",
+            "title": "システム監査：システム監査②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/E9R9KZpFado",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_990",
+                "question": "システム監査の目的は何でしょうか？",
+                "options": [
+                  "組織の経営活動と業務活動の効果的かつ効率的な遂行を支援し、目標達成に寄与すること",
+                  "システム監査基準に従って、具体的な監査項目を設定し、これらの項目について確認や評価を行うこと",
+                  "改善提案の実施状況を追跡し、その効果を確認すること",
+                  "システムの信頼性や効率性、セキュリティを評価し、改善を提案すること"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．組織の経営活動と業務活動の効果的かつ効率的な遂行を支援し、目標達成に寄与すること。解説：システム監査の主な目的は、組織の経営活動と業務活動の効果的かつ効率的な遂行を支援し、組織の目標達成に寄与することです。選択肢2、3、4はシステム監査の具体的な活動や手順ですが、それらは主な目的を達成するための手段に過ぎません。"
+              }
+            ],
+            "order": 9
+          },
+          {
+            "id": "lesson_989",
+            "curriculumId": "curr_15_11",
+            "title": "システム監査：内部統制①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/XAuf86WW5-M",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_989",
+                "question": "内部統制の目的として不適切な選択肢はどれでしょうか？",
+                "options": [
+                  "業務プロセスの明確化",
+                  "組織の利益の最大化",
+                  "実施ルールの設定",
+                  "職務分掌"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．組織の利益の最大化。解説： 内部統制の目的は、組織が自己の運営を健全かつ効率的に行うためのシステムを整備することです。それには業務プロセスの明確化、職務分掌、実施ルールの設定などが含まれますが、直接的に組織の利益を最大化することが目的ではありません。"
+              }
+            ],
+            "order": 10
+          },
+          {
+            "id": "lesson_988",
+            "curriculumId": "curr_15_11",
+            "title": "システム監査：内部統制②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/6-Z8mnCZSNU",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_988",
+                "question": "ITガバナンスの目的\\nITガバナンスの主な目的は何でしょうか？",
+                "options": [
+                  "ITとビジネス戦略の一致",
+                  "すべての上記",
+                  "ITの資源最適化",
+                  "ITのリスク管理"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．すべての上記。解説：ITガバナンスの主な目的は、IT戦略がビジネス戦略と一致し（選択肢1）、リスク管理が適切に行われること（選択肢2）、そして、ITの資源が最適に活用されることを確保する（選択肢3）。これらは全て企業が競争力を維持し、価値を創出するために必要な要素です。"
+              }
+            ],
+            "order": 11
+          }
+        ],
+        "order": 12
+      },
+      {
+        "id": "curr_15_12",
+        "courseId": "15",
+        "title": "基礎理論",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_987",
+            "curriculumId": "curr_15_12",
+            "title": "基礎理論：離散数学①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/eOXkRIYArSM",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_987",
+                "question": "二進数1011を十進数に変換するといくつになりますか？",
+                "options": [
+                  "9",
+                  "12",
+                  "11",
+                  "10"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．11。解説：二進数1011を十進数に変換すると、2^31 + 2^20 + 2^11 + 2^01 = 8 + 0 + 2 + 1 = 11になります。"
+              }
+            ],
+            "order": 1
+          },
+          {
+            "id": "lesson_986",
+            "curriculumId": "curr_15_12",
+            "title": "基礎理論：離散数学②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/R0UKxapQVxA",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_986",
+                "question": "集合について\\n集合についての説明として最も適切なものはどれでしょうか？",
+                "options": [
+                  "まとまりを持つ一連の数値",
+                  "複数の要素が関連性を持つ場合",
+                  "真偽が定まる文の集合",
+                  "同じ属性を持つもののグループ"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．同じ属性を持つもののグループ。解説：選択肢2が最も適切です。集合は、同じ属性を持つもののグループを表します。1と4は集合の定義とは異なります。3は命題の定義と混同されています。"
+              }
+            ],
+            "order": 2
+          },
+          {
+            "id": "lesson_985",
+            "curriculumId": "curr_15_12",
+            "title": "基礎理論：離散数学③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/PDc4hDaGc1k",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_985",
+                "question": "論理演算における\\AND\\\"の性質について説明したものはどれでしょうか？\"",
+                "options": [
+                  "2つの入力のうち一方でも真であれば真となる",
+                  "2つの入力がともに真である時のみ真となる",
+                  "2つの入力が異なるときに真となる",
+                  "入力の真偽を反転させる"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．2つの入力がともに真である時のみ真となる。解説：AND演算は、2つの入力がともに真である時のみ真となる性質を持つ。選択肢1はOR演算、選択肢2はNOT演算、選択肢3はXOR演算の性質を表しています。"
+              }
+            ],
+            "order": 3
+          },
+          {
+            "id": "lesson_984",
+            "curriculumId": "curr_15_12",
+            "title": "基礎理論：応用数学①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/4RzQLp0E43Q",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_984",
+                "question": "事象が起こる可能性を表す数値は何と言われますか？",
+                "options": [
+                  "組み合わせ",
+                  "分散",
+                  "順列",
+                  "確率"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．確率。解説：１．組み合わせは順序を問わない選び方の数を表します。２．確率は事象が起こる可能性を表す数値です。３．順列は順序が重要な場合の選び方の数を示します。４．分散はデータの散らばり具合を示す統計指標です。"
+              }
+            ],
+            "order": 4
+          },
+          {
+            "id": "lesson_983",
+            "curriculumId": "curr_15_12",
+            "title": "基礎理論：応用数学②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/RvX3DsDtXMg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_983",
+                "question": "データの集計を行う際、平均値を計算する目的は何ですか？",
+                "options": [
+                  "データの全体量を計算するため",
+                  "データの最大値を探すため",
+                  "データの最小値を探すため",
+                  "データの分布を理解するため"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．データの分布を理解するため。解説：１．データの全体量を計算するためには、全データの合計（和）を計算します。２．平均値は、データの中心傾向を示し、分布の理解に重要です。３．データの最小値や４．最大値を探すには、それぞれ最小値や最大値の探索を行います。"
+              }
+            ],
+            "order": 5
+          },
+          {
+            "id": "lesson_982",
+            "curriculumId": "curr_15_12",
+            "title": "基礎理論：応用数学③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/BOFnO4thmWo",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_982",
+                "question": "グラフ理論において、「頂点」とは何を示すものでしょうか？",
+                "options": [
+                  "頂点間の接続",
+                  "最適な通信経路",
+                  "グラフの方向性",
+                  "ネットワーク内の特定の位置や状態"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．ネットワーク内の特定の位置や状態。解説：頂点はグラフの基本単位で、ネットワーク内の特定の位置や状態を示します。選択肢1の「頂点間の接続」は、辺が示すものです。選択肢3の「グラフの方向性」は、有向グラフと無向グラフを分ける要素であり、頂点自体の性質を示すものではありません。選択肢4の「最適な通信経路」は、グラフ理論の応用例の一つで、頂点自体の性質を示すものではありません。"
+              }
+            ],
+            "order": 6
+          },
+          {
+            "id": "lesson_981",
+            "curriculumId": "curr_15_12",
+            "title": "基礎理論：応用数学④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/t5P_13ptGac",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_981",
+                "question": "待ち行列理論の4つの要素とは何ですか？",
+                "options": [
+                  "顧客、商品、価格、プロモーション",
+                  "顧客、到着率、出口率、処理時間",
+                  "顧客、サーバ、到着率、サービス率",
+                  "顧客、サーバ、出口率、入口率"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．顧客、サーバ、到着率、サービス率。解説：待ち行列理論の4つの要素は、顧客（サービスを待つもの）、サーバ（サービスを提供するもの）、到着率（顧客がどのくらいの頻度で待ち行列に加わるか）、サービス率（サービスがどのくらいの頻度で完了するか）です。"
+              }
+            ],
+            "order": 7
+          },
+          {
+            "id": "lesson_980",
+            "curriculumId": "curr_15_12",
+            "title": "基礎理論：応用数学⑤",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/t1HRRmseUks",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_980",
+                "question": "最適化問題の主要な二つの種類として挙げられるものは何でしょうか？",
+                "options": [
+                  "決定的最適化問題と確率的最適化問題",
+                  "単純最適化問題と複合最適化問題",
+                  "連続最適化問題と離散最適化問題",
+                  "線形最適化問題と非線形最適化問題"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．連続最適化問題と離散最適化問題。解説：本文では、最適化問題の主要な二つの種類として、連続最適化問題と離散最適化問題が挙げられています。連続最適化問題は変数が連続する範囲を取りうる場合に適用され、離散最適化問題は変数が特定の離散値を取る場合に適用されます。"
+              }
+            ],
+            "order": 8
+          },
+          {
+            "id": "lesson_979",
+            "curriculumId": "curr_15_12",
+            "title": "基礎理論：情報に関する理論①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/9ToYoGP7eyY",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_979",
+                "question": "情報量を表すために8つのビットをまとめて何と呼びますか？",
+                "options": [
+                  "キロバイト",
+                  "ギガバイト",
+                  "バイト",
+                  "メガバイト"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．バイト。解説：8つのビットをまとめたものは「バイト」と呼ばれます。他の選択肢である「キロバイト」「メガバイト」「ギガバイト」はそれぞれ1024バイト、1024キロバイト、1024メガバイトを意味します。"
+              }
+            ],
+            "order": 9
+          },
+          {
+            "id": "lesson_978",
+            "curriculumId": "curr_15_12",
+            "title": "基礎理論：情報に関する理論②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/EARNTjSLsnA",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_978",
+                "question": "アナログ信号とデジタル信号の違いは何ですか？",
+                "options": [
+                  "アナログ信号はデータの精度を保持しやすいが、デジタル信号は微細なデータ変動を表現できる",
+                  "アナログ信号は音楽のCDやMP3に使用され、デジタル信号は音楽のレコードやテープに使用される",
+                  "アナログ信号は連続的な信号であり、無限の値を取ることができる一方、デジタル信号は離散的な信号で、有限の値しか取ることができない",
+                  "アナログ信号とデジタル信号は全く同じ性質を持つ"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．アナログ信号は連続的な信号であり、無限の値を取ることができる一方、デジタル信号は離散的な信号で、有限の値しか取ることができない。解説：選択肢3が正しいです。文章によれば、アナログ信号は連続的であり、無限の値を取ることが可能です。一方、デジタル信号は離散的であり、有限の値しか取ることができません。選択肢1は逆で、選択肢2は誤りです。選択肢4も誤りで、実際にはレコードやテープはアナログ信号の例で、CDやMP3はデジタル信号の例です。"
+              }
+            ],
+            "order": 10
+          },
+          {
+            "id": "lesson_977",
+            "curriculumId": "curr_15_12",
+            "title": "基礎理論：情報に関する理論③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/8u7XfrxTMmU",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_977",
+                "question": "ASCII（アスキー）コードの主な機能は何ですか？",
+                "options": [
+                  "英語の大文字と小文字、数字、一部の記号を表現する",
+                  "インターネット接続を提供する",
+                  "演算子と算術関数を提供する",
+                  "すべての言語の文字を表現する"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．英語の大文字と小文字、数字、一部の記号を表現する。解説：ASCIIコードは主に英語の大文字と小文字、数字、一部の記号を表現するもので、選択肢1が正しいです。選択肢2はUnicodeの機能で、ASCIIでは表現できません。選択肢3と4は文字コードの機能ではありません。"
+              }
+            ],
+            "order": 11
+          },
+          {
+            "id": "lesson_976",
+            "curriculumId": "curr_15_12",
+            "title": "基礎理論：情報に関する理論④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Eo0PUeTBZzk",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_976",
+                "question": "述語論理の命題の基本的な形はどれですか？",
+                "options": [
+                  "主語が述語を含む",
+                  "述語は主語である",
+                  "主語と述語は等価である",
+                  "主語は述語である"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．主語は述語である。解説：選択肢1と3と4は述語論理の命題形式とは異なります。述語論理の命題は「主語は述語である」という形を取ります。例えば、「全ての犬は哺乳類である」という文があります。「犬」が主語で、「哺乳類である」が述語です。"
+              }
+            ],
+            "order": 12
+          },
+          {
+            "id": "lesson_975",
+            "curriculumId": "curr_15_12",
+            "title": "基礎理論：情報に関する理論⑤",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/4iA0YcbTEWU",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_975",
+                "question": "AIとルールベースのアプローチについて\\n次の中から、ルールベースのAIについて最も適切な説明を選択してください。",
+                "options": [
+                  "ルールベースのAIは、事前に定義したルールに基づいて動作します",
+                  "ルールベースのAIは、試行錯誤を通じて最良の行動を学びます",
+                  "ルールベースのAIは、人間の脳の神経回路網を模倣したAIのモデルです",
+                  "ルールベースのAIは、データから自動的に学習する手法です"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．ルールベースのAIは、事前に定義したルールに基づいて動作します。解説：ルールベースのAIは、事前に定義したルールに基づいて動作します。IF〜THENのような条件分岐を持つことが特徴であり、それはまさにコンピュータのプログラムそのものです。選択肢2は機械学習の説明で、選択肢3はニューラルネットワークの説明で、選択肢4は強化学習の説明になります。"
+              }
+            ],
+            "order": 13
+          }
+        ],
+        "order": 13
+      },
+      {
+        "id": "curr_15_13",
+        "courseId": "15",
+        "title": "アルゴリズムとプログラミング",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_974",
+            "curriculumId": "curr_15_13",
+            "title": "アルゴリズムとプログラミング：データ構造",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/7AhRm-CMOS4",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_974",
+                "question": "以下のデータ構造のうち、最初に追加されたデータが最初に出てくるというFIFO（First In First Out）原則に基づくものはどれでしょうか？",
+                "options": [
+                  "リスト",
+                  "2分木",
+                  "キュー",
+                  "スタック"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．キュー。解説：１．リストは順序付けられたデータの集合で、特定の位置に存在する要素に基づいてアクセスできますが、FIFO原則には基づいていません。２．スタックは最後に追加されたデータが最初に出てくるというLIFO（Last In First Out）原則に基づいています。３．キューは最初に入ったデータが最初に出てくるというFIFO原則に基づいています。４．2分木は階層的なデータを表現するために使用され、FIFO原則には基づいていません。"
+              }
+            ],
+            "order": 14
+          },
+          {
+            "id": "lesson_973",
+            "curriculumId": "curr_15_13",
+            "title": "アルゴリズムとプログラミング：アルゴリズムとプログラミング①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/9XIoCeeZvVk",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_973",
+                "question": "アルゴリズムの基本構造とは何を指しますか？",
+                "options": [
+                  "順序、選択、反復",
+                  "エンコード、伝送、デコード",
+                  "データ、情報、知識",
+                  "入力、処理、出力"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．順序、選択、反復。解説：アルゴリズムの基本構造は順序、選択、反復（または繰り返し）の3つから成り立っています。選択肢2は一般的な情報処理の流れを指し、選択肢3はデータの進化を指し、選択肢4は通信の基本プロセスを指しています。"
+              }
+            ],
+            "order": 15
+          },
+          {
+            "id": "lesson_972",
+            "curriculumId": "curr_15_13",
+            "title": "アルゴリズムとプログラミング：アルゴリズムとプログラミング②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/SbFufk0ky6I",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_972",
+                "question": "次のうち、アルゴリズムの要素である「関数」の特徴として正しくないものはどれですか？",
+                "options": [
+                  "特定の処理を行うプログラムの部分である",
+                  "処理内容を一つのまとまりとして抽象化する役割がある",
+                  "一度定義すると何度でも使い回すことができる",
+                  "必ず引数を受け取り、戻り値を返す"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．必ず引数を受け取り、戻り値を返す。解説：関数は特定の処理を行うプログラムの部分で、一度定義すれば何度でも使い回すことができ、処理内容を一つのまとまりとして抽象化する役割があります。しかし、全ての関数が必ずしも引数を受け取り、戻り値を返すわけではありません。関数によっては引数を受け取らないもの、戻り値を返さないものもあります。"
+              }
+            ],
+            "order": 16
+          },
+          {
+            "id": "lesson_971",
+            "curriculumId": "curr_15_13",
+            "title": "アルゴリズムとプログラミング：アルゴリズムとプログラミング③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/zLcKT-x9rBE",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_971",
+                "question": "以下のアルゴリズムの説明のうち、間違っているものはどれでしょうか？",
+                "options": [
+                  "線形探索法は、リストの先頭から順に目的の要素が見つかるまで探す手法です",
+                  "バブルソートは、隣り合う要素を比較し、必要に応じて交換する操作を繰り返します",
+                  "選択ソートは、データの中から最小値を探し、それをデータの一番後に移動させる手順を繰り返します",
+                  "2分探索法は、ソート済みのリストの中央を見て、目的の要素が中央の要素より大きいか小さいかを判断します"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．選択ソートは、データの中から最小値を探し、それをデータの一番後に移動させる手順を繰り返します。解説：選択ソートは、データの中から最小値を探し、それをデータの一番「前」に移動させる手順を繰り返します。よって選択肢3が間違いです。"
+              }
+            ],
+            "order": 17
+          },
+          {
+            "id": "lesson_970",
+            "curriculumId": "curr_15_13",
+            "title": "アルゴリズムとプログラミング：アルゴリズムとプログラミング④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/HU2ca7my8ZE",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_970",
+                "question": "以下のうち、プログラミングの目的について最も適切に説明しているものはどれでしょうか？",
+                "options": [
+                  "コンピュータに対する命令をランダムに生成すること。",
+                  "コンピュータを制御すること。",
+                  "コンピュータがアルゴリズムを実行できるようにすること。",
+                  "人間が理解できる言葉をコンピュータが理解できる言葉に翻訳すること。"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．コンピュータがアルゴリズムを実行できるようにすること。。解説：１．不適切です。プログラミングでは命令はランダムに生成されません、それらは特定の問題を解決するために設計されます。２．部分的には正しいですが、それはプログラミング言語の機能の一部に過ぎません。全体的な目的はコンピュータがアルゴリズムを実行できるようにすることです。３．正解です。プログラミングの目的は、具体的な問題を解決するための手順やルール（アルゴリズム）をコンピュータが理解できる形で記述し、それを用いてコンピュータを操作することです。４．あいまいで、プログラミングの全体的な目的を正確に表現していません。"
+              }
+            ],
+            "order": 18
+          },
+          {
+            "id": "lesson_969",
+            "curriculumId": "curr_15_13",
+            "title": "アルゴリズムとプログラミング：プログラム言語①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/kkMJxTGADjE",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_969",
+                "question": "以下のうち、「C」言語の特性として正しいものはどれでしょうか？",
+                "options": [
+                  "「一度書けばどこでも動く」をコンセプトに持つ",
+                  "統計分析やデータ可視化に特化した言語である",
+                  "ハードウェア制御やオペレーティングシステムの開発に適している",
+                  "ウェブブラウザ上で動的な処理を行う"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．ハードウェア制御やオペレーティングシステムの開発に適している。解説：「C」言語はその汎用性の高さから広範な領域で使用されています。特に、ハードウェア制御やオペレーティングシステムの開発など、システムレベルのプログラミングに適しています。"
+              }
+            ],
+            "order": 19
+          },
+          {
+            "id": "lesson_968",
+            "curriculumId": "curr_15_13",
+            "title": "アルゴリズムとプログラミング：プログラム言語②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/IPFwN_tXrIk",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_968",
+                "question": "コーディング標準を設ける目的は何でしょうか？",
+                "options": [
+                  "一貫性のあるプログラム作成を促進し、エラーの発生を減らすこと",
+                  "開発者個々のコーディングスタイルを確立すること",
+                  "コードの行数を制限すること",
+                  "インデントの深さを規定すること"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．一貫性のあるプログラム作成を促進し、エラーの発生を減らすこと。解説：コーディング標準の目的は、一貫性のあるプログラム作成を促進し、エラーの発生を減らすことです。選択肢2の「インデントの深さを規定すること」はコーディング標準の一部ですが、その目的ではありません。選択肢3と4はコーディング標準の目的とは異なります。"
+              }
+            ],
+            "order": 20
+          },
+          {
+            "id": "lesson_967",
+            "curriculumId": "curr_15_13",
+            "title": "アルゴリズムとプログラミング：その他の言語①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/KCPMng4Cezg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_967",
+                "question": "マークアップ言語の中で、自分でタグを定義して使用できる言語はどれですか？",
+                "options": [
+                  "HTML",
+                  "C++",
+                  "XML",
+                  "SGML"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．XML。解説：１．HTML：HTMLでは既存のタグを使用します。自分で新しいタグを作成することはできません。２．SGML：SGML自体はタグの定義を許可しますが、一般的には直接使用されず、３HTMLやXMLのような言語の基盤として利用されます。３．XML：XMLでは自己定義のタグを作成し、情報を構造化することができます。これにより、あらゆる種類のデータを表現できます。４．C++：これはマークアップ言語ではなく、一般的なプログラミング言語です。"
+              }
+            ],
+            "order": 21
+          },
+          {
+            "id": "lesson_966",
+            "curriculumId": "curr_15_13",
+            "title": "アルゴリズムとプログラミング：その他の言語②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/8ujhlrZDCmg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_966",
+                "question": "データ交換のプロセスについて最も正確に説明しているのは次のうちどれですか？",
+                "options": [
+                  " 一つのプログラムが生成したデータを、別のプログラムが理解し利用できる形式で提供すること",
+                  "一つのプログラムが生成したデータを別のプログラムに送信することだけ",
+                  "同一のプログラム内でデータをやり取りすること",
+                  "異なるプログラム間でデータをやり取りすることだけ"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１． 一つのプログラムが生成したデータを、別のプログラムが理解し利用できる形式で提供すること。解説：データ交換のプロセスは一つのプログラムが生成したデータを、別のプログラムが理解し利用できる形式で提供することです。そのため、選択肢1が正確な表現です。選択肢2と4はデータの送信だけを説明していますが、理解し利用できる形式で提供するという重要なポイントを含んでいません。選択肢3はデータ交換ではなく、プログラム内でのデータの流れを説明しています。"
+              }
+            ],
+            "order": 22
+          }
+        ],
+        "order": 14
+      },
+      {
+        "id": "curr_15_14",
+        "courseId": "15",
+        "title": "コンピュータ構成要素",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_965",
+            "curriculumId": "curr_15_14",
+            "title": "コンピュータ構成要素：プロセッサ①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/zYqnvgI6u94",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_965",
+                "question": "コンピュータの5つの基本的な機能のうち、「制御」が担当する役割は何でしょうか？",
+                "options": [
+                  "数値計算や論理演算を行う",
+                  "処理結果をユーザーに表示する",
+                  "データや命令を保存する",
+                  "システム全体の指示と管理を行う"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．システム全体の指示と管理を行う\n解説：コンピュータの「制御」は、システム全体の指示と管理を担当します。他の全ての部分を監督し、それらが適切に連携して動作するように指導します。"
+              }
+            ],
+            "order": 1
+          },
+          {
+            "id": "lesson_964",
+            "curriculumId": "curr_15_14",
+            "title": "コンピュータ構成要素：プロセッサ②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/TdDJybC7t8o",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_964",
+                "question": "CPUの主な機能はどれですか？",
+                "options": [
+                  "数値計算や論理計算を行う",
+                  "上記すべて",
+                  "メモリやストレージなどのリソースを制御する",
+                  "プログラムを実行する命令を制御する"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．上記すべて\n解説：CPUの主な機能として、数値計算や論理計算（選択肢1）、命令の制御（選択肢2）、リソースの制御（選択肢3）のすべてが含まれています。そのため正答は「4. 上記すべて」です。"
+              }
+            ],
+            "order": 2
+          },
+          {
+            "id": "lesson_963",
+            "curriculumId": "curr_15_14",
+            "title": "コンピュータ構成要素：メモリ①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/y9PQVuzIxsI",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_963",
+                "question": "メモリの分類\n以下の選択肢から、揮発性メモリと非揮発性メモリに関する正確な説明を選びなさい。",
+                "options": [
+                  "揮発性メモリは電源が切れてもデータを保持し、非揮発性メモリは電源が切れるとデータが失われる",
+                  "非揮発性メモリはデータの読み書きが可能で、揮発性メモリは読み込み専用である",
+                  "揮発性メモリは電源が切れるとデータが失われ、非揮発性メモリは電源が切れてもデータを保持する",
+                  "揮発性メモリのアクセス速度は非揮発性メモリよりも遅い"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．揮発性メモリは電源が切れるとデータが失われ、非揮発性メモリは電源が切れてもデータを保持する\n解説：揮発性メモリは、電源が切れると保持していたデータが失われますが、アクセス速度が速いという特徴があります。一方、非揮発性メモリは電源が切れてもデータを保持し続けることができますが、揮発性メモリに比べてアクセス速度は遅い傾向にあります。"
+              }
+            ],
+            "order": 3
+          },
+          {
+            "id": "lesson_962",
+            "curriculumId": "curr_15_14",
+            "title": "コンピュータ構成要素：メモリ②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/pbRX-zyshMk",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_962",
+                "question": "HDD（ハードディスクドライブ）とSSD（ソリッドステートドライブ）の違いについて、下記のどの記述が最も正確ですか？",
+                "options": [
+                  "HDDは半導体メモリを使用し、SSDは機械的な部品を使用する",
+                  "HDDとSSDは全く同じ特性を持つ",
+                  "HDDは記録容量が大きく、価格が比較的安いが、動作音がある。一方、SSDは読み書きの速度が非常に高く、静かで、衝撃に強い",
+                  "HDDの方が読み書きの速度が高く、SSDは記録容量が大きい"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解: ３．HDDは記録容量が大きく、価格が比較的安いが、動作音がある。一方、SSDは読み書きの速度が非常に高く、静かで、衝撃に強い\n解説：HDDとSSDは、共に大量のデータを保存するための記録媒体ですが、その特性は大きく異なります。HDDは、大きな記録容量を持ち、価格が比較的安いが、機械的な部分を含むため動作音があります。一方、SSDは半導体メモリを使用した記録媒体で、読み書きの速度が非常に高く、静かで、衝撃に強いです。その性能は価格に反映され、HDDよりも高価です。"
+              }
+            ],
+            "order": 4
+          },
+          {
+            "id": "lesson_961",
+            "curriculumId": "curr_15_14",
+            "title": "コンピュータ構成要素：メモリ③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/sQLVCMb9USc",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_961",
+                "question": "CPUが再度同じデータを必要とした場合、どの記憶領域から高速に取得することが可能でしょうか？",
+                "options": [
+                  "主記憶",
+                  "SSD",
+                  "キャッシュメモリ",
+                  "補助記憶"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．キャッシュメモリ\n解説：CPUが再度同じデータを必要とした場合、キャッシュメモリから高速に取得することが可能です。キャッシュメモリはCPUと主記憶の間にある高速なバッファで、主記憶からのデータ読み込み速度を向上させる役割があります。"
+              }
+            ],
+            "order": 5
+          },
+          {
+            "id": "lesson_960",
+            "curriculumId": "curr_15_14",
+            "title": "コンピュータ構成要素：入出力デバイス①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/sNQH2TwpmtM",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_960",
+                "question": "以下のインタフェースの中で、デジタルとアナログの両方の信号を扱うことができるものはどれですか？",
+                "options": [
+                  "HDMI",
+                  "アナログRGB",
+                  "DVI",
+                  "USB"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．DVI\n解説：DVIはデジタルとアナログの両方の信号を扱うことができるインタフェースです。HDMIとUSBはデジタル信号を使用し、アナログRGBはアナログ信号を用いて映像を転送します。"
+              }
+            ],
+            "order": 6
+          },
+          {
+            "id": "lesson_959",
+            "curriculumId": "curr_15_14",
+            "title": "コンピュータ構成要素：入出力デバイス②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/_IJqk_RsDtY",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_959",
+                "question": "以下のセンサーのうち、物体との距離を計測するものはどれでしょうか？",
+                "options": [
+                  "光学センサー",
+                  "煙センサー",
+                  "超音波センサー",
+                  "温度センサー"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．超音波センサー\n解説：超音波センサーは物体との距離を計測するために使用されます（選択肢3）。光学センサーは光の変化を検出します（選択肢1）、温度センサーは周囲の温度を読み取ります（選択肢2）、煙センサーは煙の存在を警告します（選択肢4）。"
+              }
+            ],
+            "order": 7
+          },
+          {
+            "id": "lesson_958",
+            "curriculumId": "curr_15_14",
+            "title": "コンピュータ構成要素：入出力デバイス③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/pxu25FhjK7Y",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_958",
+                "question": "デバイスドライバの主な役割は何ですか？",
+                "options": [
+                  "プログラムの実行を速度化する",
+                  "データをコンピュータに保存する",
+                  "ウイルスからコンピュータを保護する",
+                  "オペレーティングシステムとハードウェアデバイスとの間で通信を可能にする"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．オペレーティングシステムとハードウェアデバイスとの間で通信を可能にする\n解説：デバイスドライバは、オペレーティングシステムとハードウェアデバイスとの間で通信を可能にするソフトウェアです。これにより、ハードウェアデバイスが正しく機能するためには、適切なデバイスドライバが必要となります。"
+              }
+            ],
+            "order": 8
+          }
+        ],
+        "order": 15
+      },
+      {
+        "id": "curr_15_15",
+        "courseId": "15",
+        "title": "システム構成要素",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_957",
+            "curriculumId": "curr_15_15",
+            "title": "システム構成要素：システムの構成①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/oDjO5F6jSXY",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_957",
+                "question": "次の処理形態の説明として最も適しているものは何ですか？\n「一つの中央のコンピュータが全てのデータ処理を行う方式。リソースの管理が容易であり、システム全体の制御が容易となる。」",
+                "options": [
+                  "分散処理",
+                  "レプリケーション",
+                  "集中処理",
+                  "並列処理"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．集中処理\n解説：集中処理は一つの中央のコンピュータが全てのデータ処理を行う方式です。そのため、リソースの管理とシステム全体の制御が容易になる特性を持ちます。他の選択肢については、分散処理は複数のコンピュータが連携してデータ処理を行う方式、並列処理は複数のコンピュータまたはプロセッサが同時に処理を行う方式、そしてレプリケーションはデータを複数の場所に複製する方式となります。"
+              }
+            ],
+            "order": 9
+          },
+          {
+            "id": "lesson_956",
+            "curriculumId": "curr_15_15",
+            "title": "システム構成要素：システムの構成②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/fQW7nlikt2E",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_956",
+                "question": "次のシステム構成のうち、1つのシステムが停止した場合でも予備のシステムが稼働を始め、システムのダウンタイムを減らす構成はどれでしょうか？",
+                "options": [
+                  "デュアルシステム",
+                  "ピアツーピアシステム",
+                  "クライアントサーバシステム",
+                  "デュプレックスシステム"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．デュアルシステム\n解説：デュアルシステムは、主システムが停止した場合でも予備のシステムが稼働を始め、システムのダウンタイムを減らす構成です。デュプレックスシステムは、2つのシステムが常に同期をとりつつ稼働する構成であり、一方が停止してももう一方が引き続き稼働します。クライアントサーバシステムは中央のサーバがデータ処理を行い、クライアントがその結果を利用する構成です。ピアツーピアシステムはネットワークの全ての参加者が等しく通信を行う分散型のシステムで、特定のサーバがなくても動作します。"
+              }
+            ],
+            "order": 10
+          },
+          {
+            "id": "lesson_955",
+            "curriculumId": "curr_15_15",
+            "title": "システム構成要素：システムの構成③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/i62KiDCiJSA",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_955",
+                "question": "以下の記述のうち、リアルタイム処理について正しく説明しているものはどれでしょうか？",
+                "options": [
+                  "ユーザーがコマンドを入力すると、コンピュータはそのコマンドに応じてすぐに反応します",
+                  "主に大量のデータ分析やレポート生成などに使用されます",
+                  "複数のジョブをまとめて一括で処理します",
+                  "事象が発生するとすぐにそれに対応する処理形態です"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．事象が発生するとすぐにそれに対応する処理形態です\n解説：リアルタイム処理は事象が発生するとすぐにそれに対応する処理形態で、遅延が許容されない厳格なタイミング要件が設けられています。"
+              }
+            ],
+            "order": 11
+          },
+          {
+            "id": "lesson_954",
+            "curriculumId": "curr_15_15",
+            "title": "システム構成要素：システムの評価指数①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/GlrVy-tnbEk",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_954",
+                "question": "以下のうち、システム性能を評価する際に考慮するべき指標はどれですか？",
+                "options": [
+                  "システムが特定のタスクをどれだけ効率的に実行できるか",
+                  "システムの価格",
+                  "システムの外観デザイン",
+                  "ユーザーがシステムにログインするために必要なパスワードの長さ"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．システムが特定のタスクをどれだけ効率的に実行できるか\n解説：システム性能はシステムが特定のタスクをどれだけ効率的に実行できるかを示す指標です(選択肢1)。ユーザーのパスワードの長さ(選択肢2)、システムの外観デザイン(選択肢3)、システムの価格(選択肢4)はシステムの性能には関連がありません。"
+              }
+            ],
+            "order": 12
+          },
+          {
+            "id": "lesson_953",
+            "curriculumId": "curr_15_15",
+            "title": "システム構成要素：システムの評価指数②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/-0W3uhCnCf8",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_953",
+                "question": "システムの信頼性を評価するための指標として使用される「MTBF」は何を意味しますか？",
+                "options": [
+                  "平均修復時間",
+                  "平均動作間故障時間",
+                  "平均故障発生時間",
+                  "平均故障間動作時間"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．平均故障間動作時間\n解説：MTBF（Mean Time Between Failures）は平均故障間動作時間を意味します。これはシステムが故障するまでの平均的な時間を指し、長ければ長いほどシステムの信頼性が高いことを示します。"
+              }
+            ],
+            "order": 13
+          },
+          {
+            "id": "lesson_952",
+            "curriculumId": "curr_15_15",
+            "title": "システム構成要素：システムの評価指数③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/GmBfRYm66xg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_952",
+                "question": "「初期コスト」が大きく変動する要因として正しいものはどれか。",
+                "options": [
+                  "システムの保守・運用の人件費",
+                  "長期的な経済性",
+                  "エネルギーコスト",
+                  "システムの規模や機能、独自性"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．システムの規模や機能、独自性\n解説：初期コストは、システム導入のために最初に必要な費用を指します。これには、システムのハードウェアやソフトウェアの購入費用、システム設計や構築のための人件費などが含まれます。そのため、導入するシステムの規模や機能、独自性によって初期コストは大きく変動します。選択肢1と3は運用コストに関連する要素であり、選択肢4は全体の経済性を表す要素で、それぞれ初期コストには直接的に影響を及ぼしません。"
+              }
+            ],
+            "order": 14
+          }
+        ],
+        "order": 16
+      },
+      {
+        "id": "curr_15_16",
+        "courseId": "15",
+        "title": "ソフトウェア",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_951",
+            "curriculumId": "curr_15_16",
+            "title": "ソフトウェア：オペレーティングシステム①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/OOUTxGK2HIE",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_951",
+                "question": "OSの主な役割は何ですか？",
+                "options": [
+                  "アプリケーションソフトウェアのデバッグ",
+                  "プリンターの管理",
+                  "ハードウェアやソフトウェアの資源を効率的に提供すること",
+                  "インターネットへの接続管理"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．ハードウェアやソフトウェアの資源を効率的に提供すること\n解説：OSの主な役割は、ハードウェアやソフトウェアの資源を効率的に提供することです。これにより、アプリケーションソフトウェアはOSを通じてハードウェアを利用することができます。"
+              }
+            ],
+            "order": 15
+          },
+          {
+            "id": "lesson_950",
+            "curriculumId": "curr_15_16",
+            "title": "ソフトウェア：オペレーティングシステム②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/idMr5jSHPms",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_950",
+                "question": "以下のうち、オペレーティングシステム(OS)の主要な機能として誤っているものを選びなさい。",
+                "options": [
+                  "ユーザー管理",
+                  "資源管理",
+                  "ネットワーク接続管理",
+                  "ファイル管理"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．ネットワーク接続管理\n解説：OSの主要な機能はユーザー管理、ファイル管理、入出力管理、資源管理です。ネットワーク接続管理は直接的にOSの主要な機能とは言えません。ただし、OSの一部としてネットワーク機能が存在しますが、この問題の選択肢としては不適切です。"
+              }
+            ],
+            "order": 16
+          },
+          {
+            "id": "lesson_949",
+            "curriculumId": "curr_15_16",
+            "title": "ソフトウェア：オペレーティングシステム③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/UGlRhuaWulE",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_949",
+                "question": "OSの役割について正しいものを選んでください。",
+                "options": [
+                  "ハードウェアの制御",
+                  "メールの送信",
+                  "データベースの作成",
+                  "インターネット接続の制御"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１． ハードウェアの制御\n解説:\n１．正解。OSはコンピュータの基本的な機能を制御・管理します。\n２．OSはネットワーク接続を制御するが、直接的なインターネット接続の制御はネットワーク関連の設定やプロトコルが行います。\n３．データベースの作成は特定のソフトウェアやアプリケーションが行います。\n４．メールの送信はメールクライアントやウェブベースのメールサービスが行います。"
+              }
+            ],
+            "order": 17
+          },
+          {
+            "id": "lesson_948",
+            "curriculumId": "curr_15_16",
+            "title": "ソフトウェア：ファイルシステム①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/cdfv8n_GGzk",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_948",
+                "question": "「ルートディレクトリ」について最も正しい説明は何でしょうか？",
+                "options": [
+                  "ディレクトリ構造の最下位に位置するディレクトリで、全てのディレクトリ・ファイルはここから派生します",
+                  "ディレクトリ内の任意の位置を指す一般的な用語です",
+                  "ディレクトリ構造の最上位に位置するディレクトリで、全てのディレクトリ・ファイルはここから派生します",
+                  "現在位置しているディレクトリを指し、操作の基準点となります"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．ディレクトリ構造の最上位に位置するディレクトリで、全てのディレクトリ・ファイルはここから派生します\n解説:\n１．最下位に位置するディレクトリは「子ディレクトリ」または「サブディレクトリ」と呼ばれます。ルートディレクトリは最上位に位置します。\n２．現在位置しているディレクトリは「カレントディレクトリ」と呼ばれます。\n３．正解です。ルートディレクトリはディレクトリ構造の最上位に位置し、全てのディレクトリ・ファイルはここから派生します。\n４．ディレクトリ内の任意の位置を指す一般的な用語は存在しません。"
+              }
+            ],
+            "order": 18
+          },
+          {
+            "id": "lesson_947",
+            "curriculumId": "curr_15_16",
+            "title": "ソフトウェア：ファイルシステム②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/6RqGhP9ybc8",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_947",
+                "question": "バックアップの種類について述べた以下の選択肢の中で誤っているものを選びなさい。",
+                "options": [
+                  "フルバックアップはすべてのデータをコピーする",
+                  "フルバックアップは頻繁に取得するには適している",
+                  "増分バックアップは最後のバックアップ（フルまたは増分）以降に変更されたデータのみをコピーする",
+                  "差分バックアップは最後のバックアップ以降に変更されたデータのみをコピーする"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．フルバックアップは頻繁に取得するには適している\n解説：選択肢4は誤りです。フルバックアップはすべてのデータをコピーするため、時間とストレージの観点から頻繁に行うことは困難かもしれません。したがって、フルバックアップを頻繁に取得することは適していません。"
+              }
+            ],
+            "order": 19
+          },
+          {
+            "id": "lesson_946",
+            "curriculumId": "curr_15_16",
+            "title": "ソフトウェア：オフィスツール①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/dt2JcP0m6B8",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_946",
+                "question": "以下のソフトウェアパッケージの一つで、表計算を効率的に行うために開発されたものは何ですか？",
+                "options": [
+                  "Microsoft Word",
+                  "Google Slides",
+                  "Microsoft Excel",
+                  "Google Docs"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．Microsoft Excel\n解説：Microsoft Word（選択肢1）とGoogle Docs（選択肢2）は文書作成のため、Google Slides（選択肢4）はプレゼンテーションの作成のためのソフトウェアパッケージです。一方、Microsoft Excel（選択肢3）は数値データの管理と分析を容易にするための表計算ソフトウェアパッケージです。"
+              }
+            ],
+            "order": 20
+          },
+          {
+            "id": "lesson_945",
+            "curriculumId": "curr_15_16",
+            "title": "ソフトウェア：オフィスツール②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/vrIooEftT3w",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_945",
+                "question": "文書作成ソフトについて述べられている次のうち、正しいものを選んでください。",
+                "options": [
+                  "文書作成ソフトは、テキストの編集だけでなく、図や表の作成も可能である",
+                  "保存形式は文書作成ソフトの標準形式のみである",
+                  "テキスト完成後のフォーマット編集には、文字の大きさや色、段落のスタイルなどは含まれない",
+                  "スペルチェック機能は、誤字や脱字を生むことができる"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．文書作成ソフトは、テキストの編集だけでなく、図や表の作成も可能である\n解説：1は文章で述べられており、文書作成ソフトはテキストの編集だけでなく、図や表の作成も可能であると説明しています。2は誤りで、スペルチェック機能は逆に誤字や脱字を防ぐものです。3は誤りで、フォーマット編集には文字の大きさや色、段落のスタイルなどが含まれます。4は誤りで、保存形式は用途に応じて選ぶことができ、例えば編集を防ぎたい場合はPDFなどを選びます。"
+              }
+            ],
+            "order": 21
+          },
+          {
+            "id": "lesson_944",
+            "curriculumId": "curr_15_16",
+            "title": "ソフトウェア：オフィスツール③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/mfzshDtpBM0",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_944",
+                "question": "表計算ソフトの基本的な操作方法として正しいものはどれですか？",
+                "options": [
+                  "セルの参照：特定のセルを指定し、そのセルの内容を他のセルの計算に使用する",
+                  "全て正しい",
+                  "セルの関数：平均、合計、カウントなどの計算を行うことができる",
+                  "セルの四則演算：特定のセルの値を他のセルの値で掛け算、割り算、足し算、引き算ができる"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．全て正しい\n解説：表計算ソフトには、セルの参照、四則演算、関数など、様々な基本的な操作方法があります。これらを駆使することで、多様な計算やデータ分析を行うことが可能となります。"
+              }
+            ],
+            "order": 22
+          },
+          {
+            "id": "lesson_943",
+            "curriculumId": "curr_15_16",
+            "title": "ソフトウェア：オフィスツール④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Ppu6yLFKDdA",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_943",
+                "question": "プレゼンテーションソフトの基本機能として不適切なものを選びなさい。",
+                "options": [
+                  "スライドの作成",
+                  "画像の取り込み",
+                  "インターネットブラウジング",
+                  "フォントの選択"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．インターネットブラウジング\n解説：プレゼンテーションソフトの基本機能としては、「スライドの作成」、「フォントの選択」、「図形の作成」、「画像の取り込み」などがあります。「インターネットブラウジング」はウェブブラウザの機能であり、プレゼンテーションソフトの基本機能ではありません。"
+              }
+            ],
+            "order": 23
+          },
+          {
+            "id": "lesson_942",
+            "curriculumId": "curr_15_16",
+            "title": "ソフトウェア：オフィスツール⑤",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/qahY58OedrA",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_942",
+                "question": "次のうち、Webブラウザの主な機能であるものを選択してください。",
+                "options": [
+                  "ウェブサイトのデザイン作成",
+                  "ウェブサイトのプログラミング",
+                  "ウェブページの閲覧と検索",
+                  "ウェブサイトのホスティングサービス"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．ウェブページの閲覧と検索\n解説：Webブラウザは、主にインターネット上のWebページを閲覧し、情報を検索するためのツールです。ウェブサイトのデザインやホスティング、プログラミングはWebブラウザの機能ではありません。"
+              }
+            ],
+            "order": 24
+          },
+          {
+            "id": "lesson_941",
+            "curriculumId": "curr_15_16",
+            "title": "ソフトウェア：オープンソースソフトウェア",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Dw_AoBo91Qw",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_941",
+                "question": "オープンソースソフトウェアの特徴\nオープンソースソフトウェアの主な特徴として、最も適切なものは次のうちどれですか？",
+                "options": [
+                  "オープンソースソフトウェアではソースコードは公開されています。",
+                  "無保証の原則",
+                  "オープンソースソフトウェアは無保証の原則に従い、開発者に責任を問うことはできません。",
+                  "オープンソースソフトウェアでは再配布が自由です、再配布に制限はありません。"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．無保証の原則\n解説：\n１．オープンソースソフトウェアではソースコードは公開されています。\n２．オープンソースソフトウェアでは再配布が自由です、再配布に制限はありません。\n３．オープンソースソフトウェアは無保証の原則に従い、開発者に責任を問うことはできません。\n４．この選択肢が正解です。オープンソースソフトウェアの一つの特徴として、無保証の原則があります。"
+              }
+            ],
+            "order": 25
+          }
+        ],
+        "order": 17
+      },
+      {
+        "id": "curr_15_17",
+        "courseId": "15",
+        "title": "ハードウェア",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_940",
+            "curriculumId": "curr_15_17",
+            "title": "ハードウェア：ハードウェア（コンピュータ・入出力装置）①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/nahs9cUV32g",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_940",
+                "question": "次の選択肢から、パーソナルコンピュータ(PC)の特徴として適切なものを選びなさい。",
+                "options": [
+                  "ネットワーク上の他のコンピュータに対してサービスを提供すること",
+                  "大量のデータを高速に処理することが可能であること",
+                  "個々のユーザーが作業を行うことを目的としたデバイスであること",
+                  "持ち運びが可能で、いつでもどこでも情報にアクセスすることができること"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．個々のユーザーが作業を行うことを目的としたデバイスであること\n解説：\n１．これはサーバの特徴であり、ネットワーク上の他のコンピュータに対してサービスを提供します。\n２．これは携帯端末の特徴であり、持ち運びが可能で、いつでもどこでも情報にアクセスすることができます。\n３．パーソナルコンピュータ（PC）は、個々のユーザーが作業を行うことを目的としたデバイスです。\n４．これは汎用コンピュータの特徴であり、大量のデータを高速に処理することが可能です。"
+              }
+            ],
+            "order": 26
+          },
+          {
+            "id": "lesson_939",
+            "curriculumId": "curr_15_17",
+            "title": "ハードウェア：ハードウェア（コンピュータ・入出力装置）②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/AecHTKCZu5I",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_939",
+                "question": "次のうち、出力装置に分類されるものはどれでしょうか？",
+                "options": [
+                  "キーボード",
+                  "バーコードリーダー",
+                  "ディスプレイ",
+                  "マウス"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．ディスプレイ\n解説：出力装置はコンピュータからの情報をユーザーに伝える装置であり、ディスプレイはその一例です。一方、キーボード、マウス、バーコードリーダーはユーザーからの情報をコンピュータに伝える入力装置です。"
+              }
+            ],
+            "order": 27
+          }
+        ],
+        "order": 18
+      },
+      {
+        "id": "curr_15_18",
+        "courseId": "15",
+        "title": "情報デザイン",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_938",
+            "curriculumId": "curr_15_18",
+            "title": "情報デザイン：情報デザイン①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/alchQcaKTYA",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_938",
+                "question": "情報デザインの基本原則の一つ、「整列」は具体的にどのような意味を持つか選択してください。",
+                "options": [
+                  "関連する項目を互いに近い位置に配置すること",
+                  "特定の要素やパターンを反復すること",
+                  "情報を線上に配置し、視覚的に一貫性を保つこと",
+                  "異なる要素を強調し、視覚的な関心を引くために使用すること"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．情報を線上に配置し、視覚的に一貫性を保つこと\n解説：「整列」は情報を線上に配置し、視覚的に一貫性を保つことを意味します。選択肢1は「近接」、選択肢2は「対比」、選択肢4は「反復」の説明となります。"
+              }
+            ],
+            "order": 1
+          },
+          {
+            "id": "lesson_937",
+            "curriculumId": "curr_15_18",
+            "title": "情報デザイン：情報デザイン②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/kwgxtAuRadA",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_937",
+                "question": "次のうち、ユニバーサルデザインの一部と言えるものはどれでしょうか？",
+                "options": [
+                  "フォントサイズの自由な調節",
+                  "テキストの情報量の増加",
+                  "高音質の音楽のみの配信",
+                  "サイトの色彩選択の制限"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．フォントサイズの自由な調節\n解説：ユニバーサルデザインとは、年齢や文化、障害の有無や能力の違いなどにかかわらず、できる限り多くの人が快適に利用できることを目指す設計思考のことを指す。フォントサイズの自由な調節は、視覚に制約がある人々でも情報を取得できるようにするための重要な機能であるため、ユニバーサルデザインの一部と言えます。"
+              }
+            ],
+            "order": 2
+          },
+          {
+            "id": "lesson_936",
+            "curriculumId": "curr_15_18",
+            "title": "情報デザイン：インターフェース設計①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/yB5x3LSA45Q",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_936",
+                "question": "ヒューマンインタフェースに関する記述として正しいものはどれか。",
+                "options": [
+                  "ヒューマンインタフェースは、システムがユーザに情報を提示する方法を決定する",
+                  "ヒューマンインタフェースは、システムがユーザとどのようにコミュニケーションを取るかを評価する",
+                  "ヒューマンインタフェースにはユーザビリティやアクセシビリティの概念は関連しない",
+                  "ヒューマンインタフェースの目的は、システムの複雑さを高めることである"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．ヒューマンインタフェースは、システムがユーザに情報を提示する方法を決定する\n解説：ヒューマンインタフェースは、人とシステムの接点であり、人がシステムとどのように交流するか、つまりシステムをどのように操作し、システムがどのようにユーザに情報を提示するか、という点を扱います。したがって、選択肢1が正しいです。選択肢2は誤りです。ヒューマンインタフェースの目的は、システムを使いやすくすることであり、システムの複雑さを増やすことではありません。選択肢3も誤りで、ヒューマンインタフェースにはユーザビリティやアクセシビリティといった概念が関連しています。選択肢4は部分的に正しいですが、ヒューマンインタフェースはただ評価するだけではなく、設計や改善にも関与します。"
+              }
+            ],
+            "order": 3
+          },
+          {
+            "id": "lesson_935",
+            "curriculumId": "curr_15_18",
+            "title": "情報デザイン：インターフェース設計②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/dNgZBekqZ5U",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_935",
+                "question": "GUIにおけるラジオボタンの特徴は次のうちどれですか？",
+                "options": [
+                  "ユーザーが複数の選択肢から一つ以上を選ぶことが可能",
+                  "特定の項目または領域に対する操作を提供",
+                  "メニューバーから派生し、複数の選択肢を一覧表示",
+                  "ユーザーが一つの選択肢だけを選ぶことが可能"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．ユーザーが一つの選択肢だけを選ぶことが可能\n解説：この選択肢はチェックボックスの特徴を表しています。\nラジオボタンの特徴はユーザーが一つの選択肢だけを選べることです。正解です。\n3と4の選択肢はそれぞれプルダウンメニューとポップアップメニューの特徴を表しています。"
+              }
+            ],
+            "order": 4
+          },
+          {
+            "id": "lesson_934",
+            "curriculumId": "curr_15_18",
+            "title": "情報デザイン：インターフェース設計③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Jbn3Aigsmls",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_934",
+                "question": "画面設計の主要な要素として適切なものを選びなさい。",
+                "options": [
+                  "特定の色が特定の意味を持つ一貫性",
+                  "入力の流れを困難にする",
+                  "一貫しないデザイン",
+                  "操作ガイダンスの排除"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．特定の色が特定の意味を持つ一貫性\n解説：画面設計では、自然な入力の流れ、色の使用規則、操作ガイダンスの表示が主要な要素とされています。特定の色が特定の意味を持つ一貫性は、ユーザーが情報を正しく理解しやすくするために重要です。"
+              }
+            ],
+            "order": 5
+          },
+          {
+            "id": "lesson_933",
+            "curriculumId": "curr_15_18",
+            "title": "情報デザイン：インターフェース設計④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/uyVzdF7Upp4",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_933",
+                "question": "「CSS」がウェブデザインで果たす主な役割は何ですか？",
+                "options": [
+                  "サーバーサイドのプログラミングをする",
+                  "ネットワークセキュリティを強化する",
+                  "ウェブサイトのデザインや色調に統一性を持たせ、複数のウェブブラウザに対応する",
+                  "データベースを管理する"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．ウェブサイトのデザインや色調に統一性を持たせ、複数のウェブブラウザに対応する\n解説：\n１．CSSはサーバーサイドのプログラミングではなく、デザインとレイアウトに使用されます。\n２．データベース管理はCSSの役割ではありません。\n３．CSSは、ウェブサイトのデザインや色調に統一感をもたせ、さまざまなウェブブラウザに対応するためのものです。これは正解です。\n４．ネットワークセキュリティ強化はCSSの役割ではありません。"
+              }
+            ],
+            "order": 6
+          },
+          {
+            "id": "lesson_932",
+            "curriculumId": "curr_15_18",
+            "title": "情報デザイン：インターフェース設計⑤",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/OfWh9LeE38Q",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_932",
+                "question": "人間中心設計の基本的な考え方について説明している以下の選択肢の中で、最も正確なものはどれでしょうか？",
+                "options": [
+                  "製品やサービスの機能を効果的に、効率的に、満足度をもって利用できる度合いを向上させるための手法",
+                  "すべて正しい",
+                  "ユーザーの要求や期待を理解し、それを反映した設計を行うこと",
+                  "製品やサービスを設計する際に、最終的にそれを使用する人間の視点を重視すること"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．すべて正しい\n解説：人間中心設計は、ユーザビリティ、つまり製品やサービスが提供する機能を効果的に、効率的に、満足度をもって利用できる度合いを向上させるための手法（選択肢1）。そのために、製品やサービスを設計する際には、最終的にそれを使用する人間、つまりユーザーの視点を重視します（選択肢2）。また、ユーザーの要求や期待を理解し、それを反映した設計を行うことが必要です（選択肢3）。これらすべてが人間中心設計の基本的な考え方と言えます。"
+              }
+            ],
+            "order": 7
+          }
+        ],
+        "order": 19
+      },
+      {
+        "id": "curr_15_19",
+        "courseId": "15",
+        "title": "情報メディア",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_931",
+            "curriculumId": "curr_15_19",
+            "title": "情報メディア：マルチメディア技術①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Vxjx2ffTenw",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_931",
+                "question": "マルチメディアとはどのような概念を指しますか？",
+                "options": [
+                  "文字だけの情報を扱う概念",
+                  "デジタルコンテンツの著作権を管理・保護する技術",
+                  "インターネット上でのリアルタイムなデータ伝送技術",
+                  "音声、画像、文字などの様々な形態の情報をデジタル化し、統合的に扱う概念"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．音声、画像、文字などの様々な形態の情報をデジタル化し、統合的に扱う概念\n解説：マルチメディアは音声、画像、文字などの様々な形態の情報をデジタル化し、統合的に扱う概念を指します。選択肢1は文字だけの情報を扱うとあるためマルチメディアの定義から外れます。選択肢3はストリーミングの説明で、選択肢4はデジタル著作権管理（DRM）の説明となります。これらはマルチメディアの概念とは異なります。"
+              }
+            ],
+            "order": 8
+          },
+          {
+            "id": "lesson_930",
+            "curriculumId": "curr_15_19",
+            "title": "情報メディア：マルチメディア技術②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/9QmhhSx_5Dg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_930",
+                "question": "パルス符号変調 (PCM) の主な役割は何ですか？",
+                "options": [
+                  "アナログ音声信号をデジタルデータに変換する",
+                  "ファイルサイズを自動的に圧縮する",
+                  "音質を自動的に向上させる",
+                  "デジタル音声信号をアナログデータに変換する"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．アナログ音声信号をデジタルデータに変換する\n解説：パルス符号変調 (PCM) は、アナログ音声信号を取り扱いやすいデジタルデータに変換する基本的な技術です。このため、選択肢1が正解となります。PCMは、音質を自動的に向上させるわけではなく、また、ファイルサイズを自動的に圧縮するわけでもありません。デジタル音声信号をアナログデータに変換するのは、PCMの逆のプロセスにあたります。"
+              }
+            ],
+            "order": 9
+          },
+          {
+            "id": "lesson_929",
+            "curriculumId": "curr_15_19",
+            "title": "情報メディア：マルチメディア技術③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/LJlQAVG5av8",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_929",
+                "question": "次のうち、ベクターデータの特性を最も適切に表しているのはどれですか？",
+                "options": [
+                  "ピクセルの集合体として画像を表現し、詳細な色調や複雑な形状を表現できる",
+                  "色数が豊富で透明色の表現が可能で、画質の劣化がないロスレス圧縮が特徴",
+                  "256色までのパレット色を扱うことができ、透明色やアニメーションの表現が可能",
+                  "数学的な計算により画像を表現し、サイズを変更しても品質が落ちない"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．数学的な計算により画像を表現し、サイズを変更しても品質が落ちない\n解説：ベクターデータは数学的な計算（座標や方向、長さなど）により画像を表現し、サイズを変更しても品質が落ちないのが特徴です（選択肢2）。一方、ピクセルの集合体として画像を表現し、詳細な色調や複雑な形状を表現できるのはラスターデータ（選択肢1）、256色までのパレット色を扱うことができ、透明色やアニメーションの表現が可能なのはGIF形式（選択肢3）、色数が豊富で透明色の表現が可能で、画質の劣化がないロスレス圧縮が特徴なのはPNG形式（選択肢4）です。"
+              }
+            ],
+            "order": 10
+          },
+          {
+            "id": "lesson_928",
+            "curriculumId": "curr_15_19",
+            "title": "情報メディア：マルチメディア技術④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/LxG_rxntHzg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_928",
+                "question": "以下の選択肢の中から、「フレームレート」の定義を選びなさい。",
+                "options": [
+                  "一定の時間内に表示されるフレームの数",
+                  "フレームを生成する速度",
+                  "動画と音声の圧縮技術",
+                  "静止画像の一つ一つを動画で表示する単位"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．一定の時間内に表示されるフレームの数\n解説：\n１．「フレームレート」の定義で、1秒間に表示されるフレームの数を表します。\n２．「フレーム」の定義で、フレームは動画の静止画像の一つ一つを指します。\n３．「MPEG」の一部で、動画と音声の圧縮技術を指します。\n４．フレームレートとは異なる概念で、フレームを生成または取得する速度を示すものではありますが、それが必ずしも画面上に表示される速度（フレームレート）とは一致しないことがあります。"
+              }
+            ],
+            "order": 11
+          },
+          {
+            "id": "lesson_927",
+            "curriculumId": "curr_15_19",
+            "title": "情報メディア：マルチメディア技術⑤",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/G74td0IBIFg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_927",
+                "question": "次のうち、ZIPファイルについて正しく説明しているものを選んでください。",
+                "options": [
+                  "ZIPファイルはデータを圧縮する形式で、複数のファイルやフォルダを一つにまとめ、そのサイズを小さくすることができる",
+                  "ZIPファイルは通常、データの圧縮率を高めるために使用されるが、データの送信には適していない",
+                  "ZIPファイルは非可逆圧縮形式で、圧縮したデータを元に戻すことはできない",
+                  "ZIPファイルは音声、画像、動画のような大容量のデータのみを圧縮できる"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．ZIPファイルはデータを圧縮する形式で、複数のファイルやフォルダを一つにまとめ、そのサイズを小さくすることができる\n解説：\n１．ZIPファイルの基本的な特性を正確に説明しており、この文章で触れられています。\n２．間違いで、ZIPファイルは任意のデータを圧縮できます。\n３．間違いで、ZIPファイルは可逆圧縮形式であり、元のデータを完全に復元することが可能です。\n４．間違いで、ZIPファイルはデータの圧縮だけでなく、送信にも有用です。"
+              }
+            ],
+            "order": 12
+          },
+          {
+            "id": "lesson_926",
+            "curriculumId": "curr_15_19",
+            "title": "情報メディア：マルチメディア応用①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/a3QdQOqrdmw",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_926",
+                "question": "RGBモデルにおける色の混ぜ方、加法混色についての説明として最も適切なものは何ですか？",
+                "options": [
+                  "RGBの色を混ぜると黒色になる",
+                  "RGBの色を混ぜると褐色になる",
+                  "RGBの色を混ぜるとシアン、マゼンダ、イエローになる",
+                  "RGBの色を混ぜると白光になる"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．RGBの色を混ぜると白光になる\n解説：加法混色は光の色を混ぜる方法で、RGB（赤、緑、青）の光を混ぜると白光になります。そのため選択肢2が正しいです。選択肢1は減法混色（CMYモデル）の特性であり、選択肢3と4は誤った情報です。"
+              }
+            ],
+            "order": 13
+          },
+          {
+            "id": "lesson_925",
+            "curriculumId": "curr_15_19",
+            "title": "情報メディア：マルチメディア応用②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/TqvfQmXkUHA",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_925",
+                "question": "コンピュータグラフィックス（CG）と3D表現技術は、どのような映像体験を提供しますか？",
+                "options": [
+                  "カラフルな映像体験",
+                  "二次元の映像体験",
+                  "静止画の映像体験",
+                  "リアルな映像体験"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．リアルな映像体験\n解説: コンピュータグラフィックス（CG）はデジタル技術を利用した映像の作成を指し、3D表現技術は立体的な映像表現を可能にします。これら二つが組み合わさることで、リアルな映像体験が提供されます。他の選択肢は、これら技術の特性を正確に反映していません。"
+              }
+            ],
+            "order": 14
+          }
+        ],
+        "order": 20
+      },
+      {
+        "id": "curr_15_20",
+        "courseId": "15",
+        "title": "データベース",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_924",
+            "curriculumId": "curr_15_20",
+            "title": "データベース：データベース方式①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/GvoM4KRSdek",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_924",
+                "question": "データベースの主要な特性について正しいものを選びなさい。",
+                "options": [
+                  "データの永続性、データの一貫性、同時アクセスの可能性、高度なセキュリティ",
+                  "データの一時性、データの一貫性、同時アクセスの可能性、高度なセキュリティ",
+                  "データの永続性、データの不一貫性、非同時アクセス、高度なセキュリティ",
+                  "データの一時性、データの非一貫性、シーケンシャルアクセス、低度のセキュリティ"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．データの永続性、データの一貫性、同時アクセスの可能性、高度なセキュリティ\n解説：選択肢1が正解です。データベースの主要な特性とは、データの永続性（保存したデータが消えない）、データの一貫性（情報が一貫して更新される）、同時アクセスの可能性（複数の人間やシステムが同時にデータベースにアクセス可能）、高度なセキュリティ（情報を守るためのさまざまなセキュリティ機能）である。"
+              }
+            ],
+            "order": 15
+          },
+          {
+            "id": "lesson_923",
+            "curriculumId": "curr_15_20",
+            "title": "データベース：データベース方式②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/pD_keOVtfSw",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_923",
+                "question": " DBMSの目的の一つである「データの整合性」が意味するものは何でしょうか？",
+                "options": [
+                  "データを損失、破壊、不正アクセスから保護すること",
+                  "データを一連のキーと値のペアとして保存すること",
+                  "データへのアクセスとその操作を迅速に行うこと",
+                  "データの一貫性とその正確性を保つこと"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．データの一貫性とその正確性を保つこと\n解説：\n１．「データの安全性」を表し、DBMSの目的の一つではありますが、データの整合性を意味するものではありません。\n２．正解で、データの整合性はデータの一貫性とその正確性を保つことを意味します。\n３．「データの効率性」を表し、これもDBMSの目的の一つではありますが、データの整合性を意味するものではありません。\n４．キーバリューストア型のNoSQLデータベースの特性を表していますが、データの整合性を直接的に表すものではありません。"
+              }
+            ],
+            "order": 16
+          },
+          {
+            "id": "lesson_922",
+            "curriculumId": "curr_15_20",
+            "title": "データベース：データベース設計①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/p5EGA1XfaLg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_922",
+                "question": "データ分析とは何を指すか？",
+                "options": [
+                  "膨大な情報の中から有用なデータを洗出し、整理し、それをもとに結論や予測を導き出すプロセス",
+                  "データを印刷するプロセス",
+                  "データを保存するプロセス",
+                  "データを消去するプロセス"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．膨大な情報の中から有用なデータを洗出し、整理し、それをもとに結論や予測を導き出すプロセス\n解説：データ分析は、膨大な情報の中から有用なデータを洗出し、整理し、それをもとに結論や予測を導き出すプロセスを指します。"
+              }
+            ],
+            "order": 17
+          },
+          {
+            "id": "lesson_921",
+            "curriculumId": "curr_15_20",
+            "title": "データベース：データベース設計②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/wsB103rW5qk",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_921",
+                "question": "エンティティ-リレーションシップ図を何と略しますか？",
+                "options": [
+                  "E-L図",
+                  "E-F図",
+                  "E-D図",
+                  "E-R図"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．E-R図\n解説：エンティティ-リレーションシップ図はE-R図と略されます。E-R図は、エンティティ（実体）とそれらの間のリレーションシップ（関連）を表現する図式化された表現法です。"
+              }
+            ],
+            "order": 18
+          },
+          {
+            "id": "lesson_920",
+            "curriculumId": "curr_15_20",
+            "title": "データベース：データベース設計③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/5flE6O0QbCI",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_920",
+                "question": "データの正規化の目的\nデータの正規化の主な目的は何でしょうか？",
+                "options": [
+                  "データの形式を複雑にする",
+                  "データを必ずしも一貫した形式にする必要はない",
+                  "データの細部情報を失わせる",
+                  "データ間の比較や分析を容易にする"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．データ間の比較や分析を容易にする\n解説：\n１．データの正規化はデータの形式を複雑にすることではなく、異なる形式や範囲を持つデータを一貫した形式に揃えることが目的です。\n２．正解です。正規化はデータ間の比較や分析を容易にするために行われます。\n３．正規化は細部情報が失われる可能性がありますが、これは副作用であり目的ではありません。\n４．データの正規化の目的は、異なる形式や範囲を持つデータを一貫した形式に揃えることです。"
+              }
+            ],
+            "order": 19
+          },
+          {
+            "id": "lesson_919",
+            "curriculumId": "curr_15_20",
+            "title": "データベース：データ操作",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/IYraFfT-eiI",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_919",
+                "question": "関係データベースにおいて、新たな顧客情報、製品情報、販売情報などをデータベースに保存する基本的な操作は何でしょうか？",
+                "options": [
+                  "データの選択",
+                  "データの結合",
+                  "データの更新",
+                  "データの挿入"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．データの挿入\n解説：選択肢2のデータの挿入は、新規のデータ行をテーブルに追加する操作を指します。これにより新たな顧客情報、製品情報、販売情報などがデータベースに保存されます。選択肢1のデータの選択は、特定の条件に合致するデータ行を取り出す操作であり、選択肢3のデータの更新は、既存のデータ行を修正する操作です。選択肢4のデータの結合は、2つ以上のテーブルを結合して新たなテーブルを作る操作を指します。"
+              }
+            ],
+            "order": 20
+          },
+          {
+            "id": "lesson_918",
+            "curriculumId": "curr_15_20",
+            "title": "データベース：トランザクション処理①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/8kV_IjhNnkQ",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_918",
+                "question": "トランザクションについて\nトランザクションに関する説明として正しいものを選びなさい。",
+                "options": [
+                  "トランザクションは、システムの安定性を保つための手段であり、障害が発生した場合でもデータの整合性を保つための原子性を持つ",
+                  "トランザクションは、データベース操作の一連の流れを指し、全ての操作が成功すると、全ての操作が無かったことになる",
+                  "トランザクションは、全ての操作が成功しなければ、全ての操作が無かったことになるという特性を持つ",
+                  "トランザクションは、一連の操作が成功しなくても、一部の操作だけを確定することができる"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．トランザクションは、全ての操作が成功しなければ、全ての操作が無かったことになるという特性を持つ\n解説：選択肢1の説明は基本的に正しいですが、トランザクションが「システムの安定性を保つための手段」という表現は適切ではないです。選択肢2は誤りで、トランザクションの原子性は「全ての操作が成功するか、一つでも失敗すれば全てが無かったことになる」を意味します。選択肢3が正しいです。選択肢4はトランザクションが全ての操作が成功した場合に、全てが無かったことになると誤って述べており、正確ではありません。"
+              }
+            ],
+            "order": 21
+          },
+          {
+            "id": "lesson_917",
+            "curriculumId": "curr_15_20",
+            "title": "データベース：トランザクション処理②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/BcqgOkaGD1o",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_917",
+                "question": "リカバリ機能についての説明として最も適切なものは何か？",
+                "options": [
+                  "データベースが壊れた際に、新たなデータベースを作成する機能",
+                  "データベースの性能を向上させる機能",
+                  "障害が発生した際に、データベースの容量を増やす機能",
+                  "システムが障害に見舞われた際に、データの完全性と業務の継続性を保つ機能"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．システムが障害に見舞われた際に、データの完全性と業務の継続性を保つ機能\n解説：選択肢1、3、4は、リカバリ機能の本質的な役割を正確に捉えていません。リカバリ機能は、システムが障害に見舞われたときに、データの完全性と業務の継続性を保つための機能です。したがって、選択肢2が最も適切です。"
+              }
+            ],
+            "order": 22
+          }
+        ],
+        "order": 21
+      },
+      {
+        "id": "curr_15_21",
+        "courseId": "15",
+        "title": "ネットワーク",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_916",
+            "curriculumId": "curr_15_21",
+            "title": "ネットワーク：ネットワーク方式①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/GQezlNH0Lm0",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_916",
+                "question": "LAN（Local Area Network）とはどのようなネットワークを指しますか？",
+                "options": [
+                  "都市間や国間を繋ぐ大規模なネットワーク",
+                  "一般的な家庭のWi-Fiネットワーク",
+                  "インターネットサービスプロバイダーが提供するネットワーク",
+                  "比較的狭い範囲内でのネットワーク"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．比較的狭い範囲内でのネットワーク\n解説：LANは比較的狭い範囲内でのネットワークを指します。具体的には、オフィスや学校、家庭などで使用されるネットワークです。都市間や国間を繋ぐ大規模なネットワークはWANを指します。インターネットサービスプロバイダーが提供するネットワークや家庭のWi-Fiネットワークも一種のLANですが、その範囲は必ずしもLANに限定されません。"
+              }
+            ],
+            "order": 23
+          },
+          {
+            "id": "lesson_915",
+            "curriculumId": "curr_15_21",
+            "title": "ネットワーク：ネットワーク方式②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/JbkM2kK0PLw",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_915",
+                "question": "ネットワークの接続方式について述べている文章中に出てきたWi-Fiについての特徴として正しいものはどれでしょうか？",
+                "options": [
+                  "Wi-Fiは一つのアクセスポイントから複数のデバイスへ接続を提供する",
+                  "Wi-FiはEthernetをサポートしていない",
+                  "Wi-Fiの接続範囲はアクセスポイントから数百メートルである",
+                  "Wi-Fiは有線LANの一種である"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．Wi-Fiは一つのアクセスポイントから複数のデバイスへ接続を提供する\n解説：選択肢1はWi-Fiの特性であり、一つのアクセスポイントから複数のデバイスに接続を提供することができます。選択肢2は誤りで、Wi-Fiは無線LANの一種である。選択肢3も誤りで、Wi-Fiの接続範囲は通常アクセスポイントから数十メートルです。選択肢4も誤りで、Wi-Fiは物理的なEthernetケーブルを使わずにネットワークに接続するための技術です。"
+              }
+            ],
+            "order": 24
+          },
+          {
+            "id": "lesson_914",
+            "curriculumId": "curr_15_21",
+            "title": "ネットワーク：ネットワーク方式③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/FQgAFHZoxoI",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_914",
+                "question": "IoTデバイスは、以下のどのような役割を果たしていますか？",
+                "options": [
+                  "データの収集と処理をネットワークのエッジで行う",
+                  "IoTデバイスから送られてきたデータを収集、分析、処理する",
+                  "デバイス間の高速通信を行う",
+                  "センサーでデータを収集し、そのデータをネットワークを通じて他のデバイスやサーバに送信する"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．センサーでデータを収集し、そのデータをネットワークを通じて他のデバイスやサーバに送信する\n解説：IoTデバイスは、センサーでデータを収集し、そのデータをネットワークを通じて他のデバイスやサーバに送信します（1はエッジコンピューティング、3はBLE、4はIoTサーバの役割を指しています）。"
+              }
+            ],
+            "order": 25
+          },
+          {
+            "id": "lesson_913",
+            "curriculumId": "curr_15_21",
+            "title": "ネットワーク：通信プロトコル①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/nJhUGJI-K2A",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_913",
+                "question": "OSI基本参照モデルの「ネットワーク層」はどのような役割を担っているか？",
+                "options": [
+                  "物理的な通信媒体（ケーブルなど）を使用してデータを転送する",
+                  "データの形式や暗号化を扱う",
+                  "異なるネットワーク間での通信経路を管理する",
+                  "ネットワーク上でのデータ伝送の誤りを検出・修正する"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．異なるネットワーク間での通信経路を管理する\n解説：ネットワーク層では、異なるネットワーク間での通信経路を管理します。選択肢1は物理層、選択肢2はデータリンク層、選択肢4はプレゼンテーション層の役割に該当します。"
+              }
+            ],
+            "order": 26
+          },
+          {
+            "id": "lesson_912",
+            "curriculumId": "curr_15_21",
+            "title": "ネットワーク：通信プロトコル②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/sRxqzXR8oKw",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_912",
+                "question": "SMTP、POP、IMAPはどのような目的で使われるプロトコルでしょうか？",
+                "options": [
+                  "ファイル転送",
+                  "IPアドレスの動的割り当て",
+                  "メールの送受信",
+                  "ネットワーク内の時間同期"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．メールの送受信\n解説：SMTPはメールの送信を、POPとIMAPはメールの受信を担当するプロトコルです。ファイル転送はFTP、ネットワーク内の時間同期はNTP、IPアドレスの動的割り当てはDHCPがそれぞれ担当します。"
+              }
+            ],
+            "order": 27
+          },
+          {
+            "id": "lesson_911",
+            "curriculumId": "curr_15_21",
+            "title": "ネットワーク：ネットワーク応用①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/K59-S2u4EX8",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_911",
+                "question": "インターネット上のデバイスが一意に識別されるための要素は何ですか？",
+                "options": [
+                  "MACアドレス",
+                  "ネットワーク名",
+                  "ハードウェア名",
+                  "IPアドレス"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．IPアドレス\n解説：インターネット上の各デバイスには一意のIPアドレスが付与され、これによってデバイス同士の通信が成立します。したがって、インターネット上のデバイスが一意に識別されるための要素はIPアドレスです。MACアドレスはデバイスの物理的なアドレスであり、ハードウェア名やネットワーク名は一意にデバイスを識別するために使用されるものではありません。"
+              }
+            ],
+            "order": 28
+          },
+          {
+            "id": "lesson_910",
+            "curriculumId": "curr_15_21",
+            "title": "ネットワーク：ネットワーク応用②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Fa4DC8SasHw",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_910",
+                "question": "電子メールに関する問題\n電子メールでメッセージを送信する際に、メールの受信者を他の受信者に見えないようにする機能は何ですか？",
+                "options": [
+                  "同報メール",
+                  "メーリングリスト",
+                  "bcc（ブラインドカーボンコピー）",
+                  "cc（カーボンコピー）"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．bcc（ブラインドカーボンコピー）\n解説：bcc（ブラインドカーボンコピー）は、メールの受信者を他の受信者に見えないようにする機能です。同報メールは一つのメールを複数の人に同時に送る機能、cc（カーボンコピー）はメールを他の受信者にもコピーして送る機能、メーリングリストは特定のトピックに興味があるユーザーのグループに情報を一斉に送る方法を指します。"
+              }
+            ],
+            "order": 29
+          },
+          {
+            "id": "lesson_909",
+            "curriculumId": "curr_15_21",
+            "title": "ネットワーク：ネットワーク応用③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/r1wEp9QGSmI",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_909",
+                "question": "以下のうち、回線事業者の主要な役割に関する最も適切な説明はどれですか？",
+                "options": [
+                  "固定回線やモバイル回線などの通信サービスを消費者に提供すること",
+                  "消費者に通信サービスの料金を請求すること",
+                  "通信サービスの品質を監視し、規制を遵守すること",
+                  "通信線路を保有し、電話、インターネット、テレビなどの通信サービスを提供すること"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．通信線路を保有し、電話、インターネット、テレビなどの通信サービスを提供すること\n解説：回線事業者の主要な役割は、通信線路を保有し、電話、インターネット、テレビなどの通信サービスを提供することです。選択肢1は一部正しいですが、具体的に通信線路の保有と運営に焦点を当てていないため、選択肢2がより適切な説明です。選択肢3と4は回線事業者の役割ではありますが、主要な役割ではありません。"
+              }
+            ],
+            "order": 30
+          }
+        ],
+        "order": 22
+      },
+      {
+        "id": "curr_15_22",
+        "courseId": "15",
+        "title": "セキュリティ",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_908",
+            "curriculumId": "curr_15_22",
+            "title": "セキュリティ：情報セキュリティ①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/S7BdlQ3Bmig",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_908",
+                "question": "情報セキュリティにおける「機密性」が指す内容として最も適切なものはどれでしょうか。",
+                "options": [
+                  "情報が不正に閲覧や盗難に遭わないこと",
+                  "情報が正確であり続け、不正な改ざんから守られること",
+                  "ウイルスの送信や不正アクセスの防止",
+                  "必要なときに適切な情報にアクセスできること"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．情報が不正に閲覧や盗難に遭わないこと\n解説：\n１．機密性\"は情報が不正に閲覧や盗難に遭わないことを指します。したがって、この選択肢が正解となります。\n２．\"利用可能性\"を指します。\n３．これは情報セキュリティの具体的な対策の一部を指します。\n４．\"完全性\"を指します。"
+              }
+            ],
+            "order": 31
+          },
+          {
+            "id": "lesson_907",
+            "curriculumId": "curr_15_22",
+            "title": "セキュリティ：情報セキュリティ②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/CFgDY34v3_Q",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_907",
+                "question": "情報資産の代表的な種類として挙げられるものはどれか。",
+                "options": [
+                  "資本金",
+                  "具体的な製品",
+                  "顧客情報",
+                  "不動産"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．顧客情報\n解説：情報資産の代表的な種類には、顧客情報、営業情報、知的財産関連情報、人事情報などがあります。1と2の選択肢は企業の物的な資源であり、4の選択肢は製品やサービスですが、これらは情報資産ではありません。"
+              }
+            ],
+            "order": 32
+          },
+          {
+            "id": "lesson_906",
+            "curriculumId": "curr_15_22",
+            "title": "セキュリティ：情報セキュリティ③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/vwKrK91G1kE",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_906",
+                "question": "情報セキュリティにおいて、「脅威」が示す概念は何ですか？",
+                "options": [
+                  "システムの不正な操作や情報の盗難、システムの破壊などを行う悪意のあるソフトウェア",
+                  "人間の信頼性や無知を利用して情報を引き出す手法",
+                  "情報システムや情報資産に対する潜在的な危険性",
+                  "システムが脅威に対して抵抗しきれない状況"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．情報システムや情報資産に対する潜在的な危険性\n解説：文章によると、脅威は情報システムや情報資産に対する潜在的な危険性を指します。選択肢1はマルウェアに関連する内容で、選択肢2は脆弱性の定義です。選択肢4はソーシャルエンジニアリングの一部ですが、全ての脅威を網羅しているわけではありません。"
+              }
+            ],
+            "order": 33
+          },
+          {
+            "id": "lesson_905",
+            "curriculumId": "curr_15_22",
+            "title": "セキュリティ：情報セキュリティ④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/BjmnBU-3Pu4",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_905",
+                "question": "以下の選択肢から、パスワード攻撃の一種である「辞書攻撃」について最も正確に説明しているものを選んでください。",
+                "options": [
+                  "辞書攻撃は、特定のユーザーのパスワードリストが公開されてしまった場合に行われる",
+                  "辞書攻撃は、攻撃者が指定した操作を実行させるもの",
+                  "辞書攻撃は、一般的に使用されるパスワードのリストや辞書を用いて攻撃する",
+                  "辞書攻撃は、全ての可能な組み合わせを試みてパスワードを特定する"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．辞書攻撃は、一般的に使用されるパスワードのリストや辞書を用いて攻撃する\n解説：辞書攻撃は、一般的に使用されるパスワードのリストや辞書を用いて攻撃する手法です。1はパスワードリスト攻撃、2は総当たり攻撃、4はクロスサイトリクエストフォージェリやクリックジャッキングなどのWebアプリケーション攻撃の一種に該当します。"
+              }
+            ],
+            "order": 34
+          },
+          {
+            "id": "lesson_904",
+            "curriculumId": "curr_15_22",
+            "title": "セキュリティ：情報セキュリティ管理①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ohxpQesEfb4",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_904",
+                "question": "以下の選択肢から、リスクマネジメントの一部として行われる「リスクアセスメント」のプロセスを正しく説明しているものを選択してください。",
+                "options": [
+                  "リスクの特定、リスク分析、リスク評価",
+                  "リスク回避、リスク共有、リスク保有",
+                  "リスク分析、リスク評価、リスク対応",
+                  "リスクの特定、リスク回避、リスク評価"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．リスクの特定、リスク分析、リスク評価\n解説：\n１．正解。リスクアセスメントは、リスクの特定、リスク分析、リスク評価の3つのプロセスからなります。\n２．リスク回避はリスクアセスメントのプロセスではなく、リスク対応の一部です。\n３．リスク対応はリスクアセスメントのプロセスではなく、リスクマネジメント全体の一部です。\n４．リスク回避、リスク共有、リスク保有はリスク対応の一部であり、リスクアセスメントのプロセスではありません。"
+              }
+            ],
+            "order": 35
+          },
+          {
+            "id": "lesson_903",
+            "curriculumId": "curr_15_22",
+            "title": "セキュリティ：情報セキュリティ管理②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ouuOQRNGvpo",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_903",
+                "question": "情報セキュリティの要素として挙げられる「機密性」、「完全性」、「可用性」の定義について正しい組み合わせを選びなさい。",
+                "options": [
+                  "機密性：情報が許可された者だけがアクセスできること、完全性：情報が必要な時に利用できること、可用性：情報が正確で完全であること",
+                  "機密性：情報が必要な時に利用できること、完全性：情報が許可された者だけがアクセスできること、可用性：情報が正確で完全であること",
+                  "機密性：情報が許可された者だけがアクセスできること、完全性：情報が正確で完全であること、可用性：情報が必要な時に利用できること",
+                  "機密性：情報が正確で完全であること、完全性：情報が許可された者だけがアクセスできること、可用性：情報が必要な時に利用できること"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "正解：３．機密性：情報が許可された者だけがアクセスできること、完全性：情報が正確で完全であること、可用性：情報が必要な時に利用できること\n解説：情報セキュリティの要素としての機密性は、情報が許可された者だけがアクセスできることを指します。完全性は、情報が正確で完全であることを意味し、可用性は情報が必要な時に利用できることを指します。このため、選択肢3が正しいです。"
+              }
+            ],
+            "order": 36
+          },
+          {
+            "id": "lesson_902",
+            "curriculumId": "curr_15_22",
+            "title": "セキュリティ：情報セキュリティ管理③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/kV-V8t-5IUs",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_902",
+                "question": "以下の選択肢の中で、個人情報保護の重要性について最も適切に表しているのはどれですか？",
+                "options": [
+                  "顧客からの信頼を得るためと、企業の社会的責任を果たすため",
+                  "ビジネスを持続的に展開するため",
+                  "企業の評価を高めるため",
+                  "法律に違反することを避けるため"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．顧客からの信頼を得るためと、企業の社会的責任を果たすため\n解説：選択肢1が正解です。文章において、個人情報保護の重要性は顧客から信頼を得るためと企業の社会的責任を果たすためと述べられています。選択肢2〜4も個人情報保護の一部の理由になる可能性がありますが、文章に基づく最も適切な表現は選択肢1です。"
+              }
+            ],
+            "order": 37
+          },
+          {
+            "id": "lesson_901",
+            "curriculumId": "curr_15_22",
+            "title": "セキュリティ：情報セキュリティ管理④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/AlUyJKTeChU",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_901",
+                "question": " 以下の組織のうち、企業内部で情報セキュリティ対策を統括・推進する役割を持つのはどれでしょうか？",
+                "options": [
+                  "J-CSIP",
+                  "CSIRT",
+                  "J-CRAT",
+                  "情報セキュリティ委員会"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．情報セキュリティ委員会\n解説：情報セキュリティ委員会は、企業内部で情報セキュリティ対策を統括・推進する役割を持つ組織です。J-CSIPは企業や組織がサイバーセキュリティ情報を共有するためのプラットフォームであり、J-CRATはサイバー攻撃が発生した際の迅速な対応を行う専門組織です。CSIRTは、セキュリティインシデントが発生した際の対応を行う専門組織です。"
+              }
+            ],
+            "order": 38
+          },
+          {
+            "id": "lesson_900",
+            "curriculumId": "curr_15_22",
+            "title": "セキュリティ：情報セキュリティ対策・情報セキュリティ実装技術①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/sFUx3FWxEgQ",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_900",
+                "question": "情報セキュリティ対策は大きく三つの要素から成り立っています。以下の選択肢のうち、それらの要素をすべて正しく選んだものはどれでしょうか？",
+                "options": [
+                  "人的、技術的、資金的",
+                  "人的、物理的、経済的",
+                  "技術的、物理的、政策的",
+                  "人的、技術的、物理的"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．人的、技術的、物理的\n解説:：情報セキュリティ対策は大きく三つの要素、人的、技術的、物理的要素から成り立っています。1の選択肢では、「資金的」要素は情報セキュリティ対策の基本要素ではありません。3の選択肢では、「政策的」要素も情報セキュリティ対策の基本要素ではありません。政策は各要素を支える役割を果たすかもしれませんが、基本的な要素とは言えません。4の選択肢では、「経済的」要素は情報セキュリティ対策の基本要素ではありません。"
+              }
+            ],
+            "order": 39
+          },
+          {
+            "id": "lesson_899",
+            "curriculumId": "curr_15_22",
+            "title": "セキュリティ：情報セキュリティ対策・情報セキュリティ実装技術②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/zDzF9AAuJFE",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_899",
+                "question": "以下のうち、共通鍵暗号方式について説明しているのはどれでしょうか？",
+                "options": [
+                  "暗号化と復号に異なる鍵を使用する方式であり、通信する二人がそれぞれ異なる鍵を持つことで鍵の管理が容易になる",
+                  "暗号化と復号に同じ鍵を使用する方式であり、鍵の管理が非常に重要",
+                  "ディスク全体を暗号化する方法で、情報の漏洩を防ぐ",
+                  "情報を一定の長さの値に変換する関数を使用して情報の整合性を確認する方法"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．暗号化と復号に同じ鍵を使用する方式であり、鍵の管理が非常に重要\n解説：\n１．これは公開鍵暗号方式の説明です。\n２．これはハッシュ関数の説明です。\n３．これはディスク暗号化の説明です。\n４．正解です。これが共通鍵暗号方式の説明です。"
+              }
+            ],
+            "order": 40
+          },
+          {
+            "id": "lesson_898",
+            "curriculumId": "curr_15_22",
+            "title": "セキュリティ：情報セキュリティ対策・情報セキュリティ実装技術③",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/dB4kRFNFfyU",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_898",
+                "question": "認証技術についての理解\n認証技術は、通信や取引の何を確保するための技術とされていますか？",
+                "options": [
+                  "信頼性",
+                  "透明性",
+                  "効率性",
+                  "高速性"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．信頼性\n解説：認証技術は、通信や取引の信頼性を確保するための技術であり、情報の安全性を確保するために使われます。他の選択肢は認証技術の目的とは直接関連していません。"
+              }
+            ],
+            "order": 41
+          },
+          {
+            "id": "lesson_897",
+            "curriculumId": "curr_15_22",
+            "title": "セキュリティ：情報セキュリティ対策・情報セキュリティ実装技術④",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Pazto--9VPw",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_897",
+                "question": "「ワンタイムパスワード」の主な目的は何でしょうか？",
+                "options": [
+                  "パスワードを覚えるのを手間なくする",
+                  "ユーザーの行動を制限する",
+                  "一度のログインで複数のシステムにアクセスできるようにする",
+                  "パスワードが盗まれても、次に使用できないようにする"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．パスワードが盗まれても、次に使用できないようにする\n解説：ワンタイムパスワードは、その名の通り一度しか使用できないパスワードのことを指します。これはパスワードが盗まれたとしても、次には使用できないようにするための安全策です。"
+              }
+            ],
+            "order": 42
+          },
+          {
+            "id": "lesson_896",
+            "curriculumId": "curr_15_22",
+            "title": "セキュリティ：情報セキュリティ対策・情報セキュリティ実装技術⑤",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/gQQMQ5WfDRY",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_896",
+                "question": "次の生体認証の種類のうち、人間の虹彩のパターンを利用して認証する方法はどれでしょうか？",
+                "options": [
+                  "顔認証",
+                  "虹彩認証",
+                  "静脈パターン認証",
+                  "音声紋認証"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "正解：４．虹彩認証\n解説：虹彩認証は人間の目の虹彩のパターンを利用した認証方法で、人それぞれに異なるパターンを持つため、非常に精度が高いです。"
+              }
+            ],
+            "order": 43
+          },
+          {
+            "id": "lesson_895",
+            "curriculumId": "curr_15_22",
+            "title": "セキュリティ：情報セキュリティ対策・情報セキュリティ実装技術⑥",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/5UL8PFAtyg8",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_895",
+                "question": "公開鍵基盤(PKI)の役割について最も適切なものはどれですか？",
+                "options": [
+                  "デジタル証明書の発行と管理",
+                  "秘密鍵の生成",
+                  "デジタル証明書のみの管理",
+                  "デジタル署名の作成"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "正解：１．デジタル証明書の発行と管理\n解説：公開鍵基盤(PKI)の主な役割はデジタル証明書の発行と管理です。デジタル署名の作成は公開鍵暗号を使用した一部のプロセスですが、PKI全体の役割ではありません。秘密鍵の生成は個々のエンティティが行うため、PKIの主な役割ではありません。"
+              }
+            ],
+            "order": 44
+          },
+          {
+            "id": "lesson_894",
+            "curriculumId": "curr_15_22",
+            "title": "セキュリティ：情報セキュリティ対策・情報セキュリティ実装技術⑦",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/7QrZhWD3Lg4",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_894",
+                "question": "以下のうち、クロスサイトスクリプティング（XSS）の対策方法として適切なものはどれでしょうか？",
+                "options": [
+                  "システムの定期的なパッチ更新",
+                  "セキュリティ情報の暗号化",
+                  "ファイアウォールの導入",
+                  "入力値の検証と適切なエスケープ処理"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "正解：２．入力値の検証と適切なエスケープ処理\n解説：クロスサイトスクリプティングの対策として効果的なのは、ユーザからの入力値を適切に検証し、必要に応じてエスケープ処理を行うことです。これにより、不正なスクリプトが埋め込まれるのを防ぐことができます。定期的なパッチ更新やファイアウォールの導入はセキュリティ対策全般において重要ですが、XSSへの直接的な対策ではありません。セキュリティ情報の暗号化は情報の保護に寄与しますが、XSS攻撃を防ぐためのものではありません。"
+              }
+            ],
+            "order": 45
+          }
+        ],
+        "order": 23
+      }
+    ]
+  },
+  {
+    "id": "14",
+    "title": "キャリアサポート",
+    "description": "自己分析ややりたいことの見つけ方などをキャリアサポートに関する情報をまとめています。",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "キャリア",
+    "level": "初級",
+    "duration": "1ヶ月以上",
+    "image": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_14_0",
+        "courseId": "14",
+        "title": "全般・基本",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_893",
+            "curriculumId": "curr_14_0",
+            "title": "20230817_就活ガイダンス",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Nh0nnlGSClM",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 7
+          },
+          {
+            "id": "lesson_892",
+            "curriculumId": "curr_14_0",
+            "title": "20230824_自己分析①「価値観発見ワーク」",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/OYNzIZImsXo",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 8
+          },
+          {
+            "id": "lesson_891",
+            "curriculumId": "curr_14_0",
+            "title": "20230907_自己分析②「DISC理論ワーク」",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/A5swaPt41HQ",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 9
+          },
+          {
+            "id": "lesson_890",
+            "curriculumId": "curr_14_0",
+            "title": "20230914_AI最新トレンド情報",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/gkzK27R1n8Q",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 10
+          },
+          {
+            "id": "lesson_889",
+            "curriculumId": "curr_14_0",
+            "title": "20230921_マーケティングセミナー",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/yfyvhBG-UPQ",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 11
+          },
+          {
+            "id": "lesson_888",
+            "curriculumId": "curr_14_0",
+            "title": "20230928_自己分析③「やりたいことの見つけ方ワーク」",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/RZFot7535vo",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 12
+          },
+          {
+            "id": "lesson_887",
+            "curriculumId": "curr_14_0",
+            "title": "20231005_自己分析④「キャリアプラン作成」",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/WeoLMGS4YRc",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 13
+          },
+          {
+            "id": "lesson_886",
+            "curriculumId": "curr_14_0",
+            "title": "20231026_業界研究・履歴書作成ワーク",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/RiC-XZcKQYA",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 15
+          },
+          {
+            "id": "lesson_885",
+            "curriculumId": "curr_14_0",
+            "title": "20231109_「デジタルスキルを使ってキャリアとのつながりについて考える」",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/1KYyzJ3mmG4",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 16
+          },
+          {
+            "id": "lesson_884",
+            "curriculumId": "curr_14_0",
+            "title": "20231116_「IT業界や在宅勤務について」",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/BJ5fjopomF8",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 17
+          },
+          {
+            "id": "lesson_883",
+            "curriculumId": "curr_14_0",
+            "title": "20231123_「目標が漠然としていることについて」",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/uWxTDgP-53g",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 18
+          },
+          {
+            "id": "lesson_882",
+            "curriculumId": "curr_14_0",
+            "title": "20231207_制作系質問会",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/xZmCiUro0qc",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 19
+          },
+          {
+            "id": "lesson_881",
+            "curriculumId": "curr_14_0",
+            "title": "20231214_「現状と理想と手段について」",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/xhzZk5iMU4A",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 20
+          },
+          {
+            "id": "lesson_880",
+            "curriculumId": "curr_14_0",
+            "title": "20231221_「資格・試験は必要なのか」",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/jKkcVPKcWcM",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 21
+          },
+          {
+            "id": "lesson_879",
+            "curriculumId": "curr_14_0",
+            "title": "20240111_「プログラミングは必要か？ノーコードツールでアプリを作ってみよう」",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/q2Lj0TKlD6g",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 22
+          },
+          {
+            "id": "lesson_878",
+            "curriculumId": "curr_14_0",
+            "title": "20240125 _「女性活躍の今後について」",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/f2v0LByL6G8",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 23
+          },
+          {
+            "id": "lesson_877",
+            "curriculumId": "curr_14_0",
+            "title": "20240208_「会社とフリーランスの違い」",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/QiWJSF_cc4M",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 24
+          },
+          {
+            "id": "lesson_876",
+            "curriculumId": "curr_14_0",
+            "title": "20240215_「AIに仕事は奪われるのか」",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/_D3AazAUwWM",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 25
+          },
+          {
+            "id": "lesson_875",
+            "curriculumId": "curr_14_0",
+            "title": "20240222_「ビジネスの根幹」",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/saIZ4zuaORU",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 26
+          }
+        ],
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "13",
+    "title": "デジタル応用",
+    "description": "デジタルの少し応用レベルの知識を学ぶコースです。",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "デジタル",
+    "level": "中級",
+    "duration": "2、3日",
+    "image": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_13_0",
+        "courseId": "13",
+        "title": "全般・基本",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_869",
+            "curriculumId": "curr_13_0",
+            "title": "人工知能とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/gNoH3LSlcnk",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_869",
+                "question": "人工知能開発ができるプログラミング言語として有名な言語は何でしょうか？ 選択肢の中から一番近いものを一つ選択してください。",
+                "options": [
+                  "HTML",
+                  "Java",
+                  "Python",
+                  "PHP"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "人工知能開発ができるプログラミング言語として有名な言語はPythonです。"
+              }
+            ],
+            "order": 1
+          },
+          {
+            "id": "lesson_868",
+            "curriculumId": "curr_13_0",
+            "title": "機械学習とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ijOXpcQ5so0",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 2
+          },
+          {
+            "id": "lesson_867",
+            "curriculumId": "curr_13_0",
+            "title": "IDEとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/EkOd-bO0QeQ",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 3
+          },
+          {
+            "id": "lesson_866",
+            "curriculumId": "curr_13_0",
+            "title": "プログラムの基本構造とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/r2oD6I6d4ek",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_866",
+                "question": "プログラムの基本構造に該当しないものを一つ選択してください。",
+                "options": [
+                  "順次進行",
+                  "機械学習",
+                  "繰り返し",
+                  "条件分岐"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "プログラムの基本構造に該当しないものは機械学習です。"
+              }
+            ],
+            "order": 4
+          },
+          {
+            "id": "lesson_865",
+            "curriculumId": "curr_13_0",
+            "title": "VRとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Rqbq0eJWmTY",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 5
+          },
+          {
+            "id": "lesson_864",
+            "curriculumId": "curr_13_0",
+            "title": "IoTとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/llYn03L0BVU",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 6
+          },
+          {
+            "id": "lesson_863",
+            "curriculumId": "curr_13_0",
+            "title": "量子コンピュータとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/u3isJ8JU6tg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_863",
+                "question": "今までのコンピュータと量子コンピュータの処理速度を比較すると、何倍の差になるでしょうか？",
+                "options": [
+                  "100倍",
+                  "1億倍",
+                  "100万倍",
+                  "1000倍"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "今までのコンピュータと量子コンピュータの処理速度を比較すると、1億倍の差になります。"
+              }
+            ],
+            "order": 7
+          },
+          {
+            "id": "lesson_862",
+            "curriculumId": "curr_13_0",
+            "title": "5Gとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/GQVdQbiwMXo",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_862",
+                "question": "5Gの仕組みに該当しないものを一つ選択してください。",
+                "options": [
+                  "高速大容量",
+                  "低遅延",
+                  "多接続",
+                  "可干渉性"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "5Gの仕組みに該当しないものは可干渉性です。"
+              }
+            ],
+            "order": 8
+          },
+          {
+            "id": "lesson_861",
+            "curriculumId": "curr_13_0",
+            "title": "ビッグデータとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/fcPrI08EepY",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 9
+          },
+          {
+            "id": "lesson_860",
+            "curriculumId": "curr_13_0",
+            "title": "ARとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/VQA1_w8IVHk",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 10
+          },
+          {
+            "id": "lesson_859",
+            "curriculumId": "curr_13_0",
+            "title": "ブロックチェーン とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/uYfIlJVDLXg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_859",
+                "question": "分散型の台帳技術と呼ばれる技術のことを何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "IoT",
+                  "ブロックチェーン",
+                  "AR",
+                  "VR"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "分散型の台帳技術と呼ばれる技術のことをブロックチェーンといいます。"
+              }
+            ],
+            "order": 11
+          },
+          {
+            "id": "lesson_858",
+            "curriculumId": "curr_13_0",
+            "title": "6Gとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/kv2X9BO9TQQ",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 12
+          }
+        ],
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "12",
+    "title": "HP制作",
+    "description": "プログラミングを使わずにノーコードでWordpress環境でHPを作成するためのコースです。",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "クリエイター",
+    "level": "初級",
+    "duration": "1ヶ月以上",
+    "image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_12_0",
+        "courseId": "12",
+        "title": "全般・基本",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_874",
+            "curriculumId": "curr_12_0",
+            "title": "HP制作セミナー",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/fpG4gydfINk",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 1
+          },
+          {
+            "id": "lesson_769",
+            "curriculumId": "curr_12_0",
+            "title": "Elementor更新情報",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/RkLRt60wzu8",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 2
+          },
+          {
+            "id": "lesson_873",
+            "curriculumId": "curr_12_0",
+            "title": "HP制作課題について",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/LZF-_eGWDsQ",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 3
+          },
+          {
+            "id": "lesson_872",
+            "curriculumId": "curr_12_0",
+            "title": "レスポンシブ対応について",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/r_j1rMoa-MI",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 4
+          },
+          {
+            "id": "lesson_871",
+            "curriculumId": "curr_12_0",
+            "title": "Wordpress構築について_応用",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/kRG6L_ePLfQ",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 5
+          }
+        ],
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "11",
+    "title": "動画制作",
+    "description": "TikTok，YouTube、Instagramなど、動画コンテンツが主流担ってきています。動画制作の過程や動画編集の使い方、実践も含めて動画最セクに関するスキルを学びます。",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "クリエイター",
+    "level": "初級",
+    "duration": "4日～6日",
+    "image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_11_0",
+        "courseId": "11",
+        "title": "全般・基本",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_783",
+            "curriculumId": "curr_11_0",
+            "title": "動画制作セミナー",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/mq_LnVrc5xw",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 1
+          }
+        ],
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "10",
+    "title": "Google Apps Script",
+    "description": "Google Apps Scriptを使うと、GmailやGoogleスプレッドシートやGoogleカレンダーなどのGoogle サービス上で様々な処理を自動化できます。単一サービス上での自動化はもちろん、GmailとGoogleスプレッドシート、GmailとGoogleドキュメントなど、複数のGoogleサービスを連携させて業務の効率化を量ることももちろん可能です。",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "業務効率化",
+    "level": "初級",
+    "duration": "1週間",
+    "image": "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_10_0",
+        "courseId": "10",
+        "title": "全般・基本",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_765",
+            "curriculumId": "curr_10_0",
+            "title": "①概要説明",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Jj7IFbEnMmI",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 1
+          },
+          {
+            "id": "lesson_764",
+            "curriculumId": "curr_10_0",
+            "title": "②活用事例",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/yaANPlGbRxw",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 2
+          },
+          {
+            "id": "lesson_763",
+            "curriculumId": "curr_10_0",
+            "title": "③-1 Gmail→スプレッドシート①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/4czu0cMQ5-U",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 3
+          },
+          {
+            "id": "lesson_762",
+            "curriculumId": "curr_10_0",
+            "title": "③-1 Gmail→スプレッドシート②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/iI3vYusBr8c",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 4
+          },
+          {
+            "id": "lesson_761",
+            "curriculumId": "curr_10_0",
+            "title": "③-2 Gmail→Google ドライブ①",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/YdYm0XtY5jk",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 5
+          },
+          {
+            "id": "lesson_760",
+            "curriculumId": "curr_10_0",
+            "title": "③-2 Gmail→Google ドライブ②",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/lZVVeRRsNsU",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 6
+          }
+        ],
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "9",
+    "title": "アプリ開発②（業務管理）",
+    "description": "Google App Sheetを活用し、BtoB向けにノーコードでスプレッドシートを使い、データベースにアプリを構築します。在庫管理、営業管理、顧客管理、勤怠管理などあらゆる業務管理ツール、企業の基幹システムを構築することが可能となります。",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "業務効率化",
+    "level": "初級",
+    "duration": "1週間",
+    "image": "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_9_0",
+        "courseId": "9",
+        "title": "全般・基本",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_772",
+            "curriculumId": "curr_9_0",
+            "title": "アプリ制作１〜顧客管理システム導入編〜",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/NaQTsVGMTkg",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 1
+          },
+          {
+            "id": "lesson_771",
+            "curriculumId": "curr_9_0",
+            "title": "アプリ制作２〜顧客管理システム実装１〜",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/PO5eSxUHymw",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 2
+          },
+          {
+            "id": "lesson_770",
+            "curriculumId": "curr_9_0",
+            "title": "アプリ制作３〜顧客管理システム実装２〜",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/84kqzOv6DIs",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 3
+          }
+        ],
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "8",
+    "title": "アプリ開発①（モバイルアプリ）",
+    "description": "ノーコードアプリ開発ツールClickを用いて、EC，SNS，タスク管理ツール、在庫管理ツールなどBtoC向けを中心に、業務用ツールのアプリを作成し、サービス開発や業務効率化につながるアプリ開発ができるようになります。",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "クリエイター",
+    "level": "初級",
+    "duration": "1週間",
+    "image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_8_0",
+        "courseId": "8",
+        "title": "全般・基本",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_779",
+            "curriculumId": "curr_8_0",
+            "title": "アプリ制作１〜一言掲示板アプリ〜",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/wk21wfcmxsg",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 1
+          },
+          {
+            "id": "lesson_778",
+            "curriculumId": "curr_8_0",
+            "title": "アプリ制作２〜タスク管理アプリ〜",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Qwfq7TgYyhQ",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 2
+          },
+          {
+            "id": "lesson_759",
+            "curriculumId": "curr_8_0",
+            "title": "Adalo〜SNS＆マッチングアプリ〜1",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/gd0QbMN6-Kk",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 3
+          },
+          {
+            "id": "lesson_757",
+            "curriculumId": "curr_8_0",
+            "title": "Adalo〜SNS＆マッチングアプリ〜2",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/OYY_vK9z3zc",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 4
+          }
+        ],
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "7",
+    "title": "業務自動化",
+    "description": "Makeというツールを活用し、特定の作業をアプリ感で連携し、自動化することができます。受診したメール内容をLINEに転機したり、名刺を撮影した画像を送ると自動でスプレッドシートに自動で転機してくれたりと無限の広がりが考えられます。",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "業務効率化",
+    "level": "初級",
+    "duration": "1週間",
+    "image": "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_7_0",
+        "courseId": "7",
+        "title": "全般・基本",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_758",
+            "curriculumId": "curr_7_0",
+            "title": "業務自動化ツール",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/3n9fCvkmbR8",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 1
+          }
+        ],
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "6",
+    "title": "情報セキュリティ",
+    "description": "企業では情報セキュリティに長けた人材が不足している現状があります。ウイルスの種類や、対策方法、企業における情報セキュリティについて学んでいきます。",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "ビジネス",
+    "level": "初級",
+    "duration": "2、3日",
+    "image": "https://images.unsplash.com/photo-1454165833767-02486835bcd4?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_6_0",
+        "courseId": "6",
+        "title": "全般・基本",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_803",
+            "curriculumId": "curr_6_0",
+            "title": "情報セキュリティとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/cPP1xt2xJ4A",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_803",
+                "question": "情報セキュリティの3要素とは、機密性、完全性とあと一つは何でしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "多様性",
+                  "暗号性",
+                  "柔軟性",
+                  "可用性"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "情報セキュリティの3要素とは、機密性、完全性、可用性です。"
+              }
+            ],
+            "order": 1
+          },
+          {
+            "id": "lesson_802",
+            "curriculumId": "curr_6_0",
+            "title": "暗号化とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/WhcA4m4qfDQ",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_802",
+                "question": "第三者が読み取れないようにデータを変換することを何といいますか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "暗号化",
+                  "多様化",
+                  "柔軟化",
+                  "三者化"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "第三者が読み取れないようにデータを変換することを暗号化といいます。"
+              }
+            ],
+            "order": 2
+          },
+          {
+            "id": "lesson_801",
+            "curriculumId": "curr_6_0",
+            "title": "共通鍵暗号方式とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/3QXQLNT6itg",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 3
+          },
+          {
+            "id": "lesson_800",
+            "curriculumId": "curr_6_0",
+            "title": "公開鍵暗号方式とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/t7LWWkGmeP8",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_800",
+                "question": "暗号化と復号に違う鍵を使用する暗号方式のことを何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "公開鍵暗号方式",
+                  "暗号鍵共通方式",
+                  "共通鍵暗号方式",
+                  "暗号鍵公開方式"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "暗号化と復号に違う鍵を使用する暗号方式のことを公開鍵暗号方式といいます。"
+              }
+            ],
+            "order": 4
+          },
+          {
+            "id": "lesson_799",
+            "curriculumId": "curr_6_0",
+            "title": "スパムメールとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/7s1wCOaRjvk",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_799",
+                "question": "受信者の承諾なしに送信される電子メールのことを何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "広告配信",
+                  "不信メール",
+                  "スパムメール",
+                  "豚肉の缶詰"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "受信者の承諾なしに送信される電子メールのことをスパムメールといいます。"
+              }
+            ],
+            "order": 5
+          },
+          {
+            "id": "lesson_798",
+            "curriculumId": "curr_6_0",
+            "title": "サイバー攻撃とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Tx2wOby3wqE",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_798",
+                "question": "サイバー攻撃のうち、サーバーに負荷をかける攻撃のことを何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "標的型攻撃",
+                  "不正アクセスを利用した攻撃",
+                  "脆弱性を狙った攻撃",
+                  "DDoS攻撃"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "サイバー攻撃のうち、サーバーに負荷をかける攻撃のことをDDoS攻撃といいます。"
+              }
+            ],
+            "order": 6
+          },
+          {
+            "id": "lesson_797",
+            "curriculumId": "curr_6_0",
+            "title": "セキュリティ対策とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ps5k_saIm4s",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 7
+          },
+          {
+            "id": "lesson_796",
+            "curriculumId": "curr_6_0",
+            "title": "ファイアウォールとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/d4VtNRFYmpg",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 8
+          },
+          {
+            "id": "lesson_795",
+            "curriculumId": "curr_6_0",
+            "title": "公衆無線LANについて",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/dOdvS2tEnHg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_795",
+                "question": "SSIDとは何でしょうか？ 誤っているものを一つ選択してください。",
+                "options": [
+                  "アクセスポイントから送出される無線LANの電波の識別名のこと",
+                  "アクセスポイント（親機）のこと",
+                  "Service Set Identifierのこと",
+                  "ネットワーク名とも呼ばれている"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "SSIDとはアクセスポイント（親機）のことではありません。"
+              }
+            ],
+            "order": 9
+          },
+          {
+            "id": "lesson_794",
+            "curriculumId": "curr_6_0",
+            "title": "さまざまな公衆無線LANサービス",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/9JVp2b9BALs",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 10
+          },
+          {
+            "id": "lesson_793",
+            "curriculumId": "curr_6_0",
+            "title": "Wi-Fiの接続と暗号化の仕組み",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/wFTDfExo28k",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_793",
+                "question": "選択肢のうち、一番暗号化の強度が強いものを選択してください。",
+                "options": [
+                  "WPA",
+                  "暗号化なし",
+                  "WPA2",
+                  "WEP"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "選択肢のうち、一番暗号化の強度が強いものはWPA2です。"
+              }
+            ],
+            "order": 11
+          },
+          {
+            "id": "lesson_792",
+            "curriculumId": "curr_6_0",
+            "title": "安全なWeb利用の方法",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/sgIIWHRptJw",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 12
+          },
+          {
+            "id": "lesson_791",
+            "curriculumId": "curr_6_0",
+            "title": "VPNとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ivUD-tDeDR8",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_791",
+                "question": "VPNの暗号化の対象範囲のうち、正しいものを一つ選択してください。",
+                "options": [
+                  "利用者の機器からVPNサーバまで",
+                  "VPNサーバからWebサーバまで",
+                  "利用者の機器からインターネットまで",
+                  "利用者の機器からWebサーバまで"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "VPNの暗号化の対象範囲のうち、正しいものは「利用者の機器からVPNサーバまで」です。"
+              }
+            ],
+            "order": 13
+          },
+          {
+            "id": "lesson_790",
+            "curriculumId": "curr_6_0",
+            "title": "より安全・安心にWi-Fiを使うために",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ZtMENv3SH4g",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 14
+          },
+          {
+            "id": "lesson_789",
+            "curriculumId": "curr_6_0",
+            "title": "無線LAN利用時に注意すべき３つのポイント",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/FiBT-EdNoc8",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_789",
+                "question": "セキュリティ対策のポイントのうち、誤っているものを一つ選択してください。",
+                "options": [
+                  "接続するアクセスポイントを確認する",
+                  "自宅に設置している機器の設定を確認する",
+                  "VPNの利用状況を確認する",
+                  "正しいURLでHTTPS通信をしているか確認する"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "セキュリティ対策のポイントのうち、誤っているものは「VPNの利用状況を確認する」です。"
+              }
+            ],
+            "order": 15
+          },
+          {
+            "id": "lesson_788",
+            "curriculumId": "curr_6_0",
+            "title": "こんなにある無線LAN（Wi-Fi）",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Zb39jrOhJ4E",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_788",
+                "question": "Wi-Fiをつなぐための機器のうち、誤っているものを一つ選択してください。",
+                "options": [
+                  "ルーター",
+                  "クレジットカード",
+                  "テザリング",
+                  "モバイルWi-Fi"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "Wi-Fiをつなぐための機器のうち、誤っているものはクレジットカードです。"
+              }
+            ],
+            "order": 16
+          },
+          {
+            "id": "lesson_787",
+            "curriculumId": "curr_6_0",
+            "title": "Wi-Fiはこうやって繋がっている",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/IMB8wfiXYZ0",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_787",
+                "question": "2.4GHz帯の特徴として、正しいものを一つ選択してください。",
+                "options": [
+                  "広範囲に電波が飛ぶ",
+                  "周波数が高い",
+                  "遠くまで電波が飛びにくい",
+                  "他機器の電波との干渉は少ない"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "2.4GHz帯の特徴として、正しいものは「広範囲に電波が飛ぶ」です。"
+              }
+            ],
+            "order": 17
+          },
+          {
+            "id": "lesson_786",
+            "curriculumId": "curr_6_0",
+            "title": "Wi-Fi利用－自宅編－",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/gl5NYgPZTH8",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 18
+          },
+          {
+            "id": "lesson_785",
+            "curriculumId": "curr_6_0",
+            "title": "Wi-Fi利用－オフィス編－",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/kj0SbTMxNHQ",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_785",
+                "question": "オフィスでのネットワーク利用については誰に確認するのが適しているかを選択してください。",
+                "options": [
+                  "Wi-Fiに詳しい友人",
+                  "管理者",
+                  "同僚",
+                  "EISスタッフ"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "オフィスでのネットワーク利用については管理者に確認するのが適しています。"
+              }
+            ],
+            "order": 19
+          },
+          {
+            "id": "lesson_784",
+            "curriculumId": "curr_6_0",
+            "title": "Wi-Fi利用－外出先編－",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/aB2A4Ha-YS4",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 20
+          }
+        ],
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "5",
+    "title": "マーケティング基礎",
+    "description": "マーケティングについて知ろう",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "ビジネス",
+    "level": "初級",
+    "duration": "2、3日",
+    "image": "https://images.unsplash.com/photo-1454165833767-02486835bcd4?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_5_0",
+        "courseId": "5",
+        "title": "全般・基本",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_814",
+            "curriculumId": "curr_5_0",
+            "title": "第0回_マーケティングとは",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/kjE1BGQRgIk",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_814",
+                "question": "マーケティングに必要な要素は市場調査と戦略とあと一つは何でしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "柔軟性",
+                  "コンセプト",
+                  "ビジョン",
+                  "広告宣伝"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "マーケティングに必要な要素は市場調査と戦略とあと一つは広告宣伝です。"
+              }
+            ],
+            "order": 1
+          },
+          {
+            "id": "lesson_813",
+            "curriculumId": "curr_5_0",
+            "title": "第1回_マーケティングの４P",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/1Cl5TIiOQLs",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_813",
+                "question": "アメリカのマーケティング学者「Ｅ.Ｊ.マッカーシー」がマーケティング戦略上のフレームワークとして1960年に提唱した「Product（製品）」「Price（価格）」「Promotion（プロモーション）」「Place（流通≒チャネル）」の頭文字をとったものは何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "ポジショニング戦略",
+                  "マーケティングの4P",
+                  "顧客ファースト",
+                  "プロダクトライフサイクル"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "アメリカのマーケティング学者「Ｅ.Ｊ.マッカーシー」がマーケティング戦略上のフレームワークとして1960年に提唱した「Product（製品）」「Price（価格）」「Promotion（プロモーション）」「Place（流通≒チャネル）」の頭文字をとったものはマーケティングの4Pといいます。"
+              }
+            ],
+            "order": 2
+          },
+          {
+            "id": "lesson_812",
+            "curriculumId": "curr_5_0",
+            "title": "第2回_マーケティングの４C",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/xlEAyoAqFVg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_812",
+                "question": "マーケティングの4Cについて誤っているものを一つ選択してください。",
+                "options": [
+                  "Communication",
+                  "Customer cost",
+                  "Company",
+                  "Convenience"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "マーケティングの4Cについて誤っているものはCompanyです。"
+              }
+            ],
+            "order": 3
+          },
+          {
+            "id": "lesson_811",
+            "curriculumId": "curr_5_0",
+            "title": "第3回_顧客ファースト",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/rhr-u5pCOcc",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_811",
+                "question": "顧客に対して「価値を提供できて、相手が喜んでくれるから、関係性が続く」ことが大切であるという考え方を何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "顧客ファースト",
+                  "ポジショニング戦略",
+                  "マーケティングの4P",
+                  "プロダクトライフサイクル"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "顧客に対して「価値を提供できて、相手が喜んでくれるから、関係性が続く」ことが大切であるという考え方を顧客ファーストといいます。"
+              }
+            ],
+            "order": 4
+          },
+          {
+            "id": "lesson_810",
+            "curriculumId": "curr_5_0",
+            "title": "第4回_プロダクトライフサイクル",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/BBNXbdVhW4w",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_810",
+                "question": "プロダクトライフサイクルの順番で正しいものを一つ選択してください。",
+                "options": [
+                  "成長期→導入期→成熟期→衰退期",
+                  "導入期→成長期→衰退期→成熟期",
+                  "導入期→成長期→成熟期→衰退期",
+                  "導入期→成熟期→成長期→衰退期"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "プロダクトライフサイクルの順番で正しいものは「導入期→成長期→成熟期→衰退期」です。"
+              }
+            ],
+            "order": 5
+          },
+          {
+            "id": "lesson_809",
+            "curriculumId": "curr_5_0",
+            "title": "第5回_キャズム理論",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ucm-MCZu0k4",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_809",
+                "question": "キャズム理論の説明で正しいものを一つ選択してください。",
+                "options": [
+                  "「物を売るための仕組み」のこと",
+                  "新たな製品が世に出た際に、その製品が市場に普及するために超える必要のある溝について説いた理論のこと",
+                  "競合や法律、市場トレンドといった自社を取り巻く外部環境と、自社の資産やブランド力、さらには価格や品質といった内部環境を、プラス要因とマイナス要因に分類して分析する手法",
+                  "事業が生まれ、成長してピークに至り、そこから衰退を始め、最終的にどのように終焉を迎えるかという一連のプロセスを、段階ごとに分けて体系化した考え方"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "キャズム理論の説明で正しいものは「新たな製品が世に出た際に、その製品が市場に普及するために超える必要のある溝について説いた理論のこと」です。"
+              }
+            ],
+            "order": 6
+          },
+          {
+            "id": "lesson_808",
+            "curriculumId": "curr_5_0",
+            "title": "第6回_コーポレートサイクル",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/pH23GhEzC5g",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_808",
+                "question": "コーポレートライフサイクルの1番目のプロセスについて、正しいものを一つ選択してください。",
+                "options": [
+                  "シード",
+                  "メイズ",
+                  "マネージ",
+                  "グロウ"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "コーポレートライフサイクルの1番目のプロセスについて、正しいものはシードです。"
+              }
+            ],
+            "order": 7
+          },
+          {
+            "id": "lesson_807",
+            "curriculumId": "curr_5_0",
+            "title": "第7回_人間理解",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/7UEOJNqS81Y",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 8
+          },
+          {
+            "id": "lesson_806",
+            "curriculumId": "curr_5_0",
+            "title": "第8回_SWOT分析",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/kl9N9X3hFio",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_806",
+                "question": "SWOT分析の要素で誤っているものを一つ選択してください。",
+                "options": [
+                  "Strength",
+                  "Through",
+                  "Opportunity",
+                  "Weakness"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "SWOT分析の要素で誤っているものはThroughです。"
+              }
+            ],
+            "order": 9
+          },
+          {
+            "id": "lesson_805",
+            "curriculumId": "curr_5_0",
+            "title": "第9回_ポジショニング戦略",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/7tmHqM25WQw",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_805",
+                "question": "自社の商品やサービスを競合他社と比較した際に、ユーザー（消費者）やターゲット市場にとって優位な立場を位置づけることを何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "プロダクトライフサイクル",
+                  "顧客ファースト",
+                  "人間理解",
+                  "ポジショニング戦略"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "自社の商品やサービスを競合他社と比較した際に、ユーザー（消費者）やターゲット市場にとって優位な立場を位置づけることをポジショニング戦略といいます。"
+              }
+            ],
+            "order": 10
+          },
+          {
+            "id": "lesson_804",
+            "curriculumId": "curr_5_0",
+            "title": "第10回_3C分析",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/3A9ixxu1gZs",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_804",
+                "question": "3C分析について誤っているものを一つ選択してください。",
+                "options": [
+                  "Communication",
+                  "Competitor",
+                  "Company",
+                  "Customer"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "3C分析について誤っているものはCommunicationです。"
+              }
+            ],
+            "order": 11
+          }
+        ],
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "4",
+    "title": "Google基礎",
+    "description": "スプレッドシートやドキュメント、ドライブ、Gmail、スライド、ToDoリストなど、Googleのツールについて学んでいきます。特にクラウドサービスは自動化やアプリ開発、AI活用と非常に相性が良く急速に進化している領域なので、より非常に重要な経験になります",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "ビジネス",
+    "level": "初級",
+    "duration": "1日",
+    "image": "https://images.unsplash.com/photo-1454165833767-02486835bcd4?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_4_0",
+        "courseId": "4",
+        "title": "全般・基本",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_777",
+            "curriculumId": "curr_4_0",
+            "title": "Googleクローム",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Pi5daIiFGKw",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 1
+          },
+          {
+            "id": "lesson_776",
+            "curriculumId": "curr_4_0",
+            "title": "Googleスライド",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/I4a3tAOJBDc",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 2
+          },
+          {
+            "id": "lesson_775",
+            "curriculumId": "curr_4_0",
+            "title": "Googleドキュメント",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/3mY183OzOIY",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 3
+          },
+          {
+            "id": "lesson_774",
+            "curriculumId": "curr_4_0",
+            "title": "Googleスプレッドシート",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/oMsEmiAbOdc",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 4
+          },
+          {
+            "id": "lesson_773",
+            "curriculumId": "curr_4_0",
+            "title": "Googleフォーム",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ZyzdmnkO8aE",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 5
+          },
+          {
+            "id": "lesson_768",
+            "curriculumId": "curr_4_0",
+            "title": "Google基礎 - アカウント作成 -",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/6jQWLg70xvc",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 6
+          },
+          {
+            "id": "lesson_767",
+            "curriculumId": "curr_4_0",
+            "title": "Google基礎 - アカウントの基本操作 -",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/j17DH4kiFyY",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 7
+          },
+          {
+            "id": "lesson_766",
+            "curriculumId": "curr_4_0",
+            "title": "Google基礎 - 制作練習 -",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Uo-ZYq8oo_U",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 8
+          }
+        ],
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "title": "デジタル基礎（必修）",
+    "description": "デジタルに関する基礎知識を学ぶコースです。",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "デジタル",
+    "level": "初級",
+    "duration": "1週間",
+    "image": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_3_0",
+        "courseId": "3",
+        "title": "全般・基本",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_857",
+            "curriculumId": "curr_3_0",
+            "title": "プログラミング言語とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ZGB_38dOeQY",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_857",
+                "question": "プログラミング言語が必要は理由は何でしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "ロボットが人に命令をするためにプログラミング言語が必要である",
+                  "複雑なルールのボードゲームを作るために、プログラミング言語が必要である",
+                  "外国人は、日本語や英語などの「人間語」を理解することができない場合があり、人同士が会話をするためにプログラミング言語が必要である",
+                  "コンピュータは、日本語や英語などの「人間語」を理解することができず、人間とコンピュータが会話するためにプログラミング言語が必要である"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "コンピュータは、日本語や英語などの「人間語」を理解することができず、人間とコンピュータが会話するためにプログラミング言語が必要です。"
+              }
+            ],
+            "order": 1
+          },
+          {
+            "id": "lesson_856",
+            "curriculumId": "curr_3_0",
+            "title": "プログラムとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/xSfgv_MlU8c",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 2
+          },
+          {
+            "id": "lesson_855",
+            "curriculumId": "curr_3_0",
+            "title": "プログラミング言語の種類にはどんなものがある？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/-LXCMmSS0cc",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 3
+          },
+          {
+            "id": "lesson_854",
+            "curriculumId": "curr_3_0",
+            "title": "JavaScriptとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/HpXhE05rDgs",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_854",
+                "question": "JavaScriptのフレームワークを選択してください。",
+                "options": [
+                  "Ruby on Rails",
+                  "React",
+                  "Bootstrap",
+                  "Spring Framework"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "選択肢の中でJavaScriptのフレームワークに該当するものはReactです。"
+              }
+            ],
+            "order": 4
+          },
+          {
+            "id": "lesson_853",
+            "curriculumId": "curr_3_0",
+            "title": "Pythonとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ZhufHFIXku4",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_853",
+                "question": "世界規模のテクノロジー企業のGoogleで、社内の標準プログラミング言語として採用されている言語は何でしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "HTML",
+                  "COBOL",
+                  "Python",
+                  "PHP"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "世界規模のテクノロジー企業のGoogleで、社内の標準プログラミング言語として採用されている言語はPythonです。"
+              }
+            ],
+            "order": 5
+          },
+          {
+            "id": "lesson_852",
+            "curriculumId": "curr_3_0",
+            "title": "Rubyとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/QmZZcBia7dU",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 6
+          },
+          {
+            "id": "lesson_851",
+            "curriculumId": "curr_3_0",
+            "title": "Javaとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/_5wNWgfwBbA",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 7
+          },
+          {
+            "id": "lesson_850",
+            "curriculumId": "curr_3_0",
+            "title": "HTMLとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/xCPEsIiDI_I",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_850",
+                "question": "HTMLタグにはリンクのためのタグがありますが、リンクするためのタグはどれでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "<p>",
+                  "<b>",
+                  "<a>",
+                  "<h1>"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "リンクするためのタグは<a>です。"
+              }
+            ],
+            "order": 8
+          },
+          {
+            "id": "lesson_849",
+            "curriculumId": "curr_3_0",
+            "title": "CSSとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/jqJUXpR-wXk",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_849",
+                "question": "CSSは、HTMLで作った文章の何を変更することができる言語でしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "デザイン",
+                  "データ",
+                  "段落",
+                  "動き"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "CSSは、HTMLで作った文章のデザインを変更することができる言語です。"
+              }
+            ],
+            "order": 9
+          },
+          {
+            "id": "lesson_848",
+            "curriculumId": "curr_3_0",
+            "title": "PHPとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/y5nhLDM5g-o",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 10
+          },
+          {
+            "id": "lesson_847",
+            "curriculumId": "curr_3_0",
+            "title": "SQLとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/7CSvDRzaZR4",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 11
+          },
+          {
+            "id": "lesson_846",
+            "curriculumId": "curr_3_0",
+            "title": "フレームワークとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/BPRtLnYAeL4",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 12
+          },
+          {
+            "id": "lesson_845",
+            "curriculumId": "curr_3_0",
+            "title": "IPとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/phK5FB-Rfy4",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_845",
+                "question": "データの送受信について規定したルールのことを何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "KPI",
+                  "WMV",
+                  "MP3",
+                  "IP"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "データの送受信について規定したルールのことをIPといいます。"
+              }
+            ],
+            "order": 13
+          },
+          {
+            "id": "lesson_844",
+            "curriculumId": "curr_3_0",
+            "title": "TCPとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/hTt07JXEJok",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 14
+          },
+          {
+            "id": "lesson_843",
+            "curriculumId": "curr_3_0",
+            "title": "ウェブとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/F3yov3siGKM",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_843",
+                "question": "他のウェブサイトに移動するために使われる仕組みのことを何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "ハイパーテキスト",
+                  "Ruby",
+                  "フレームワーク",
+                  "TCP"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "他のウェブサイトに移動するために使われる仕組みのことをハイパーテキストといいます。"
+              }
+            ],
+            "order": 15
+          },
+          {
+            "id": "lesson_842",
+            "curriculumId": "curr_3_0",
+            "title": "URLとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Du-ho0YxcZE",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_842",
+                "question": "インターネット上の情報の住所のことを何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "アドレス",
+                  "URL",
+                  "WAN",
+                  "メールアドレス"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "インターネット上の情報の住所のことをURLといいます。"
+              }
+            ],
+            "order": 16
+          },
+          {
+            "id": "lesson_841",
+            "curriculumId": "curr_3_0",
+            "title": "LANとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/VUii10WKP_w",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 17
+          },
+          {
+            "id": "lesson_840",
+            "curriculumId": "curr_3_0",
+            "title": "WANとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/NydlfuaJjJE",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 18
+          },
+          {
+            "id": "lesson_839",
+            "curriculumId": "curr_3_0",
+            "title": "HTTPとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Z3IAcQuB8f0",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_839",
+                "question": "通信内容を暗号化する通信プロトコルのことを何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "HP",
+                  "URL",
+                  "HTTPS",
+                  "HTTP"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "通信内容を暗号化する通信プロトコルのことをHTTPSといいます。"
+              }
+            ],
+            "order": 19
+          },
+          {
+            "id": "lesson_838",
+            "curriculumId": "curr_3_0",
+            "title": "インターネットとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/daFfgBhzX_w",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_838",
+                "question": "世界中のパソコンをはじめとした様々な機器同士を相互につないでくれるネットワークのことを何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "プログラミング",
+                  "HTML",
+                  "IP",
+                  "インターネット"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "世界中のパソコンをはじめとした様々な機器同士を相互につないでくれるネットワークのことをインターネットといいます。"
+              }
+            ],
+            "order": 20
+          },
+          {
+            "id": "lesson_837",
+            "curriculumId": "curr_3_0",
+            "title": "ポート番号とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ac1tohMto9k",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 21
+          },
+          {
+            "id": "lesson_836",
+            "curriculumId": "curr_3_0",
+            "title": "コンパイルとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/2FzDBWi8BkE",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 22
+          },
+          {
+            "id": "lesson_835",
+            "curriculumId": "curr_3_0",
+            "title": "Linuxとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/q8pBgVp459k",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 23
+          },
+          {
+            "id": "lesson_834",
+            "curriculumId": "curr_3_0",
+            "title": "Gitとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/vc7wqajaZKE",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 24
+          },
+          {
+            "id": "lesson_833",
+            "curriculumId": "curr_3_0",
+            "title": "サーバーとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/ODig-LexsV8",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_833",
+                "question": "サービスや機能を提供するコンピュータのことを何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "TCP",
+                  "サーバー",
+                  "API",
+                  "クライアント"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "サービスや機能を提供するコンピュータのことをサーバーといいます。"
+              }
+            ],
+            "order": 25
+          },
+          {
+            "id": "lesson_832",
+            "curriculumId": "curr_3_0",
+            "title": "APIとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/D4slpOz-7g4",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 26
+          },
+          {
+            "id": "lesson_831",
+            "curriculumId": "curr_3_0",
+            "title": "データベースとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/WsoDZcmwi4U",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_831",
+                "question": "収集したデータを、検索や追加などが簡単にできるように整理したもののことを何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "Webサイト",
+                  "データベース",
+                  "人工知能",
+                  "ポート番号"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "収集したデータを、検索や追加などが簡単にできるように整理したもののことをデータベースといいます。"
+              }
+            ],
+            "order": 27
+          },
+          {
+            "id": "lesson_830",
+            "curriculumId": "curr_3_0",
+            "title": "CPUとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/AcFT9_KKlNs",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_830",
+                "question": "プログラムを動かすためにデータを計算したり、メモリやハードディスクなどに命令を出す部品のことを何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "WAN",
+                  "ガベージコレクション",
+                  "クラウド",
+                  "CPU"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "プログラムを動かすためにデータを計算したり、メモリやハードディスクなどに命令を出す部品のことをCPUといいます。"
+              }
+            ],
+            "order": 28
+          },
+          {
+            "id": "lesson_829",
+            "curriculumId": "curr_3_0",
+            "title": "メモリとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/EWkJnopYioo",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_829",
+                "question": "プログラムやデータを一時的に保存しておくためのパソコンの部品の一つのことを何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "メモリ",
+                  "ハードディスク",
+                  "データ",
+                  "プログラム"
+                ],
+                "correctAnswerIndex": 0,
+                "explanation": "プログラムやデータを一時的に保存しておくためのパソコンの部品の一つのことをメモリといいます。"
+              }
+            ],
+            "order": 29
+          },
+          {
+            "id": "lesson_828",
+            "curriculumId": "curr_3_0",
+            "title": "メモリ管理とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/cUnFQCozOAA",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 30
+          },
+          {
+            "id": "lesson_827",
+            "curriculumId": "curr_3_0",
+            "title": "ガベージコレクションとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/0Htb_-S8M7k",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 31
+          },
+          {
+            "id": "lesson_826",
+            "curriculumId": "curr_3_0",
+            "title": "GPUとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/Nm19EhUQkB4",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 32
+          },
+          {
+            "id": "lesson_825",
+            "curriculumId": "curr_3_0",
+            "title": "コンピュータの構成要素ってなに？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/YF8p5ljat8w",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_825",
+                "question": "コンピュータは５つの構成要素から成り立っていますが、選択肢の中から誤っているものを一つ選択してください。",
+                "options": [
+                  "記憶装置",
+                  "演算装置",
+                  "制御装置",
+                  "開発装置"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "コンピュータは５つの構成要素から成り立っていますが、選択肢の中で誤っているものは開発装置です。"
+              }
+            ],
+            "order": 33
+          },
+          {
+            "id": "lesson_824",
+            "curriculumId": "curr_3_0",
+            "title": "HDD（ハードディスクドライブ）とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/UyNnxg2tOHg",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 34
+          },
+          {
+            "id": "lesson_823",
+            "curriculumId": "curr_3_0",
+            "title": "SSDとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/s0GEzEWpGjg",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_823",
+                "question": "HDDと比較した際に、SSDのメリットに該当しないものを一つ選択してください。",
+                "options": [
+                  "故障しにくい",
+                  "軽量化されている",
+                  "価格が安い",
+                  "処理速度が早い"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "HDDと比較した際に、SSDのメリットに該当しないものは「価格が安い」です。"
+              }
+            ],
+            "order": 35
+          },
+          {
+            "id": "lesson_822",
+            "curriculumId": "curr_3_0",
+            "title": "クラウドとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/EI-piFwG_N0",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_822",
+                "question": "データセンターにあるコンピュータを利用して、インターネットを通して、いつでもどこでもデータにアクセスできるシステムのことを何というでしょうか？ 正しいものを一つ選択してください。",
+                "options": [
+                  "データベース",
+                  "クラウドコンピューティング",
+                  "フレームワーク",
+                  "API"
+                ],
+                "correctAnswerIndex": 3,
+                "explanation": "データセンターにあるコンピュータを利用して、インターネットを通して、いつでもどこでもデータにアクセスできるシステムのことをクラウドコンピューティングといいます。"
+              }
+            ],
+            "order": 36
+          },
+          {
+            "id": "lesson_821",
+            "curriculumId": "curr_3_0",
+            "title": "IaaS（イアース）とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/HFUtjkG03EA",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 37
+          },
+          {
+            "id": "lesson_820",
+            "curriculumId": "curr_3_0",
+            "title": "PaaS（パース）とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/GdUKqfzvGCk",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 38
+          },
+          {
+            "id": "lesson_819",
+            "curriculumId": "curr_3_0",
+            "title": "SaaS（サース）とは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/kruRscJujCA",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_819",
+                "question": "SaaSに該当するサービスを一つ選択してください。",
+                "options": [
+                  "AWS",
+                  "heroku",
+                  "ニフクラ",
+                  "Google Workspace"
+                ],
+                "correctAnswerIndex": 1,
+                "explanation": "SaaSに該当するサービスはGoogle Workspaceです。"
+              }
+            ],
+            "order": 39
+          },
+          {
+            "id": "lesson_818",
+            "curriculumId": "curr_3_0",
+            "title": "AWSとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/0czJqsWMWrM",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 40
+          },
+          {
+            "id": "lesson_817",
+            "curriculumId": "curr_3_0",
+            "title": "GCPとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/782OB_TIkBE",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 41
+          },
+          {
+            "id": "lesson_816",
+            "curriculumId": "curr_3_0",
+            "title": "Azureとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/NudwS2Bieuk",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 42
+          },
+          {
+            "id": "lesson_815",
+            "curriculumId": "curr_3_0",
+            "title": "クラウドストレージとは？",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/2DaWVArOHUU",
+            "duration": "10:00",
+            "quiz": [
+              {
+                "id": "q_815",
+                "question": "クラウドストレージに該当しないものを一つ選択してください。",
+                "options": [
+                  "Dropbox",
+                  "Google Drive",
+                  "Linux",
+                  "One Drive"
+                ],
+                "correctAnswerIndex": 2,
+                "explanation": "クラウドストレージに該当しないものはLinuxです。"
+              }
+            ],
+            "order": 43
+          }
+        ],
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "title": "SNSマーケティング",
+    "description": "スマホの普及によりSNSにおけるマーケティングは、商品やサービスのPRや集客においてかかせないものとなりました。各SNSの特徴や活用方法などについて学びます。Canvaを使い簡単にデザインを学び、Instagramの投稿を考えます。",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "クリエイター",
+    "level": "初級",
+    "duration": "4日～6日",
+    "image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_2_0",
+        "courseId": "2",
+        "title": "全般・基本",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_870",
+            "curriculumId": "curr_2_0",
+            "title": "SNSマーケティングセミナー",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/SNZ8C2UmsLI",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 1
+          }
+        ],
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "1",
+    "title": "AI活用",
+    "description": "Chat GPT、Google Gemini、画像生成AI、動画生成AIの基礎知識の習得、活用方法、実践による成果物の提出などを行います。",
+    "instructor": {
+      "name": "リスキル講師",
+      "role": "Expert Advisor",
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+    },
+    "category": "業務効率化",
+    "level": "初級",
+    "duration": "1～3時間",
+    "image": "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=800",
+    "curriculums": [
+      {
+        "id": "curr_1_0",
+        "courseId": "1",
+        "title": "全般・基本",
+        "description": "",
+        "lessons": [
+          {
+            "id": "lesson_782",
+            "curriculumId": "curr_1_0",
+            "title": "AI活用〜AIについて〜",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/9NeeFfOsLSw",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 1
+          },
+          {
+            "id": "lesson_781",
+            "curriculumId": "curr_1_0",
+            "title": "AI活用〜実際のAIツールを見てみよう１〜",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/hV1T9CTfG4Q",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 2
+          },
+          {
+            "id": "lesson_780",
+            "curriculumId": "curr_1_0",
+            "title": "AI活用〜実際のAIツールを見てみよう２〜",
+            "description": "",
+            "youtubeUrl": "https://www.youtube.com/embed/mY7Gs3W4ofw",
+            "duration": "10:00",
+            "quiz": null,
+            "order": 3
+          }
+        ],
+        "order": 1
+      }
+    ]
+  }
+];

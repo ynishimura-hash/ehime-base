@@ -1,0 +1,814 @@
+
+> ehime-base-app@0.1.0 lint
+> eslint
+
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/admin/management/page.tsx
+   40:28  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   52:22  warning  'error' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   98:45  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  229:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/analysis/page.tsx
+   7:12  warning  'ArrowRight' is defined but never used  @typescript-eslint/no-unused-vars
+  11:10  warning  'Course' is defined but never used      @typescript-eslint/no-unused-vars
+  11:18  warning  'Job' is defined but never used         @typescript-eslint/no-unused-vars
+  11:23  warning  'Company' is defined but never used     @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/api/ai/company-profile/route.ts
+   46:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  113:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/api/ai/job-generate/route.ts
+   21:13  error  'geminiParts' is never reassigned. Use 'const' instead  prefer-const
+   21:26  error  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+   66:34  error  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  126:21  error  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/api/elearning/route.ts
+  22:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  45:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  73:61  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/companies/[id]/page.tsx
+  86:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/companies/page.tsx
+  227:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/dashboard/company/jobs/new/page.tsx
+  78:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  86:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/dashboard/company/page.tsx
+  4:44  warning  'TrendingUp' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/dashboard/company/profile/page.tsx
+   4:61  warning  'Phone' is defined but never used         @typescript-eslint/no-unused-vars
+   4:68  warning  'MapPin' is defined but never used        @typescript-eslint/no-unused-vars
+  72:47  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/dashboard/company/scout/page.tsx
+   4:18  warning  'MapPin' is defined but never used                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   4:26  warning  'Briefcase' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+   4:67  warning  'ChevronDown' is defined but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   4:80  warning  'Filter' is defined but never used                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  75:45  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/game/page.tsx
+  3:17  warning  'useState' is defined but never used         @typescript-eslint/no-unused-vars
+  4:18  warning  'AnimatePresence' is defined but never used  @typescript-eslint/no-unused-vars
+  5:29  warning  'GameStats' is defined but never used        @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/jobs/[id]/page.tsx
+  132:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/jobs/page.tsx
+    8:110  warning  'ArrowRight' is defined but never used                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+   15:46   warning  'activeRole' is assigned a value but never used                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+  400:57   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  414:65   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/layout.tsx
+   7:8  warning  'DebugRoleSwitcher' is defined but never used   @typescript-eslint/no-unused-vars
+   9:7  warning  'geistSans' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  14:7  warning  'geistMono' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/money-simulation/page.tsx
+    3:36  warning  'useEffect' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+   14:8   warning  'CashFlowGraph' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+  137:90  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+  202:26  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/money-simulation/page.tsx:202:26
+  200 |                     {/* 1. Assets & Config */}
+  201 |                     <div>
+> 202 |                         <SectionHeader id="assets" title="資産・シミュレーション条件" icon={TrendingUp} />
+      |                          ^^^^^^^^^^^^^ This component is created during render
+  203 |                         {expandedSection === 'assets' && (
+  204 |                             <div className="bg-white p-4 rounded-b-xl border border-t-0 border-slate-200 shadow-sm">
+  205 |                                 <AssetsConfigForm
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/money-simulation/page.tsx:137:27
+  135 |     };
+  136 |
+> 137 |     const SectionHeader = ({ id, title, icon: Icon }: { id: string, title: string, icon: any }) => (
+      |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 138 |         <button
+      | ^^^^^^^^^^^^^^^
+> 139 |             onClick={() => setExpandedSection(expandedSection === id ? null : id)}
+      …
+      | ^^^^^^^^^^^^^^^
+> 147 |         </button>
+      | ^^^^^^^^^^^^^^^
+> 148 |     );
+      | ^^^^^^ The component is created during render here
+  149 |
+  150 |     return (
+  151 |         <div className="min-h-screen bg-slate-50 font-sans pb-20">  react-hooks/static-components
+  217:26  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/money-simulation/page.tsx:217:26
+  215 |                     {/* 2. Basic Profile */}
+  216 |                     <div>
+> 217 |                         <SectionHeader id="basic" title="基本情報・家族" icon={Users} />
+      |                          ^^^^^^^^^^^^^ This component is created during render
+  218 |                         {expandedSection === 'basic' && (
+  219 |                             <div className="bg-white p-4 rounded-b-xl border border-t-0 border-slate-200 shadow-sm space-y-6">
+  220 |                                 <PersonInput
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/money-simulation/page.tsx:137:27
+  135 |     };
+  136 |
+> 137 |     const SectionHeader = ({ id, title, icon: Icon }: { id: string, title: string, icon: any }) => (
+      |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 138 |         <button
+      | ^^^^^^^^^^^^^^^
+> 139 |             onClick={() => setExpandedSection(expandedSection === id ? null : id)}
+      …
+      | ^^^^^^^^^^^^^^^
+> 147 |         </button>
+      | ^^^^^^^^^^^^^^^
+> 148 |     );
+      | ^^^^^^ The component is created during render here
+  149 |
+  150 |     return (
+  151 |         <div className="min-h-screen bg-slate-50 font-sans pb-20">            react-hooks/static-components
+  259:26  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/money-simulation/page.tsx:259:26
+  257 |                     {/* 2. Expenses & Housing */}
+  258 |                     <div>
+> 259 |                         <SectionHeader id="expenses" title="住まい・生活費" icon={Info} />
+      |                          ^^^^^^^^^^^^^ This component is created during render
+  260 |                         {expandedSection === 'expenses' && (
+  261 |                             <div className="bg-white p-4 rounded-b-xl border border-t-0 border-slate-200 shadow-sm">
+  262 |                                 <ExpensesForm
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/money-simulation/page.tsx:137:27
+  135 |     };
+  136 |
+> 137 |     const SectionHeader = ({ id, title, icon: Icon }: { id: string, title: string, icon: any }) => (
+      |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 138 |         <button
+      | ^^^^^^^^^^^^^^^
+> 139 |             onClick={() => setExpandedSection(expandedSection === id ? null : id)}
+      …
+      | ^^^^^^^^^^^^^^^
+> 147 |         </button>
+      | ^^^^^^^^^^^^^^^
+> 148 |     );
+      | ^^^^^^ The component is created during render here
+  149 |
+  150 |     return (
+  151 |         <div className="min-h-screen bg-slate-50 font-sans pb-20">           react-hooks/static-components
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/mypage/edit/page.tsx
+   6:29  warning  'ChevronRight' is defined but never used                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+  51:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/mypage/page.tsx
+  10:26  warning  'ArrowRight' is defined but never used                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  23:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  71:54  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/page.tsx
+    6:15   warning  'Building2' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+    6:38   warning  'LogIn' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+    6:108  warning  'Heart' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+    6:123  warning  'Clock' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   42:11   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+   60:17   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+   71:11   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  191:17   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  234:21   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  253:33   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  266:31   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  286:25   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  388:21   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  425:15   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/quests/page.tsx
+   8:10  warning  'Job' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  33:17  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/quests/page.tsx:33:17
+  31 |             const regionName = areaMap[areaParam];
+  32 |             if (regionName && !selectedRegions.includes(regionName)) {
+> 33 |                 setSelectedRegions([regionName]);
+     |                 ^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  34 |             }
+  35 |         }
+  36 |  react-hooks/set-state-in-effect
+  41:8   warning  React Hook useEffect has missing dependencies: 'searchParams', 'selectedCategories', and 'selectedRegions'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react-hooks/exhaustive-deps
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/reels/page.tsx
+    6:10  warning  'ReelIcon' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+    9:54  warning  'ChevronUp' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   32:15  warning  'company' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   50:12  warning  'isFilterOpen' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+   50:26  warning  'setIsFilterOpen' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+   63:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/reels/page.tsx:63:13
+  61 |                 'nanyo': '南予'
+  62 |             };
+> 63 |             setSelectedArea(areaMap[areaParam] || '');
+     |             ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  64 |         }
+  65 |         if (industryParam) {
+  66 |             setSelectedIndustry(industryParam);  react-hooks/set-state-in-effect
+   68:8   warning  React Hook useEffect has a missing dependency: 'searchParams'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  react-hooks/exhaustive-deps
+  218:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/reskill/course/[id]/page.tsx
+  23:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  97:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/reskill/courses/page.tsx
+    6:23  warning  'Filter' is defined but never used                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+    6:38  warning  'ChevronRight' is defined but never used                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+    7:5   warning  'ChevronLeft' is defined but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  100:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  135:45  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/reskill/lesson/[id]/page.tsx
+    9:5   warning  'Award' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+   33:11  warning  'curriculum' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   36:30  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+   43:25  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+   58:48  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+   67:46  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+   70:29  error    Error: Cannot access variable before it is declared
+
+`handleComplete` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/reskill/lesson/[id]/page.tsx:70:29
+  68 |                         // YT.PlayerState.ENDED is 0
+  69 |                         if (event.data === 0) {
+> 70 |                             handleComplete();
+     |                             ^^^^^^^^^^^^^^ `handleComplete` accessed before it is declared
+  71 |                         }
+  72 |                     }
+  73 |                 }
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/reskill/lesson/[id]/page.tsx:109:5
+  107 |     };
+  108 |
+> 109 |     const handleComplete = () => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 110 |         completeLesson(lesson.id);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 111 |         setShowCelebration(true);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 112 |         toast.success('レッスンを完了しました！');
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 113 |         setTimeout(() => setShowCelebration(false), 3000);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 114 |     };
+      | ^^^^^^^ `handleComplete` is declared here
+  115 |
+  116 |     const nextLesson = allLessons.find(l =>
+  117 |         l.curriculumId === lesson.curriculumId && l.order === lesson.order + 1  react-hooks/immutability
+   78:24  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+   78:46  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+   81:14  error    Error: This value cannot be modified
+
+Modifying a variable defined outside a component or hook is not allowed. Consider using an effect.
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/reskill/lesson/[id]/page.tsx:81:14
+  79 |             initPlayer();
+  80 |         } else {
+> 81 |             (window as any).onYouTubeIframeAPIReady = initPlayer;
+     |              ^^^^^^^^^^^^^ value cannot be modified
+  82 |         }
+  83 |
+  84 |         return () => {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        react-hooks/immutability
+   81:24  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+   89:8   warning  React Hook useEffect has missing dependencies: 'handleComplete' and 'lesson'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react-hooks/exhaustive-deps
+   95:8   warning  React Hook useEffect has a missing dependency: 'lesson'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/exhaustive-deps
+  101:51  warning  'idx' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  118:26  warning  'l' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/reskill/page.tsx
+    6:17   warning  'CheckCircle2' is defined but never used                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+   16:9    warning  'isLessonCompleted' is assigned a value but never used                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  139:116  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  142:57   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  143:77   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  147:45   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  158:61   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  164:61   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  193:37   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  222:45   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/saved/page.tsx
+  126:41  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  176:45  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/settings/page.tsx
+  8:11  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/app/welcome/page.tsx
+   3:17  warning  'useEffect' is defined but never used            @typescript-eslint/no-unused-vars
+  10:13  warning  'authStatus' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  10:25  warning  'activeRole' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/LayoutWrapper.tsx
+    6:10  warning  'Home' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+    6:27  warning  'Search' is defined but never used                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+    6:63  warning  'FileEdit' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+    6:73  warning  'UserCircle' is defined but never used                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+   14:11  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   29:11  warning  'router' is assigned a value but never used                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  110:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  140:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  160:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  179:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  209:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/MobileBottomNav.tsx
+   6:10  warning  'Home' is defined but never used                   @typescript-eslint/no-unused-vars
+   6:49  warning  'Video' is defined but never used                  @typescript-eslint/no-unused-vars
+  12:13  warning  'interactions' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/RoleSwitcher.tsx
+   6:10  warning  'RefreshCcw' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+  11:11  warning  'pathname' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  15:21  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/RoleSwitcher.tsx:15:21
+  13 |     // Prevent hydration mismatch by rendering only after mount
+  14 |     const [mounted, setMounted] = React.useState(false);
+> 15 |     useEffect(() => setMounted(true), []);
+     |                     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  16 |
+  17 |     if (!mounted) return null;
+  18 |  react-hooks/set-state-in-effect
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/analysis/FortuneAnalysis.tsx
+    6:15  warning  'Moon' is defined but never used                      @typescript-eslint/no-unused-vars
+    6:21  warning  'Sun' is defined but never used                       @typescript-eslint/no-unused-vars
+    8:49  warning  'BookOpen' is defined but never used                  @typescript-eslint/no-unused-vars
+    8:59  warning  'Star' is defined but never used                      @typescript-eslint/no-unused-vars
+    8:65  warning  'ArrowUpRight' is defined but never used              @typescript-eslint/no-unused-vars
+  168:12  warning  'recommendations' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/analysis/StrengthsDiscovery.tsx
+  7:36  warning  'BarChart3' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/auth/LoginPromptModal.tsx
+  3:10  warning  'useAppStore' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/chat/ChatDetailModal.tsx
+    2:13  warning  'MapPin' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+    2:64  warning  'Activity' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+    2:97  warning  'AlertCircle' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+   23:5   warning  'partnerId' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   44:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/chat/ChatDetailModal.tsx:44:13
+  42 |     useEffect(() => {
+  43 |         if (isOpen) {
+> 44 |             setAlias(settings?.alias || '');
+     |             ^^^^^^^^ Avoid calling setState() directly within an effect
+  45 |             setMemo(settings?.memo || '');
+  46 |         }
+  47 |     }, [isOpen, settings]);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/set-state-in-effect
+   96:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @next/next/no-img-element
+  100:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @next/next/no-img-element
+  189:30  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/chat/ChatDetailModal.tsx:189:30
+  187 |                         <label className="text-xs font-bold text-slate-500 mb-2 block uppercase tracking-wider">優先度</label>
+  188 |                         <div className="flex gap-2">
+> 189 |                             <PriorityButton level="high" label="高" color="red" />
+      |                              ^^^^^^^^^^^^^^ This component is created during render
+  190 |                             <PriorityButton level="medium" label="中" color="orange" />
+  191 |                             <PriorityButton level="low" label="低" color="blue" />
+  192 |                         </div>
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/chat/ChatDetailModal.tsx:68:28
+  66 |     if (!isOpen) return null;
+  67 |
+> 68 |     const PriorityButton = ({ level, label, color }: { level: 'high' | 'medium' | 'low', label: string, color: string }) => (
+     |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 69 |         <button
+     | ^^^^^^^^^^^^^^^
+> 70 |             onClick={() => setPriority(settings?.priority === level ? null : level)}
+     …
+     | ^^^^^^^^^^^^^^^
+> 77 |         </button>
+     | ^^^^^^^^^^^^^^^
+> 78 |     );
+     | ^^^^^^ The component is created during render here
+  79 |
+  80 |     return (
+  81 |         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">  react-hooks/static-components
+  190:30  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/chat/ChatDetailModal.tsx:190:30
+  188 |                         <div className="flex gap-2">
+  189 |                             <PriorityButton level="high" label="高" color="red" />
+> 190 |                             <PriorityButton level="medium" label="中" color="orange" />
+      |                              ^^^^^^^^^^^^^^ This component is created during render
+  191 |                             <PriorityButton level="low" label="低" color="blue" />
+  192 |                         </div>
+  193 |                     </div>
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/chat/ChatDetailModal.tsx:68:28
+  66 |     if (!isOpen) return null;
+  67 |
+> 68 |     const PriorityButton = ({ level, label, color }: { level: 'high' | 'medium' | 'low', label: string, color: string }) => (
+     |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 69 |         <button
+     | ^^^^^^^^^^^^^^^
+> 70 |             onClick={() => setPriority(settings?.priority === level ? null : level)}
+     …
+     | ^^^^^^^^^^^^^^^
+> 77 |         </button>
+     | ^^^^^^^^^^^^^^^
+> 78 |     );
+     | ^^^^^^ The component is created during render here
+  79 |
+  80 |     return (
+  81 |         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">                                                                                                   react-hooks/static-components
+  191:30  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/chat/ChatDetailModal.tsx:191:30
+  189 |                             <PriorityButton level="high" label="高" color="red" />
+  190 |                             <PriorityButton level="medium" label="中" color="orange" />
+> 191 |                             <PriorityButton level="low" label="低" color="blue" />
+      |                              ^^^^^^^^^^^^^^ This component is created during render
+  192 |                         </div>
+  193 |                     </div>
+  194 |
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/chat/ChatDetailModal.tsx:68:28
+  66 |     if (!isOpen) return null;
+  67 |
+> 68 |     const PriorityButton = ({ level, label, color }: { level: 'high' | 'medium' | 'low', label: string, color: string }) => (
+     |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 69 |         <button
+     | ^^^^^^^^^^^^^^^
+> 70 |             onClick={() => setPriority(settings?.priority === level ? null : level)}
+     …
+     | ^^^^^^^^^^^^^^^
+> 77 |         </button>
+     | ^^^^^^^^^^^^^^^
+> 78 |     );
+     | ^^^^^^ The component is created during render here
+  79 |
+  80 |     return (
+  81 |         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">                                                                                                                                                        react-hooks/static-components
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/chat/UnifiedChatInterface.tsx
+    4:122  warning  'Trash2' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+   40:9    error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/chat/UnifiedChatInterface.tsx:40:9
+  38 |     const [mounted, setMounted] = useState(false);
+  39 |     useEffect(() => {
+> 40 |         setMounted(true);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  41 |     }, []);
+  42 |
+  43 |     // Determine which chats to show based on role                                                                                                                                                                                                                                react-hooks/set-state-in-effect
+   64:36   error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `getSettings`, but the source dependencies were [chats, activeFilter, chatSettings, myselfId, chatSortBy, chatFilterPriority]. Inferred different dependency than source.
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/chat/UnifiedChatInterface.tsx:64:36
+   62 |
+   63 |     // Filter & Sort Chats
+>  64 |     const processedChats = useMemo(() => {
+      |                                    ^^^^^^^
+>  65 |         return chats.filter(chat => {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  66 |             const s = getSettings(chat.id);
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 102 |         });
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 103 |     }, [chats, activeFilter, chatSettings, myselfId, chatSortBy, chatFilterPriority]);
+      | ^^^^^^ Could not preserve existing manual memoization
+  104 |
+  105 |     const selectedChat = chats.find(c => c.id === selectedChatId);
+  106 |  react-hooks/preserve-manual-memoization
+   64:36   error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `getSettings`, but the source dependencies were [chats, activeFilter, chatSettings, myselfId, chatSortBy, chatFilterPriority]. Inferred different dependency than source.
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/chat/UnifiedChatInterface.tsx:64:36
+   62 |
+   63 |     // Filter & Sort Chats
+>  64 |     const processedChats = useMemo(() => {
+      |                                    ^^^^^^^
+>  65 |         return chats.filter(chat => {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  66 |             const s = getSettings(chat.id);
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 102 |         });
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 103 |     }, [chats, activeFilter, chatSettings, myselfId, chatSortBy, chatFilterPriority]);
+      | ^^^^^^ Could not preserve existing manual memoization
+  104 |
+  105 |     const selectedChat = chats.find(c => c.id === selectedChatId);
+  106 |  react-hooks/preserve-manual-memoization
+   64:36   error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `getSettings`, but the source dependencies were [chats, activeFilter, chatSettings, myselfId, chatSortBy, chatFilterPriority]. Inferred different dependency than source.
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/chat/UnifiedChatInterface.tsx:64:36
+   62 |
+   63 |     // Filter & Sort Chats
+>  64 |     const processedChats = useMemo(() => {
+      |                                    ^^^^^^^
+>  65 |         return chats.filter(chat => {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  66 |             const s = getSettings(chat.id);
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 102 |         });
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 103 |     }, [chats, activeFilter, chatSettings, myselfId, chatSortBy, chatFilterPriority]);
+      | ^^^^^^ Could not preserve existing manual memoization
+  104 |
+  105 |     const selectedChat = chats.find(c => c.id === selectedChatId);
+  106 |  react-hooks/preserve-manual-memoization
+  103:8    warning  React Hook useMemo has a missing dependency: 'getSettings'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/exhaustive-deps
+  131:21   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/chat/UnifiedChatInterface.tsx:131:21
+  129 |                 const unreadMsgs = chat.messages.filter(m => m.senderId !== myselfId && !m.isRead);
+  130 |                 if (unreadMsgs.length > 0) {
+> 131 |                     setUnreadBoundaryMessageId(unreadMsgs[0].id);
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  132 |                 } else {
+  133 |                     setUnreadBoundaryMessageId(null);
+  134 |                 }                                         react-hooks/set-state-in-effect
+  393:45   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @next/next/no-img-element
+  473:45   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @next/next/no-img-element
+  501:61   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @next/next/no-img-element
+  537:75   warning  'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  554:85   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @next/next/no-img-element
+  652:49   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/debug/DebugAccountSwitcher.tsx
+  5:10  warning  'RefreshCw' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/game/ActionGame.tsx
+  6:15  warning  'Heart' is defined but never used        @typescript-eslint/no-unused-vars
+  6:22  warning  'AlertCircle' is defined but never used  @typescript-eslint/no-unused-vars
+  7:10  warning  'toast' is defined but never used        @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/game/ActionMenuPart.tsx
+  6:32  warning  'Zap' is defined but never used         @typescript-eslint/no-unused-vars
+  6:37  warning  'TrendingUp' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/game/NovelPart.tsx
+  11:77  warning  'playerGender' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+  19:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/game/NovelPart.tsx:19:13
+  17 |     useEffect(() => {
+  18 |         if (step?.bg) {
+> 19 |             setLastBg(step.bg);
+     |             ^^^^^^^^^ Avoid calling setState() directly within an effect
+  20 |         }
+  21 |     }, [step?.bg]);
+  22 |  react-hooks/set-state-in-effect
+  37:35  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-explicit-any
+  85:42  warning  'i' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/game/QuizPart.tsx
+  6:17  warning  'CheckCircle2' is defined but never used  @typescript-eslint/no-unused-vars
+  6:31  warning  'XCircle' is defined but never used       @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/jobs/JobPostForm.tsx
+  5:10  warning  'Plus' is defined but never used         @typescript-eslint/no-unused-vars
+  5:23  warning  'Trash2' is defined but never used       @typescript-eslint/no-unused-vars
+  5:31  warning  'CheckCircle' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/jobs/ReelScroller.tsx
+   5:40  warning  'Info' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  33:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/modals/ConsultModal.tsx
+   2:19  warning  'User' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  62:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/modals/EditProfileModal.tsx
+  294:87  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/MoneyInput.tsx
+  11:84  warning  'step' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+  22:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/MoneyInput.tsx:22:13
+  20 |         const numLocal = Number(localValue.replace(/,/g, ''));
+  21 |         if (numLocal !== value && localValue !== '') {
+> 22 |             setLocalValue(value === 0 ? '' : formatValue(value));
+     |             ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  23 |         }
+  24 |     }, [value]);
+  25 |  react-hooks/set-state-in-effect
+  24:8   warning  React Hook useEffect has a missing dependency: 'localValue'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  react-hooks/exhaustive-deps
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/NumberInput.tsx
+  18:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/NumberInput.tsx:18:13
+  16 |         // Sync with parent only if valid and different
+  17 |         if (Number(localValue) !== value && localValue !== '') {
+> 18 |             setLocalValue(value.toString());
+     |             ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  19 |         }
+  20 |     }, [value]);
+  21 |  react-hooks/set-state-in-effect
+  20:8   warning  React Hook useEffect has a missing dependency: 'localValue'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/exhaustive-deps
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/PercentageInput.tsx
+  22:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/PercentageInput.tsx:22:13
+  20 |         // But here we just have simple numbers.
+  21 |         if (Number(localValue) !== value && localValue !== '') {
+> 22 |             setLocalValue(value.toString());
+     |             ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  23 |         }
+  24 |     }, [value]);
+  25 |  react-hooks/set-state-in-effect
+  24:8   warning  React Hook useEffect has a missing dependency: 'localValue'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              react-hooks/exhaustive-deps
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/ResultsGraph.tsx
+  14:11  warning  'maxVal' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  49:48  error    Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/SliderMoneyInput.tsx
+  23:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/SliderMoneyInput.tsx:23:13
+  21 |         const numLocal = Number(localValue.replace(/,/g, ''));
+  22 |         if (numLocal !== value) {
+> 23 |             setLocalValue(value === 0 ? '' : formatValue(value));
+     |             ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  24 |         }
+  25 |     }, [value]);
+  26 |  react-hooks/set-state-in-effect
+  25:8   warning  React Hook useEffect has a missing dependency: 'localValue'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/exhaustive-deps
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/forms/AssetsConfigForm.tsx
+  16:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  17:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/forms/ExpensesForm.tsx
+  17:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  18:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/forms/FamilyForm.tsx
+  28:64  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  34:80  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/forms/PersonInput.tsx
+   3:16  warning  'Briefcase' is defined but never used     @typescript-eslint/no-unused-vars
+  15:51  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/results/CashFlowGraph.tsx
+  3:10  warning  'BarChart' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/tools/ComparisonManager.tsx
+   1:17  warning  'useState' is defined but never used   @typescript-eslint/no-unused-vars
+  15:45  warning  'baseInput' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/money-simulation/tools/TargetCalculator.tsx
+   4:22  warning  'ArrowRight' is defined but never used            @typescript-eslint/no-unused-vars
+  22:17  error    'found' is never reassigned. Use 'const' instead  prefer-const
+  22:17  warning  'found' is assigned a value but never used        @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/reels/ReelIcon.tsx
+  43:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  45:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/components/reels/ReelModal.tsx
+  27:5  warning  'companyId' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/context/AuthContext.tsx
+  23:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/context/AuthContext.tsx:23:13
+  21 |         const savedRole = localStorage.getItem('ehime-base-debug-role') as UserRole;
+  22 |         if (savedRole) {
+> 23 |             setRoleState(savedRole);
+     |             ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  24 |         }
+  25 |         setIsLoading(false);
+  26 |     }, []);  react-hooks/set-state-in-effect
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/lib/appStore.ts
+   69:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  116:93  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/lib/gameScenarios.ts
+   14:26  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   16:23  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   99:45  warning  'state' is defined but never used         @typescript-eslint/no-unused-vars
+  100:50  warning  'state' is defined but never used         @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/lib/gameStore.ts
+  74:15  warning  'get' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/lib/money-simulation/constants.ts
+  1:10  warning  'EducationLevel' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/yuyu24/2ndBrain/Ehime Base app/ehime-base-app/src/lib/recommendation.ts
+  20:5  warning  'companies' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 221 problems (68 errors, 153 warnings)
+  2 errors and 0 warnings potentially fixable with the `--fix` option.
+

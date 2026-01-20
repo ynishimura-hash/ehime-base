@@ -753,9 +753,9 @@ function AdminManagementContent() {
                 }
             }
             setEditingItem(null);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error('保存に失敗しました');
+            toast.error(error.message || '保存に失敗しました');
         }
     };
 

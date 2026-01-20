@@ -23,7 +23,9 @@ export default function OrganizationProgressPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     // Calculate total available lessons in the system
-    const totalSystemLessons = courses.reduce((acc, course) => acc + course.lessons.length, 0) || 20; // Default to 20 if 0
+    const totalSystemLessons = courses.reduce((acc, course) => {
+        return acc + (course.curriculums?.reduce((cAcc, curr) => cAcc + (curr.lessons?.length || 0), 0) || 0);
+    }, 0) || 20; // Default to 20 if 0
 
     useEffect(() => {
         const fetchProgressData = async () => {

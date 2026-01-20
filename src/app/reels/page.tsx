@@ -90,6 +90,7 @@ function ReelsContent() {
     const [selectedArea, setSelectedArea] = useState('');
     const [selectedIndustry, setSelectedIndustry] = useState('');
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [hoveredReelIndex, setHoveredReelIndex] = useState<number | null>(null);
 
     // Initialize from URL
     useEffect(() => {
@@ -248,10 +249,12 @@ function ReelsContent() {
                                 key={`${item.type}-${item.entityId}-${item.reel.id}`}
                                 onClick={() => handleReelClick(index)}
                                 onMouseEnter={(e) => {
+                                    setHoveredReelIndex(index);
                                     const video = e.currentTarget.querySelector('video');
                                     if (video) video.play().catch(() => { });
                                 }}
                                 onMouseLeave={(e) => {
+                                    setHoveredReelIndex(null);
                                     const video = e.currentTarget.querySelector('video');
                                     if (video) {
                                         video.pause();
@@ -269,11 +272,19 @@ function ReelsContent() {
                                         preload="metadata"
                                     />
                                 ) : (
-                                    <img
-                                        src={`https://img.youtube.com/vi/${item.reel.url.split('embed/')[1]}/0.jpg`}
-                                        alt={item.reel.title}
-                                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                                    />
+                                    index === hoveredReelIndex ? (
+                                        <iframe
+                                            src={`https://www.youtube.com/embed/${item.reel.url.split('embed/')[1]}?autoplay=1&mute=1&controls=0&start=0&rel=0`}
+                                            className="w-full h-full object-cover pointer-events-none"
+                                            allow="autoplay; encrypted-media"
+                                        />
+                                    ) : (
+                                        <img
+                                            src={`https://img.youtube.com/vi/${item.reel.url.split('embed/')[1]}/0.jpg`}
+                                            alt={item.reel.title}
+                                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                                        />
+                                    )
                                 )}
 
                                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />

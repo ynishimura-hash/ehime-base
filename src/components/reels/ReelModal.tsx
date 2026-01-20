@@ -30,6 +30,12 @@ export const ReelModal: React.FC<ReelModalProps> = ({
     const [isLiked, setIsLiked] = useState(false);
     const touchStartY = useRef<number | null>(null);
 
+    // Video Control State
+    const [isPlaying, setIsPlaying] = useState(true);
+    const [progress, setProgress] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const videoRef = useRef<HTMLVideoElement>(null);
+
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -43,6 +49,9 @@ export const ReelModal: React.FC<ReelModalProps> = ({
 
     useEffect(() => {
         setCurrentIndex(initialReelIndex);
+        // Reset video state
+        setIsPlaying(true);
+        setProgress(0);
     }, [initialReelIndex]);
 
     // Keyboard Navigation
@@ -65,6 +74,7 @@ export const ReelModal: React.FC<ReelModalProps> = ({
 
     const currentReel = reels[currentIndex];
 
+    // Navigation Handlers
     const handleNext = () => {
         if (currentIndex < reels.length - 1) {
             setCurrentIndex(prev => prev + 1);
@@ -95,6 +105,38 @@ export const ReelModal: React.FC<ReelModalProps> = ({
         touchStartY.current = null;
     };
 
+    // Video Control Handler
+    const togglePlay = () => {
+        if (videoRef.current) {
+            if (isPlaying) {
+                videoRef.current.pause();
+            } else {
+                videoRef.current.play();
+            }
+            setIsPlaying(!isPlaying);
+        }
+    };
+
+    const handleTimeUpdate = () => {
+        if (videoRef.current) {
+            const current = videoRef.current.currentTime;
+            const total = videoRef.current.duration;
+            if (total > 0) {
+                setProgress((current / total) * 100);
+                setDuration(total);
+            }
+        }
+    };
+
+    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const seekValue = parseFloat(e.target.value);
+        const seekTime = (seekValue / 100) * duration;
+        if (videoRef.current) {
+            videoRef.current.currentTime = seekTime;
+            setProgress(seekValue);
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
             {/* Close Button */}
@@ -112,22 +154,38 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                 onTouchEnd={handleTouchEnd}
             >
                 {/* Video Player */}
-                <div className="w-full h-full flex items-center justify-center bg-black relative">
+                <div
+                    className="w-full h-full flex items-center justify-center bg-black relative cursor-pointer"
+                    onClick={currentReel.type === 'file' ? togglePlay : undefined}
+                >
                     {currentReel.type === 'file' ? (
-                        <video
-                            src={currentReel.url}
-                            className="w-full h-full object-cover"
-                            autoPlay
-                            loop
-                            playsInline
-                        />
+                        <>
+                            <video
+                                ref={videoRef}
+                                src={currentReel.url}
+                                className="w-full h-full object-contain bg-black"
+                                autoPlay
+                                loop
+                                playsInline
+                                onTimeUpdate={handleTimeUpdate}
+                                onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+                            />
+                            {/* Play/Pause Icon Overlay */}
+                            {!isPlaying && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
+                                    <div className="bg-white/20 p-4 rounded-full backdrop-blur-sm">
+                                        <div className="w-0 h-0 border-l-[20px] border-l-white border-y-[12px] border-y-transparent ml-1" />
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     ) : (
                         <iframe
-                            src={`${currentReel.url}?autoplay=1&mute=0&controls=0&loop=1&playlist=${currentReel.url.split('embed/')[1]}`} // simplistic playlist hack for loop
-                            className="w-full h-full pointer-events-none" // Disable interaction to keep swipe working? might break volume control
+                            src={`${currentReel.url}?autoplay=1&mute=0&controls=0&loop=1&playlist=${currentReel.url.split('embed/')[1]}`}
+                            className="w-full h-full pointer-events-none"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
-                            style={{ pointerEvents: 'auto' }} // Re-enable for YouTube controls if needed, but might interfere with swipe
+                            style={{ pointerEvents: 'auto' }}
                         />
                     )}
 
@@ -138,7 +196,7 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                 {/* Right Side Actions */}
                 <div className="absolute bottom-20 right-4 flex flex-col gap-6 items-center z-10">
                     <button
-                        onClick={() => setIsLiked(!isLiked)}
+                        onClick={(e) => { e.stopPropagation(); setIsLiked(!isLiked); }}
                         className="flex flex-col items-center gap-1 group"
                     >
                         <div className={`p-3 rounded-full bg-black/40 backdrop-blur-sm transition-transform group-active:scale-95 ${isLiked ? 'text-red-500' : 'text-white'}`}>
@@ -149,7 +207,10 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                         </span>
                     </button>
 
-                    <button className="flex flex-col items-center gap-1 group">
+                    <button
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex flex-col items-center gap-1 group"
+                    >
                         <div className="p-3 rounded-full bg-black/40 backdrop-blur-sm text-white transition-transform group-active:scale-95">
                             <Share2 size={24} />
                         </div>
@@ -158,24 +219,45 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                 </div>
 
                 {/* Bottom Info Area */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 pb-8 z-10 text-white">
-                    <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-bold text-lg drop-shadow-md line-clamp-1">{entityName}</h3>
-                        <Link
-                            href={entityType === 'company' ? `/companies/${entityId}` : `/jobs/${entityId}`}
-                            className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold border border-white/30 hover:bg-white/30 transition-colors flex items-center gap-1"
-                        >
-                            詳細へ <ArrowRight size={12} />
-                        </Link>
+                <div className="absolute bottom-0 left-0 right-0 z-20 pb-safe">
+                    <div className="px-4 pb-4 text-white">
+                        <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-bold text-lg drop-shadow-md line-clamp-1">{entityName}</h3>
+                            <Link
+                                href={entityType === 'company' ? `/companies/${entityId}` : `/jobs/${entityId}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold border border-white/30 hover:bg-white/30 transition-colors flex items-center gap-1"
+                            >
+                                詳細へ <ArrowRight size={12} />
+                            </Link>
+                        </div>
+
+                        <p className="text-sm font-medium mb-1 drop-shadow-md line-clamp-2">
+                            {currentReel.title}
+                        </p>
+                        {currentReel.description && (
+                            <p className="text-xs text-slate-200 drop-shadow-md line-clamp-2 opacity-90">
+                                {currentReel.description}
+                            </p>
+                        )}
                     </div>
 
-                    <p className="text-sm font-medium mb-1 drop-shadow-md line-clamp-2">
-                        {currentReel.title}
-                    </p>
-                    {currentReel.description && (
-                        <p className="text-xs text-slate-200 drop-shadow-md line-clamp-2 opacity-90">
-                            {currentReel.description}
-                        </p>
+                    {/* Progress Bar (Only for File Videos) */}
+                    {currentReel.type === 'file' && (
+                        <div className="w-full h-1 bg-white/30 relative group" onClick={(e) => e.stopPropagation()}>
+                            <div
+                                className="absolute left-0 top-0 bottom-0 bg-white transition-all duration-100 ease-linear"
+                                style={{ width: `${progress}%` }}
+                            />
+                            <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                value={progress || 0}
+                                onChange={handleSeek}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer group-hover:h-2 transition-all"
+                            />
+                        </div>
                     )}
                 </div>
             </div>

@@ -147,24 +147,6 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                 <X size={24} />
             </button>
 
-            {/* Navigation Buttons (Desktop) */}
-            {currentIndex > 0 && (
-                <button
-                    onClick={(e) => { e.stopPropagation(); handlePrev(); }}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/20 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all hover:scale-110 hidden md:block"
-                >
-                    <ChevronLeft size={32} />
-                </button>
-            )}
-
-            {currentIndex < reels.length - 1 && (
-                <button
-                    onClick={(e) => { e.stopPropagation(); handleNext(); }}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/20 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all hover:scale-110 hidden md:block"
-                >
-                    <ChevronRight size={32} />
-                </button>
-            )}
 
             {/* Main Container */}
             <div
@@ -172,6 +154,24 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
             >
+                {/* Navigation Buttons (Desktop - Inside Card) */}
+                {currentIndex > 0 && (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/20 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all hover:scale-110 hidden md:block"
+                    >
+                        <ChevronLeft size={32} />
+                    </button>
+                )}
+
+                {currentIndex < reels.length - 1 && (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); handleNext(); }}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/20 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all hover:scale-110 hidden md:block"
+                    >
+                        <ChevronRight size={32} />
+                    </button>
+                )}
                 {/* Video Player */}
                 <div
                     className="w-full h-full flex items-center justify-center bg-black relative cursor-pointer"

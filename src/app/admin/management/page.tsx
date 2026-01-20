@@ -847,9 +847,9 @@ function AdminManagementContent() {
             setLinkTargetType('none');
             setLinkTargetId('');
 
-        } catch (error) {
-            console.error(error);
-            toast.error('エラーが発生しました');
+        } catch (error: any) {
+            console.error('Video Upload Error:', error);
+            toast.error(`エラーが発生しました: ${error.message || error.error_description || '詳細はコンソールをご確認ください'}`);
         } finally {
             setUploading(false);
         }

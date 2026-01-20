@@ -178,7 +178,7 @@ export default function HomePage() {
       </section>
 
       {/* 3. Icon Menu (Quick Navigation) */}
-      <section className="max-w-7xl mx-auto px-6 -mt-10 relative z-20">
+      <section className="max-w-7xl mx-auto px-6 mt-8 md:-mt-10 relative z-20">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: 'クエスト', icon: Map, color: 'bg-blue-500', href: '/quests', desc: '体験から始める', illustration: '/illustrations/quest_card.png' },

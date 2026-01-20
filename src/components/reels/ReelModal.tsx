@@ -142,11 +142,10 @@ export const ReelModal: React.FC<ReelModalProps> = ({
             {/* Close Button */}
             <button
                 onClick={onClose}
-                className="absolute top-4 right-4 z-50 text-white p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+                className="absolute top-4 right-2 z-50 text-white p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
             >
                 <X size={24} />
             </button>
-
 
             {/* Main Container */}
             <div
@@ -158,7 +157,7 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                 {currentIndex > 0 && (
                     <button
                         onClick={(e) => { e.stopPropagation(); handlePrev(); }}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/20 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all hover:scale-110 hidden md:block"
+                        className="absolute left-1 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/20 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all hover:scale-110 hidden md:block"
                     >
                         <ChevronLeft size={32} />
                     </button>
@@ -167,7 +166,7 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                 {currentIndex < reels.length - 1 && (
                     <button
                         onClick={(e) => { e.stopPropagation(); handleNext(); }}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/20 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all hover:scale-110 hidden md:block"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/20 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all hover:scale-110 hidden md:block"
                     >
                         <ChevronRight size={32} />
                     </button>
@@ -213,7 +212,7 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                 </div>
 
                 {/* Right Side Actions */}
-                <div className="absolute bottom-20 right-4 flex flex-col gap-6 items-center z-10">
+                <div className="absolute bottom-20 right-2 flex flex-col gap-6 items-center z-10">
                     <button
                         onClick={(e) => { e.stopPropagation(); setIsLiked(!isLiked); }}
                         className="flex flex-col items-center gap-1 group"

@@ -12,20 +12,21 @@ import {
     LogOut,
     Menu
 } from 'lucide-react';
+import { useAppStore } from '@/lib/appStore';
 
-const sidebarItems = [
-    { name: 'ダッシュボード', icon: LayoutDashboard, href: '/dashboard/company' },
-    { name: '企業情報編集', icon: Building2, href: '/dashboard/company/profile' },
-    { name: '求人・クエスト管理', icon: Briefcase, href: '/dashboard/company/jobs/new' }, // Simplified: just go to new/list for now
-    { name: 'スカウト', icon: Users, href: '/dashboard/company/scout' },
-    { name: 'メッセージ', icon: MessageSquare, href: '/dashboard/company/messages' },
-];
+// ... (keep sidebarItems)
 
 export default function CompanyDashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+    const { logout } = useAppStore();
 
     const isMessagesPage = pathname?.startsWith('/dashboard/company/messages');
+
+    const handleLogout = () => {
+        logout();
+        window.location.href = '/';
+    };
 
     return (
         <div className="h-screen overflow-hidden bg-slate-50 flex">
@@ -54,10 +55,13 @@ export default function CompanyDashboardLayout({ children }: { children: React.R
                 </nav>
 
                 <div className="p-4 border-t border-slate-800">
-                    <Link href="/" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-400 hover:text-white transition-colors">
+                    <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all text-left"
+                    >
                         <LogOut size={18} />
-                        ログアウト / ユーザー版へ
-                    </Link>
+                        ログアウト
+                    </button>
                 </div>
             </aside>
 
@@ -86,10 +90,13 @@ export default function CompanyDashboardLayout({ children }: { children: React.R
                                 {item.name}
                             </Link>
                         ))}
-                        <Link href="/" className="flex items-center gap-4 py-3 text-slate-400 font-bold mt-8">
+                        <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center gap-4 py-3 text-slate-400 font-bold mt-8 text-left"
+                        >
                             <LogOut size={20} />
                             ログアウト
-                        </Link>
+                        </button>
                     </div>
                 )}
 

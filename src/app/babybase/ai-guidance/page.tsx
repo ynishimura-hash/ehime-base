@@ -224,7 +224,11 @@ export default function AIGuidance() {
                         placeholder="（例）寝かしつけが大変で困っています..."
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                                handleSend();
+                            }
+                        }}
                         className="w-full bg-slate-50 border-none rounded-[2.5rem] py-5 pl-8 pr-16 font-bold text-sm focus:ring-2 focus:ring-pink-100 transition-all shadow-inner"
                     />
                     <button

@@ -28,19 +28,40 @@ export default function BabyBaseTop() {
         }
     }, [chatMessages]);
 
-    const handleSendChat = () => {
-        if (!chatInput.trim()) return;
-        const userMsg = chatInput;
-        setChatMessages(prev => [...prev, { role: 'user', text: userMsg }]);
-        setChatInput('');
+    const [isTyping, setIsTyping] = useState(false);
 
-        // Mock AI response
-        setTimeout(() => {
-            let aiText = "お悩み承りました。愛媛には、その分野に詳しい専門家の方がいらっしゃいます。詳細なアドバイスをご希望ですか？";
-            if (userMsg.includes('離乳食')) aiText = "離乳食についてですね。栄養士の村上先生が、愛媛の旬の食材を使ったレシピを提案されています。";
-            if (userMsg.includes('夜泣き')) aiText = "夜泣きは大変ですよね...ねんねコンサルタントの田中先生が、生活リズムの整え方についてアドバイス可能です。";
-            setChatMessages(prev => [...prev, { role: 'ai', text: aiText }]);
-        }, 800);
+    const handleSendChat = async () => {
+        if (!chatInput.trim() || isTyping) return;
+        const userMsgText = chatInput;
+        const userMsg = { role: 'user' as const, text: userMsgText };
+
+        const updatedMessages = [...chatMessages, userMsg];
+        setChatMessages(updatedMessages);
+        setChatInput('');
+        setIsTyping(true);
+
+        try {
+            const response = await fetch('/api/babybase/ai-analysis', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: updatedMessages.map(m => ({ text: m.text, sender: m.role === 'user' ? 'user' : 'ai' })),
+                    specialists: bbSpecialists,
+                    articles: bbArticles,
+                    posts: bbPosts
+                })
+            });
+
+            if (!response.ok) throw new Error('AI Analysis failed');
+            const data = await response.json();
+
+            setChatMessages(prev => [...prev, { role: 'ai', text: data.responseText }]);
+        } catch (error) {
+            console.error('Top Chat Error:', error);
+            setChatMessages(prev => [...prev, { role: 'ai', text: '申し訳ありません。現在案内所が混み合っております。少し時間を置いて再度お試しください。' }]);
+        } finally {
+            setIsTyping(false);
+        }
     };
 
     const trendingWords = ['離乳食の進め方', '夜泣き対策', '保活2026', '産後ケア', '愛媛おでかけ'];
@@ -128,6 +149,15 @@ export default function BabyBaseTop() {
                                     </div>
                                 </motion.div>
                             ))}
+                            {isTyping && (
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
+                                    <div className="bg-white border border-pink-50 px-4 py-2 rounded-2xl flex gap-1">
+                                        <motion.div animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1 }} className="w-1.5 h-1.5 bg-pink-400 rounded-full" />
+                                        <motion.div animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-1.5 h-1.5 bg-pink-400 rounded-full" />
+                                        <motion.div animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-1.5 h-1.5 bg-pink-400 rounded-full" />
+                                    </div>
+                                </motion.div>
+                            )}
                         </div>
 
                         <div className="p-5 bg-white border-t border-pink-50 shrink-0">
@@ -136,7 +166,11 @@ export default function BabyBaseTop() {
                                     type="text"
                                     value={chatInput}
                                     onChange={(e) => setChatInput(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                                            handleSendChat();
+                                        }
+                                    }}
                                     placeholder="今の悩みをお聞かせください..."
                                     className="flex-1 bg-slate-50 border-none rounded-[1.5rem] py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-pink-100 shadow-inner placeholder:text-slate-300"
                                 />

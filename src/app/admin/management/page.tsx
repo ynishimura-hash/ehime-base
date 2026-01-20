@@ -802,22 +802,42 @@ function AdminManagementContent() {
                                     onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
                                 />
                             </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">業界</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.industry || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, industry: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">所在地</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.location || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, location: e.target.value })}
+                                    />
+                                </div>
+                            </div>
                             <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">業界</label>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">WebサイトURL</label>
                                 <input
                                     type="text"
                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                    value={editingItem.industry || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, industry: e.target.value })}
+                                    value={editingItem.website_url || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, website_url: e.target.value })}
+                                    placeholder="https://example.com"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">所在地</label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                    value={editingItem.location || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, location: e.target.value })}
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">説明文</label>
+                                <textarea
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[100px]"
+                                    value={editingItem.description || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, description: e.target.value })}
                                 />
                             </div>
                         </>
@@ -833,35 +853,39 @@ function AdminManagementContent() {
                                     onChange={e => setEditingItem({ ...editingItem, title: e.target.value })}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">タイプ</label>
-                                <select
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                    value={editingItem.type || 'job'}
-                                    onChange={e => setEditingItem({ ...editingItem, type: e.target.value })}
-                                >
-                                    <option value="job">求人 (Job)</option>
-                                    <option value="quest">クエスト (Quest)</option>
-                                </select>
-                            </div>
-                            {actionType === 'create' && (
+                            <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">企業ID (company_id)</label>
-                                    <input
-                                        type="text"
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">タイプ</label>
+                                    <select
                                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        placeholder="企業IDを入力"
-                                        value={editingItem.company_id || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, company_id: e.target.value })}
-                                    />
+                                        value={editingItem.type || 'job'}
+                                        onChange={e => setEditingItem({ ...editingItem, type: e.target.value })}
+                                    >
+                                        <option value="job">求人 (Job)</option>
+                                        <option value="quest">クエスト (Quest)</option>
+                                    </select>
                                 </div>
-                            )}
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">企業 (Organization)</label>
+                                    <select
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.organization_id || editingItem.company_id || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, organization_id: e.target.value, company_id: e.target.value })}
+                                    >
+                                        <option value="">企業を選択...</option>
+                                        {realCompanies.map(c => (
+                                            <option key={c.id} value={c.id}>{c.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
                             <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">説明 (簡易)</label>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">詳細内容 (Content)</label>
                                 <textarea
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[100px]"
-                                    value={editingItem.description || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, description: e.target.value })}
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[150px]"
+                                    value={editingItem.content || editingItem.description || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, content: e.target.value, description: e.target.value })}
+                                    placeholder="求人の詳細内容..."
                                 />
                             </div>
                         </>

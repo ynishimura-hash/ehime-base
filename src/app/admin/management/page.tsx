@@ -25,27 +25,48 @@ function AdminManagementContent() {
     const [uploading, setUploading] = useState(false);
 
     // New State for Users and Editing/Bulk
+    // New State for Real Data
     const [realUsers, setRealUsers] = useState<any[]>([]);
+    const [realCompanies, setRealCompanies] = useState<any[]>([]);
+    const [realJobs, setRealJobs] = useState<any[]>([]);
+
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [editingItem, setEditingItem] = useState<any | null>(null);
-    const [editMode, setEditMode] = useState<'user' | 'company' | null>(null);
+    const [editMode, setEditMode] = useState<'user' | 'company' | 'job' | null>(null);
+    const [actionType, setActionType] = useState<'create' | 'edit'>('edit');
+
+    const usersFileInputRef = React.useRef<HTMLInputElement>(null);
+    const companiesFileInputRef = React.useRef<HTMLInputElement>(null);
+    const jobsFileInputRef = React.useRef<HTMLInputElement>(null);
 
     const supabase = createClient();
 
     React.useEffect(() => {
+        setSelectedIds(new Set()); // Clear selection on tab change
         if (currentTab === 'media') {
             fetchMedia();
         } else if (currentTab === 'users') {
             fetchUsers();
+        } else if (currentTab === 'companies') {
+            fetchCompanies();
+        } else if (currentTab === 'jobs') {
+            fetchJobs();
         }
     }, [currentTab]);
 
     const fetchUsers = async () => {
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .order('created_at', { ascending: false });
+        const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
         if (!error && data) setRealUsers(data);
+    };
+
+    const fetchCompanies = async () => {
+        const { data, error } = await supabase.from('companies').select('*').order('created_at', { ascending: false });
+        if (!error && data) setRealCompanies(data);
+    };
+
+    const fetchJobs = async () => {
+        const { data, error } = await supabase.from('jobs').select('*').order('created_at', { ascending: false });
+        if (!error && data) setRealJobs(data);
     };
 
     const fetchMedia = async () => {
@@ -112,7 +133,7 @@ function AdminManagementContent() {
         }
     }, [courses.length, fetchCourses]);
 
-    const handleCsvUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleCsvUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'user' | 'company' | 'job' | 'course') => {
         const file = event.target.files?.[0];
         if (!file) return;
 
@@ -128,16 +149,37 @@ function AdminManagementContent() {
                 headers.forEach((header, i) => {
                     const cleanHeader = header.trim().replace(/"/g, '');
                     const cleanValue = values[i]?.trim().replace(/"/g, '');
-                    obj[cleanHeader] = cleanValue;
+                    if (cleanHeader) obj[cleanHeader] = cleanValue;
                 });
                 return obj;
             });
 
             try {
-                await addCourses(data);
-                toast.success(`${data.length}件のコースを登録しました`);
+                let error = null;
+                if (type === 'user') {
+                    // Warning: Ideally requires Auth API, inserting to profile might fail if ID not provided
+                    // For now, we attempt direct insert if schema allows or use random ID if possible (depends on DB)
+                    // We will just try insertion.
+                    const { error: err } = await supabase.from('profiles').insert(data);
+                    error = err;
+                    if (!error) fetchUsers();
+                } else if (type === 'company') {
+                    const { error: err } = await supabase.from('companies').insert(data);
+                    error = err;
+                    if (!error) fetchCompanies();
+                } else if (type === 'job') {
+                    const { error: err } = await supabase.from('jobs').insert(data);
+                    error = err;
+                    if (!error) fetchJobs();
+                } else if (type === 'course') {
+                    await addCourses(data); // Existing logic
+                }
+
+                if (error) throw error;
+                toast.success(`${data.length}件のデータを登録しました`);
             } catch (error) {
-                toast.error('登録に失敗しました');
+                console.error(error);
+                toast.error('登録に失敗しました。CSVのフォーマットを確認してください。');
             }
         };
         reader.readAsText(file);
@@ -187,9 +229,29 @@ function AdminManagementContent() {
     );
 
     const renderUsers = () => (
-        <div className="space-y-4">
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-black text-slate-900">求職者一覧</h2>
+                <div className="flex gap-2">
+                    <input
+                        type="file"
+                        accept=".csv"
+                        className="hidden"
+                        ref={usersFileInputRef}
+                        onChange={(e) => handleCsvUpload(e, 'user')}
+                    />
+                    <button
+                        onClick={() => usersFileInputRef.current?.click()}
+                        className="bg-slate-100 text-slate-700 px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-slate-200 transition-all"
+                    >
+                        <Upload size={18} /> CSV登録
+                    </button>
+                    <button 
+                        onClick={() => { setEditingItem({}); setEditMode('user'); setActionType('create'); }}
+                        className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all"
+                    >
+                        <Plus size={18} /> 新規追加
+                    </button>
+                </div>
             </div>
             <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
                 <table className="w-full text-left border-collapse">
@@ -200,10 +262,10 @@ function AdminManagementContent() {
                                     {selectedIds.size === realUsers.length && realUsers.length > 0 ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
                                 </button>
                             </th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">ユーザー</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">タイプ</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">登録日</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">アクション</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">ユーザー</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">タイプ</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">登録日</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest text-right">アクション</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -218,8 +280,8 @@ function AdminManagementContent() {
                                     <div className="flex items-center gap-3">
                                         <img src={user.avatar_url || 'https://via.placeholder.com/40'} className="w-10 h-10 rounded-full object-cover" alt="" />
                                         <div>
-                                            <div className="font-black text-slate-800">{user.full_name || 'No Name'}</div>
-                                            <div className="text-xs text-slate-400 font-bold">{user.email}</div>
+                                            <div className="font-black text-slate-900">{user.full_name || 'No Name'}</div>
+                                            <div className="text-xs text-slate-500 font-bold">{user.email}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -228,12 +290,12 @@ function AdminManagementContent() {
                                         {user.user_type}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 text-xs font-bold text-slate-500">
-                                    {new Date(user.created_at).toLocaleDateString()}
+                                <td className="px-6 py-4 text-xs font-bold text-slate-600">
+                                    {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
                                 </td>
                                 <td className="px-6 py-4 text-right">
                                     <button
-                                        onClick={() => { setEditingItem(user); setEditMode('user'); }}
+                                        onClick={() => { setEditingItem(user); setEditMode('user'); setActionType('edit'); }}
                                         className="p-2 text-slate-400 hover:text-blue-600"
                                     >
                                         <Edit3 size={18} />
@@ -244,17 +306,35 @@ function AdminManagementContent() {
                     </tbody>
                 </table>
             </div>
-            {renderBulkActions()}
-        </div>
+            { renderBulkActions() }
+        </div >
     );
 
     const renderCompanies = () => (
         <div className="space-y-4">
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-black text-slate-900">企業管理一覧</h2>
-                <button className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all">
-                    <Plus size={18} /> 新規企業登録
-                </button>
+                <div className="flex gap-2">
+                    <input
+                        type="file"
+                        accept=".csv"
+                        className="hidden"
+                        ref={companiesFileInputRef}
+                        onChange={(e) => handleCsvUpload(e, 'company')}
+                    />
+                    <button
+                        onClick={() => companiesFileInputRef.current?.click()}
+                        className="bg-slate-100 text-slate-700 px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-slate-200 transition-all"
+                    >
+                        <Upload size={18} /> CSV登録
+                    </button>
+                    <button
+                        onClick={() => { setEditingItem({}); setEditMode('company'); setActionType('create'); }}
+                        className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all"
+                    >
+                        <Plus size={18} /> 新規企業登録
+                    </button>
+                </div>
             </div>
             <div className="mb-6 bg-white p-4 rounded-2xl border border-slate-200 flex items-center gap-3">
                 <Search size={20} className="text-slate-400" />
@@ -263,13 +343,18 @@ function AdminManagementContent() {
                     placeholder="企業名または業界で検索..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-transparent border-none outline-none font-bold text-sm"
+                    className="flex-1 bg-transparent border-none outline-none font-bold text-slate-900 text-sm placeholder:text-slate-400"
                 />
             </div>
             <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
+                            <th className="px-6 py-4 w-12">
+                                <button onClick={() => toggleAll(realCompanies.map(c => c.id))}>
+                                    {selectedIds.size === realCompanies.length && realCompanies.length > 0 ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
+                                </button>
+                            </th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">企業名</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">業界</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">ステータス</th>
@@ -277,13 +362,18 @@ function AdminManagementContent() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        {companies
-                            .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.industry.toLowerCase().includes(searchQuery.toLowerCase()))
+                        {realCompanies
+                            .filter(c => (c.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (c.industry || '').toLowerCase().includes(searchQuery.toLowerCase()))
                             .map(company => (
-                                <tr key={company.id} className="hover:bg-slate-50 transition-colors">
+                                <tr key={company.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(company.id) ? 'bg-blue-50/50' : ''}`}>
+                                    <td className="px-6 py-4">
+                                        <button onClick={() => toggleSelection(company.id)}>
+                                            {selectedIds.has(company.id) ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
+                                        </button>
+                                    </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <img src={company.image} className="w-10 h-10 rounded-xl object-cover" alt="" />
+                                            <img src={company.image_url || 'https://via.placeholder.com/40'} className="w-10 h-10 rounded-xl object-cover" alt="" />
                                             <span className="font-black text-slate-800">{company.name}</span>
                                         </div>
                                     </td>
@@ -296,7 +386,7 @@ function AdminManagementContent() {
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <button
-                                                onClick={() => toast.info(`${company.name}の情報を編集します（モック）`)}
+                                                onClick={() => { setEditingItem(company); setEditMode('company'); setActionType('edit'); }}
                                                 className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                             >
                                                 <Edit3 size={18} />
@@ -322,8 +412,24 @@ function AdminManagementContent() {
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-black text-slate-900">求人・クエスト管理</h2>
                 <div className="flex gap-2">
+                    <input
+                        type="file"
+                        accept=".csv"
+                        className="hidden"
+                        ref={jobsFileInputRef}
+                        onChange={(e) => handleCsvUpload(e, 'job')}
+                    />
+                    <button
+                        onClick={() => jobsFileInputRef.current?.click()}
+                        className="bg-slate-100 text-slate-700 px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-slate-200 transition-all"
+                    >
+                        <Upload size={18} /> CSV登録
+                    </button>
                     <button className="bg-slate-100 text-slate-600 px-6 py-3 rounded-2xl font-black text-sm hover:bg-slate-200 transition-all">一括公開停止</button>
-                    <button className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all">
+                    <button
+                        onClick={() => { setEditingItem({}); setEditMode('job'); setActionType('create'); }}
+                        className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all"
+                    >
                         <Plus size={18} /> 新規追加
                     </button>
                 </div>
@@ -335,13 +441,18 @@ function AdminManagementContent() {
                     placeholder="求人タイトルまたは企業名で検索..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-transparent border-none outline-none font-bold text-sm"
+                    className="flex-1 bg-transparent border-none outline-none font-bold text-slate-900 text-sm placeholder:text-slate-400"
                 />
             </div>
             <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
+                            <th className="px-6 py-4 w-12">
+                                <button onClick={() => toggleAll(realJobs.map(j => j.id))}>
+                                    {selectedIds.size === realJobs.length && realJobs.length > 0 ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
+                                </button>
+                            </th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">求人タイトル</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">タイプ</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">企業</th>
@@ -349,23 +460,33 @@ function AdminManagementContent() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        {jobs
+                        {realJobs
                             .filter(j =>
-                                j.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                companies.find(c => c.id === j.companyId)?.name.toLowerCase().includes(searchQuery.toLowerCase())
+                                (j.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                realCompanies.find(c => c.id === j.company_id)?.name.toLowerCase().includes(searchQuery.toLowerCase())
                             )
                             .map(job => (
-                                <tr key={job.id} className="hover:bg-slate-50 transition-colors">
+                                <tr key={job.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(job.id) ? 'bg-blue-50/50' : ''}`}>
+                                    <td className="px-6 py-4">
+                                        <button onClick={() => toggleSelection(job.id)}>
+                                            {selectedIds.has(job.id) ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
+                                        </button>
+                                    </td>
                                     <td className="px-6 py-4 font-black text-slate-800">{job.title}</td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-black ${job.type === 'quest' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>
-                                            {job.type.toUpperCase()}
+                                            {(job.type || 'job').toUpperCase()}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-bold text-slate-500">{companies.find(c => c.id === job.companyId)?.name}</td>
+                                    <td className="px-6 py-4 text-sm font-bold text-slate-500">{realCompanies.find(c => c.id === job.company_id)?.name || job.company_id}</td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2 text-slate-400">
-                                            <button className="p-2 hover:text-blue-600"><Eye size={18} /></button>
+                                            <button
+                                                onClick={() => { setEditingItem(job); setEditMode('job'); setActionType('edit'); }}
+                                                className="p-2 hover:text-blue-600"
+                                            >
+                                                <Edit3 size={18} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -386,7 +507,7 @@ function AdminManagementContent() {
                         accept=".csv"
                         className="hidden"
                         ref={fileInputRef}
-                        onChange={handleCsvUpload}
+                        onChange={(e) => handleCsvUpload(e, 'course')}
                     />
                     <button
                         onClick={() => fileInputRef.current?.click()}
@@ -511,59 +632,184 @@ function AdminManagementContent() {
     const handleSaveEdit = async () => {
         if (!editingItem || !editMode) return;
 
-        // Save logic based on type
-        if (editMode === 'user') {
-            const { error } = await supabase
-                .from('profiles')
-                .update({
-                    full_name: editingItem.full_name,
-                    user_type: editingItem.user_type
-                })
-                .eq('id', editingItem.id);
-
-            if (error) toast.error('更新に失敗しました');
-            else {
-                toast.success('更新しました');
-                setEditingItem(null);
-                fetchUsers();
+        try {
+            if (editMode === 'user') {
+                if (actionType === 'create') {
+                    // Create logic
+                    const { error } = await supabase.from('profiles').insert([editingItem]);
+                    if (error) throw error;
+                    toast.success('ユーザーを作成しました');
+                    fetchUsers();
+                } else {
+                    // Update logic
+                    const { error } = await supabase
+                        .from('profiles')
+                        .update({
+                            full_name: editingItem.full_name,
+                            user_type: editingItem.user_type
+                        })
+                        .eq('id', editingItem.id);
+                    if (error) throw error;
+                    toast.success('更新しました');
+                    fetchUsers();
+                }
+            } else if (editMode === 'company') {
+                if (actionType === 'create') {
+                    const { error } = await supabase.from('companies').insert([editingItem]);
+                    if (error) throw error;
+                    toast.success('企業を作成しました');
+                    fetchCompanies();
+                } else {
+                    const { error } = await supabase
+                        .from('companies')
+                        .update({
+                            name: editingItem.name,
+                            industry: editingItem.industry,
+                            location: editingItem.location
+                        })
+                        .eq('id', editingItem.id);
+                    if (error) throw error;
+                    toast.success('更新しました');
+                    fetchCompanies();
+                }
+            } else if (editMode === 'job') {
+                if (actionType === 'create') {
+                    const { error } = await supabase.from('jobs').insert([editingItem]);
+                    if (error) throw error;
+                    toast.success('求人を作成しました');
+                    fetchJobs();
+                } else {
+                    const { error } = await supabase
+                        .from('jobs')
+                        .update({
+                            title: editingItem.title,
+                            type: editingItem.type,
+                            description: editingItem.description
+                        })
+                        .eq('id', editingItem.id);
+                    if (error) throw error;
+                    toast.success('更新しました');
+                    fetchJobs();
+                }
             }
+            setEditingItem(null);
+        } catch (error) {
+            console.error(error);
+            toast.error('保存に失敗しました');
         }
     };
 
     const renderEditModal = () => (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="bg-white w-full max-w-lg rounded-3xl p-8 shadow-2xl space-y-6">
+            <div className="bg-white w-full max-w-lg rounded-3xl p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-black text-slate-900">詳細編集</h3>
+                    <h3 className="text-xl font-black text-slate-900">{actionType === 'create' ? '新規登録' : '詳細編集'}</h3>
                     <button onClick={() => setEditingItem(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                         <X size={20} />
                     </button>
                 </div>
 
                 <div className="space-y-4">
-                    <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">名前</label>
-                        <input
-                            type="text"
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                            value={editingItem.full_name || editingItem.name || ''}
-                            onChange={e => setEditingItem({ ...editingItem, full_name: e.target.value, name: e.target.value })}
-                        />
-                    </div>
                     {editMode === 'user' && (
-                        <div>
-                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">ユーザータイプ</label>
-                            <select
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                value={editingItem.user_type}
-                                onChange={e => setEditingItem({ ...editingItem, user_type: e.target.value })}
-                            >
-                                <option value="student">Student (求職者)</option>
-                                <option value="company">Company (企業)</option>
-                                <option value="specialist">Specialist</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div>
+                        <>
+                            <div>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">名前</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                    value={editingItem.full_name || editingItem.name || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, full_name: e.target.value, name: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">ユーザータイプ</label>
+                                <select
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                    value={editingItem.user_type || 'student'}
+                                    onChange={e => setEditingItem({ ...editingItem, user_type: e.target.value })}
+                                >
+                                    <option value="student">Student (求職者)</option>
+                                    <option value="company">Company (企業)</option>
+                                    <option value="specialist">Specialist</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                        </>
+                    )}
+                    {editMode === 'company' && (
+                        <>
+                            <div>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">企業名</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                    value={editingItem.name || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">業界</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                    value={editingItem.industry || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, industry: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">所在地</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                    value={editingItem.location || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, location: e.target.value })}
+                                />
+                            </div>
+                        </>
+                    )}
+                    {editMode === 'job' && (
+                        <>
+                            <div>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">タイトル</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                    value={editingItem.title || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, title: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">タイプ</label>
+                                <select
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                    value={editingItem.type || 'job'}
+                                    onChange={e => setEditingItem({ ...editingItem, type: e.target.value })}
+                                >
+                                    <option value="job">求人 (Job)</option>
+                                    <option value="quest">クエスト (Quest)</option>
+                                </select>
+                            </div>
+                            {actionType === 'create' && (
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">企業ID (company_id)</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        placeholder="企業IDを入力"
+                                        value={editingItem.company_id || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, company_id: e.target.value })}
+                                    />
+                                </div>
+                            )}
+                            <div>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">説明 (簡易)</label>
+                                <textarea
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[100px]"
+                                    value={editingItem.description || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, description: e.target.value })}
+                                />
+                            </div>
+                        </>
                     )}
                 </div>
 

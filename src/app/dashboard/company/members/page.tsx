@@ -13,8 +13,10 @@ export default function MemberManagementPage() {
     // For now, listing some mock users as "members"
     const members = users.slice(0, 3); // Mock content
 
-    const handleCreateInvite = () => {
-        const token = createInvitation(currentCompanyId);
+    const handleCreateInvite = async () => {
+        const token = await createInvitation(currentCompanyId);
+        if (!token) return;
+
         // In prod: domain would be dynamic or env var
         const link = `${window.location.origin}/organizations/join?token=${token}`;
         setInviteLink(link);

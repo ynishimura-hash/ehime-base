@@ -8,6 +8,7 @@ import { MomProfile, ChildProfile, Specialist, BabyBaseEvent, LearningArticle, S
 import { BB_SPECIALISTS, BB_EVENTS, BB_ARTICLES, BB_POSTS } from './babybaseData';
 import { useGameStore } from './gameStore';
 import { toast } from 'sonner';
+import { createClient } from '@/utils/supabase/client';
 
 // --- Types ---
 
@@ -177,8 +178,8 @@ interface AppState {
 
     // Invitation Actions
     invitations: Invitation[];
-    createInvitation: (orgId: string, role?: 'admin' | 'member') => string; // Returns token
-    consumeInvitation: (token: string, userId: string) => boolean;
+    createInvitation: (orgId: string, role?: 'admin' | 'member') => Promise<string | null>; // Returns token
+    consumeInvitation: (token: string, userId: string) => Promise<boolean>;
 }
 
 export interface Invitation {
@@ -332,34 +333,55 @@ export const useAppStore = create<AppState>()(
             setCompactMode: (isCompact) => set({ isCompactMode: isCompact }),
             setLessonSidebarOpen: (isOpen) => set({ isLessonSidebarOpen: isOpen }),
 
-            // Helper for invitations (Mock Implementation)
+            // Helper for invitations (Supabase Integration)
             invitations: [],
-            createInvitation: (orgId, role = 'member') => {
+            createInvitation: async (orgId, role = 'member') => {
+                const supabase = createClient();
                 const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-                const newInv: Invitation = {
-                    id: `inv_${Date.now()}`,
-                    organizationId: orgId,
+                const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+                const { error } = await supabase.from('organization_invitations').insert({
+                    organization_id: orgId,
                     token,
                     role,
-                    expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
-                    isUsed: false
-                };
-                set(s => ({ invitations: [...s.invitations, newInv] }));
-                return token;
-            },
-            consumeInvitation: (token, userId) => {
-                const state = get();
-                const inv = state.invitations.find(i => i.token === token && !i.isUsed && i.expiresAt > Date.now());
-                if (!inv) return false;
+                    expires_at: expiresAt
+                });
 
-                // Mark as used
+                if (error) {
+                    console.error('Failed to create invitation:', error);
+                    toast.error('招待リンクの作成に失敗しました');
+                    return null;
+                }
+
+                // Optimistic update for UI (optional, but good for feedback)
+                // In a real app with real-time subscription, this might be redundant, but good for now.
                 set(s => ({
-                    invitations: s.invitations.map(i => i.id === inv.id ? { ...i, isUsed: true } : i)
+                    invitations: [...s.invitations, {
+                        id: 'temp_' + token,
+                        organizationId: orgId,
+                        token,
+                        role,
+                        expiresAt: Date.now() + 86400000,
+                        isUsed: false
+                    }]
                 }));
 
-                // Add to organization logic (In a real app, this would be a DB insert)
-                // Assuming we have a way to link user to company in 'users' array or separate store
-                // For now, let's just toast success as the actual persistence handles it via Supabase later
+                return token;
+            },
+            consumeInvitation: async (token, userId) => {
+                const supabase = createClient();
+                const { data, error } = await supabase.rpc('join_organization_via_token', { token_input: token });
+
+                if (error) {
+                    console.error('RPC Error:', error);
+                    return false;
+                }
+
+                if (!data || data.success === false) {
+                    console.error('Join failed:', data?.message);
+                    return false;
+                }
+
                 toast.success('組織に参加しました！');
                 return true;
             },

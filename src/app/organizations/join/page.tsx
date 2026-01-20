@@ -27,8 +27,8 @@ function JoinContent() {
 
         setStatus('loading');
         // Simulate API delay
-        setTimeout(() => {
-            const success = consumeInvitation(token, currentUserId);
+        setTimeout(async () => {
+            const success = await consumeInvitation(token, currentUserId);
             if (success) {
                 setStatus('success');
                 toast.success('組織への参加が完了しました！');

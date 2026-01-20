@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ehime Base Core Architecture Diagram</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-col: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .mermaid-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 95%;
+            overflow: auto;
+        }
+
+        /* Allow svg to scale */
+        svg {
+            max-width: none !important;
+            min-width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Ehime Base データベース構成図</h1>
+    <p>ブラウザのズーム機能(Ctrl/Cmd + +/-)を使って拡大縮小してください。</p>
+    <div class="mermaid-container">
+        <div class="mermaid">
+            erDiagram
+            %% ユーザーと認証
+            profiles ||--o{ user_roles : has
+            profiles {
+            uuid id pk "Authユーザーと紐付け"
+            string email
+            string display_name
+            string avatar_url
+            string user_type "student(受講生) | company(企業) | specialist(専門家) | admin(管理)"
+            jsonb diagnosis_result "Big5/価値観診断データ"
+            vector embedding "AIマッチング用ベクトル"
+            timestamp created_at
+            }
+
+            %% 組織・団体 (旧: 企業) - 拡張
+            organizations ||--o{ organization_members : "has members"
+            organizations ||--o{ jobs : "posts"
+            organizations ||--o{ events : "organizes"
+            organizations {
+            uuid id pk
+            string type "company(企業) | school(学校) | community(コミュニティ)"
+            string name
+            text description_raw
+            text description_ai_analysis
+            jsonb culture_tags
+            vector culture_vector
+            string website_url
+            string location
+            }
+
+            %% 組織メンバー管理 (New)
+            organization_members {
+            uuid id pk
+            uuid organization_id fk
+            uuid user_id fk
+            string role "admin(管理者) | member(一般) | student(研修生)"
+            string status "active | invited | inactive"
+            timestamp joined_at
+            }
+
+            %% コンテンツ (求人 / クエスト / 学習)
+            jobs {
+            uuid id pk
+            uuid organization_id fk "Updated from company_id"
+            string title
+            text content
+            jsonb required_skills_ai
+            jsonb value_tags_ai
+            vector matching_vector
+            boolean is_active
+            }
+
+            specialists {
+            uuid id pk
+            uuid profile_id fk
+            string expertise_area
+            text bio
+            jsonb available_slots
+            }
+
+            %% 学習 & 進捗
+            courses ||--o{ lessons : contains
+            courses {
+            uuid id pk
+            string title
+            string category
+            int difficulty_level
+            }
+
+            %% ユーザー行動履歴・ログ (管理者・分析用)
+            bookmarks {
+            uuid id pk
+            uuid user_id fk
+            uuid item_id
+            string item_type "job | organization | article | course"
+            timestamp created_at
+            }
+
+            view_logs {
+            uuid id pk
+            uuid user_id fk
+            uuid item_id
+            string item_type
+            int duration_seconds "滞在時間"
+            timestamp viewed_at
+            }
+
+            course_progress {
+            uuid id pk
+            uuid user_id fk
+            uuid course_id fk
+            uuid lesson_id fk
+            string status "not_started | in_progress | completed"
+            int progress_percent "進捗率"
+            int quiz_score "テスト点数"
+            timestamp last_accessed_at "最終学習日時"
+            timestamp completed_at
+            }
+
+            %% マッチング結果
+            matches {
+            uuid user_id fk
+            uuid target_id
+            string target_type "job | organization | specialist"
+            float match_score "AI算出の相性スコア"
+            boolean is_viewed
+            }
+        </div>
+    </div>
+</body>
+
+</html>

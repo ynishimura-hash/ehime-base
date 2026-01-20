@@ -247,14 +247,26 @@ function ReelsContent() {
                             <button
                                 key={`${item.type}-${item.entityId}-${item.reel.id}`}
                                 onClick={() => handleReelClick(index)}
+                                onMouseEnter={(e) => {
+                                    const video = e.currentTarget.querySelector('video');
+                                    if (video) video.play().catch(() => { });
+                                }}
+                                onMouseLeave={(e) => {
+                                    const video = e.currentTarget.querySelector('video');
+                                    if (video) {
+                                        video.pause();
+                                        video.currentTime = 0;
+                                    }
+                                }}
                                 className="relative aspect-[9/16] rounded-2xl overflow-hidden group shadow-md hover:shadow-xl transition-all hover:scale-105 border border-slate-100 bg-black"
                             >
                                 {item.reel.type === 'file' ? (
                                     <video
-                                        src={item.reel.url}
+                                        src={`${item.reel.url}#t=0.001`}
                                         className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                                         muted
                                         playsInline
+                                        preload="metadata"
                                     />
                                 ) : (
                                     <img

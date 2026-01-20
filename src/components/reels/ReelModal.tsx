@@ -29,6 +29,8 @@ export const ReelModal: React.FC<ReelModalProps> = ({
     const [currentIndex, setCurrentIndex] = useState(initialReelIndex);
     const [isLiked, setIsLiked] = useState(false);
     const touchStartY = useRef<number | null>(null);
+    const [touchOffset, setTouchOffset] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
 
     // Video Control State
     const [isPlaying, setIsPlaying] = useState(true);
@@ -49,10 +51,17 @@ export const ReelModal: React.FC<ReelModalProps> = ({
 
     useEffect(() => {
         setCurrentIndex(initialReelIndex);
-        // Reset video state
+    }, [initialReelIndex]);
+
+    useEffect(() => {
         setIsPlaying(true);
         setProgress(0);
-    }, [initialReelIndex]);
+        setTouchOffset(0);
+        if (videoRef.current) {
+            videoRef.current.currentTime = 0;
+            videoRef.current.play().catch(() => { });
+        }
+    }, [currentIndex]);
 
     // Keyboard Navigation
     useEffect(() => {
@@ -89,19 +98,38 @@ export const ReelModal: React.FC<ReelModalProps> = ({
 
     const handleTouchStart = (e: React.TouchEvent) => {
         touchStartY.current = e.touches[0].clientY;
+        setIsDragging(true);
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (touchStartY.current === null) return;
+        const currentY = e.touches[0].clientY;
+        const diff = currentY - touchStartY.current;
+        setTouchOffset(diff);
     };
 
     const handleTouchEnd = (e: React.TouchEvent) => {
+        setIsDragging(false);
         if (touchStartY.current === null) return;
-        const diff = touchStartY.current - e.changedTouches[0].clientY;
 
-        if (Math.abs(diff) > 50) { // Threshold
-            if (diff > 0) { // Swipe Up
-                handleNext();
-            } else { // Swipe Down
-                handlePrev();
+        const diff = touchOffset;
+        const threshold = 100; // Swipe threshold
+
+        if (Math.abs(diff) > threshold) {
+            if (diff < 0) { // Swipe Up -> Next
+                if (currentIndex < reels.length - 1) {
+                    handleNext();
+                }
+            } else { // Swipe Down -> Prev
+                if (currentIndex > 0) {
+                    handlePrev();
+                } else {
+                    // Pull down to close? User didn't request, but standard behavior. 
+                    // For now just rubber band back if no prev.
+                }
             }
         }
+        setTouchOffset(0);
         touchStartY.current = null;
     };
 
@@ -149,8 +177,13 @@ export const ReelModal: React.FC<ReelModalProps> = ({
 
             {/* Main Container */}
             <div
-                className="relative w-full h-full md:max-w-md md:max-h-[80vh] md:rounded-2xl overflow-hidden bg-zinc-900 shadow-2xl"
+                className="relative w-full h-full md:max-w-md md:max-h-[80vh] md:rounded-2xl overflow-hidden bg-zinc-900 shadow-2xl transition-transform ease-out"
+                style={{
+                    transform: `translateY(${touchOffset}px)`,
+                    transitionDuration: isDragging ? '0ms' : '300ms'
+                }}
                 onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
             >
                 {/* Navigation Buttons (Desktop - Inside Card) */}
@@ -183,8 +216,8 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                                 src={currentReel.url}
                                 className="w-full h-full object-contain bg-black"
                                 autoPlay
-                                loop
                                 playsInline
+                                onEnded={handleNext}
                                 onTimeUpdate={handleTimeUpdate}
                                 onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
                             />
@@ -212,7 +245,7 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                 </div>
 
                 {/* Right Side Actions */}
-                <div className="absolute bottom-20 right-2 flex flex-col gap-6 items-center z-10">
+                <div className={`absolute bottom-20 right-2 flex flex-col gap-6 items-center z-10 transition-opacity duration-300 ${isPlaying ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                     <button
                         onClick={(e) => { e.stopPropagation(); setIsLiked(!isLiked); }}
                         className="flex flex-col items-center gap-1 group"
@@ -237,7 +270,7 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                 </div>
 
                 {/* Bottom Info Area */}
-                <div className="absolute bottom-0 left-0 right-0 z-20 pb-safe">
+                <div className={`absolute bottom-0 left-0 right-0 z-20 pb-safe transition-opacity duration-300 ${isPlaying ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                     <div className="px-4 pb-4 text-white">
                         <div className="flex items-center gap-2 mb-2">
                             <h3 className="font-bold text-lg drop-shadow-md line-clamp-1">{entityName}</h3>

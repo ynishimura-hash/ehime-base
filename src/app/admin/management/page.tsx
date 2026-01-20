@@ -229,6 +229,7 @@ function AdminManagementContent() {
     );
 
     const renderUsers = () => (
+        <div className="space-y-4">
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-black text-slate-900">求職者一覧</h2>
                 <div className="flex gap-2">
@@ -245,7 +246,7 @@ function AdminManagementContent() {
                     >
                         <Upload size={18} /> CSV登録
                     </button>
-                    <button 
+                    <button
                         onClick={() => { setEditingItem({}); setEditMode('user'); setActionType('create'); }}
                         className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all"
                     >
@@ -306,7 +307,7 @@ function AdminManagementContent() {
                     </tbody>
                 </table>
             </div>
-            { renderBulkActions() }
+            {renderBulkActions()}
         </div >
     );
 

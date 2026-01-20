@@ -725,7 +725,15 @@ function AdminManagementContent() {
                         .update({
                             name: editingItem.name,
                             industry: editingItem.industry,
-                            location: editingItem.location
+                            location: editingItem.location,
+                            representative_name: editingItem.representative_name,
+                            established_date: editingItem.established_date,
+                            employee_count: editingItem.employee_count,
+                            capital: editingItem.capital,
+                            business_content: editingItem.business_content,
+                            phone: editingItem.phone,
+                            website_url: editingItem.website_url,
+                            description: editingItem.description
                         })
                         .eq('id', editingItem.id);
                     if (error) throw error;
@@ -744,7 +752,15 @@ function AdminManagementContent() {
                         .update({
                             title: editingItem.title,
                             type: editingItem.type,
-                            description: editingItem.description
+                            description: editingItem.description,
+                            salary: editingItem.salary,
+                            employment_type: editingItem.employment_type,
+                            working_hours: editingItem.working_hours,
+                            holidays: editingItem.holidays,
+                            benefits: editingItem.benefits,
+                            qualifications: editingItem.qualifications,
+                            access: editingItem.access,
+                            content: editingItem.content
                         })
                         .eq('id', editingItem.id);
                     if (error) throw error;
@@ -1069,18 +1085,82 @@ function AdminManagementContent() {
                                     />
                                 </div>
                             </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">代表者名</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.representative_name || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, representative_name: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">設立日</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.established_date || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, established_date: e.target.value })}
+                                        placeholder="例: 2000年4月1日"
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">従業員数</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.employee_count || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, employee_count: e.target.value })}
+                                        placeholder="例: 100名"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">資本金</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.capital || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, capital: e.target.value })}
+                                        placeholder="例: 1000万円"
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">電話番号</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.phone || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, phone: e.target.value })}
+                                        placeholder="089-000-0000"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">WebサイトURL</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.website_url || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, website_url: e.target.value })}
+                                        placeholder="https://example.com"
+                                    />
+                                </div>
+                            </div>
                             <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">WebサイトURL</label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                    value={editingItem.website_url || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, website_url: e.target.value })}
-                                    placeholder="https://example.com"
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">事業内容</label>
+                                <textarea
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[80px]"
+                                    value={editingItem.business_content || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, business_content: e.target.value })}
+                                    placeholder="事業内容の概要..."
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">説明文</label>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">説明文 (詳細)</label>
                                 <textarea
                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[100px]"
                                     value={editingItem.description || ''}
@@ -1133,6 +1213,78 @@ function AdminManagementContent() {
                                     value={editingItem.content || editingItem.description || ''}
                                     onChange={e => setEditingItem({ ...editingItem, content: e.target.value, description: e.target.value })}
                                     placeholder="求人の詳細内容..."
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">給与</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.salary || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, salary: e.target.value })}
+                                        placeholder="例: 月給 25万円〜"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">雇用形態</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.employment_type || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, employment_type: e.target.value })}
+                                        placeholder="例: 正社員"
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">勤務時間</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.working_hours || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, working_hours: e.target.value })}
+                                        placeholder="例: 9:00 - 18:00"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">休日</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.holidays || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, holidays: e.target.value })}
+                                        placeholder="例: 土日祝"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">福利厚生</label>
+                                <textarea
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[60px]"
+                                    value={editingItem.benefits || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, benefits: e.target.value })}
+                                    placeholder="福利厚生..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">応募条件</label>
+                                <textarea
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[60px]"
+                                    value={editingItem.qualifications || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, qualifications: e.target.value })}
+                                    placeholder="必要な資格や経験..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">アクセス</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                    value={editingItem.access || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, access: e.target.value })}
+                                    placeholder="アクセス..."
                                 />
                             </div>
                         </>

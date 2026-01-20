@@ -166,7 +166,7 @@ export const ReelModal: React.FC<ReelModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+        <div className="fixed inset-0 z-[100] h-[100dvh] bg-black flex items-center justify-center">
             {/* Close Button */}
             <button
                 onClick={onClose}
@@ -206,6 +206,7 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                 )}
                 {/* Video Player */}
                 <div
+                    key={currentReel.url}
                     className="w-full h-full flex items-center justify-center bg-black relative cursor-pointer"
                     onClick={currentReel.type === 'file' ? togglePlay : undefined}
                 >
@@ -236,7 +237,8 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                             className="w-full h-full pointer-events-none"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
-                            style={{ pointerEvents: 'auto' }}
+                            allowFullScreen
+                            style={{ pointerEvents: 'none' }}
                         />
                     )}
 
@@ -245,7 +247,7 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                 </div>
 
                 {/* Right Side Actions */}
-                <div className={`absolute bottom-20 right-2 flex flex-col gap-6 items-center z-10 transition-opacity duration-300 ${isPlaying ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                <div className="absolute bottom-20 right-2 flex flex-col gap-6 items-center z-10">
                     <button
                         onClick={(e) => { e.stopPropagation(); setIsLiked(!isLiked); }}
                         className="flex flex-col items-center gap-1 group"
@@ -270,7 +272,7 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                 </div>
 
                 {/* Bottom Info Area */}
-                <div className={`absolute bottom-0 left-0 right-0 z-20 pb-safe transition-opacity duration-300 ${isPlaying ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                <div className="absolute bottom-0 left-0 right-0 z-20 pb-safe">
                     <div className="px-4 pb-4 text-white">
                         <div className="flex items-center gap-2 mb-2">
                             <h3 className="font-bold text-lg drop-shadow-md line-clamp-1">{entityName}</h3>

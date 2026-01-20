@@ -5,7 +5,7 @@ import { useAppStore } from '@/lib/appStore';
 import {
     Building2, Briefcase, GraduationCap, Users,
     Search, Edit3, Trash2, Eye, X, CheckSquare, Square,
-    Plus, ChevronLeft, Upload, Video, FileVideo, Save, ArrowRight
+    Plus, ChevronLeft, Upload, Video, FileVideo, Save, ArrowRight, Link as LinkIcon
 } from 'lucide-react';
 
 import Link from 'next/link';
@@ -969,70 +969,84 @@ function AdminManagementContent() {
                         動画はまだアップロードされていません
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-3">
                         {mediaItems.map((item) => {
                             const isShorts = item.public_url.includes('shorts/');
                             return (
-                                <div key={item.id} className="group relative rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
-                                    {item.type === 'youtube' ? (
-                                        <div className={`relative ${isShorts ? 'aspect-[9/16]' : 'aspect-video'} bg-black`}>
+                                <div key={item.id} className="group flex items-start gap-4 p-3 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition-colors">
+                                    {/* Thumbnail Area - Compact & Unified Vertical Ratio */}
+                                    <div className="shrink-0 w-24 aspect-[9/16] bg-black rounded-lg overflow-hidden relative shadow-sm">
+                                        {item.type === 'youtube' ? (
                                             <iframe
                                                 width="100%"
                                                 height="100%"
                                                 src={`https://www.youtube.com/embed/${getYouTubeID(item.public_url)}`}
-                                                title="YouTube video player"
+                                                title="YouTube"
                                                 frameBorder="0"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen
+                                                className="pointer-events-none" // Disable interaction in list view for meaningful drag/click if needed, but here just display
                                             />
-                                        </div>
-                                    ) : (
-                                        <video src={item.public_url} className="w-full aspect-video object-cover" controls />
-                                    )}
-                                    <div className="p-4">
-                                        <div className="flex items-start justify-between mb-2">
-                                            <p className="font-black text-slate-800 text-sm truncate flex-1" title={item.filename}>
-                                                {item.filename}
-                                            </p>
-                                            {item.type === 'youtube' && <span className="bg-red-100 text-red-600 text-[10px] font-black px-1.5 py-0.5 rounded">YT</span>}
-                                        </div>
-
-                                        {/* Linked Info */}
-                                        {(item.company_id || item.job_id) && (
-                                            <div className="mb-2">
-                                                {item.company_id && <span className="block text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded mb-1">社: {realCompanies.find(c => c.id === item.company_id)?.name}</span>}
-                                                {item.job_id && <span className="block text-[10px] bg-blue-50 text-blue-500 px-2 py-1 rounded">Job: {realJobs.find(j => j.id === item.job_id)?.title}</span>}
-                                            </div>
+                                        ) : (
+                                            <video src={item.public_url} className="w-full h-full object-cover" />
                                         )}
+                                        {item.type === 'youtube' && <span className="absolute top-1 right-1 bg-red-600 text-white text-[8px] font-black px-1 rounded shadow-sm">YT</span>}
+                                    </div>
 
-                                        <p className="text-[10px] text-slate-400 font-bold mt-1">
-                                            {new Date(item.created_at).toLocaleDateString()}
-                                        </p>
-                                        <div className="mt-3 flex items-center justify-between">
-                                            <button
-                                                onClick={() => {
-                                                    navigator.clipboard.writeText(item.public_url);
-                                                    toast.success('URLをコピーしました');
-                                                }}
-                                                className="text-xs font-black text-blue-600 hover:underline"
-                                            >
-                                                URLコピー
-                                            </button>
-                                            <button
-                                                onClick={async () => {
-                                                    if (!confirm('本当に削除しますか？')) return;
-                                                    const { error } = await supabase.from('media_library').delete().eq('id', item.id);
-                                                    if (error) {
-                                                        toast.error('削除に失敗しました');
-                                                    } else {
-                                                        toast.success('削除しました');
-                                                        fetchMedia();
-                                                    }
-                                                }}
-                                                className="text-xs font-black text-red-400 hover:text-red-600"
-                                            >
-                                                削除
-                                            </button>
+                                    {/* Info Area */}
+                                    <div className="flex-1 min-w-0 py-1">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <p className="font-black text-slate-800 text-sm truncate pr-4" title={item.filename}>
+                                                    {item.filename || 'No Title'}
+                                                </p>
+                                                {/* Linked Info Tags */}
+                                                {(item.company_id || item.job_id) && (
+                                                    <div className="flex flex-wrap gap-2 mt-1.5">
+                                                        {item.company_id && (
+                                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-600">
+                                                                <Building2 size={10} /> {realCompanies.find(c => c.id === item.company_id)?.name}
+                                                            </span>
+                                                        )}
+                                                        {item.job_id && (
+                                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md text-blue-600">
+                                                                <Briefcase size={10} /> {realJobs.find(j => j.id === item.job_id)?.title}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Date & Actions */}
+                                            <div className="flex flex-col items-end gap-2 shrink-0">
+                                                <span className="text-[10px] font-bold text-slate-400">
+                                                    {new Date(item.created_at).toLocaleDateString()}
+                                                </span>
+                                                <div className="flex items-center gap-3">
+                                                    <button
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(item.public_url);
+                                                            toast.success('URL Copied');
+                                                        }}
+                                                        className="text-slate-400 hover:text-blue-600 transition-colors"
+                                                        title="URLコピー"
+                                                    >
+                                                        <LinkIcon size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (!confirm('削除しますか？')) return;
+                                                            const { error } = await supabase.from('media_library').delete().eq('id', item.id);
+                                                            if (!error) {
+                                                                toast.success('削除しました');
+                                                                fetchMedia();
+                                                            }
+                                                        }}
+                                                        className="text-slate-400 hover:text-red-600 transition-colors"
+                                                        title="削除"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

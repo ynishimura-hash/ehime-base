@@ -755,82 +755,256 @@ function AdminManagementContent() {
                 <div className="space-y-4">
                     {editMode === 'user' && (
                         <>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">名前</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.full_name || editingItem.name || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, full_name: e.target.value, name: e.target.value })}
-                                        placeholder="氏名"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">ユーザータイプ</label>
-                                    <select
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.user_type || 'student'}
-                                        onChange={e => setEditingItem({ ...editingItem, user_type: e.target.value })}
+                            <div className="flex bg-slate-100 rounded-xl p-1 mb-6">
+                                {['basic', 'detail', 'activity', 'analysis'].map((tab) => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setModalTab(tab as any)}
+                                        className={`flex-1 py-2 text-xs font-black rounded-lg transition-all ${modalTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                     >
-                                        <option value="student">Student (求職者)</option>
-                                        <option value="company">Company (企業)</option>
-                                        <option value="specialist">Specialist</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
+                                        {tab === 'basic' && '基本情報'}
+                                        {tab === 'detail' && '詳細情報'}
+                                        {tab === 'activity' && '活動履歴'}
+                                        {tab === 'analysis' && '診断・分析'}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {modalTab === 'basic' && (
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">姓 (Last Name)</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                                value={editingItem.last_name || ''}
+                                                onChange={e => setEditingItem({ ...editingItem, last_name: e.target.value, full_name: `${e.target.value} ${editingItem.first_name || ''}` })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">名 (First Name)</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                                value={editingItem.first_name || ''}
+                                                onChange={e => setEditingItem({ ...editingItem, first_name: e.target.value, full_name: `${editingItem.last_name || ''} ${e.target.value}` })}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">表示氏名 (Full Name)</label>
+                                        <input
+                                            type="text"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                            value={editingItem.full_name || editingItem.name || ''}
+                                            onChange={e => setEditingItem({ ...editingItem, full_name: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">メールアドレス</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-500 cursor-not-allowed"
+                                                value={editingItem.email || ''}
+                                                readOnly
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">電話番号</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                                value={editingItem.phone || ''}
+                                                onChange={e => setEditingItem({ ...editingItem, phone: e.target.value })}
+                                                placeholder="090-0000-0000"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">生年月日</label>
+                                            <input
+                                                type="date"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                                value={editingItem.dob || ''}
+                                                onChange={e => setEditingItem({ ...editingItem, dob: e.target.value })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">年齢</label>
+                                            <div className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-500">
+                                                {editingItem.dob ? Math.floor((new Date().getTime() - new Date(editingItem.dob).getTime()) / 3.15576e10) + '歳' : '-'}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">性別</label>
+                                            <select
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                                value={editingItem.gender || 'unspecified'}
+                                                onChange={e => setEditingItem({ ...editingItem, gender: e.target.value })}
+                                            >
+                                                <option value="male">男性</option>
+                                                <option value="female">女性</option>
+                                                <option value="other">その他</option>
+                                                <option value="unspecified">未指定</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">ユーザータイプ</label>
+                                        <select
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                            value={editingItem.user_type || 'student'}
+                                            onChange={e => setEditingItem({ ...editingItem, user_type: e.target.value })}
+                                        >
+                                            <option value="student">Student (求職者)</option>
+                                            <option value="company">Company (企業)</option>
+                                            <option value="specialist">Specialist</option>
+                                            <option value="admin">Admin</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">メールアドレス (参照のみ)</label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-500 cursor-not-allowed"
-                                    value={editingItem.email || ''}
-                                    readOnly
-                                    placeholder="メールアドレス"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">大学・所属</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.university || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, university: e.target.value })}
-                                        placeholder="例：愛媛大学"
-                                    />
+                            )}
+
+                            {modalTab === 'detail' && (
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">会社名</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                                value={editingItem.company_name || ''}
+                                                onChange={e => setEditingItem({ ...editingItem, company_name: e.target.value })}
+                                                placeholder="会社名（社会人の場合）"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">部署・所属</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                                value={editingItem.department || ''}
+                                                onChange={e => setEditingItem({ ...editingItem, department: e.target.value })}
+                                                placeholder="部署名"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">大学・所属</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                                value={editingItem.university || ''}
+                                                onChange={e => setEditingItem({ ...editingItem, university: e.target.value })}
+                                                placeholder="例：愛媛大学"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">学部・部署</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                                value={editingItem.faculty || ''}
+                                                onChange={e => setEditingItem({ ...editingItem, faculty: e.target.value })}
+                                                placeholder="例：法文学部"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">自己紹介 (Bio)</label>
+                                        <textarea
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[100px]"
+                                            value={editingItem.bio || ''}
+                                            onChange={e => setEditingItem({ ...editingItem, bio: e.target.value })}
+                                            placeholder="自己紹介文..."
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">タグ</label>
+                                        <input
+                                            type="text"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                            value={Array.isArray(editingItem.tags) ? editingItem.tags.join(',') : (editingItem.tags || '')}
+                                            onChange={e => setEditingItem({ ...editingItem, tags: e.target.value.split(',') })}
+                                            placeholder="カンマ区切り"
+                                        />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">学部・部署</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.faculty || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, faculty: e.target.value })}
-                                        placeholder="例：法文学部"
-                                    />
+                            )}
+
+                            {modalTab === 'activity' && (
+                                <div className="space-y-6">
+                                    <div>
+                                        <h4 className="text-sm font-black text-slate-900 mb-2">eラーニング受講履歴</h4>
+                                        <div className="bg-slate-50 rounded-xl p-4 min-h-[50px] text-xs">
+                                            {relatedData.courses?.length > 0 ? (
+                                                relatedData.courses.map((c: any) => (
+                                                    <div key={c.id} className="flex justify-between py-1 border-b border-slate-100 last:border-0">
+                                                        <span>{c.courses?.title || 'Unknown Course'}</span>
+                                                        <span className={c.status === 'completed' ? 'text-green-600 font-bold' : 'text-slate-500'}>{c.status}</span>
+                                                    </div>
+                                                ))
+                                            ) : <div className="text-slate-400">履歴なし</div>}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-black text-slate-900 mb-2">求人応募履歴</h4>
+                                        <div className="bg-slate-50 rounded-xl p-4 min-h-[50px] text-xs">
+                                            {relatedData.applications?.length > 0 ? (
+                                                relatedData.applications.map((app: any) => (
+                                                    <div key={app.id} className="flex justify-between py-1 border-b border-slate-100 last:border-0">
+                                                        <span>{app.jobs?.title || 'Unknown Job'}</span>
+                                                        <span className="font-bold text-blue-600">{app.status}</span>
+                                                    </div>
+                                                ))
+                                            ) : <div className="text-slate-400">応募履歴なし</div>}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-black text-slate-900 mb-2">気になるリスト (Saved)</h4>
+                                        <div className="bg-slate-50 rounded-xl p-4 min-h-[50px] text-xs">
+                                            {relatedData.bookmarks?.length > 0 ? (
+                                                relatedData.bookmarks.map((b: any) => (
+                                                    <div key={b.id} className="py-1 border-b border-slate-100 last:border-0">
+                                                        {b.item_type}: {b.item_id}
+                                                    </div>
+                                                ))
+                                            ) : <div className="text-slate-400">保存アイテムなし</div>}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-black text-slate-900 mb-2">閲覧履歴 (Views)</h4>
+                                        <div className="bg-slate-50 rounded-xl p-4 min-h-[50px] text-xs max-h-[150px] overflow-y-auto">
+                                            {relatedData.logs?.length > 0 ? (
+                                                relatedData.logs.map((log: any) => (
+                                                    <div key={log.id} className="flex justify-between py-1 border-b border-slate-100 last:border-0">
+                                                        <span>{log.item_type} viewed</span>
+                                                        <span className="text-slate-400">{new Date(log.viewed_at).toLocaleDateString()}</span>
+                                                    </div>
+                                                ))
+                                            ) : <div className="text-slate-400">履歴なし</div>}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">自己紹介 (Bio)</label>
-                                <textarea
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[100px]"
-                                    value={editingItem.bio || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, bio: e.target.value })}
-                                    placeholder="自己紹介文..."
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">タグ (カンマ区切り)</label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                    value={Array.isArray(editingItem.tags) ? editingItem.tags.join(',') : (editingItem.tags || '')}
-                                    onChange={e => setEditingItem({ ...editingItem, tags: e.target.value.split(',') })}
-                                    placeholder="例：営業, マーケティング, 愛媛"
-                                />
-                            </div>
+                            )}
+
+                            {modalTab === 'analysis' && (
+                                <div className="space-y-4">
+                                    <div className="bg-slate-50 p-4 rounded-xl">
+                                        <h4 className="font-black text-slate-900 mb-2">診断結果 (JSON)</h4>
+                                        <pre className="text-xs text-slate-600 overflow-x-auto">
+                                            {JSON.stringify(editingItem.diagnosis_result || {}, null, 2)}
+                                        </pre>
+                                    </div>
+                                    <div className="text-center p-4">
+                                        <p className="text-xs text-slate-400">※ 占い結果や詳細診断は実装に合わせてここに表示されます</p>
+                                    </div>
+                                </div>
+                            )}
                         </>
                     )}
                     {editMode === 'company' && (

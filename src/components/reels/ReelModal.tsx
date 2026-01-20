@@ -45,6 +45,22 @@ export const ReelModal: React.FC<ReelModalProps> = ({
         setCurrentIndex(initialReelIndex);
     }, [initialReelIndex]);
 
+    // Keyboard Navigation
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                handleNext();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                handlePrev();
+            } else if (e.key === 'Escape') {
+                onClose();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, currentIndex, reels]);
+
     if (!isOpen || !reels || reels.length === 0) return null;
 
     const currentReel = reels[currentIndex];

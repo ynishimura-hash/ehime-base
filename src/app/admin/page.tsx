@@ -117,7 +117,17 @@ export default function AdminDashboardPage() {
                 {/* Stats Grid */}
                 <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {stats.map((stat, i) => (
-                        <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm group hover:scale-[1.02] hover:shadow-xl transition-all cursor-default">
+                        <Link
+                            key={i}
+                            href={
+                                stat.label === '登録ユーザー' ? '/admin/management?tab=users' :
+                                    stat.label === '提携企業' ? '/admin/management?tab=companies' :
+                                        stat.label === '公開求人' ? '/admin/management?tab=jobs' :
+                                            stat.label === 'eラーニング数' ? '/admin/management?tab=learning' :
+                                                '/admin'
+                            }
+                            className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm group hover:scale-[1.02] hover:shadow-xl transition-all block"
+                        >
                             <div className="flex items-start justify-between mb-4">
                                 <div className={`${stat.bg} ${stat.color} p-3 rounded-2xl`}>
                                     <stat.icon size={24} />
@@ -130,7 +140,7 @@ export default function AdminDashboardPage() {
                                 <p className="text-slate-400 text-xs font-black uppercase tracking-widest">{stat.label}</p>
                                 <p className="text-4xl font-black text-slate-900 mt-2 tracking-tighter">{stat.value}</p>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </section>
 

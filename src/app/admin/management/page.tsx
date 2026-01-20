@@ -3,9 +3,9 @@
 import React, { useState, Suspense } from 'react';
 import { useAppStore } from '@/lib/appStore';
 import {
-    Building2, Briefcase, GraduationCap,
-    Search, Edit3, Trash2, Eye,
-    Plus, ChevronLeft, Upload, Video, FileVideo
+    Building2, Briefcase, GraduationCap, Users,
+    Search, Edit3, Trash2, Eye, X, CheckSquare, Square,
+    Plus, ChevronLeft, Upload, Video, FileVideo, Save
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -23,13 +23,30 @@ function AdminManagementContent() {
     const videoInputRef = React.useRef<HTMLInputElement>(null);
     const [mediaItems, setMediaItems] = useState<any[]>([]);
     const [uploading, setUploading] = useState(false);
+
+    // New State for Users and Editing/Bulk
+    const [realUsers, setRealUsers] = useState<any[]>([]);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [editingItem, setEditingItem] = useState<any | null>(null);
+    const [editMode, setEditMode] = useState<'user' | 'company' | null>(null);
+
     const supabase = createClient();
 
     React.useEffect(() => {
         if (currentTab === 'media') {
             fetchMedia();
+        } else if (currentTab === 'users') {
+            fetchUsers();
         }
     }, [currentTab]);
+
+    const fetchUsers = async () => {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (!error && data) setRealUsers(data);
+    };
 
     const fetchMedia = async () => {
         const { data, error } = await supabase
@@ -129,6 +146,107 @@ function AdminManagementContent() {
     if (activeRole !== 'admin') {
         return <div className="p-10 text-center font-black">Authentication Required</div>;
     }
+
+    const toggleSelection = (id: string) => {
+        const newSet = new Set(selectedIds);
+        if (newSet.has(id)) newSet.delete(id);
+        else newSet.add(id);
+        setSelectedIds(newSet);
+    };
+
+    const toggleAll = (ids: string[]) => {
+        if (selectedIds.size === ids.length) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(ids));
+        }
+    };
+
+    const handleBulkAction = async (action: 'delete' | 'verify') => {
+        if (!confirm(`${selectedIds.size}件のアイテムに対して操作を実行しますか？`)) return;
+
+        // Mock Implementation for now
+        toast.info('一括操作を実行しました（バックエンド未接続）');
+        setSelectedIds(new Set());
+    };
+
+    const renderBulkActions = () => (
+        <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-6 transition-all transform ${selectedIds.size > 0 ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+            <span className="font-bold text-sm">{selectedIds.size} 選択中</span>
+            <div className="h-4 w-px bg-white/20" />
+            <button onClick={() => handleBulkAction('verify')} className="text-xs font-bold hover:text-blue-300 flex items-center gap-2">
+                <CheckSquare size={16} /> 承認/認証
+            </button>
+            <button onClick={() => handleBulkAction('delete')} className="text-xs font-bold hover:text-red-300 flex items-center gap-2">
+                <Trash2 size={16} /> 削除
+            </button>
+            <button onClick={() => setSelectedIds(new Set())} className="ml-2 p-1 hover:bg-white/20 rounded-full">
+                <X size={16} />
+            </button>
+        </div>
+    );
+
+    const renderUsers = () => (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-black text-slate-900">求職者一覧</h2>
+            </div>
+            <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
+                <table className="w-full text-left border-collapse">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th className="px-6 py-4 w-12">
+                                <button onClick={() => toggleAll(realUsers.map(u => u.id))}>
+                                    {selectedIds.size === realUsers.length && realUsers.length > 0 ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
+                                </button>
+                            </th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">ユーザー</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">タイプ</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">登録日</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">アクション</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {realUsers.map(user => (
+                            <tr key={user.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(user.id) ? 'bg-blue-50/50' : ''}`}>
+                                <td className="px-6 py-4">
+                                    <button onClick={() => toggleSelection(user.id)}>
+                                        {selectedIds.has(user.id) ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
+                                    </button>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                        <img src={user.avatar_url || 'https://via.placeholder.com/40'} className="w-10 h-10 rounded-full object-cover" alt="" />
+                                        <div>
+                                            <div className="font-black text-slate-800">{user.full_name || 'No Name'}</div>
+                                            <div className="text-xs text-slate-400 font-bold">{user.email}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <span className={`px-2 py-1 rounded-lg text-xs font-black ${user.user_type === 'student' ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-600'}`}>
+                                        {user.user_type}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 text-xs font-bold text-slate-500">
+                                    {new Date(user.created_at).toLocaleDateString()}
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                    <button
+                                        onClick={() => { setEditingItem(user); setEditMode('user'); }}
+                                        className="p-2 text-slate-400 hover:text-blue-600"
+                                    >
+                                        <Edit3 size={18} />
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            {renderBulkActions()}
+        </div>
+    );
 
     const renderCompanies = () => (
         <div className="space-y-4">
@@ -390,6 +508,75 @@ function AdminManagementContent() {
         </div>
     );
 
+    const handleSaveEdit = async () => {
+        if (!editingItem || !editMode) return;
+
+        // Save logic based on type
+        if (editMode === 'user') {
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    full_name: editingItem.full_name,
+                    user_type: editingItem.user_type
+                })
+                .eq('id', editingItem.id);
+
+            if (error) toast.error('更新に失敗しました');
+            else {
+                toast.success('更新しました');
+                setEditingItem(null);
+                fetchUsers();
+            }
+        }
+    };
+
+    const renderEditModal = () => (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white w-full max-w-lg rounded-3xl p-8 shadow-2xl space-y-6">
+                <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-black text-slate-900">詳細編集</h3>
+                    <button onClick={() => setEditingItem(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                        <X size={20} />
+                    </button>
+                </div>
+
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">名前</label>
+                        <input
+                            type="text"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                            value={editingItem.full_name || editingItem.name || ''}
+                            onChange={e => setEditingItem({ ...editingItem, full_name: e.target.value, name: e.target.value })}
+                        />
+                    </div>
+                    {editMode === 'user' && (
+                        <div>
+                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">ユーザータイプ</label>
+                            <select
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                value={editingItem.user_type}
+                                onChange={e => setEditingItem({ ...editingItem, user_type: e.target.value })}
+                            >
+                                <option value="student">Student (求職者)</option>
+                                <option value="company">Company (企業)</option>
+                                <option value="specialist">Specialist</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-slate-100">
+                    <button onClick={() => setEditingItem(null)} className="flex-1 py-3 font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors">キャンセル</button>
+                    <button onClick={handleSaveEdit} className="flex-1 py-3 bg-blue-600 text-white font-black rounded-xl hover:bg-blue-500 transition-colors flex items-center justify-center gap-2">
+                        <Save size={18} /> 保存する
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+
     return (
         <div className="min-h-screen bg-slate-50">
             <div className="max-w-7xl mx-auto px-6 py-10">
@@ -398,7 +585,13 @@ function AdminManagementContent() {
                 </Link>
 
                 <main className="space-y-10">
-                    <div className="flex gap-1 bg-slate-200 p-1.5 rounded-[2rem] self-start inline-flex">
+                    <div className="flex gap-1 bg-slate-200 p-1.5 rounded-[2rem] self-start inline-flex flex-wrap">
+                        <button
+                            onClick={() => router.push('?tab=users')}
+                            className={`px-8 py-3.5 rounded-3xl text-sm font-black transition-all ${currentTab === 'users' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:bg-white/50'}`}
+                        >
+                            <Users size={16} className="inline mr-2" /> 求職者
+                        </button>
                         <button
                             onClick={() => router.push('?tab=companies')}
                             className={`px-8 py-3.5 rounded-3xl text-sm font-black transition-all ${currentTab === 'companies' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:bg-white/50'}`}
@@ -425,13 +618,16 @@ function AdminManagementContent() {
                         </button>
                     </div>
 
-                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
+                        {currentTab === 'users' && renderUsers()}
                         {currentTab === 'companies' && renderCompanies()}
                         {currentTab === 'jobs' && renderJobs()}
                         {currentTab === 'learning' && renderLearning()}
                         {currentTab === 'media' && renderMedia()}
                     </div>
                 </main>
+
+                {editingItem && renderEditModal()}
             </div>
         </div>
     );

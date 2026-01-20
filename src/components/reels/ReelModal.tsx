@@ -237,7 +237,6 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                             className="w-full h-full pointer-events-none"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
-                            allowFullScreen
                             style={{ pointerEvents: 'none' }}
                         />
                     )}

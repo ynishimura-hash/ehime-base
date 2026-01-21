@@ -846,7 +846,14 @@ function AdminManagementContent() {
                     .filter(c => c.title.toLowerCase().includes(searchQuery.toLowerCase()) || c.category.toLowerCase().includes(searchQuery.toLowerCase()))
                     .map(course => (
                         <div key={course.id} className="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm flex items-start gap-4">
-                            <img src={course.image} className="w-24 h-24 rounded-3xl object-cover" alt="" />
+                            <img
+                                src={course.image || course.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=200&h=200&fit=crop'}
+                                className="w-24 h-24 rounded-3xl object-cover"
+                                alt=""
+                                onError={(e) => {
+                                    e.currentTarget.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=200&h=200&fit=crop';
+                                }}
+                            />
                             <div className="flex-1">
                                 <h3 className="font-black text-slate-800 leading-tight">{course.title}</h3>
                                 <p className="text-xs text-slate-400 font-bold mt-1">{course.category} | {course.level}</p>
@@ -1520,16 +1527,12 @@ function AdminManagementContent() {
                     </div>
                 </div>
                 <div className="space-y-4">
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">サムネイルURL</label>
-                        <input
-                            type="text"
-                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 shadow-sm focus:border-blue-500 outline-none transition-all"
-                            value={editingItem.image || ''}
-                            onChange={e => setEditingItem({ ...editingItem, image: e.target.value })}
-                            placeholder="https://..."
-                        />
-                    </div>
+                    <ImageUpload
+                        currentImageUrl={editingItem.image || editingItem.thumbnail_url}
+                        onImageUploaded={(url) => setEditingItem({ ...editingItem, image: url, thumbnail_url: url })}
+                        label="サムネイル画像"
+                        folder="courses"
+                    />
                     <div>
                         <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">コース説明</label>
                         <textarea

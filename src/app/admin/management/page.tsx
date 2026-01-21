@@ -1205,6 +1205,7 @@ function AdminManagementContent() {
 
 
     const handleSaveEdit = async () => {
+        console.log('handleSaveEdit called!', { editMode, actionType, editingItem });
         if (!editingItem || !editMode) return;
 
         try {
@@ -1264,6 +1265,11 @@ function AdminManagementContent() {
                     toast.success('企業を作成しました');
                     fetchCompanies();
                 } else {
+                    console.log('Saving company with data:', {
+                        logo_url: editingItem.logo_url,
+                        cover_image_url: editingItem.cover_image_url,
+                        full_editingItem: editingItem
+                    });
                     const { error } = await supabase
                         .from('organizations')
                         .update({
@@ -1282,7 +1288,11 @@ function AdminManagementContent() {
                             cover_image_url: editingItem.cover_image_url
                         })
                         .eq('id', editingItem.id);
-                    if (error) throw error;
+                    if (error) {
+                        console.error('Save error:', error);
+                        throw error;
+                    }
+                    console.log('Save successful!');
                     toast.success('更新しました');
                     fetchCompanies();
                 }

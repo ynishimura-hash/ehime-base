@@ -17,7 +17,7 @@ export function ImageUpload({
     currentImageUrl,
     onImageUploaded,
     label = "画像をアップロード",
-    bucketName = "images",
+    bucketName = "image",
     folder = "uploads"
 }: ImageUploadProps) {
     const [uploading, setUploading] = useState(false);

@@ -1872,6 +1872,120 @@ function AdminManagementContent() {
                             </div>
                         </div>
                     )}
+
+                    {editMode === 'course' && renderCourseEdit()}
+
+                    {editMode === 'media' && (
+                        <div className="space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-6">
+                                    <div className="aspect-video bg-black rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white">
+                                        {editingItem.type === 'youtube' ? (
+                                            <iframe
+                                                width="100%"
+                                                height="100%"
+                                                src={`https://www.youtube.com/embed/${getYouTubeID(editingItem.public_url)}`}
+                                                title="YouTube"
+                                                frameBorder="0"
+                                                className="w-full h-full"
+                                            />
+                                        ) : (
+                                            <video src={editingItem.public_url} controls className="w-full h-full object-cover" />
+                                        )}
+                                    </div>
+                                    <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 flex items-center justify-between font-bold">
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">形式</p>
+                                            <p className="text-sm text-slate-700 uppercase">{editingItem.type || 'REEL'}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">登録日</p>
+                                            <p className="text-sm text-slate-500">{editingItem.created_at ? new Date(editingItem.created_at).toLocaleDateString() : 'N/A'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block ml-1">動画タイトル</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-5 py-4 font-bold text-slate-900 focus:border-blue-500 outline-none transition-all"
+                                                placeholder="タイトルを入力..."
+                                                value={editingItem.title || ''}
+                                                onChange={e => setEditingItem({ ...editingItem, title: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block ml-1">説明・キャプション</label>
+                                            <textarea
+                                                className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-5 py-4 font-bold text-slate-900 focus:border-blue-500 outline-none transition-all min-h-[100px]"
+                                                placeholder="キャプションを入力..."
+                                                value={editingItem.caption || ''}
+                                                onChange={e => setEditingItem({ ...editingItem, caption: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block ml-1">リンクURL</label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 focus:border-blue-500 outline-none"
+                                                    placeholder="https://..."
+                                                    value={editingItem.link_url || ''}
+                                                    onChange={e => setEditingItem({ ...editingItem, link_url: e.target.value })}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block ml-1">リンクテキスト</label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 focus:border-blue-500 outline-none"
+                                                    placeholder="詳細を見る"
+                                                    value={editingItem.link_text || ''}
+                                                    onChange={e => setEditingItem({ ...editingItem, link_text: e.target.value })}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-slate-50 rounded-3xl p-6 space-y-4 border border-slate-100">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <LinkIcon size={16} className="text-blue-600" />
+                                            <h4 className="text-xs font-black text-slate-900">紐付け設定</h4>
+                                        </div>
+                                        <div className="grid grid-cols-1 gap-4">
+                                            <div>
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">関連企業</label>
+                                                <select
+                                                    className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-2 font-bold text-sm"
+                                                    value={editingItem.organization_id || ''}
+                                                    onChange={e => setEditingItem({ ...editingItem, organization_id: e.target.value })}
+                                                >
+                                                    <option value="">関連なし</option>
+                                                    {realCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">関連求人・クエスト</label>
+                                                <select
+                                                    className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-2 font-bold text-sm"
+                                                    value={editingItem.job_id || ''}
+                                                    onChange={e => setEditingItem({ ...editingItem, job_id: e.target.value })}
+                                                >
+                                                    <option value="">関連なし</option>
+                                                    {realJobs.map(j => <option key={j.id} value={j.id}>{j.title}</option>)}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="p-8 border-t border-slate-100 flex gap-4 bg-white shrink-0">

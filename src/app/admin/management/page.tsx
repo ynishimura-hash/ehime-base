@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createClient } from '@/utils/supabase/client';
+import { ImageUpload } from '@/components/ImageUpload';
 
 
 
@@ -1725,6 +1726,12 @@ function AdminManagementContent() {
                             </div>
                             {modalTab === 'basic' && (
                                 <div className="space-y-4">
+                                    <ImageUpload
+                                        currentImageUrl={editingItem.avatar_url}
+                                        onImageUploaded={(url) => setEditingItem({ ...editingItem, avatar_url: url })}
+                                        label="アバター画像"
+                                        folder="avatars"
+                                    />
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">姓</label>
@@ -1817,6 +1824,20 @@ function AdminManagementContent() {
 
                     {editMode === 'company' && (
                         <div className="space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                                <ImageUpload
+                                    currentImageUrl={editingItem.logo_url}
+                                    onImageUploaded={(url) => setEditingItem({ ...editingItem, logo_url: url })}
+                                    label="ロゴ画像"
+                                    folder="logos"
+                                />
+                                <ImageUpload
+                                    currentImageUrl={editingItem.cover_image_url}
+                                    onImageUploaded={(url) => setEditingItem({ ...editingItem, cover_image_url: url })}
+                                    label="カバー画像"
+                                    folder="covers"
+                                />
+                            </div>
                             <div className="grid grid-cols-1 gap-4">
                                 <div>
                                     <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">企業名</label>
@@ -1842,6 +1863,12 @@ function AdminManagementContent() {
 
                     {editMode === 'job' && (
                         <div className="space-y-6">
+                            <ImageUpload
+                                currentImageUrl={editingItem.cover_image_url || editingItem.cover_image}
+                                onImageUploaded={(url) => setEditingItem({ ...editingItem, cover_image_url: url, cover_image: url })}
+                                label="カバー画像"
+                                folder="jobs"
+                            />
                             <div className="grid grid-cols-1 gap-4">
                                 <div>
                                     <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">タイトル</label>

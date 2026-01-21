@@ -300,72 +300,7 @@ function AdminManagementContent() {
 
     // ... (Existing render methods)
 
-    // CSV Modal Component
-    const renderCsvModal = () => {
-        if (!showCsvModal || !csvTargetType) return null;
 
-        const targetFields = csvTargetType === 'company' ? COMPANY_FIELDS : JOB_FIELDS;
-
-        return (
-            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-                <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-2xl shadow-2xl overflow-y-auto max-h-[90vh]">
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                            <h2 className="text-2xl font-black text-slate-800">CSVデータの紐付け</h2>
-                            <p className="text-sm font-bold text-slate-400 mt-1">
-                                {csvData.length}件のデータが見つかりました。<br />
-                                データベースの項目とCSVの列を関連付けてください。
-                            </p>
-                        </div>
-                        <button onClick={() => setShowCsvModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-                            <X size={24} className="text-slate-400" />
-                        </button>
-                    </div>
-
-                    <div className="space-y-4 mb-8">
-                        {Object.entries(targetFields).map(([dbField, label]) => (
-                            <div key={dbField} className="flex items-center justify-between gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                <div className="flex-1">
-                                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-                                    <p className="font-bold text-slate-700 text-sm">
-                                        {csvMapping[dbField] ? `Preview: ${csvData[0][csvMapping[dbField]] || '(空)'}` : '(選択なし)'}
-                                    </p>
-                                </div>
-                                <ArrowRight className="text-slate-300" size={16} />
-                                <div className="flex-1">
-                                    <select
-                                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 font-bold text-sm text-slate-700"
-                                        value={csvMapping[dbField] || ''}
-                                        onChange={(e) => setCsvMapping({ ...csvMapping, [dbField]: e.target.value })}
-                                    >
-                                        <option value="">(インポートしない)</option>
-                                        {csvHeaders.map(h => (
-                                            <option key={h} value={h}>{h}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="flex justify-end gap-3">
-                        <button
-                            onClick={() => setShowCsvModal(false)}
-                            className="px-6 py-3 rounded-2xl font-black text-sm text-slate-500 hover:bg-slate-100 transition-colors"
-                        >
-                            キャンセル
-                        </button>
-                        <button
-                            onClick={executeCsvImport}
-                            className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-black text-sm hover:bg-blue-500 transition-all shadow-lg shadow-blue-200"
-                        >
-                            インポート実行
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    };
 
     const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -1186,6 +1121,90 @@ function AdminManagementContent() {
         }
     };
 
+    const renderCsvModal = () => {
+        let targetFields: Record<string, string> = {};
+        let title = '';
+        if (csvTargetType === 'company') { targetFields = COMPANY_FIELDS; title = '企業データインポート'; }
+        else if (csvTargetType === 'job') { targetFields = JOB_FIELDS; title = '求人データインポート'; }
+        else if (csvTargetType === 'user') { targetFields = USER_FIELDS; title = 'ユーザーデータインポート'; }
+        else if (csvTargetType === 'course') { targetFields = COURSE_FIELDS; title = 'コースデータインポート'; }
+
+        return (
+            <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                <div className="bg-white w-full max-w-4xl rounded-3xl p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xl font-black text-slate-900">{title} - 項目マッピング</h3>
+                        <button onClick={() => setShowCsvModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                            <X size={20} />
+                        </button>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-slate-50 text-slate-500 font-bold">
+                                <tr>
+                                    <th className="p-3 rounded-tl-xl">DB項目</th>
+                                    <th className="p-3 rounded-tr-xl">CSV列</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {Object.entries(targetFields).map(([key, label]) => (
+                                    <tr key={key}>
+                                        <td className="p-3 font-bold text-slate-700">{label}</td>
+                                        <td className="p-3">
+                                            <select
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 font-bold text-slate-900"
+                                                value={csvMapping[key] || ''}
+                                                onChange={(e) => setCsvMapping({ ...csvMapping, [key]: e.target.value })}
+                                            >
+                                                <option value="">(スキップ)</option>
+                                                {csvHeaders.map(h => (
+                                                    <option key={h} value={h}>{h}</option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="bg-slate-50 p-4 rounded-xl">
+                        <h4 className="font-bold text-slate-900 mb-2">プレビュー (最初の3件)</h4>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-xs text-left whitespace-nowrap">
+                                <thead className="text-slate-400 font-bold border-b border-slate-200">
+                                    <tr>
+                                        {Object.keys(targetFields).map(key => (
+                                            <th key={key} className="p-2">{targetFields[key]}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {csvData.slice(0, 3).map((row, i) => (
+                                        <tr key={i}>
+                                            {Object.entries(targetFields).map(([key, _]) => {
+                                                const csvHeader = csvMapping[key];
+                                                return <td key={key} className="p-2 text-slate-600">{csvHeader ? row[csvHeader] : '-'}</td>
+                                            })}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                        <button onClick={() => setShowCsvModal(false)} className="px-6 py-3 font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors">キャンセル</button>
+                        <button onClick={executeCsvImport} className="px-8 py-3 bg-blue-600 text-white font-black rounded-xl hover:bg-blue-500 transition-colors flex items-center gap-2">
+                            インポート実行
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const renderEditModal = () => (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
             <div className="bg-white w-full max-w-lg rounded-3xl p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
@@ -1764,6 +1783,7 @@ function AdminManagementContent() {
 
                 {editingItem && renderEditModal()}
                 {showMediaModal && renderMediaModal()}
+                {showCsvModal && renderCsvModal()}
             </div>
         </div>
     );

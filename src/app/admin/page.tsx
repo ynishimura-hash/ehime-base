@@ -9,15 +9,31 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { createClient } from '@/utils/supabase/client';
 
 export default function AdminDashboardPage() {
-    const { users, companies, jobs, interactions, activeRole, courses, fetchCourses } = useAppStore();
+    const { interactions, activeRole, courses, fetchCourses } = useAppStore();
+    const [counts, setCounts] = React.useState({ users: 0, companies: 0, jobs: 0, learning: 0 });
 
     React.useEffect(() => {
-        if (courses.length === 0) {
-            fetchCourses();
-        }
-    }, [courses.length, fetchCourses]);
+        const fetchStats = async () => {
+            const supabase = createClient();
+            const { count: userCount } = await supabase.from('users').select('*', { count: 'exact', head: true });
+            const { count: orgCount } = await supabase.from('organizations').select('*', { count: 'exact', head: true });
+            const { count: jobCount } = await supabase.from('jobs').select('*', { count: 'exact', head: true });
+
+            // Initial fetch for courses if needed, but assuming store handles it or we use media count
+            if (courses.length === 0) fetchCourses();
+
+            setCounts({
+                users: userCount || 0,
+                companies: orgCount || 0,
+                jobs: jobCount || 0,
+                learning: courses.length // Keep from store for now as table structure for courses is unclear
+            });
+        };
+        fetchStats();
+    }, [fetchCourses, courses.length]);
 
     const [password, setPassword] = React.useState('');
     const { loginAs } = useAppStore();
@@ -72,10 +88,10 @@ export default function AdminDashboardPage() {
     }
 
     const stats = [
-        { label: '登録ユーザー', value: users.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', trend: '+12%' },
-        { label: '提携企業', value: companies.length, icon: Building2, color: 'text-emerald-600', bg: 'bg-emerald-50', trend: '+3' },
-        { label: '公開求人', value: jobs.filter(j => j.type === 'job').length, icon: Briefcase, color: 'text-amber-600', bg: 'bg-amber-50', trend: '+8' },
-        { label: 'eラーニング数', value: courses.length, icon: GraduationCap, color: 'text-purple-600', bg: 'bg-purple-50', trend: '+1' },
+        { label: '登録ユーザー', value: counts.users, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', trend: 'Real' },
+        { label: '提携企業', value: counts.companies, icon: Building2, color: 'text-emerald-600', bg: 'bg-emerald-50', trend: 'Real' },
+        { label: '公開求人', value: counts.jobs, icon: Briefcase, color: 'text-amber-600', bg: 'bg-amber-50', trend: 'Real' },
+        { label: 'eラーニング数', value: counts.learning, icon: GraduationCap, color: 'text-purple-600', bg: 'bg-purple-50', trend: 'Store' },
     ];
 
     return (

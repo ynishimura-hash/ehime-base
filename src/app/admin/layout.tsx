@@ -11,7 +11,8 @@ import {
     Menu,
     Database,
     ShieldCheck,
-    FileText
+    FileText,
+    Eye
 } from 'lucide-react';
 import { useAppStore } from '@/lib/appStore';
 
@@ -58,6 +59,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     ))}
                 </nav>
 
+                <div className="px-4 pb-2">
+                    <Link
+                        href="/"
+                        target="_blank"
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                    >
+                        <Eye size={18} />
+                        Ehime Baseを見る
+                    </Link>
+                </div>
+
                 <div className="p-4 border-t border-slate-800">
                     <button
                         onClick={handleLogout}
@@ -94,6 +106,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                 {item.name}
                             </Link>
                         ))}
+                        <Link
+                            href="/"
+                            target="_blank"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="flex items-center gap-4 py-3 text-slate-400 font-bold border-b border-slate-800"
+                        >
+                            <Eye size={20} />
+                            Ehime Baseを見る
+                        </Link>
                         <button
                             onClick={handleLogout}
                             className="w-full flex items-center gap-4 py-3 text-slate-400 font-bold mt-8 text-left"

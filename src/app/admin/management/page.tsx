@@ -667,7 +667,7 @@ function AdminManagementContent() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <img src={company.image_url || 'https://via.placeholder.com/40'} className="w-10 h-10 rounded-xl object-cover" alt="" />
+                                            <img src={company.logo_url || company.cover_image_url || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=100&h=100&fit=crop'} className="w-10 h-10 rounded-xl object-cover" alt="" />
                                             <span className="font-black text-slate-800">{company.name}</span>
                                         </div>
                                     </td>
@@ -771,7 +771,16 @@ function AdminManagementContent() {
                                             {selectedIds.has(job.id) ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
                                         </button>
                                     </td>
-                                    <td className="px-6 py-4 font-black text-slate-800">{job.title}</td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <img
+                                                src={job.cover_image_url || job.cover_image || 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=100&h=100&fit=crop'}
+                                                className="w-10 h-10 rounded-xl object-cover"
+                                                alt=""
+                                            />
+                                            <span className="font-black text-slate-800">{job.title}</span>
+                                        </div>
+                                    </td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-black ${job.type === 'quest' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>
                                             {(job.type || 'job').toUpperCase()}

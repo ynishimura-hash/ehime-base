@@ -1878,8 +1878,8 @@ function AdminManagementContent() {
                     {editMode === 'media' && (
                         <div className="space-y-8">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="space-y-6 flex flex-col items-center justify-center bg-slate-900/5 rounded-[2.5rem] p-4 min-h-[400px]">
-                                    <div className="aspect-[9/16] bg-black rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white w-auto h-full max-h-[60vh] relative group/preview">
+                                <div className="space-y-6 flex flex-col items-center justify-center bg-slate-900/5 rounded-[2.5rem] p-4 h-[500px]">
+                                    <div className="aspect-[9/16] bg-black rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white h-full w-auto relative group/preview">
                                         {editingItem.type === 'youtube' ? (
                                             <iframe
                                                 width="100%"
@@ -1890,7 +1890,7 @@ function AdminManagementContent() {
                                                 className="w-full h-full"
                                             />
                                         ) : (
-                                            <video src={editingItem.public_url} controls className="w-full h-full object-cover" />
+                                            <video src={editingItem.public_url} controls className="w-full h-full object-contain" />
                                         )}
                                     </div>
                                     <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 flex items-center justify-between font-bold">

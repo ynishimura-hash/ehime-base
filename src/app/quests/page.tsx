@@ -38,7 +38,7 @@ function QuestsContent() {
                 *,
                 organization:organizations!inner (
                     id, name, industry, location, is_premium,
-                    logo_url, cover_image_url, logo_color, category
+                    cover_image_url, logo_color, category
                 )
             `)
             .eq('organization.status', 'approved')
@@ -48,7 +48,41 @@ function QuestsContent() {
             console.error('Error fetching quests:', error);
             toast.error('クエスト情報の取得に失敗しました');
         } else {
-            setQuests(data || []);
+            // Fetch media for each quest/company
+            const questsWithReels = await Promise.all((data || []).map(async (quest: any) => {
+                // Fetch reels for this quest (job)
+                const { data: questReels } = await supabase
+                    .from('media_library')
+                    .select('*')
+                    .eq('job_id', quest.id);
+
+                // Fetch reels for the company
+                const { data: companyReels } = await supabase
+                    .from('media_library')
+                    .select('*')
+                    .eq('organization_id', quest.organization.id)
+                    .is('job_id', null);
+
+                // Combine and transform to Reel format
+                const allReels = [...(questReels || []), ...(companyReels || [])];
+                const reels = allReels.map((media: any) => ({
+                    id: media.id,
+                    type: media.type || 'file',
+                    url: media.public_url,
+                    thumbnail: media.thumbnail_url || media.public_url,
+                    title: media.title || media.filename,
+                }));
+
+                return {
+                    ...quest,
+                    organization: {
+                        ...quest.organization,
+                        reels: reels,
+                    }
+                };
+            }));
+
+            setQuests(questsWithReels);
         }
         setLoading(false);
     };
@@ -297,7 +331,7 @@ function QuestsContent() {
                                 <div className="absolute right-6 top-1/2 -translate-y-1/2 z-10 transition-transform group-hover:scale-110">
                                     <ReelIcon
                                         reels={company?.reels || []}
-                                        fallbackImage={company?.logo_url}
+                                        fallbackImage={company?.cover_image_url}
                                         onClick={() => {
                                             setActiveReels(company?.reels || []);
                                             setActiveEntity({ name: quest.title, id: quest.id, companyId: company?.id });

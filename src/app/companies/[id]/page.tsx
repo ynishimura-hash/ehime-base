@@ -166,7 +166,7 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                             {reels.length > 0 && (
                                 <ReelIcon
                                     reels={reels}
-                                    fallbackImage={company.logo_url}
+                                    fallbackImage={company.cover_image_url}
                                     onClick={() => setIsReelModalOpen(true)}
                                 />
                             )}

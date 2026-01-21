@@ -3,7 +3,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/appStore';
-import { JOBS, COMPANIES } from '@/lib/dummyData';
 import { useSearchParams } from 'next/navigation';
 import { Building2, Heart, Search, Filter, X, ChevronDown, ChevronUp, MapPin, Briefcase, JapaneseYen, Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { ReelIcon } from '@/components/reels/ReelIcon';
@@ -15,7 +14,7 @@ import { toast } from 'sonner';
 function JobsContent() {
     const searchParams = useSearchParams();
     const { interactions, toggleInteraction, activeRole, currentUserId } = useAppStore();
-    const supabase = createClient(); // Use createClient inside component
+    const supabase = createClient();
 
     // Mapping area parameter to regional keywords
     const areaMap: Record<string, string> = {
@@ -30,7 +29,7 @@ function JobsContent() {
     const initialArea = areaMap[initialAreaParam] || '';
 
     // State
-    const [jobs, setJobs] = useState<any[]>([]); // Real jobs
+    const [jobs, setJobs] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     const [searchQuery, setSearchQuery] = useState(initialQ);
@@ -48,24 +47,62 @@ function JobsContent() {
     // Fetch Jobs from Supabase
     const fetchJobs = async () => {
         setLoading(true);
-        // Fetch jobs and inner join approved organizations
         const { data, error } = await supabase
             .from('jobs')
             .select(`
                 *,
                 organization:organizations!inner (
                     id, name, industry, location, is_premium,
-                    logo_url, cover_image_url
+                    cover_image_url
                 )
             `)
-            .eq('organization.status', 'approved')
-            .eq('type', 'job'); // Ensure only jobs
+            .eq('organization.status', 'approved');
 
         if (error) {
             console.error('Error fetching jobs:', error);
-            toast.error('求人情報の取得に失敗しました');
         } else {
-            setJobs(data || []);
+            // Client-side filtering
+            const rawJobs = data || [];
+            const filtered = rawJobs.filter((job: any) => {
+                const type = job.type || job.value_tags_ai?.type;
+                return type === 'job' || !type;
+            });
+
+            // Fetch media for each job/company
+            const jobsWithReels = await Promise.all(filtered.map(async (job: any) => {
+                // Fetch reels for this job
+                const { data: jobReels } = await supabase
+                    .from('media_library')
+                    .select('*')
+                    .eq('job_id', job.id);
+
+                // Fetch reels for the company
+                const { data: companyReels } = await supabase
+                    .from('media_library')
+                    .select('*')
+                    .eq('organization_id', job.organization.id)
+                    .is('job_id', null);
+
+                // Combine and transform to Reel format
+                const allReels = [...(jobReels || []), ...(companyReels || [])];
+                const reels = allReels.map((media: any) => ({
+                    id: media.id,
+                    type: media.type || 'file',
+                    url: media.public_url,
+                    thumbnail: media.thumbnail_url || media.public_url,
+                    title: media.title || media.filename,
+                }));
+
+                return {
+                    ...job,
+                    organization: {
+                        ...job.organization,
+                        reels: reels,
+                    }
+                };
+            }));
+
+            setJobs(jobsWithReels);
         }
         setLoading(false);
     };
@@ -74,19 +111,22 @@ function JobsContent() {
         fetchJobs();
     }, []);
 
-    const allTags = Array.from(new Set(jobs.flatMap(j => (j.tags || [])))); // Handle null tags if any
+    const allTags = Array.from(new Set(jobs.flatMap(j => (j.tags || []))));
 
     // Filtering Logic
     const filteredJobs = jobs.filter(job => {
         const company = job.organization;
+        // Merge value_tags_ai
+        const jobData = { ...job, ...job.value_tags_ai };
+
         const query = searchQuery.toLowerCase();
 
         // 1. Keyword Search
         const matchesSearch = !query ||
-            job.title?.toLowerCase().includes(query) ||
+            jobData.title?.toLowerCase().includes(query) ||
             company?.name?.toLowerCase().includes(query) ||
-            job.location?.toLowerCase().includes(query) ||
-            (job.tags || []).some((t: string) => t.toLowerCase().includes(query));
+            jobData.location?.toLowerCase().includes(query) ||
+            (jobData.tags || []).some((t: string) => t.toLowerCase().includes(query));
 
         // 2. Area Filter
         const regionCities: Record<string, string[]> = {
@@ -96,32 +136,30 @@ function JobsContent() {
         };
         const cities = regionCities[selectedArea] || [];
         const matchesArea = !selectedArea ||
-            job.location?.includes(selectedArea) ||
+            jobData.location?.includes(selectedArea) ||
             company?.location?.includes(selectedArea) ||
-            cities.some(city => job.location?.includes(city) || company?.location?.includes(city));
+            cities.some(city => jobData.location?.includes(city) || company?.location?.includes(city));
 
         // 3. Industry Filter
         const matchesIndustry = !selectedIndustry || company?.industry === selectedIndustry;
 
         // 4. Tag Filter
-        const matchesTags = selectedTags.length === 0 || selectedTags.some(t => (job.tags || []).includes(t));
+        const matchesTags = selectedTags.length === 0 || selectedTags.some(t => (jobData.tags || []).includes(t));
 
-        // 4. Condition Filter (Ehime Base Style)
+        // 4. Condition Filter
         let matchesConditions = true;
         if (selectedConditions.length > 0) {
-            const tags = job.tags || [];
-            // AND logic: all selected conditions must be met
+            const tags = jobData.tags || [];
             if (selectedConditions.includes('unexperienced')) {
-                // Assuming is_experience column or check tags
                 const isUnexperienced = tags.some((t: string) => ['未経験OK', '新卒', '未経験'].includes(t));
                 if (!isUnexperienced) matchesConditions = false;
             }
             if (selectedConditions.includes('remote')) {
-                const isRemote = tags.some((t: string) => ['リモート', 'テレワーク', '在宅'].includes(t)) || job.welfare?.includes('リモート');
+                const isRemote = tags.some((t: string) => ['リモート', 'テレワーク', '在宅'].includes(t)) || jobData.welfare?.includes('リモート');
                 if (!isRemote) matchesConditions = false;
             }
             if (selectedConditions.includes('weekend')) {
-                const isWeekend = tags.includes('土日祝休み') || job.holidays?.includes('土日');
+                const isWeekend = tags.includes('土日祝休み') || jobData.holidays?.includes('土日');
                 if (!isWeekend) matchesConditions = false;
             }
         }
@@ -396,8 +434,8 @@ function JobsContent() {
                     ) : filteredJobs.length > 0 ? (
                         filteredJobs.map(job => {
                             const company = job.organization;
-                            // Ensure images exist (fallback for dummy data)
-                            const mainImage = company.cover_image_url || 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800'; // Fallback
+                            const jobData = { ...job, ...job.value_tags_ai };
+                            const mainImage = jobData.cover_image || company.cover_image_url || 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800';
                             const subImages = company.images && company.images.length >= 3 ? company.images : [mainImage, mainImage, mainImage];
 
                             return (
@@ -414,13 +452,12 @@ function JobsContent() {
                                             }}>
                                                 <ReelIcon
                                                     reels={company.reels || []}
-                                                    fallbackImage={company.logo_url}
-                                                    onClick={() => { }} // Handle click in wrapper div to satisfy type
+                                                    fallbackImage={company.cover_image_url}
+                                                    onClick={() => { }}
                                                 />
                                             </div>
                                         </div>
 
-                                        {/* Like Button */}
                                         <button
                                             onClick={(e) => toggleLike(job.id, e)}
                                             className="absolute top-6 right-6 z-10 bg-white/80 backdrop-blur-sm p-3 rounded-full shadow-sm hover:bg-red-50 hover:scale-110 transition-all group/heart"
@@ -432,10 +469,8 @@ function JobsContent() {
                                         </button>
 
                                         <div className="flex flex-col md:flex-row gap-6">
-                                            {/* Images Column (Left) fixed width on desktop */}
                                             <div className="w-full md:w-80 shrink-0">
                                                 <div className="space-y-2">
-                                                    {/* Main Image */}
                                                     <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-100 relative">
                                                         <img src={mainImage} alt={job.title} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
                                                         <span className="absolute top-2 left-2 px-2 py-0.5 bg-blue-600/90 text-white text-[10px] font-bold rounded shadow-sm">
@@ -447,7 +482,6 @@ function JobsContent() {
                                                             </span>
                                                         )}
                                                     </div>
-                                                    {/* Sub Images (3 cols) */}
                                                     <div className="grid grid-cols-3 gap-2">
                                                         {subImages.slice(0, 3).map((img: string, idx: number) => (
                                                             <div key={idx} className="aspect-video rounded-xl overflow-hidden bg-slate-100">
@@ -458,7 +492,6 @@ function JobsContent() {
                                                 </div>
                                             </div>
 
-                                            {/* Content Column (Right) */}
                                             <div className="flex-1 min-w-0 flex flex-col pr-24 md:pr-36">
                                                 <div className="mb-1">
                                                     <div className="text-xs font-bold text-slate-500 flex items-center gap-1.5 mb-1.5">
@@ -466,12 +499,12 @@ function JobsContent() {
                                                         {company.name}
                                                     </div>
                                                     <h2 className="text-xl md:text-2xl font-black text-slate-900 leading-tight mb-2 group-hover:text-blue-600 transition-colors">
-                                                        {job.title}
+                                                        {jobData.title}
                                                     </h2>
                                                 </div>
 
                                                 <div className="flex flex-wrap gap-2 mb-4">
-                                                    {(job.tags || []).slice(0, 4).map((tag: string) => (
+                                                    {(jobData.tags || []).slice(0, 4).map((tag: string) => (
                                                         <span key={tag} className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-lg border border-slate-200">
                                                             #{tag}
                                                         </span>
@@ -481,19 +514,18 @@ function JobsContent() {
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 mb-4 text-xs font-bold text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100">
                                                     <div className="flex items-center gap-2">
                                                         <MapPin size={14} className="text-slate-400 shrink-0" />
-                                                        <span className="truncate">{job.location || company.location}</span>
+                                                        <span className="truncate">{jobData.location || company.location}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2 text-blue-600">
                                                         <JapaneseYen size={14} className="text-blue-400 shrink-0" />
-                                                        <span className="truncate text-base">{job.reward || job.salary || '要相談'}</span>
+                                                        <span className="truncate text-base">{jobData.reward || jobData.salary || '要相談'}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2 text-slate-600 md:col-span-2">
                                                         <Clock size={14} className="text-slate-400 shrink-0" />
-                                                        <span className="truncate">{job.working_hours || '9:00 - 18:00'}</span>
+                                                        <span className="truncate">{jobData.working_hours || '9:00 - 18:00'}</span>
                                                     </div>
                                                 </div>
 
-                                                {/* Reality Check */}
                                                 {(company.rjp_negatives) && (
                                                     <div className="mt-auto bg-amber-50 border border-amber-200 rounded-xl p-3 flex gap-3 relative overflow-hidden">
                                                         <div className="absolute -right-2 -top-2 text-amber-100 transform rotate-12">

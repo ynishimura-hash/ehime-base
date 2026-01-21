@@ -38,7 +38,31 @@ export default function CompaniesPage() {
             console.error('Error fetching companies:', error);
             toast.error('企業情報の取得に失敗しました');
         } else {
-            setCompanies(data || []);
+            // Fetch media for each company
+            const companiesWithReels = await Promise.all((data || []).map(async (company: any) => {
+                // Fetch reels for this company
+                const { data: companyReels } = await supabase
+                    .from('media_library')
+                    .select('*')
+                    .eq('organization_id', company.id)
+                    .is('job_id', null);
+
+                // Transform to Reel format
+                const reels = (companyReels || []).map((media: any) => ({
+                    id: media.id,
+                    type: media.type || 'file',
+                    url: media.public_url,
+                    thumbnail: media.thumbnail_url || media.public_url,
+                    title: media.title || media.filename,
+                }));
+
+                return {
+                    ...company,
+                    reels: reels,
+                };
+            }));
+
+            setCompanies(companiesWithReels);
         }
         setLoading(false);
     };
@@ -246,6 +270,7 @@ export default function CompaniesPage() {
                                 <div className="absolute top-4 left-4 z-10 text-white drop-shadow-md">
                                     <ReelIcon
                                         reels={company.reels || []}
+                                        fallbackImage={company.cover_image_url}
                                         onClick={() => {
                                             setActiveReels(company.reels || []);
                                             setActiveEntity({ name: company.name, id: company.id });

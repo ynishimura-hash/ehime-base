@@ -847,7 +847,7 @@ function AdminManagementContent() {
                     .map(course => (
                         <div key={course.id} className="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm flex items-start gap-4">
                             <img
-                                src={course.image || course.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=200&h=200&fit=crop'}
+                                src={course.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=200&h=200&fit=crop'}
                                 className="w-24 h-24 rounded-3xl object-cover"
                                 alt=""
                                 onError={(e) => {
@@ -1528,8 +1528,8 @@ function AdminManagementContent() {
                 </div>
                 <div className="space-y-4">
                     <ImageUpload
-                        currentImageUrl={editingItem.image || editingItem.thumbnail_url}
-                        onImageUploaded={(url) => setEditingItem({ ...editingItem, image: url, thumbnail_url: url })}
+                        currentImageUrl={editingItem.image}
+                        onImageUploaded={(url) => setEditingItem({ ...editingItem, image: url })}
                         label="サムネイル画像"
                         folder="courses"
                     />

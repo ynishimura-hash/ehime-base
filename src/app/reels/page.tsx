@@ -27,38 +27,50 @@ function ReelsContent() {
     // Fetch Media Library
     useEffect(() => {
         const fetchMedia = async () => {
-            const { data, error } = await supabase
+            // 1. Fetch Media
+            const { data: mediaData, error: mediaError } = await supabase
                 .from('media_library')
-                .select(`
-                    *,
-                    organization:organizations!inner (
-                        id, status, name, industry, location, logo_url
-                    )
-                `)
-                .eq('organization.status', 'approved')
+                .select('*')
                 .order('created_at', { ascending: false });
 
-            if (data) {
+            if (mediaError) {
+                console.error('Error fetching media:', mediaError);
+                return;
+            }
+
+            // 2. Fetch Organizations (for mapping)
+            const { data: orgsData } = await supabase
+                .from('organizations')
+                .select('id, name, logo_url, location, industry');
+
+            // Map for quick lookup
+            const orgMap = new Map(orgsData?.map((o: any) => [o.id, o]) || []);
+
+            if (mediaData) {
                 // Transform to Reel format
-                const items = data.map((item: any) => ({
-                    reel: {
-                        id: item.id,
-                        url: item.type === 'youtube' ? `https://www.youtube.com/embed/${getYouTubeID(item.public_url)}` : item.public_url,
-                        title: item.title || item.filename || 'No Title',
-                        caption: item.caption,
-                        link_url: item.link_url,
-                        link_text: item.link_text,
-                        likes: 0,
-                        comments: 0,
-                        shares: 0,
-                        type: item.type === 'youtube' ? 'youtube' : 'file'
-                    },
-                    organization: item.organization, // Store organization info for filtering
-                    entityName: item.organization?.name || 'Company',
-                    entityId: item.organization_id || item.job_id || 'admin',
-                    type: item.organization_id ? 'company' : (item.job_id ? 'job' : 'company'),
-                    companyId: item.organization_id
-                }));
+                const items = mediaData.map((item: any) => {
+                    const org = item.organization_id ? orgMap.get(item.organization_id) : null;
+
+                    return {
+                        reel: {
+                            id: item.id,
+                            url: item.type === 'youtube' ? `https://www.youtube.com/embed/${getYouTubeID(item.public_url)}` : item.public_url,
+                            title: item.title || item.filename || 'No Title',
+                            caption: item.caption,
+                            link_url: item.link_url,
+                            link_text: item.link_text,
+                            likes: 0,
+                            comments: 0,
+                            shares: 0,
+                            type: item.type === 'youtube' ? 'youtube' : 'file'
+                        },
+                        organization: org,
+                        entityName: org?.name || 'Ehime Base',
+                        entityId: item.organization_id || item.job_id || 'admin',
+                        type: item.organization_id ? 'company' : (item.job_id ? 'job' : 'company'),
+                        companyId: item.organization_id
+                    };
+                });
                 setMediaReels(items);
             }
         };

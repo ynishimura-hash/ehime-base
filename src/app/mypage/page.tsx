@@ -12,9 +12,12 @@ import { Trophy, Swords, ArrowRight } from 'lucide-react';
 export default function MyPage() {
     const { users, currentUserId } = useAppStore();
     const { isInitialized, stats } = useGameStore();
-    const currentUser = users.find(u => u.id === currentUserId);
 
-    if (!currentUser) return null;
+    // Demo Mode: If admin or user not found, show Yuji's data
+    const currentUser = users.find(u => u.id === currentUserId) ||
+        (currentUserId === 'u_admin' ? users.find(u => u.id === 'u_yuji') : undefined);
+
+    if (!currentUser) return <div className="p-10 text-center font-bold text-slate-400">Loading Profile...</div>;
 
     return (
         <div className="min-h-screen bg-slate-50 pb-24">

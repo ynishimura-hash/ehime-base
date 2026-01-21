@@ -790,7 +790,12 @@ function AdminManagementContent() {
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2 text-slate-400">
                                             <button
-                                                onClick={() => { setEditingItem(job); setEditMode('job'); setActionType('edit'); }}
+                                                onClick={() => {
+                                                    console.log('Editing job:', job);
+                                                    setEditingItem(job);
+                                                    setEditMode('job');
+                                                    setActionType('edit');
+                                                }}
                                                 className="p-2 hover:text-blue-600 cursor-pointer"
                                             >
                                                 <Edit3 size={18} />

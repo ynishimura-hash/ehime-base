@@ -55,6 +55,74 @@ export default function LoginPage() {
         }
     };
 
+    const handleCreateDemoAccount = async () => {
+        setLoading(true);
+        try {
+            const email = 'yuji@ehime-base.com';
+            const password = 'ehimebase2024';
+
+            // 1. Sign Up
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: '西村 裕二',
+                        user_type: 'student'
+                    }
+                }
+            });
+
+            if (error) {
+                // If user already exists, try to sign in instead
+                if (error.message.includes('already registered')) {
+                    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+                    if (signInError) throw signInError;
+
+                    // Retrigger profile update just in case
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        const { DEMO_DIAGNOSIS_RESULT } = await import('@/lib/demoData');
+                        await supabase.from('profiles').update({
+                            full_name: '西村 裕二',
+                            diagnosis_result: DEMO_DIAGNOSIS_RESULT
+                        }).eq('id', user.id);
+                    }
+
+                    toast.success('デモアカウントでログインしました');
+                    router.push('/babybase');
+                    router.refresh();
+                    return;
+                }
+                throw error;
+            }
+
+            // 2. Set Demo Data (Diagnosis Result)
+            if (data.user) {
+                const { DEMO_DIAGNOSIS_RESULT } = await import('@/lib/demoData');
+                const { error: updateError } = await supabase
+                    .from('profiles')
+                    .update({
+                        full_name: '西村 裕二',
+                        diagnosis_result: DEMO_DIAGNOSIS_RESULT
+                    })
+                    .eq('id', data.user.id);
+
+                if (updateError) throw updateError;
+            }
+
+            toast.success('デモアカウントを作成しました！');
+            router.push('/babybase');
+            router.refresh();
+
+        } catch (error: any) {
+            console.error(error);
+            toast.error('デモアカウント作成に失敗しました', { description: error.message });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#FFFBF0] flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-md bg-white rounded-[2rem] shadow-xl shadow-pink-100/50 p-8 space-y-8">
@@ -123,11 +191,21 @@ export default function LoginPage() {
                     Googleでログイン
                 </button>
 
-                <div className="text-center">
-                    <Link href="/babybase/register" className="text-xs font-bold text-pink-500 hover:text-pink-600 transition-colors">
+                <div className="text-center space-y-4">
+                    <Link href="/babybase/register" className="text-xs font-bold text-pink-500 hover:text-pink-600 transition-colors block">
                         アカウントをお持ちでない方はこちら
                     </Link>
-                    <div className="mt-8 pt-4 border-t border-slate-50">
+
+                    <button
+                        type="button"
+                        onClick={handleCreateDemoAccount}
+                        disabled={loading}
+                        className="w-full py-3 border-2 border-dashed border-green-300 text-green-600 font-black rounded-xl hover:bg-green-50 transition-all text-xs"
+                    >
+                        🌱 デモアカウント作成（西村裕二）
+                    </button>
+
+                    <div className="pt-4 border-t border-slate-50">
                         <Link href="/admin" className="text-[10px] font-bold text-slate-300 hover:text-slate-400 transition-colors">
                             管理者ログイン
                         </Link>

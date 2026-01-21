@@ -1,0 +1,84 @@
+                    {editMode === 'media' && (
+                        <>
+                            <div>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">タイトル</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                    value={editingItem.title || editingItem.filename || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, title: e.target.value })}
+                                    placeholder="動画のタイトル"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">キャプション / 説明</label>
+                                <textarea
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[80px]"
+                                    value={editingItem.caption || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, caption: e.target.value })}
+                                    placeholder="動画の説明文やキャプション..."
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">ボタン/リンク URL</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.link_url || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, link_url: e.target.value })}
+                                        placeholder="https://..."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">ボタンテキスト</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.link_text || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, link_text: e.target.value })}
+                                        placeholder="詳細を見る"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-4 pt-4 border-t border-slate-100">
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">紐付け設定 (Drill-down)</label>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="block text-[10px] font-black text-slate-300 uppercase pl-1">企業を選択</label>
+                                        <select
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 cursor-pointer focus:bg-white transition-all shadow-sm"
+                                            value={editingItem.organization_id || ''}
+                                            onChange={e => setEditingItem({ ...editingItem, organization_id: e.target.value, job_id: '' })}
+                                        >
+                                            <option value="">(選択なし)</option>
+                                            {realCompanies.map(c => (
+                                                <option key={c.id} value={c.id}>{c.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="block text-[10px] font-black text-slate-300 uppercase pl-1">関連する求人・クエスト</label>
+                                        <select
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 cursor-pointer disabled:opacity-50 focus:bg-white transition-all shadow-sm"
+                                            value={editingItem.job_id || ''}
+                                            disabled={!editingItem.organization_id}
+                                            onChange={e => setEditingItem({ ...editingItem, job_id: e.target.value })}
+                                        >
+                                            <option value="">(選択なし)</option>
+                                            {realJobs
+                                                .filter(j => j.organization_id === editingItem.organization_id)
+                                                .map(j => (
+                                                    <option key={j.id} value={j.id}>{j.type === 'quest' ? ' [Q] ' : ' [J] '}{j.title}</option>
+                                                ))
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <p className="text-[10px] text-slate-400 font-bold italic pl-1">
+                                    ※ 企業のみを選択した場合は「企業詳細ページ」にのみ表示されます。
+                                </p>
+                            </div>
+                        </>
+                    )}

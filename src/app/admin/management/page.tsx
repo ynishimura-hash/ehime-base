@@ -1156,9 +1156,9 @@ function AdminManagementContent() {
                                     </div>
                                 </div>
                                 <div className="p-5 space-y-3">
-                                    <div>
+                                    <div className="space-y-1">
                                         <h4 className="font-black text-slate-900 text-sm line-clamp-1">{item.title || item.filename || 'No Title'}</h4>
-                                        <p className="text-[10px] font-bold text-slate-400 mt-0.5">{new Date(item.created_at).toLocaleDateString()}</p>
+                                        <p className="text-[10px] font-bold text-slate-400">{new Date(item.created_at).toLocaleDateString()}</p>
                                     </div>
                                     <div className="flex flex-wrap gap-1.5">
                                         {item.organization_id && (
@@ -1475,7 +1475,7 @@ function AdminManagementContent() {
             <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">コースタイトル</label>
+                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">コースタイトル</label>
                         <input
                             type="text"
                             className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 shadow-sm focus:border-blue-500 outline-none transition-all"
@@ -1486,7 +1486,7 @@ function AdminManagementContent() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">カテゴリ</label>
+                            <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">カテゴリ</label>
                             <input
                                 type="text"
                                 className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 shadow-sm focus:border-blue-500 outline-none transition-all"
@@ -1496,7 +1496,7 @@ function AdminManagementContent() {
                             />
                         </div>
                         <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">難易度</label>
+                            <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">難易度</label>
                             <select
                                 className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 shadow-sm focus:border-blue-500 outline-none transition-all"
                                 value={editingItem.level || '初級'}
@@ -1511,7 +1511,7 @@ function AdminManagementContent() {
                 </div>
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">サムネイルURL</label>
+                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">サムネイルURL</label>
                         <input
                             type="text"
                             className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 shadow-sm focus:border-blue-500 outline-none transition-all"
@@ -1521,7 +1521,7 @@ function AdminManagementContent() {
                         />
                     </div>
                     <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">コース説明</label>
+                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">コース説明</label>
                         <textarea
                             className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 font-bold text-slate-900 shadow-sm focus:border-blue-500 outline-none transition-all min-h-[50px]"
                             value={editingItem.description || ''}
@@ -1727,26 +1727,26 @@ function AdminManagementContent() {
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">姓</label>
-                                            <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.last_name || ''} onChange={e => setEditingItem({ ...editingItem, last_name: e.target.value })} />
+                                            <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">姓</label>
+                                            <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.last_name || ''} onChange={e => setEditingItem({ ...editingItem, last_name: e.target.value })} />
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">名</label>
-                                            <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.first_name || ''} onChange={e => setEditingItem({ ...editingItem, first_name: e.target.value })} />
+                                            <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">名</label>
+                                            <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.first_name || ''} onChange={e => setEditingItem({ ...editingItem, first_name: e.target.value })} />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">メールアドレス</label>
-                                        <input type="email" className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold" value={editingItem.email || ''} onChange={e => setEditingItem({ ...editingItem, email: e.target.value })} />
+                                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">メールアドレス</label>
+                                        <input type="email" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.email || ''} onChange={e => setEditingItem({ ...editingItem, email: e.target.value })} />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">電話番号</label>
-                                            <input type="text" className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold" value={editingItem.phone || ''} onChange={e => setEditingItem({ ...editingItem, phone: e.target.value })} />
+                                            <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">電話番号</label>
+                                            <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.phone || ''} onChange={e => setEditingItem({ ...editingItem, phone: e.target.value })} />
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">ユーザータイプ</label>
-                                            <select className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold" value={editingItem.user_type || 'student'} onChange={e => setEditingItem({ ...editingItem, user_type: e.target.value })}>
+                                            <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">ユーザータイプ</label>
+                                            <select className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.user_type || 'student'} onChange={e => setEditingItem({ ...editingItem, user_type: e.target.value })}>
                                                 <option value="student">求職者</option>
                                                 <option value="company">企業ユーザー</option>
                                                 <option value="admin">管理者</option>
@@ -1759,16 +1759,16 @@ function AdminManagementContent() {
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 gap-4">
                                         <div>
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">所属大学 / 現在の組織</label>
-                                            <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.university || editingItem.company_name || ''} onChange={e => setEditingItem({ ...editingItem, university: e.target.value })} />
+                                            <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">所属大学 / 現在の組織</label>
+                                            <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.university || editingItem.company_name || ''} onChange={e => setEditingItem({ ...editingItem, university: e.target.value })} />
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">学部 / 部署</label>
-                                            <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.faculty || editingItem.department || ''} onChange={e => setEditingItem({ ...editingItem, faculty: e.target.value })} />
+                                            <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">学部 / 部署</label>
+                                            <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.faculty || editingItem.department || ''} onChange={e => setEditingItem({ ...editingItem, faculty: e.target.value })} />
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">自己紹介</label>
-                                            <textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold min-h-[100px]" value={editingItem.bio || ''} onChange={e => setEditingItem({ ...editingItem, bio: e.target.value })} />
+                                            <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">自己紹介</label>
+                                            <textarea className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[100px]" value={editingItem.bio || ''} onChange={e => setEditingItem({ ...editingItem, bio: e.target.value })} />
                                         </div>
                                     </div>
                                 </div>
@@ -1819,22 +1819,22 @@ function AdminManagementContent() {
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 gap-4">
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">企業名</label>
-                                    <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.name || ''} onChange={e => setEditingItem({ ...editingItem, name: e.target.value })} />
+                                    <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">企業名</label>
+                                    <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.name || ''} onChange={e => setEditingItem({ ...editingItem, name: e.target.value })} />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">業界</label>
-                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.industry || ''} onChange={e => setEditingItem({ ...editingItem, industry: e.target.value })} />
+                                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">業界</label>
+                                        <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.industry || ''} onChange={e => setEditingItem({ ...editingItem, industry: e.target.value })} />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">所在地</label>
-                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.location || ''} onChange={e => setEditingItem({ ...editingItem, location: e.target.value })} />
+                                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">所在地</label>
+                                        <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.location || ''} onChange={e => setEditingItem({ ...editingItem, location: e.target.value })} />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">事業内容</label>
-                                    <textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold min-h-[100px]" value={editingItem.business_content || ''} onChange={e => setEditingItem({ ...editingItem, business_content: e.target.value })} />
+                                    <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">事業内容</label>
+                                    <textarea className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[100px]" value={editingItem.business_content || ''} onChange={e => setEditingItem({ ...editingItem, business_content: e.target.value })} />
                                 </div>
                             </div>
                         </div>
@@ -1844,47 +1844,47 @@ function AdminManagementContent() {
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 gap-4">
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">タイトル</label>
-                                    <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.title || ''} onChange={e => setEditingItem({ ...editingItem, title: e.target.value })} />
+                                    <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">タイトル</label>
+                                    <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.title || ''} onChange={e => setEditingItem({ ...editingItem, title: e.target.value })} />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">タイプ</label>
-                                        <select className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.type || 'job'} onChange={e => setEditingItem({ ...editingItem, type: e.target.value })}>
+                                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">タイプ</label>
+                                        <select className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.type || 'job'} onChange={e => setEditingItem({ ...editingItem, type: e.target.value })}>
                                             <option value="job">求人</option>
                                             <option value="quest">クエスト</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">企業</label>
-                                        <select className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.organization_id || ''} onChange={e => setEditingItem({ ...editingItem, organization_id: e.target.value })}>
+                                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">企業</label>
+                                        <select className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.organization_id || ''} onChange={e => setEditingItem({ ...editingItem, organization_id: e.target.value })}>
                                             <option value="">企業を選択...</option>
                                             {realCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                         </select>
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">詳細内容</label>
-                                    <textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold min-h-[150px]" value={editingItem.content || editingItem.description || ''} onChange={e => setEditingItem({ ...editingItem, content: e.target.value })} />
+                                    <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">詳細内容</label>
+                                    <textarea className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[150px]" value={editingItem.content || editingItem.description || ''} onChange={e => setEditingItem({ ...editingItem, content: e.target.value })} />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">給与</label>
-                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.salary || ''} onChange={e => setEditingItem({ ...editingItem, salary: e.target.value })} />
+                                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">給与</label>
+                                        <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.salary || ''} onChange={e => setEditingItem({ ...editingItem, salary: e.target.value })} />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">雇用形態</label>
-                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.employment_type || ''} onChange={e => setEditingItem({ ...editingItem, employment_type: e.target.value })} />
+                                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">雇用形態</label>
+                                        <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.employment_type || ''} onChange={e => setEditingItem({ ...editingItem, employment_type: e.target.value })} />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">勤務時間</label>
-                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.working_hours || ''} onChange={e => setEditingItem({ ...editingItem, working_hours: e.target.value })} />
+                                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">勤務時間</label>
+                                        <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.working_hours || ''} onChange={e => setEditingItem({ ...editingItem, working_hours: e.target.value })} />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">休日</label>
-                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.holidays || ''} onChange={e => setEditingItem({ ...editingItem, holidays: e.target.value })} />
+                                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">休日</label>
+                                        <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.holidays || ''} onChange={e => setEditingItem({ ...editingItem, holidays: e.target.value })} />
                                     </div>
                                 </div>
                             </div>
@@ -1911,7 +1911,7 @@ function AdminManagementContent() {
                                             <video src={editingItem.public_url} controls className="w-full h-full object-contain" />
                                         )}
                                     </div>
-                                    <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 flex items-center justify-between font-bold">
+                                    <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 flex items-center justify-between font-bold gap-8">
                                         <div>
                                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">形式</p>
                                             <p className="text-sm text-slate-700 uppercase">{editingItem.type || 'REEL'}</p>

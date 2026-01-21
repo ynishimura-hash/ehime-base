@@ -127,6 +127,24 @@ function AdminManagementContent() {
     const [mediaParentId, setMediaParentId] = useState(''); // Selected company for hierarchical job/quest link
     const [showMediaModal, setShowMediaModal] = useState(false);
     const [isAiParsing, setIsAiParsing] = useState(false);
+    const [associationType, setAssociationType] = useState<'company' | 'job' | 'quest' | null>(null);
+
+    React.useEffect(() => {
+        if (editingItem && editMode === 'media') {
+            if (editingItem.organization_id) {
+                setAssociationType('company');
+            } else if (editingItem.job_id) {
+                const linkedJob = realJobs.find(j => j.id === editingItem.job_id);
+                if (linkedJob && linkedJob.type === 'quest') {
+                    setAssociationType('quest');
+                } else {
+                    setAssociationType('job');
+                }
+            } else {
+                setAssociationType(null);
+            }
+        }
+    }, [editingItem, editMode, realJobs]);
 
 
     // ... (Keep DB Fields Definitions as they are) ... (Wait, I replaced them in previous step, so I should just focus on executeCsvImport)
@@ -1905,7 +1923,7 @@ function AdminManagementContent() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-6">
+                                <div className="space-y-6 flex flex-col justify-between h-full">
                                     <div className="space-y-4">
                                         <div>
                                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block ml-1">動画タイトル</label>
@@ -1957,27 +1975,49 @@ function AdminManagementContent() {
                                             <LinkIcon size={16} className="text-blue-600" />
                                             <h4 className="text-xs font-black text-slate-900">紐付け設定</h4>
                                         </div>
-                                        <div className="grid grid-cols-1 gap-4">
+                                        <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">関連企業</label>
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">関連タイプ</label>
                                                 <select
                                                     className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-2 font-bold text-sm"
-                                                    value={editingItem.organization_id || ''}
-                                                    onChange={e => setEditingItem({ ...editingItem, organization_id: e.target.value })}
+                                                    value={associationType || ''}
+                                                    onChange={e => {
+                                                        const newType = e.target.value as 'company' | 'job' | 'quest' | '';
+                                                        setAssociationType(newType || null);
+                                                        setEditingItem({ ...editingItem, organization_id: null, job_id: null });
+                                                    }}
                                                 >
                                                     <option value="">関連なし</option>
-                                                    {realCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                                    <option value="company">企業 (Company)</option>
+                                                    <option value="job">求人 (Job)</option>
+                                                    <option value="quest">クエスト (Quest)</option>
                                                 </select>
                                             </div>
                                             <div>
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">関連求人・クエスト</label>
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">コンテンツ選択</label>
                                                 <select
                                                     className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-2 font-bold text-sm"
-                                                    value={editingItem.job_id || ''}
-                                                    onChange={e => setEditingItem({ ...editingItem, job_id: e.target.value })}
+                                                    value={editingItem.organization_id || editingItem.job_id || ''}
+                                                    disabled={!associationType}
+                                                    onChange={e => {
+                                                        const val = e.target.value;
+                                                        if (associationType === 'company') {
+                                                            setEditingItem({ ...editingItem, organization_id: val, job_id: null });
+                                                        } else {
+                                                            setEditingItem({ ...editingItem, organization_id: null, job_id: val });
+                                                        }
+                                                    }}
                                                 >
-                                                    <option value="">関連なし</option>
-                                                    {realJobs.map(j => <option key={j.id} value={j.id}>{j.title}</option>)}
+                                                    <option value="">選択してください</option>
+                                                    {associationType === 'company' && realCompanies.map(c => (
+                                                        <option key={c.id} value={c.id}>{c.name}</option>
+                                                    ))}
+                                                    {associationType === 'job' && realJobs.filter(j => j.type !== 'quest').map(j => (
+                                                        <option key={j.id} value={j.id}>{j.title}</option>
+                                                    ))}
+                                                    {associationType === 'quest' && realJobs.filter(j => j.type === 'quest').map(q => (
+                                                        <option key={q.id} value={q.id}>{q.title}</option>
+                                                    ))}
                                                 </select>
                                             </div>
                                         </div>

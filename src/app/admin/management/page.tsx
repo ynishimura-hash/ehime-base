@@ -1091,10 +1091,10 @@ function AdminManagementContent() {
                         動画はまだアップロードされていません
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                         {mediaItems.map((item) => (
                             <div key={item.id} className="group bg-slate-50 border border-slate-200 rounded-3xl overflow-hidden hover:shadow-xl hover:shadow-slate-200 transition-all duration-300">
-                                <div className="aspect-video bg-black relative">
+                                <div className="aspect-[9/16] bg-black relative">
                                     {item.type === 'youtube' ? (
                                         <iframe
                                             width="100%"
@@ -1878,8 +1878,8 @@ function AdminManagementContent() {
                     {editMode === 'media' && (
                         <div className="space-y-8">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="space-y-6">
-                                    <div className="aspect-video bg-black rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white">
+                                <div className="space-y-6 flex flex-col items-center">
+                                    <div className="aspect-[9/16] bg-black rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white w-full max-w-[320px]">
                                         {editingItem.type === 'youtube' ? (
                                             <iframe
                                                 width="100%"

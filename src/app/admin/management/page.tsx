@@ -119,6 +119,7 @@ function AdminManagementContent() {
     const [linkTargetType, setLinkTargetType] = useState<'none' | 'company' | 'job' | 'quest'>('none');
     const [linkTargetId, setLinkTargetId] = useState('');
     const [showMediaModal, setShowMediaModal] = useState(false);
+    const [isAiParsing, setIsAiParsing] = useState(false);
 
 
     // ... (Keep DB Fields Definitions as they are) ... (Wait, I replaced them in previous step, so I should just focus on executeCsvImport)
@@ -1214,6 +1215,46 @@ function AdminManagementContent() {
         }
     };
 
+    const handleAiParse = async () => {
+        if (!csvData.length || !csvTargetType) return;
+        setIsAiParsing(true);
+        const toastId = toast.loading('AIがデータを解析・整形中...', { duration: 30000 });
+
+        try {
+            const response = await fetch('/api/admin/parse-csv', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ csvData: csvData, type: csvTargetType })
+            });
+
+            if (!response.ok) throw new Error('AI Parse failed');
+
+            const { data } = await response.json();
+
+            // Update data and reset headers/mapping to match perfect keys
+            setCsvData(data);
+
+            // Since keys are now perfect DB keys, we update headers to match keys
+            if (data.length > 0) {
+                const newHeaders = Object.keys(data[0]);
+                setCsvHeaders(newHeaders);
+
+                const newMapping: Record<string, string> = {};
+                newHeaders.forEach(h => { newMapping[h] = h; });
+                setCsvMapping(newMapping);
+            }
+
+            toast.dismiss(toastId);
+            toast.success('AI解析が完了しました (データ整形済み)');
+        } catch (error) {
+            console.error(error);
+            toast.dismiss(toastId);
+            toast.error('AI解析に失敗しました');
+        } finally {
+            setIsAiParsing(false);
+        }
+    };
+
     const renderCsvModal = () => {
         let targetFields: Record<string, string> = {};
         let title = '';
@@ -1226,7 +1267,16 @@ function AdminManagementContent() {
             <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
                 <div className="bg-white w-full max-w-4xl rounded-3xl p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-black text-slate-900">{title} - 項目マッピング</h3>
+                        <div className="flex items-center gap-4">
+                            <h3 className="text-xl font-black text-slate-900">{title} - 項目マッピング</h3>
+                            <button
+                                onClick={handleAiParse}
+                                disabled={isAiParsing}
+                                className="px-4 py-2 bg-purple-600 text-white text-xs font-black rounded-full hover:bg-purple-500 disabled:opacity-50 flex items-center gap-2 transition-all shadow-lg shadow-purple-200"
+                            >
+                                {isAiParsing ? <span className="animate-spin">⌛</span> : '✨ AI自動解析 (Beta)'}
+                            </button>
+                        </div>
                         <button onClick={() => setShowCsvModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                             <X size={20} />
                         </button>

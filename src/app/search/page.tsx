@@ -3,8 +3,8 @@
 import React, { useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Briefcase, ChevronRight, Search, Map, Wallet, Building2, Users } from 'lucide-react';
-import { COMPANIES, JOBS, type Job, type Company } from '@/lib/dummyData';
+import { ArrowLeft, MapPin, Briefcase, ChevronRight, Search, Map, Wallet, Building2, Users, Loader2, ArrowRight } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
 
 // Area Mapping Logic
 const AREA_MAPPING: Record<string, string[]> = {
@@ -16,13 +16,51 @@ const AREA_MAPPING: Record<string, string[]> = {
 function SearchResultsContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const supabase = createClient();
 
     const query = searchParams.get('q') || '';
     const area = searchParams.get('area') || 'all';
     const industry = searchParams.get('industry') || 'all';
 
-    // Search Logic
+    const [loading, setLoading] = React.useState(true);
+    const [allJobs, setAllJobs] = React.useState<any[]>([]);
+    const [companies, setCompanies] = React.useState<any[]>([]);
+
+    React.useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+
+            // 1. Fetch approved organizations
+            const { data: orgData } = await supabase
+                .from('organizations')
+                .select('*')
+                .eq('status', 'approved');
+
+            setCompanies(orgData || []);
+
+            // 2. Fetch jobs linked to approved organizations
+            const { data: jobData } = await supabase
+                .from('jobs')
+                .select(`
+                    *,
+                    organization:organizations!inner (
+                        id, name, industry, location, is_premium,
+                        logo_url, cover_image_url, logo_color, category, status
+                    )
+                `)
+                .eq('organization.status', 'approved');
+
+            setAllJobs(jobData || []);
+            setLoading(false);
+        };
+
+        fetchData();
+    }, []);
+
+    // Search Logic (Client-side filtering for responsiveness once loaded)
     const { questResults, jobResults, companyResults } = useMemo(() => {
+        if (loading) return { questResults: [], jobResults: [], companyResults: [] };
+
         // Helper to check text match
         const matchText = (text?: string) => {
             if (!query) return true;
@@ -33,29 +71,31 @@ function SearchResultsContent() {
         const matchArea = (location?: string) => {
             if (area === 'all' || !location) return true;
             const targetCities = AREA_MAPPING[area];
-            if (!targetCities) return true; // Fallback
+            if (!targetCities) return true;
             return targetCities.some(city => location.includes(city));
         };
 
         // Helper to check industry match
         const matchIndustry = (ind?: string) => {
             if (industry === 'all' || !ind) return true;
-            return ind === industry;
+            // Area and Industry from URL are slugs (toyo, it_system), but dummy data uses display names. 
+            // In the DB, we might have both. For now, matching slugs or names.
+            return ind === industry || ind.toLowerCase().includes(industry.toLowerCase());
         };
 
-        const filteredJobsFull = JOBS.filter(job => {
-            const company = COMPANIES.find(c => c.id === job.companyId);
-            const matchesKeyword = matchText(job.title) || matchText(job.description) || matchText(company?.name);
+        const filteredJobsFull = allJobs.filter(job => {
+            const company = job.organization;
+            const matchesKeyword = matchText(job.title) || matchText(job.content) || matchText(company?.name);
             const matchesArea = matchArea(job.location) || matchArea(company?.location);
-            const matchesIndustry = matchIndustry(company?.industry);
+            const matchesIndustry = matchIndustry(company?.industry) || matchIndustry(company?.category);
 
             return matchesKeyword && matchesArea && matchesIndustry;
         });
 
-        const filteredCompanies = COMPANIES.filter(company => {
+        const filteredCompanies = companies.filter(company => {
             const matchesKeyword = matchText(company.name) || matchText(company.description) || matchText(company.industry);
             const matchesArea = matchArea(company.location);
-            const matchesIndustry = matchIndustry(company.industry);
+            const matchesIndustry = matchIndustry(company.industry) || matchIndustry(company.category);
             return matchesKeyword && matchesArea && matchesIndustry;
         });
 
@@ -64,7 +104,16 @@ function SearchResultsContent() {
             jobResults: filteredJobsFull.filter(j => j.type === 'job'),
             companyResults: filteredCompanies
         };
-    }, [query, area, industry]);
+    }, [query, area, industry, allJobs, companies, loading]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-4">
+                <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+                <p className="text-slate-400 font-bold">データを検索中...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
@@ -189,16 +238,16 @@ function EmptyState({ message }: { message: string }) {
     );
 }
 
-function QuestCard({ quest }: { quest: Job }) {
-    const company = COMPANIES.find(c => c.id === quest.companyId);
+function QuestCard({ quest }: { quest: any }) {
+    const company = quest.organization;
     return (
         <Link href={`/jobs/${quest.id}`} className="block group h-full">
             <div className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-lg transition-all h-full flex flex-col">
                 <div className="relative h-48 bg-slate-100">
-                    {company?.image ? (
-                        <img src={company.image} alt="" className="w-full h-full object-cover" />
+                    {company?.logo_url ? (
+                        <img src={company.logo_url} alt="" className="w-full h-full object-cover" />
                     ) : (
-                        <div className={`w-full h-full ${company?.logoColor || 'bg-slate-300'}`} />
+                        <div className={`w-full h-full ${company?.logo_color || 'bg-slate-300'}`} />
                     )}
                     <div className="absolute top-2 left-2">
                         <span className="bg-white/90 backdrop-blur text-blue-600 text-[10px] px-2 py-1 rounded font-black shadow-sm">
@@ -209,7 +258,7 @@ function QuestCard({ quest }: { quest: Job }) {
                 <div className="p-4 flex-1 flex flex-col">
                     <div className="flex items-center gap-2 mb-2">
                         <div className="w-5 h-5 rounded overflow-hidden">
-                            {company?.image ? <img src={company.image} alt="" className="w-full h-full object-cover" /> : <div className="bg-slate-300 w-full h-full"></div>}
+                            {company?.logo_url ? <img src={company.logo_url} alt="" className="w-full h-full object-cover" /> : <div className="bg-slate-300 w-full h-full"></div>}
                         </div>
                         <span className="text-[10px] font-bold text-slate-400 line-clamp-1">{company?.name}</span>
                     </div>
@@ -226,16 +275,16 @@ function QuestCard({ quest }: { quest: Job }) {
     );
 }
 
-function JobCard({ job }: { job: Job }) {
-    const company = COMPANIES.find(c => c.id === job.companyId);
+function JobCard({ job }: { job: any }) {
+    const company = job.organization;
     return (
         <Link href={`/jobs/${job.id}`} className="block group h-full">
             <div className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-lg transition-all h-full flex flex-col">
                 <div className="relative h-48 bg-slate-100">
-                    {company?.image ? (
-                        <img src={company.image} alt="" className="w-full h-full object-cover" />
+                    {company?.logo_url ? (
+                        <img src={company.logo_url} alt="" className="w-full h-full object-cover" />
                     ) : (
-                        <div className={`w-full h-full ${company?.logoColor || 'bg-slate-300'}`} />
+                        <div className={`w-full h-full ${company?.logo_color || 'bg-slate-300'}`} />
                     )}
                     <div className="absolute top-2 left-2">
                         <span className="bg-slate-900 text-white text-[10px] px-2 py-1 rounded font-black shadow-sm">
@@ -252,7 +301,7 @@ function JobCard({ job }: { job: Job }) {
                         {job.title}
                     </h3>
                     <div className="mt-auto flex flex-wrap gap-1">
-                        {job.tags.slice(0, 2).map(tag => (
+                        {job.tags && job.tags.slice(0, 2).map((tag: string) => (
                             <span key={tag} className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-bold">
                                 {tag}
                             </span>
@@ -264,15 +313,15 @@ function JobCard({ job }: { job: Job }) {
     );
 }
 
-function CompanyCard({ company }: { company: Company }) {
+function CompanyCard({ company }: { company: any }) {
     return (
         <Link href={`/companies/${company.id}`} className="block group h-full">
             <div className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-lg transition-all h-full flex flex-col">
                 <div className="relative h-48 bg-slate-100">
-                    {company.image ? (
-                        <img src={company.image} alt="" className="w-full h-full object-cover" />
+                    {company.logo_url ? (
+                        <img src={company.logo_url} alt="" className="w-full h-full object-cover" />
                     ) : (
-                        <div className={`w-full h-full ${company.logoColor || 'bg-slate-300'} flex items-center justify-center text-white font-black text-2xl`}>
+                        <div className={`w-full h-full ${company.logo_color || 'bg-slate-300'} flex items-center justify-center text-white font-black text-2xl`}>
                             {company.name.slice(0, 1)}
                         </div>
                     )}
@@ -295,24 +344,7 @@ function CompanyCard({ company }: { company: Company }) {
     );
 }
 
-function ArrowRight({ size = 24 }: { size?: number }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={size}
-            height={size}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M5 12h14" />
-            <path d="m12 5 7 7-7 7" />
-        </svg>
-    );
-}
+
 
 export default function SearchPage() {
     return (

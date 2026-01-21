@@ -1,7 +1,6 @@
 "use client";
 
-import React, { use, useState } from 'react';
-import { JOBS, COMPANIES } from '@/lib/dummyData';
+import React, { use, useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/appStore';
 import {
     MapPin,
@@ -11,15 +10,74 @@ import {
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { LoginPromptModal } from '@/components/auth/LoginPromptModal';
+import { ReelModal } from '@/components/reels/ReelModal';
+import { ReelIcon } from '@/components/reels/ReelIcon';
+
+import { createClient } from '@/utils/supabase/client';
+import { Reel } from '@/lib/dummyData';
+import { Loader2 } from 'lucide-react';
 
 export default function CompanyDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const { authStatus, currentUserId, interactions, toggleInteraction } = useAppStore();
-    const company = COMPANIES.find(c => c.id === id);
-    const companyJobs = JOBS.filter(j => j.companyId === id);
+    const supabase = createClient();
+    const { authStatus, currentUserId, interactions, toggleInteraction, addInteraction, removeInteraction } = useAppStore();
 
+    const [company, setCompany] = useState<any>(null);
+    const [companyJobs, setCompanyJobs] = useState<any[]>([]);
+    const [reels, setReels] = useState<Reel[]>([]);
+    const [loading, setLoading] = useState(true);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [isReelModalOpen, setIsReelModalOpen] = useState(false);
     const [loginModalMessage, setLoginModalMessage] = useState('');
+
+    useEffect(() => {
+        const fetchCompanyData = async () => {
+            setLoading(true);
+
+            // 1. Fetch organization details (status check handled by RLS)
+            const { data: org, error } = await supabase
+                .from('organizations')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error || !org) {
+                console.error('Error fetching company:', error);
+                setLoading(false);
+                return;
+            }
+            setCompany(org);
+
+            // 2. Fetch associated jobs
+            const { data: jobs } = await supabase
+                .from('jobs')
+                .select('*')
+                .eq('organization_id', id);
+            setCompanyJobs(jobs || []);
+
+            // 3. Fetch reels
+            const { data: media } = await supabase
+                .from('media_library')
+                .select('*')
+                .eq('organization_id', id);
+
+            setReels((media || []).map(m => ({
+                id: m.id,
+                url: m.public_url,
+                type: m.type === 'youtube' ? 'youtube' : 'file',
+                title: m.title || m.filename,
+                caption: m.caption,
+                description: m.caption,
+                link_url: m.link_url,
+                link_text: m.link_text,
+                likes: 0
+            })));
+
+            setLoading(false);
+        };
+
+        fetchCompanyData();
+    }, [id]);
 
     const isLiked = interactions.some(i => i.type === 'like_company' && i.fromId === currentUserId && i.toId === id);
 
@@ -33,6 +91,11 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
     };
 
     const toggleLike = () => {
+        if (authStatus !== 'authenticated') {
+            setLoginModalMessage('企業を「気になる」リストに保存するにはログインが必要です');
+            setIsLoginModalOpen(true);
+            return;
+        }
         toggleInteraction('like_company', currentUserId, id);
         toast.success(isLiked ? '「気になる」を解除しました' : '企業を「気になる」リストに保存しました');
     };
@@ -46,10 +109,20 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
         });
     };
 
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 gap-4">
+                <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+                <p className="text-slate-400 font-bold">情報を取得中...</p>
+            </div>
+        );
+    }
+
     if (!company) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center">
                 <h2 className="text-2xl font-bold text-zinc-800">企業が見つかりませんでした</h2>
+                <p className="text-slate-400 mt-2">承認されていないか、削除された可能性があります</p>
                 <Link href="/companies" className="mt-4 text-blue-500 font-bold underline">企業一覧に戻る</Link>
             </div>
         );
@@ -83,11 +156,25 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                 {/* Profile Card */}
                 <section className="bg-white md:rounded-[3rem] md:shadow-2xl md:border border-zinc-50 overflow-hidden">
                     <div className="h-64 md:h-96 relative">
-                        <img src={company.image} alt={company.name} className="w-full h-full object-cover" />
+                        {company.cover_image_url ? (
+                            <img src={company.cover_image_url} alt={company.name} className="w-full h-full object-cover" />
+                        ) : (
+                            <div className={`w-full h-full ${company.logo_color || 'bg-slate-300'}`} />
+                        )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                        <div className="absolute top-10 right-10 z-20">
+                            {reels.length > 0 && (
+                                <ReelIcon
+                                    reels={reels}
+                                    fallbackImage={company.logo_url}
+                                    onClick={() => setIsReelModalOpen(true)}
+                                />
+                            )}
+                        </div>
+
                         <div className="absolute bottom-10 left-10 text-white">
                             <div className="flex items-center gap-2 mb-2">
-                                <span className={`w-4 h-4 rounded-full ${company.logoColor}`} />
+                                <span className={`w-4 h-4 rounded-full ${company.logo_color || 'bg-blue-500'}`} />
                                 <span className="text-sm font-bold uppercase tracking-widest opacity-80">{company.industry}</span>
                             </div>
                             <h2 className="text-4xl md:text-5xl font-black italic tracking-tight">{company.name}</h2>
@@ -104,8 +191,9 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                             <h3 className="text-2xl font-black text-zinc-800">愛媛の土地で、私たちが目指すこと</h3>
                             <p className="text-zinc-600 leading-relaxed font-medium">
                                 {company.description}
-                                私たちは単なる企業ではなく、愛媛の未来を共に創る冒険者の集まりです。
-                                一歩踏み出すあなたの「歪み」を、私たちの組織はレバレッジ（力）に変える準備ができています。
+                                {company.business_content && (
+                                    <span className="block mt-4">{company.business_content}</span>
+                                )}
                             </p>
                         </div>
 
@@ -130,7 +218,7 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                                 {authStatus === 'authenticated' ? (
                                     <>
                                         <p className="text-orange-900/80 text-lg font-bold italic leading-relaxed max-w-2xl">
-                                            「{company.rjpNegatives}」
+                                            「{company.rjp_negatives || company.rjpNegatives || '完璧な会社はありません。真実を語ることで、より良いマッチングを目指しています。'}」
                                         </p>
                                         <p className="text-orange-700/60 text-xs font-bold uppercase tracking-widest">
                                             完璧な会社はありません。この不完全さに、あなたの力が加わることを期待しています。
@@ -140,7 +228,7 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                                     <div className="py-8 flex flex-col items-center justify-center space-y-4 bg-white/40 backdrop-blur-sm rounded-2xl border border-orange-200/50 relative">
                                         <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none overflow-hidden">
                                             <p className="text-orange-900 font-bold blur-[2px] leading-relaxed italic p-12">
-                                                {company.rjpNegatives} {company.rjpNegatives}
+                                                {company.rjp_negatives || 'Secret Truth'} {company.rjp_negatives || 'Secret Truth'}
                                             </p>
                                         </div>
                                         <div className="relative z-20 flex flex-col items-center">
@@ -158,6 +246,8 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                             </div>
                         </div>
 
+
+
                         {/* Corporate Profile Table */}
                         <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 md:p-12 shadow-sm">
                             <h3 className="text-2xl font-black text-zinc-800 mb-8 border-l-4 border-blue-600 pl-4">
@@ -166,7 +256,7 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                             <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                                 <div className="border-b border-slate-100 pb-4">
                                     <dt className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">設立</dt>
-                                    <dd className="text-base font-bold text-slate-800">{company.foundingYear}年</dd>
+                                    <dd className="text-base font-bold text-slate-800">{company.established_date || '-'}</dd>
                                 </div>
                                 <div className="border-b border-slate-100 pb-4">
                                     <dt className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">資本金</dt>
@@ -174,15 +264,15 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                                 </div>
                                 <div className="border-b border-slate-100 pb-4">
                                     <dt className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">従業員数</dt>
-                                    <dd className="text-base font-bold text-slate-800">{company.employeeCount || '-'}</dd>
+                                    <dd className="text-base font-bold text-slate-800">{company.employee_count || '-'}</dd>
                                 </div>
                                 <div className="border-b border-slate-100 pb-4">
                                     <dt className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">代表者</dt>
-                                    <dd className="text-base font-bold text-slate-800">{company.representative || '-'}</dd>
+                                    <dd className="text-base font-bold text-slate-800">{company.representative_name || company.representative || '-'}</dd>
                                 </div>
                                 <div className="border-b border-slate-100 pb-4 md:col-span-2">
                                     <dt className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">所在地</dt>
-                                    <dd className="text-base font-bold text-slate-800">{company.address || '-'}</dd>
+                                    <dd className="text-base font-bold text-slate-800">{company.location || company.address || '-'}</dd>
                                 </div>
                                 <div className="border-b border-slate-100 pb-4 md:col-span-2">
                                     <dt className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">福利厚生</dt>
@@ -191,8 +281,8 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                                 <div className="pt-2 md:col-span-2">
                                     <dt className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Webサイト</dt>
                                     <dd>
-                                        <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold hover:underline flex items-center gap-1">
-                                            {company.website || '-'} <ArrowRight size={14} />
+                                        <a href={company.website_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold hover:underline flex items-center gap-1">
+                                            {company.website_url || '-'} <ArrowRight size={14} />
                                         </a>
                                     </dd>
                                 </div>
@@ -232,14 +322,14 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                 <div className="flex flex-col md:flex-row justify-center gap-4">
                     <button
                         onClick={() => toast.success('公式SNSをフォローしました')}
-                        className="bg-eis-yellow text-zinc-900 px-12 py-4 rounded-full font-black hover:bg-yellow-400 transition-all"
+                        className="bg-amber-400 text-zinc-900 px-12 py-4 rounded-full font-black hover:bg-yellow-400 transition-all"
                     >
                         公式SNSをフォローする
                     </button>
                     <button
                         onClick={() => {
                             toast.info('採用サイトへ遷移します');
-                            window.open('https://eis-reach.com', '_blank');
+                            window.open(company.website_url || 'https://eis-reach.com', '_blank');
                         }}
                         className="bg-white/10 text-white border border-white/20 px-12 py-4 rounded-full font-black hover:bg-white/20 transition-all"
                     >
@@ -252,6 +342,16 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                 isOpen={isLoginModalOpen}
                 onClose={() => setIsLoginModalOpen(false)}
                 message={loginModalMessage}
+            />
+
+            <ReelModal
+                isOpen={isReelModalOpen}
+                onClose={() => setIsReelModalOpen(false)}
+                reels={reels}
+                entityName={company.name}
+                entityId={company.id}
+                entityType="company"
+                companyId={company.id}
             />
         </div>
     );

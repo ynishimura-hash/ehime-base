@@ -11,7 +11,8 @@ import {
     MessageSquare,
     LogOut,
     Menu,
-    Zap
+    Zap,
+    User
 } from 'lucide-react';
 import { useAppStore } from '@/lib/appStore';
 
@@ -19,7 +20,8 @@ const sidebarItems = [
     { name: 'ダッシュボード', icon: LayoutDashboard, href: '/dashboard/company' },
     { name: '企業情報編集', icon: Building2, href: '/dashboard/company/profile' },
     { name: '求人・クエスト管理', icon: Briefcase, href: '/dashboard/company/jobs' },
-    { name: '応募者管理 (ATS)', icon: Users, href: '/dashboard/company/applications' }, // New ATS Link
+    { name: '応募者管理 (ATS)', icon: Users, href: '/dashboard/company/applications' },
+    { name: 'メンバー管理', icon: User, href: '/dashboard/company/members' },
     { name: 'スカウト', icon: Zap, href: '/dashboard/company/scout' },
     { name: 'メッセージ', icon: MessageSquare, href: '/dashboard/company/messages' },
 ];

@@ -237,17 +237,48 @@ function AdminManagementContent() {
 
             // Synonym Dictionary
             const synonyms: Record<string, string[]> = {
+                // Common
                 name: ['企業名', '会社名', 'Company', 'Name', '事業所名', '商号'],
+                title: ['タイトル', '職種', 'Title', 'Role', 'Position', 'コース名', '求人タイトル'],
+                description: ['説明', '詳細', 'Description', 'Detail', '自己紹介', 'プロフィール', 'Bio'],
+
+                // Contact / Info
                 website_url: ['URL', 'Web', 'HP', 'ホームページ', 'リンク', 'サイト'],
-                industry: ['業界', '業種', 'Industry', 'Category', '分野'],
-                location: ['住所', '所在地', 'Location', 'Address', '勤務地'],
+                email: ['メール', 'Email', 'Address', 'Mail'],
                 phone: ['電話', 'TEL', 'Phone', 'Mobile', '連絡先'],
+                location: ['住所', '所在地', 'Location', 'Address', '勤務地', 'アクセス'],
+
+                // Company Specific
+                industry: ['業界', '業種', 'Industry', 'Category', '分野'],
                 representative_name: ['代表', '社長', 'Representative', 'CEO'],
                 established_date: ['設立', '創業', 'Established', 'Date'],
                 employee_count: ['従業員', '社員数', 'Staff', 'Count', '人数'],
-                email: ['メール', 'Email', 'Address', 'Mail'],
-                salary: ['給与', '賃金', 'Salary', 'Pay', '年収', '月給'],
-                title: ['タイトル', '職種', 'Title', 'Role', 'Position'],
+                capital: ['資本金', 'Capital'],
+                business_content: ['事業内容', 'Business', 'Service'],
+
+                // Job Specific
+                content: ['仕事内容', '業務内容', 'Content', 'Description'],
+                salary: ['給与', '賃金', 'Salary', 'Pay', '年収', '月給', '報酬'],
+                employment_type: ['雇用形態', 'Type', '契約', 'Employment'],
+                working_hours: ['勤務時間', 'Hours', 'Time', '就業時間'],
+                holidays: ['休日', '休暇', 'Holiday', 'Vacation'],
+                benefits: ['福利厚生', 'Benefits', '待遇', '手当'],
+                qualifications: ['応募条件', '資格', 'スキル', 'Requirements', 'Qualifications'],
+                company_name: ['企業名', '会社名', 'Company'], // For linking jobs to companies
+
+                // User Specific
+                last_name: ['姓', '氏', 'LastName', 'FamilyName'],
+                first_name: ['名', 'FirstName', 'GivenName'],
+                full_name: ['氏名', '名前', 'FullName', 'Name'],
+                university: ['大学', 'University', 'School', '学歴'],
+                faculty: ['学部', 'Faculty', 'Department', 'Major'],
+                department: ['部署', 'Department', 'Division'],
+
+                // Course Specific
+                category: ['カテゴリ', '分野', 'Category', 'Subject'],
+                level: ['レベル', '難易度', 'Level', 'Difficulty'],
+                duration: ['所要時間', '時間', 'Duration', 'Length'],
+                image: ['画像', 'サムネイル', 'Image', 'Thumbnail']
             };
 
             const sampleRow = data[0] || {};
@@ -260,17 +291,23 @@ function AdminManagementContent() {
                     return fieldSynonyms.some(s => cleanHeader.includes(s.toLowerCase()));
                 });
 
-                // 2. Check Content Patterns (Heuristics) if no header match or for verification
+                // 2. Check Content Patterns (Heuristics)
                 if (!bestMatch) {
-                    // Try to guess from content
                     const potentialMatch = headers.find(h => {
-                        const val = String(sampleRow[h] || '');
-                        if (!val || val.length > 200) return false; // Skip too long text
+                        const val = String(sampleRow[h] || '').trim();
+                        if (!val || val.length > 300) return false;
 
+                        // Universal
                         if (dbField === 'website_url' && (val.startsWith('http') || val.includes('www.'))) return true;
                         if (dbField === 'email' && val.includes('@') && val.includes('.')) return true;
-                        if (dbField === 'phone' && (val.match(/^[\d-]{10,15}$/) || val.startsWith('0'))) return true;
+                        if (dbField === 'phone' && (val.match(/^[\d-]{10,15}$/) || val.startsWith('090') || val.startsWith('080'))) return true;
+
+                        // Specifics
+                        if (dbField === 'salary' && (val.includes('円') || val.includes('万円'))) return true;
+                        if (dbField === 'working_hours' && val.includes(':')) return true;
+                        if (dbField === 'level' && (val === 'beginner' || val === 'intermediate' || val.includes('級'))) return true;
                         if (dbField === 'name' && (val.includes('株式会社') || val.includes('有限会社'))) return true;
+
                         return false;
                     });
                     if (potentialMatch) bestMatch = potentialMatch;

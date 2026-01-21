@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Save, Sparkles, Globe, RefreshCcw, Zap, Building2, Phone, MapPin, Briefcase, FileText } from 'lucide-react';
+import { Save, Sparkles, Globe, RefreshCcw, Zap, Building2, Phone, MapPin, Briefcase, FileText, Upload, Image as ImageIcon, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { createClient } from '@/utils/supabase/client';
 
 export default function CompanyProfileEditor() {
     const [isLoading, setIsLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [url, setUrl] = useState('');
 
     // Form States
@@ -29,7 +31,44 @@ export default function CompanyProfileEditor() {
         // RJP
         rjpNegatives: '',
         rjpPositives: '',
+        logo_url: '',
+        cover_image_url: '',
     });
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'logo_url' | 'cover_image_url') => {
+        if (!e.target.files || e.target.files.length === 0) return;
+
+        const file = e.target.files[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${field}-${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        setUploading(true);
+        const toastId = toast.loading('画像をアップロード中...');
+
+        try {
+            const supabase = createClient();
+            const { error: uploadError } = await supabase.storage
+                .from('company-assets')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('company-assets')
+                .getPublicUrl(filePath);
+
+            handleChange(field, publicUrl);
+            toast.dismiss(toastId);
+            toast.success('画像をアップロードしました');
+        } catch (error) {
+            console.error(error);
+            toast.dismiss(toastId);
+            toast.error('画像のアップロードに失敗しました');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     // AI Auto-fill Handler
     const handleAutoFill = async () => {
@@ -128,6 +167,45 @@ export default function CompanyProfileEditor() {
                     </button>
                 </div>
             </div>
+
+            {/* Branding Images */}
+            <section className="space-y-6">
+                <div className="relative group">
+                    <div className={`w-full h-48 md:h-64 rounded-3xl overflow-hidden border-2 border-dashed border-slate-300 bg-slate-100 flex items-center justify-center relative transition-all ${formData.cover_image_url ? 'border-transparent' : 'hover:border-blue-400 hover:bg-blue-50'}`}>
+                        {formData.cover_image_url ? (
+                            <img src={formData.cover_image_url} alt="Cover" className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="text-center text-slate-400">
+                                <ImageIcon className="mx-auto mb-2" size={32} />
+                                <span className="font-bold text-sm">カバー画像を設定</span>
+                            </div>
+                        )}
+
+                        <label className="absolute inset-0 cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 text-white font-bold">
+                            <Upload className="mr-2" size={20} /> 画像を変更
+                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'cover_image_url')} />
+                        </label>
+                    </div>
+
+                    {/* Logo - Overlapping */}
+                    <div className="absolute -bottom-10 left-8 md:left-12">
+                        <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl border-4 border-white bg-white shadow-xl overflow-hidden relative group/logo">
+                            {formData.logo_url ? (
+                                <img src={formData.logo_url} alt="Logo" className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300">
+                                    <Building2 size={32} />
+                                </div>
+                            )}
+                            <label className="absolute inset-0 cursor-pointer flex items-center justify-center opacity-0 group-hover/logo:opacity-100 transition-opacity bg-black/40 text-white font-bold text-xs text-center p-2">
+                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'logo_url')} />
+                                ロゴ<br />変更
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div className="h-4 md:h-6"></div> {/* Spacer for Logo overlap */}
+            </section>
 
             <div className="space-y-6">
                 {/* Basic Info */}

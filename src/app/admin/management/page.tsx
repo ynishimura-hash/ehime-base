@@ -5,7 +5,7 @@ import { useAppStore } from '@/lib/appStore';
 import {
     Building2, Briefcase, GraduationCap, Users,
     Search, Edit3, Trash2, Eye, X, CheckSquare, Square,
-    Plus, ChevronLeft, Upload, Video, FileVideo, Save, ArrowRight, Link as LinkIcon
+    Plus, ChevronLeft, ChevronRight, Upload, Video, FileVideo, Save, ArrowRight, Link as LinkIcon
 } from 'lucide-react';
 
 import Link from 'next/link';
@@ -894,56 +894,95 @@ function AdminManagementContent() {
     };
 
     const renderMediaModal = () => (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-[2rem] w-full max-w-2xl p-8 max-h-[90vh] overflow-y-auto">
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="font-bold text-lg text-slate-700">新規動画追加</h3>
-                    <button onClick={() => setShowMediaModal(false)} className="p-2 hover:bg-slate-100 rounded-full">
-                        <X size={24} className="text-slate-400" />
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-end justify-center z-50 p-0 sm:p-4 animate-in fade-in duration-300">
+            <div className="bg-white rounded-t-[2.5rem] sm:rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[95vh] animate-in slide-in-from-bottom duration-500">
+                {/* Header */}
+                <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
+                    <div>
+                        <h3 className="font-black text-xl text-slate-900">新規動画追加</h3>
+                        <p className="text-xs text-slate-400 font-bold mt-1">動画ファイルをアップロードするか、YouTube URLを入力してください</p>
+                    </div>
+                    <button onClick={() => setShowMediaModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors cursor-pointer text-slate-400">
+                        <X size={24} />
                     </button>
                 </div>
 
-                <div className="space-y-6">
-                    <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">動画タイプ</label>
-                        <div className="flex gap-4 mb-4">
-                            <button
-                                onClick={() => setVideoLinkType('file')}
-                                className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${videoLinkType === 'file' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500'}`}
-                            >
-                                ファイルアップロード
-                            </button>
-                            <button
-                                onClick={() => setVideoLinkType('youtube')}
-                                className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${videoLinkType === 'youtube' ? 'bg-red-600 text-white' : 'bg-slate-100 text-slate-500'}`}
-                            >
-                                YouTube URL
-                            </button>
+                <div className="flex-1 overflow-y-auto p-8 space-y-8 pb-32">
+                    {/* Media Info Section */}
+                    <div className="space-y-6">
+                        <div className="space-y-4">
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">動画ソース</label>
+                            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl">
+                                <button
+                                    onClick={() => setVideoLinkType('file')}
+                                    className={`py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${videoLinkType === 'file' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
+                                >
+                                    ファイル
+                                </button>
+                                <button
+                                    onClick={() => setVideoLinkType('youtube')}
+                                    className={`py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${videoLinkType === 'youtube' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
+                                >
+                                    YouTube
+                                </button>
+                            </div>
+
+                            {videoLinkType === 'file' ? (
+                                <div className="space-y-2">
+                                    <input type="file" accept="video/*" ref={videoInputRef} className="hidden" onChange={() => { }} />
+                                    <button
+                                        onClick={() => videoInputRef.current?.click()}
+                                        className="w-full h-40 border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center gap-3 hover:border-blue-400 hover:bg-blue-50/50 transition-all group cursor-pointer"
+                                    >
+                                        <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                                            <Upload size={24} className="text-slate-400 group-hover:text-blue-500" />
+                                        </div>
+                                        <span className="text-xs font-black text-slate-400 group-hover:text-blue-600">動画ファイルを選択</span>
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    <input
+                                        type="text"
+                                        placeholder="https://youtube.com/..."
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-sm text-slate-900 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm"
+                                        value={youtubeUrl}
+                                        onChange={(e) => setYoutubeUrl(e.target.value)}
+                                    />
+                                </div>
+                            )}
                         </div>
 
-                        {videoLinkType === 'file' ? (
-                            <input
-                                type="file"
-                                accept="video/*"
-                                className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                                ref={videoInputRef}
-                            />
-                        ) : (
-                            <input
-                                type="text"
-                                placeholder="YouTube URL (Shorts対応)..."
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                value={youtubeUrl}
-                                onChange={(e) => setYoutubeUrl(e.target.value)}
-                            />
-                        )}
+                        <div className="grid grid-cols-1 gap-6">
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1">タイトル</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-sm text-slate-900 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm"
+                                    value={editingItem?.title || ''}
+                                    onChange={(e) => setEditingItem({ ...editingItem, title: e.target.value })}
+                                    placeholder="動画のタイトル"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1">キャプション</label>
+                                <textarea
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-sm text-slate-900 min-h-[100px] focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm"
+                                    value={editingItem?.caption || ''}
+                                    onChange={(e) => setEditingItem({ ...editingItem, caption: e.target.value })}
+                                    placeholder="動画の内容を説明してください..."
+                                />
+                            </div>
+                        </div>
                     </div>
+                </div>
 
-                    <div className="bg-slate-50/50 p-6 rounded-[2.5rem] border border-slate-100">
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-4">関連付け (オプション)</label>
-                        <div className="space-y-6">
-                            {/* Level 1: Select Type */}
-                            <div className="grid grid-cols-4 gap-2">
+                {/* Bottom Picker Section */}
+                <div className="bg-slate-50 border-t border-slate-200 p-6 space-y-4 shrink-0 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+                    <div className="flex flex-col gap-4">
+                        <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-none">
+                            <span className="text-[10px] font-black text-slate-400 uppercase whitespace-nowrap">1. 関連：</span>
+                            <div className="flex gap-2">
                                 {(['none', 'company', 'job', 'quest'] as const).map(type => (
                                     <button
                                         key={type}
@@ -952,7 +991,7 @@ function AdminManagementContent() {
                                             setLinkTargetId('');
                                             setMediaParentId('');
                                         }}
-                                        className={`px-3 py-3 rounded-2xl font-black text-[10px] md:text-sm transition-all border-2 cursor-pointer ${linkTargetType === type ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-white bg-white text-slate-400 hover:border-slate-200 shadow-sm'}`}
+                                        className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all border-2 whitespace-nowrap cursor-pointer ${linkTargetType === type ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-400 hover:border-blue-200'}`}
                                     >
                                         {type === 'none' && 'なし'}
                                         {type === 'company' && '企業'}
@@ -961,72 +1000,58 @@ function AdminManagementContent() {
                                     </button>
                                 ))}
                             </div>
+                        </div>
 
-                            {/* Level 2: Conditional drill-down - Horizontal Layout */}
-                            {linkTargetType !== 'none' && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1 duration-200">
-                                    {/* Level 2a: Parent Company Selection (for Job/Quest) */}
+                        {linkTargetType !== 'none' && (
+                            <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-none animate-in fade-in slide-in-from-bottom-2">
+                                <span className="text-[10px] font-black text-slate-400 uppercase whitespace-nowrap">2. コンテンツ：</span>
+                                <div className="flex gap-2">
+                                    {linkTargetType === 'company' && realCompanies.map(c => (
+                                        <button
+                                            key={c.id}
+                                            onClick={() => setLinkTargetId(c.id)}
+                                            className={`px-4 py-3 rounded-xl text-xs font-bold transition-all border-2 whitespace-nowrap cursor-pointer ${linkTargetId === c.id ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-200'}`}
+                                        >
+                                            {c.name}
+                                        </button>
+                                    ))}
                                     {(linkTargetType === 'job' || linkTargetType === 'quest') && (
-                                        <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-slate-400 pl-1">STEP 2: 企業を選択</p>
-                                            <select
-                                                className="w-full bg-white border-2 border-slate-100 rounded-2xl px-4 py-3 font-bold text-sm text-slate-700 focus:border-blue-600 outline-none transition-all cursor-pointer shadow-sm"
-                                                value={mediaParentId}
-                                                onChange={(e) => {
-                                                    setMediaParentId(e.target.value);
-                                                    setLinkTargetId('');
-                                                }}
-                                            >
-                                                <option value="">対象の企業を選択...</option>
-                                                {realCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                            </select>
-                                        </div>
-                                    )}
-
-                                    {/* Level 2b: Final Entity Selection */}
-                                    {(linkTargetType === 'company' || ((linkTargetType === 'job' || linkTargetType === 'quest') && mediaParentId)) && (
-                                        <div className={`space-y-1 animate-in fade-in slide-in-from-left-2 duration-300 ${linkTargetType === 'company' ? 'md:col-span-2' : ''}`}>
-                                            <p className="text-[10px] font-black text-slate-400 pl-1">
-                                                {linkTargetType === 'company' ? 'STEP 2: 対象の企業を選択' : 'STEP 3: 具体的な項目を選択'}
-                                            </p>
-                                            <select
-                                                className="w-full bg-blue-50 border-2 border-blue-100 rounded-2xl px-4 py-3 font-bold text-sm text-blue-700 focus:border-blue-600 outline-none transition-all cursor-pointer shadow-sm"
-                                                value={linkTargetId}
-                                                onChange={(e) => setLinkTargetId(e.target.value)}
-                                            >
-                                                <option value="">{linkTargetType === 'company' ? '企業を選択...' : '項目を選択...'}</option>
-                                                {linkTargetType === 'company' && realCompanies.map(c => (
-                                                    <option key={c.id} value={c.id}>{c.name}</option>
-                                                ))}
-                                                {linkTargetType === 'job' && realJobs
-                                                    .filter(j => j.organization_id === mediaParentId && j.type !== 'quest')
-                                                    .map(j => <option key={j.id} value={j.id}>{j.title}</option>)
-                                                }
-                                                {linkTargetType === 'quest' && realJobs
-                                                    .filter(j => j.organization_id === mediaParentId && j.type === 'quest')
-                                                    .map(j => <option key={j.id} value={j.id}>{j.title}</option>)
-                                                }
-                                            </select>
-                                            {linkTargetType !== 'company' && realJobs.filter(j => j.organization_id === mediaParentId && (linkTargetType === 'job' ? j.type !== 'quest' : j.type === 'quest')).length === 0 && (
-                                                <p className="text-[10px] text-red-400 font-bold mt-1 pl-1 italic">※選択された企業には該当する項目が登録されていません</p>
-                                            )}
+                                        <div className="flex gap-4 items-center">
+                                            {/* For Job/Quest, we might still need company first or just show all. 
+                                                User said: "関連が求人なら求人リストを出したい". We try direct list. */}
+                                            {realJobs
+                                                .filter(j => linkTargetType === 'job' ? j.type !== 'quest' : j.type === 'quest')
+                                                .map(j => (
+                                                    <button
+                                                        key={j.id}
+                                                        onClick={() => setLinkTargetId(j.id)}
+                                                        className={`px-4 py-3 rounded-xl text-xs font-bold transition-all border-2 whitespace-nowrap cursor-pointer ${linkTargetId === j.id ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-200'}`}
+                                                    >
+                                                        <div className="flex flex-col items-start">
+                                                            <span className="text-[8px] opacity-50 uppercase">{realCompanies.find(c => c.id === j.organization_id)?.name}</span>
+                                                            {j.title}
+                                                        </div>
+                                                    </button>
+                                                ))
+                                            }
                                         </div>
                                     )}
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
-                </div>
 
-                <div className="flex justify-end mt-8">
-                    <button
-                        onClick={handleMediaSubmit}
-                        disabled={uploading}
-                        className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-200"
-                    >
-                        {uploading ? <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" /> : <Upload size={18} />}
-                        保存する
-                    </button>
+                    <div className="flex justify-end gap-3 pt-2">
+                        <button onClick={() => setShowMediaModal(false)} className="px-6 py-3 font-bold text-slate-500 hover:bg-white rounded-xl transition-all cursor-pointer">キャンセル</button>
+                        <button
+                            onClick={handleMediaSubmit}
+                            disabled={uploading}
+                            className="bg-blue-600 text-white px-10 py-3 rounded-[1.25rem] font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-blue-100 cursor-pointer"
+                        >
+                            {uploading ? <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" /> : <Save size={18} />}
+                            ビデオを保存
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1051,108 +1076,72 @@ function AdminManagementContent() {
                         動画はまだアップロードされていません
                     </div>
                 ) : (
-                    <div className="space-y-3">
-                        {mediaItems.map((item) => {
-                            const isShorts = item.public_url.includes('shorts/');
-                            return (
-                                <div key={item.id} className="group flex items-start gap-4 p-3 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition-colors">
-                                    {/* Thumbnail Area - Compact & Unified Vertical Ratio */}
-                                    <div className="shrink-0 w-24 aspect-[9/16] bg-black rounded-lg overflow-hidden relative shadow-sm">
-                                        {item.type === 'youtube' ? (
-                                            <iframe
-                                                width="100%"
-                                                height="100%"
-                                                src={`https://www.youtube.com/embed/${getYouTubeID(item.public_url)}`}
-                                                title="YouTube"
-                                                frameBorder="0"
-                                                className="pointer-events-none" // Disable interaction in list view for meaningful drag/click if needed, but here just display
-                                            />
-                                        ) : (
-                                            <video src={item.public_url} className="w-full h-full object-cover" />
-                                        )}
-                                        {item.type === 'youtube' && <span className="absolute top-1 right-1 bg-red-600 text-white text-[8px] font-black px-1 rounded shadow-sm">YT</span>}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {mediaItems.map((item) => (
+                            <div key={item.id} className="group bg-slate-50 border border-slate-200 rounded-[2rem] overflow-hidden hover:shadow-xl hover:shadow-slate-200 transition-all duration-300">
+                                <div className="aspect-video bg-black relative">
+                                    {item.type === 'youtube' ? (
+                                        <iframe
+                                            width="100%"
+                                            height="100%"
+                                            src={`https://www.youtube.com/embed/${getYouTubeID(item.public_url)}`}
+                                            title="YouTube"
+                                            frameBorder="0"
+                                            className="pointer-events-none"
+                                        />
+                                    ) : (
+                                        <video src={item.public_url} className="w-full h-full object-cover" />
+                                    )}
+                                    <div className="absolute top-4 left-4 flex gap-2">
+                                        {item.type === 'youtube' && <span className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg uppercase">YouTube</span>}
+                                        {!item.organization_id && !item.job_id && <span className="bg-blue-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg uppercase">Reels</span>}
                                     </div>
-
-                                    {/* Info Area */}
-                                    <div className="flex-1 min-w-0 py-1">
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-black text-slate-900 text-sm">
-                                                    {item.title || item.filename || 'No Title'}
-                                                </p>
-                                                {item.caption && (
-                                                    <p className="text-xs text-slate-500 font-bold mt-1 line-clamp-1">
-                                                        {item.caption}
-                                                    </p>
-                                                )}
-                                                <div className="flex flex-wrap gap-2 mt-2">
-                                                    {/* Linked Info Tags */}
-                                                    {item.organization_id && (
-                                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-600">
-                                                            <Building2 size={10} /> {realCompanies.find(c => c.id === item.organization_id)?.name}
-                                                        </span>
-                                                    )}
-                                                    {item.job_id && (
-                                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md text-blue-600">
-                                                            <Briefcase size={10} /> {realJobs.find(j => j.id === item.job_id)?.title}
-                                                        </span>
-                                                    )}
-                                                    {item.link_url && (
-                                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md text-slate-500">
-                                                            <LinkIcon size={10} /> {item.link_text || 'リンクあり'}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Date & Actions */}
-                                            <div className="flex flex-col items-end gap-2 shrink-0">
-                                                <span className="text-[10px] font-bold text-slate-400">
-                                                    {new Date(item.created_at).toLocaleDateString()}
-                                                </span>
-                                                <div className="flex items-center gap-3">
-                                                    <button
-                                                        onClick={() => {
-                                                            setEditingItem(item);
-                                                            setEditMode('media');
-                                                            setActionType('edit');
-                                                        }}
-                                                        className="text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
-                                                        title="編集"
-                                                    >
-                                                        <Edit3 size={14} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => {
-                                                            navigator.clipboard.writeText(item.public_url);
-                                                            toast.success('URL Copied');
-                                                        }}
-                                                        className="text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
-                                                        title="URLコピー"
-                                                    >
-                                                        <LinkIcon size={14} />
-                                                    </button>
-                                                    <button
-                                                        onClick={async () => {
-                                                            if (!confirm('削除しますか？')) return;
-                                                            const { error } = await supabase.from('media_library').delete().eq('id', item.id);
-                                                            if (!error) {
-                                                                toast.success('削除しました');
-                                                                fetchMedia();
-                                                            }
-                                                        }}
-                                                        className="text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
-                                                        title="削除"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                            onClick={() => {
+                                                setEditingItem(item);
+                                                setEditMode('media');
+                                                setActionType('edit');
+                                            }}
+                                            className="p-2 bg-white/90 backdrop-blur-sm text-slate-700 hover:text-blue-600 rounded-full shadow-lg transition-all transform hover:scale-110 cursor-pointer"
+                                        >
+                                            <Edit3 size={16} />
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                if (!confirm('削除しますか？')) return;
+                                                const { error } = await supabase.from('media_library').delete().eq('id', item.id);
+                                                if (!error) {
+                                                    toast.success('削除しました');
+                                                    fetchMedia();
+                                                }
+                                            }}
+                                            className="p-2 bg-white/90 backdrop-blur-sm text-slate-700 hover:text-red-600 rounded-full shadow-lg transition-all transform hover:scale-110 cursor-pointer"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
                                     </div>
                                 </div>
-                            );
-                        })}
+                                <div className="p-5 space-y-3">
+                                    <div>
+                                        <h4 className="font-black text-slate-900 text-sm line-clamp-1">{item.title || item.filename || 'No Title'}</h4>
+                                        <p className="text-[10px] font-bold text-slate-400 mt-0.5">{new Date(item.created_at).toLocaleDateString()}</p>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {item.organization_id && (
+                                            <span className="inline-flex items-center gap-1 text-[9px] font-black bg-white border border-slate-200 px-2 py-0.5 rounded-lg text-slate-600">
+                                                <Building2 size={8} /> {realCompanies.find(c => c.id === item.organization_id)?.name || '企業あり'}
+                                            </span>
+                                        )}
+                                        {item.job_id && (
+                                            <span className="inline-flex items-center gap-1 text-[9px] font-black bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-lg text-blue-600">
+                                                <Briefcase size={8} /> {realJobs.find(j => j.id === item.job_id)?.title || '求人あり'}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>
@@ -1437,13 +1426,15 @@ function AdminManagementContent() {
 
     const renderEditModal = () => (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="bg-white w-full max-w-lg rounded-3xl p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-black text-slate-900">{actionType === 'create' ? '新規登録' : '詳細編集'}</h3>
-                    <button onClick={() => setEditingItem(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-                        <X size={20} />
-                    </button>
-                </div>
+            <div className={`bg-white w-full rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] ${editMode === 'media' ? 'max-w-5xl' : 'max-w-lg p-8 space-y-6 overflow-y-auto'}`}>
+                {editMode !== 'media' && (
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xl font-black text-slate-900">{actionType === 'create' ? '新規登録' : '詳細編集'}</h3>
+                        <button onClick={() => setEditingItem(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                            <X size={20} />
+                        </button>
+                    </div>
+                )}
 
                 <div className="space-y-4">
                     {editMode === 'user' && (
@@ -1715,88 +1706,159 @@ function AdminManagementContent() {
                         </>
                     )}
                     {editMode === 'media' && (
-                        <>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">タイトル</label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                    value={editingItem.title || editingItem.filename || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, title: e.target.value })}
-                                    placeholder="動画のタイトル"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">キャプション / 説明</label>
-                                <textarea
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[80px]"
-                                    value={editingItem.caption || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, caption: e.target.value })}
-                                    placeholder="動画の説明文やキャプション..."
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col h-full">
+                            {/* Header for Media Modal */}
+                            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
                                 <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">ボタン/リンク URL</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.link_url || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, link_url: e.target.value })}
-                                        placeholder="https://..."
-                                    />
+                                    <h3 className="font-black text-xl text-slate-900">メディア編集</h3>
+                                    <p className="text-xs text-slate-400 font-bold mt-1">動画のタイトル、説明、および紐付け先を管理できます</p>
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">ボタンテキスト</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.link_text || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, link_text: e.target.value })}
-                                        placeholder="詳細を見る"
-                                    />
-                                </div>
+                                <button onClick={() => setEditingItem(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors cursor-pointer text-slate-400">
+                                    <X size={24} />
+                                </button>
                             </div>
-                            <div className="space-y-4 pt-4 border-t border-slate-100">
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">紐付け設定 (Drill-down)</label>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <label className="block text-[10px] font-black text-slate-300 uppercase pl-1">企業を選択</label>
-                                        <select
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 cursor-pointer focus:bg-white transition-all shadow-sm"
-                                            value={editingItem.organization_id || ''}
-                                            onChange={e => setEditingItem({ ...editingItem, organization_id: e.target.value, job_id: '' })}
-                                        >
-                                            <option value="">(選択なし)</option>
-                                            {realCompanies.map(c => (
-                                                <option key={c.id} value={c.id}>{c.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="block text-[10px] font-black text-slate-300 uppercase pl-1">関連する求人・クエスト</label>
-                                        <select
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 cursor-pointer disabled:opacity-50 focus:bg-white transition-all shadow-sm"
-                                            value={editingItem.job_id || ''}
-                                            disabled={!editingItem.organization_id}
-                                            onChange={e => setEditingItem({ ...editingItem, job_id: e.target.value })}
-                                        >
-                                            <option value="">(選択なし)</option>
-                                            {realJobs
-                                                .filter(j => j.organization_id === editingItem.organization_id)
-                                                .map(j => (
-                                                    <option key={j.id} value={j.id}>{j.type === 'quest' ? ' [Q] ' : ' [J] '}{j.title}</option>
-                                                ))
-                                            }
-                                        </select>
+                            <div className="flex-1 overflow-y-auto p-8 space-y-8 pb-32">
+                                <div className="aspect-video bg-black rounded-[2rem] overflow-hidden shadow-lg relative shrink-0">
+                                    {editingItem.type === 'youtube' ? (
+                                        <iframe
+                                            width="100%"
+                                            height="100%"
+                                            src={`https://www.youtube.com/embed/${getYouTubeID(editingItem.public_url)}`}
+                                            frameBorder="0"
+                                            allowFullScreen
+                                        />
+                                    ) : (
+                                        <video src={editingItem.public_url} className="w-full h-full object-contain" controls />
+                                    )}
+                                    <div className="absolute top-4 left-4">
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black text-white shadow-lg ${editingItem.type === 'youtube' ? 'bg-red-600' : 'bg-blue-600'}`}>
+                                            {editingItem.type.toUpperCase()}
+                                        </span>
                                     </div>
                                 </div>
-                                <p className="text-[10px] text-slate-400 font-bold italic pl-1">
-                                    ※ 企業のみを選択した場合は「企業詳細ページ」にのみ表示されます。
-                                </p>
+
+                                <div className="grid grid-cols-1 gap-6">
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1">タイトル</label>
+                                        <input
+                                            type="text"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 shadow-sm focus:bg-white focus:border-blue-500 outline-none transition-all"
+                                            value={editingItem.title || editingItem.filename || ''}
+                                            onChange={e => setEditingItem({ ...editingItem, title: e.target.value })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1">キャプション</label>
+                                        <textarea
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 min-h-[100px] shadow-sm focus:bg-white focus:border-blue-500 outline-none transition-all"
+                                            value={editingItem.caption || ''}
+                                            onChange={e => setEditingItem({ ...editingItem, caption: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1">カスタムアクションURL</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 shadow-sm focus:bg-white focus:border-blue-500 outline-none transition-all"
+                                                value={editingItem.link_url || ''}
+                                                onChange={e => setEditingItem({ ...editingItem, link_url: e.target.value })}
+                                                placeholder="https://..."
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1">ボタンラベル</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 shadow-sm focus:bg-white focus:border-blue-500 outline-none transition-all"
+                                                value={editingItem.link_text || ''}
+                                                onChange={e => setEditingItem({ ...editingItem, link_text: e.target.value })}
+                                                placeholder="詳細をチェック"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </>
+
+                            {/* Bottom Picker Section */}
+                            <div className="bg-slate-50 border-t border-slate-200 p-6 space-y-4 shrink-0 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+                                <div className="flex flex-col gap-4">
+                                    <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-none">
+                                        <span className="text-[10px] font-black text-slate-400 uppercase whitespace-nowrap">1. 関連：</span>
+                                        <div className="flex gap-2">
+                                            {(['none', 'company', 'job', 'quest'] as const).map(type => {
+                                                const isActive = (type === 'none' && !editingItem.organization_id && !editingItem.job_id) ||
+                                                    (type === 'company' && editingItem.organization_id && !editingItem.job_id) ||
+                                                    (type === 'job' && editingItem.job_id && realJobs.find(j => j.id === editingItem.job_id)?.type !== 'quest') ||
+                                                    (type === 'quest' && realJobs.find(j => j.id === editingItem.job_id)?.type === 'quest');
+
+                                                return (
+                                                    <button
+                                                        key={type}
+                                                        onClick={() => {
+                                                            if (type === 'none') setEditingItem({ ...editingItem, organization_id: null, job_id: null });
+                                                            else if (type === 'company') setEditingItem({ ...editingItem, job_id: null });
+                                                            setLinkTargetType(type);
+                                                        }}
+                                                        className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all border-2 whitespace-nowrap cursor-pointer ${isActive ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-400 hover:border-blue-200'}`}
+                                                    >
+                                                        {type === 'none' && 'なし'}
+                                                        {type === 'company' && '企業'}
+                                                        {type === 'job' && '求人'}
+                                                        {type === 'quest' && 'クエスト'}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {(editingItem.organization_id || editingItem.job_id || linkTargetType !== 'none') && (
+                                        <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-none animate-in fade-in slide-in-from-bottom-2">
+                                            <span className="text-[10px] font-black text-slate-400 uppercase whitespace-nowrap">2. コンテンツ：</span>
+                                            <div className="flex gap-2">
+                                                {linkTargetType === 'company' && realCompanies.map(c => (
+                                                    <button
+                                                        key={c.id}
+                                                        onClick={() => setEditingItem({ ...editingItem, organization_id: c.id, job_id: null })}
+                                                        className={`px-4 py-3 rounded-xl text-xs font-bold transition-all border-2 whitespace-nowrap cursor-pointer ${editingItem.organization_id === c.id && !editingItem.job_id ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-200'}`}
+                                                    >
+                                                        {c.name}
+                                                    </button>
+                                                ))}
+                                                {(linkTargetType === 'job' || linkTargetType === 'quest') && (
+                                                    <div className="flex gap-2 items-center">
+                                                        {realJobs
+                                                            .filter(j => linkTargetType === 'job' ? j.type !== 'quest' : j.type === 'quest')
+                                                            .map(j => (
+                                                                <button
+                                                                    key={j.id}
+                                                                    onClick={() => setEditingItem({ ...editingItem, organization_id: j.organization_id, job_id: j.id })}
+                                                                    className={`px-4 py-3 rounded-xl text-xs font-bold transition-all border-2 whitespace-nowrap cursor-pointer ${editingItem.job_id === j.id ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-200'}`}
+                                                                >
+                                                                    <div className="flex flex-col items-start">
+                                                                        <span className="text-[8px] opacity-50 uppercase">{realCompanies.find(c => c.id === j.organization_id)?.name}</span>
+                                                                        {j.title}
+                                                                    </div>
+                                                                </button>
+                                                            ))
+                                                        }
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex justify-end gap-3 pt-2">
+                                    <button onClick={() => setEditingItem(null)} className="px-6 py-3 font-bold text-slate-500 hover:bg-white rounded-xl transition-all cursor-pointer">キャンセル</button>
+                                    <button onClick={handleSaveEdit} className="bg-blue-600 text-white px-10 py-3 rounded-[1.25rem] font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all cursor-pointer shadow-xl shadow-blue-100">
+                                        <Save size={18} />
+                                        変更を保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     )}
                     {editMode === 'company' && (
                         <>

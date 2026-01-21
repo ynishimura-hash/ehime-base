@@ -35,7 +35,7 @@ function AdminManagementContent() {
 
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [editingItem, setEditingItem] = useState<any | null>(null);
-    const [editMode, setEditMode] = useState<'user' | 'company' | 'job' | null>(null);
+    const [editMode, setEditMode] = useState<'company' | 'job' | 'user' | 'media' | null>(null);
     const [actionType, setActionType] = useState<'create' | 'edit'>('edit');
     const [modalTab, setModalTab] = useState<'basic' | 'detail' | 'activity' | 'analysis'>('basic');
     const [relatedData, setRelatedData] = useState<any>({ applications: [], logs: [], bookmarks: [], courses: [] });
@@ -1028,11 +1028,11 @@ function AdminManagementContent() {
                                                     {item.filename || 'No Title'}
                                                 </p>
                                                 {/* Linked Info Tags */}
-                                                {(item.company_id || item.job_id) && (
+                                                {(item.organization_id || item.job_id) && (
                                                     <div className="flex flex-wrap gap-2 mt-1.5">
-                                                        {item.company_id && (
+                                                        {item.organization_id && (
                                                             <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-600">
-                                                                <Building2 size={10} /> {realCompanies.find(c => c.id === item.company_id)?.name}
+                                                                <Building2 size={10} /> {realCompanies.find(c => c.id === item.organization_id)?.name}
                                                             </span>
                                                         )}
                                                         {item.job_id && (
@@ -1050,6 +1050,17 @@ function AdminManagementContent() {
                                                     {new Date(item.created_at).toLocaleDateString()}
                                                 </span>
                                                 <div className="flex items-center gap-3">
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingItem(item);
+                                                            setEditMode('media');
+                                                            setActionType('edit');
+                                                        }}
+                                                        className="text-slate-400 hover:text-blue-600 transition-colors"
+                                                        title="編集"
+                                                    >
+                                                        <Edit3 size={14} />
+                                                    </button>
                                                     <button
                                                         onClick={() => {
                                                             navigator.clipboard.writeText(item.public_url);
@@ -1194,6 +1205,21 @@ function AdminManagementContent() {
                     toast.success('更新しました');
                     fetchJobs();
                 }
+            } else if (editMode === 'media') {
+                const { error } = await supabase
+                    .from('media_library')
+                    .update({
+                        title: editingItem.title,
+                        caption: editingItem.caption,
+                        link_url: editingItem.link_url,
+                        link_text: editingItem.link_text,
+                        organization_id: editingItem.organization_id,
+                        job_id: editingItem.job_id
+                    })
+                    .eq('id', editingItem.id);
+                if (error) throw error;
+                toast.success('更新しました');
+                fetchMedia();
             }
             setEditingItem(null);
         } catch (error: any) {
@@ -1625,6 +1651,79 @@ function AdminManagementContent() {
                                     </div>
                                 </div>
                             )}
+                        </>
+                    )}
+                    {editMode === 'media' && (
+                        <>
+                            <div>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">タイトル</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                    value={editingItem.title || editingItem.filename || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, title: e.target.value })}
+                                    placeholder="動画のタイトル"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">キャプション / 説明</label>
+                                <textarea
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[80px]"
+                                    value={editingItem.caption || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, caption: e.target.value })}
+                                    placeholder="動画の説明文やキャプション..."
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">ボタン/リンク URL</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.link_url || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, link_url: e.target.value })}
+                                        placeholder="https://..."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">ボタンテキスト</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.link_text || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, link_text: e.target.value })}
+                                        placeholder="詳細を見る"
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">関連企業</label>
+                                    <select
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.organization_id || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, organization_id: e.target.value })}
+                                    >
+                                        <option value="">(未選択)</option>
+                                        {realCompanies.map(c => (
+                                            <option key={c.id} value={c.id}>{c.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">関連求人</label>
+                                    <select
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                        value={editingItem.job_id || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, job_id: e.target.value })}
+                                    >
+                                        <option value="">(未選択)</option>
+                                        {realJobs.map(j => (
+                                            <option key={j.id} value={j.id}>{j.title}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
                         </>
                     )}
                     {editMode === 'company' && (

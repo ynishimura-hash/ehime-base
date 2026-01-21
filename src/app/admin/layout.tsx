@@ -18,6 +18,7 @@ import { useAppStore } from '@/lib/appStore';
 
 const sidebarItems = [
     { name: 'ダッシュボード', icon: LayoutDashboard, href: '/admin' },
+    { name: '企業承認申請', icon: ShieldCheck, href: '/admin/approvals' },
     { name: 'データ管理 (企業/求人)', icon: Database, href: '/admin/management' },
     { name: '組織アカウント発行', icon: Users, href: '/organizations/register' },
 ];

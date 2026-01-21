@@ -26,7 +26,10 @@ export interface Reel {
     type: 'file' | 'youtube';
     thumbnail?: string;
     title: string;
+    caption?: string; // New
     description?: string;
+    link_url?: string; // New
+    link_text?: string; // New
     likes: number;
 }
 

@@ -4,18 +4,58 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/appStore';
-import { Map, ArrowRight, Wallet, Clock, Info, Search, Filter, ChevronUp, ChevronDown, X } from 'lucide-react';
-import { Job, Reel } from '@/lib/dummyData';
+import { Map, ArrowRight, Wallet, Clock, Info, Search, Filter, ChevronUp, ChevronDown, X, Loader2 } from 'lucide-react';
+import { Reel } from '@/lib/dummyData';
 import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
+import { createClient } from '@/utils/supabase/client';
+import { toast } from 'sonner';
 
 function QuestsContent() {
     const searchParams = useSearchParams();
-    const { jobs, companies } = useAppStore();
+    const supabase = createClient();
+    const { interactions, currentUserId } = useAppStore();
+
+    // State
+    const [quests, setQuests] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
     const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    // Reel State
+    const [isReelModalOpen, setIsReelModalOpen] = useState(false);
+    const [activeReels, setActiveReels] = useState<Reel[]>([]);
+    const [activeEntity, setActiveEntity] = useState<{ name: string, id: string, companyId?: string }>({ name: '', id: '' });
+
+    // Fetch Quests from Supabase
+    const fetchQuests = async () => {
+        setLoading(true);
+        const { data, error } = await supabase
+            .from('jobs')
+            .select(`
+                *,
+                organization:organizations!inner (
+                    id, name, industry, location, is_premium,
+                    logo_url, cover_image_url, logo_color, category
+                )
+            `)
+            .eq('organization.status', 'approved')
+            .eq('type', 'quest');
+
+        if (error) {
+            console.error('Error fetching quests:', error);
+            toast.error('クエスト情報の取得に失敗しました');
+        } else {
+            setQuests(data || []);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        fetchQuests();
+    }, []);
 
     // Initialize area and industry filters from URL parameters
     useEffect(() => {
@@ -35,18 +75,9 @@ function QuestsContent() {
         }
 
         if (industryParam && !selectedCategories.includes(industryParam)) {
-            // Check if industryParam is one of the standardized industries
             setSelectedCategories([industryParam]);
         }
-    }, []);
-
-    // Reel State
-    const [isReelModalOpen, setIsReelModalOpen] = useState(false);
-    const [activeReels, setActiveReels] = useState<Reel[]>([]);
-    const [activeEntity, setActiveEntity] = useState<{ name: string, id: string, companyId?: string }>({ name: '', id: '' });
-
-    // Filter only quests
-    const allQuests = jobs.filter(j => j.type === 'quest');
+    }, [searchParams]);
 
     // Extract unique filter options
     const allRegions = ['中予', '東予', '南予'];
@@ -75,11 +106,12 @@ function QuestsContent() {
     };
 
     // Filter Logic
-    const filteredQuests = allQuests.filter(quest => {
-        const matchesSearch =
-            quest.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            quest.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            companies.find(c => c.id === quest.companyId)?.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const filteredQuests = quests.filter(quest => {
+        const company = quest.organization;
+        const matchesSearch = !searchQuery ||
+            quest.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            quest.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            company?.name?.toLowerCase().includes(searchQuery.toLowerCase());
 
         const regionCities: Record<string, string[]> = {
             '中予': ['松山', '伊予', '東温', '久万高原', '松前', '砥部'],
@@ -89,15 +121,15 @@ function QuestsContent() {
 
         const matchesRegion = selectedRegions.length === 0 || selectedRegions.some(region => {
             if (quest.location?.includes(region)) return true;
+            if (company?.location?.includes(region)) return true;
             const cities = regionCities[region] || [];
-            return cities.some(city => quest.location?.includes(city));
+            return cities.some(city => quest.location?.includes(city) || company?.location?.includes(city));
         });
 
-        // Match either the quest's category OR the company's industry
-        const company = companies.find(c => c.id === quest.companyId);
+        // Match either the quest's category OR the company's industry/category
         const matchesCategory = selectedCategories.length === 0 ||
             selectedCategories.includes(quest.category) ||
-            (company && selectedCategories.includes(company.industry));
+            (company && (selectedCategories.includes(company.industry) || selectedCategories.includes(company.category)));
 
         return matchesSearch && matchesRegion && matchesCategory;
     });
@@ -244,16 +276,18 @@ function QuestsContent() {
             </div>
 
             <div className="p-4 md:p-8 max-w-4xl mx-auto">
-
-
                 {/* Results Count */}
-                < div className="mb-4 text-slate-500 text-sm font-bold" >
+                <div className="mb-4 text-slate-500 text-sm font-bold">
                     {filteredQuests.length}件のクエストが見つかりました
-                </div >
+                </div>
 
                 <div className="grid gap-4">
-                    {filteredQuests.map(quest => {
-                        const company = companies.find(c => c.id === quest.companyId);
+                    {loading ? (
+                        <div className="flex justify-center p-20">
+                            <Loader2 className="animate-spin text-slate-400" />
+                        </div>
+                    ) : filteredQuests.map(quest => {
+                        const company = quest.organization;
                         return (
                             <Link
                                 href={`/jobs/${quest.id}`} // Quests are jobs in the data model
@@ -263,7 +297,7 @@ function QuestsContent() {
                                 <div className="absolute right-6 top-1/2 -translate-y-1/2 z-10 transition-transform group-hover:scale-110">
                                     <ReelIcon
                                         reels={company?.reels || []}
-                                        fallbackImage={company?.image}
+                                        fallbackImage={company?.logo_url}
                                         onClick={() => {
                                             setActiveReels(company?.reels || []);
                                             setActiveEntity({ name: quest.title, id: quest.id, companyId: company?.id });
@@ -286,7 +320,7 @@ function QuestsContent() {
                                     {quest.title}
                                 </h3>
                                 <div className="flex items-center gap-2 text-slate-500 text-xs font-bold mb-4">
-                                    <div className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] ${company?.logoColor || 'bg-slate-400'}`}>
+                                    <div className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] ${company?.logo_color || 'bg-slate-400'}`}>
                                         {company?.name.slice(0, 1) || 'C'}
                                     </div>
                                     {company?.name}
@@ -297,10 +331,10 @@ function QuestsContent() {
                                         <Info size={16} className="text-slate-400" />
                                         <span className="line-clamp-1">{quest.description}</span>
                                     </div>
-                                    {quest.workingHours && (
+                                    {quest.working_hours && (
                                         <div className="flex items-center gap-2 text-slate-600 text-sm">
                                             <Clock size={16} className="text-slate-400" />
-                                            <span>{quest.workingHours}</span>
+                                            <span>{quest.working_hours}</span>
                                         </div>
                                     )}
                                 </div>
@@ -313,20 +347,18 @@ function QuestsContent() {
                     })}
                 </div>
 
-                {
-                    filteredQuests.length === 0 && (
-                        <div className="text-center py-20 text-slate-400">
-                            <p className="font-bold">条件に一致するクエストが見つかりませんでした。</p>
-                            <button
-                                onClick={clearFilters}
-                                className="mt-4 text-blue-600 hover:underline text-sm font-bold"
-                            >
-                                条件をクリアして全件表示
-                            </button>
-                        </div>
-                    )
-                }
-            </div >
+                {filteredQuests.length === 0 && !loading && (
+                    <div className="text-center py-20 text-slate-400">
+                        <p className="font-bold">条件に一致するクエストが見つかりませんでした。</p>
+                        <button
+                            onClick={clearFilters}
+                            className="mt-4 text-blue-600 hover:underline text-sm font-bold"
+                        >
+                            条件をクリアして全件表示
+                        </button>
+                    </div>
+                )}
+            </div>
 
             <ReelModal
                 isOpen={isReelModalOpen}
@@ -337,7 +369,7 @@ function QuestsContent() {
                 entityType="job" // Quests are internally job structures
                 companyId={activeEntity.companyId}
             />
-        </div >
+        </div>
     );
 }
 

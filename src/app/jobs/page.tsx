@@ -1,18 +1,21 @@
 "use client";
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/appStore';
 import { JOBS, COMPANIES } from '@/lib/dummyData';
 import { useSearchParams } from 'next/navigation';
-import { Building2, Heart, Search, Filter, X, ChevronDown, ChevronUp, MapPin, Briefcase, JapaneseYen, Clock, ArrowRight } from 'lucide-react';
+import { Building2, Heart, Search, Filter, X, ChevronDown, ChevronUp, MapPin, Briefcase, JapaneseYen, Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
 import { Reel } from '@/lib/dummyData';
+import { createClient } from '@/utils/supabase/client';
+import { toast } from 'sonner';
 
 function JobsContent() {
     const searchParams = useSearchParams();
     const { interactions, toggleInteraction, activeRole, currentUserId } = useAppStore();
+    const supabase = createClient(); // Use createClient inside component
 
     // Mapping area parameter to regional keywords
     const areaMap: Record<string, string> = {
@@ -27,6 +30,9 @@ function JobsContent() {
     const initialArea = areaMap[initialAreaParam] || '';
 
     // State
+    const [jobs, setJobs] = useState<any[]>([]); // Real jobs
+    const [loading, setLoading] = useState(true);
+
     const [searchQuery, setSearchQuery] = useState(initialQ);
     const [selectedArea, setSelectedArea] = useState(initialArea);
     const [selectedIndustry, setSelectedIndustry] = useState(initialIndustry);
@@ -34,29 +40,53 @@ function JobsContent() {
     const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-    // Filter sync (optional: if you want to update when URL changes without full reload)
-    // For now, let's keep it simple with initial state.
-
     // Reel State
     const [isReelModalOpen, setIsReelModalOpen] = useState(false);
     const [activeReels, setActiveReels] = useState<Reel[]>([]);
     const [activeEntity, setActiveEntity] = useState<{ name: string, id: string, companyId?: string }>({ name: '', id: '' });
 
-    // Data Extraction
-    const allJobItems = JOBS.filter(j => j.type === 'job');
-    const allTags = Array.from(new Set(allJobItems.flatMap(j => j.tags)));
+    // Fetch Jobs from Supabase
+    const fetchJobs = async () => {
+        setLoading(true);
+        // Fetch jobs and inner join approved organizations
+        const { data, error } = await supabase
+            .from('jobs')
+            .select(`
+                *,
+                organization:organizations!inner (
+                    id, name, industry, location, is_premium,
+                    logo_url, cover_image_url
+                )
+            `)
+            .eq('organization.status', 'approved')
+            .eq('type', 'job'); // Ensure only jobs
+
+        if (error) {
+            console.error('Error fetching jobs:', error);
+            toast.error('求人情報の取得に失敗しました');
+        } else {
+            setJobs(data || []);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        fetchJobs();
+    }, []);
+
+    const allTags = Array.from(new Set(jobs.flatMap(j => (j.tags || [])))); // Handle null tags if any
 
     // Filtering Logic
-    const filteredJobs = allJobItems.filter(job => {
-        const company = COMPANIES.find(c => c.id === job.companyId);
+    const filteredJobs = jobs.filter(job => {
+        const company = job.organization;
         const query = searchQuery.toLowerCase();
 
         // 1. Keyword Search
         const matchesSearch = !query ||
-            job.title.toLowerCase().includes(query) ||
-            company?.name.toLowerCase().includes(query) ||
+            job.title?.toLowerCase().includes(query) ||
+            company?.name?.toLowerCase().includes(query) ||
             job.location?.toLowerCase().includes(query) ||
-            job.tags.some(t => t.toLowerCase().includes(query));
+            (job.tags || []).some((t: string) => t.toLowerCase().includes(query));
 
         // 2. Area Filter
         const regionCities: Record<string, string[]> = {
@@ -74,22 +104,24 @@ function JobsContent() {
         const matchesIndustry = !selectedIndustry || company?.industry === selectedIndustry;
 
         // 4. Tag Filter
-        const matchesTags = selectedTags.length === 0 || selectedTags.some(t => job.tags.includes(t));
+        const matchesTags = selectedTags.length === 0 || selectedTags.some(t => (job.tags || []).includes(t));
 
         // 4. Condition Filter (Ehime Base Style)
         let matchesConditions = true;
         if (selectedConditions.length > 0) {
+            const tags = job.tags || [];
             // AND logic: all selected conditions must be met
             if (selectedConditions.includes('unexperienced')) {
-                const isUnexperienced = !job.isExperience || job.tags.some(t => ['未経験OK', '新卒', '未経験'].includes(t));
+                // Assuming is_experience column or check tags
+                const isUnexperienced = tags.some((t: string) => ['未経験OK', '新卒', '未経験'].includes(t));
                 if (!isUnexperienced) matchesConditions = false;
             }
             if (selectedConditions.includes('remote')) {
-                const isRemote = job.tags.some(t => ['リモート', 'テレワーク', '在宅'].includes(t)) || job.welfare?.includes('リモート');
+                const isRemote = tags.some((t: string) => ['リモート', 'テレワーク', '在宅'].includes(t)) || job.welfare?.includes('リモート');
                 if (!isRemote) matchesConditions = false;
             }
             if (selectedConditions.includes('weekend')) {
-                const isWeekend = job.tags.includes('土日祝休み') || job.holidays?.includes('土日');
+                const isWeekend = tags.includes('土日祝休み') || job.holidays?.includes('土日');
                 if (!isWeekend) matchesConditions = false;
             }
         }
@@ -357,27 +389,35 @@ function JobsContent() {
                 </div>
 
                 <div className="space-y-4">
-                    {filteredJobs.length > 0 ? (
+                    {loading ? (
+                        <div className="flex justify-center p-20">
+                            <Loader2 className="animate-spin text-slate-400" />
+                        </div>
+                    ) : filteredJobs.length > 0 ? (
                         filteredJobs.map(job => {
-                            const company = COMPANIES.find(c => c.id === job.companyId)!;
+                            const company = job.organization;
                             // Ensure images exist (fallback for dummy data)
-                            const mainImage = company.image;
-                            const subImages = company.images && company.images.length >= 3 ? company.images : [company.image, company.image, company.image];
+                            const mainImage = company.cover_image_url || 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800'; // Fallback
+                            const subImages = company.images && company.images.length >= 3 ? company.images : [mainImage, mainImage, mainImage];
 
                             return (
                                 <Link href={`/jobs/${job.id}`} key={job.id} className="block group">
                                     <div className="bg-white rounded-[2rem] p-4 md:p-6 shadow-sm border border-slate-100 transition-all hover:shadow-lg hover:-translate-y-1 relative">
 
                                         <div className="absolute right-6 top-1/2 -translate-y-1/2 z-20 transition-transform group-hover:scale-110">
-                                            <ReelIcon
-                                                reels={company.reels || []}
-                                                fallbackImage={company.image}
-                                                onClick={() => {
-                                                    setActiveReels(company.reels || []);
-                                                    setActiveEntity({ name: job.title, id: job.id, companyId: company.id });
-                                                    setIsReelModalOpen(true);
-                                                }}
-                                            />
+                                            <div onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setActiveReels(company.reels || []);
+                                                setActiveEntity({ name: job.title, id: job.id, companyId: company.id });
+                                                setIsReelModalOpen(true);
+                                            }}>
+                                                <ReelIcon
+                                                    reels={company.reels || []}
+                                                    fallbackImage={company.logo_url}
+                                                    onClick={() => { }} // Handle click in wrapper div to satisfy type
+                                                />
+                                            </div>
                                         </div>
 
                                         {/* Like Button */}
@@ -399,9 +439,9 @@ function JobsContent() {
                                                     <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-100 relative">
                                                         <img src={mainImage} alt={job.title} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
                                                         <span className="absolute top-2 left-2 px-2 py-0.5 bg-blue-600/90 text-white text-[10px] font-bold rounded shadow-sm">
-                                                            {job.category}
+                                                            {job.category || '中途'}
                                                         </span>
-                                                        {company.isPremium && (
+                                                        {company.is_premium && (
                                                             <span className="absolute top-2 right-2 bg-yellow-400 text-white text-[10px] font-black px-2 py-0.5 rounded shadow-sm">
                                                                 ★ PREMIUM
                                                             </span>
@@ -409,7 +449,7 @@ function JobsContent() {
                                                     </div>
                                                     {/* Sub Images (3 cols) */}
                                                     <div className="grid grid-cols-3 gap-2">
-                                                        {subImages.slice(0, 3).map((img, idx) => (
+                                                        {subImages.slice(0, 3).map((img: string, idx: number) => (
                                                             <div key={idx} className="aspect-video rounded-xl overflow-hidden bg-slate-100">
                                                                 <img src={img} alt="" className="w-full h-full object-cover" />
                                                             </div>
@@ -431,7 +471,7 @@ function JobsContent() {
                                                 </div>
 
                                                 <div className="flex flex-wrap gap-2 mb-4">
-                                                    {job.tags.slice(0, 4).map(tag => (
+                                                    {(job.tags || []).slice(0, 4).map((tag: string) => (
                                                         <span key={tag} className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-lg border border-slate-200">
                                                             #{tag}
                                                         </span>
@@ -449,12 +489,12 @@ function JobsContent() {
                                                     </div>
                                                     <div className="flex items-center gap-2 text-slate-600 md:col-span-2">
                                                         <Clock size={14} className="text-slate-400 shrink-0" />
-                                                        <span className="truncate">{job.workingHours || '9:00 - 18:00'}</span>
+                                                        <span className="truncate">{job.working_hours || '9:00 - 18:00'}</span>
                                                     </div>
                                                 </div>
 
                                                 {/* Reality Check */}
-                                                {(company.rjpNegatives) && (
+                                                {(company.rjp_negatives) && (
                                                     <div className="mt-auto bg-amber-50 border border-amber-200 rounded-xl p-3 flex gap-3 relative overflow-hidden">
                                                         <div className="absolute -right-2 -top-2 text-amber-100 transform rotate-12">
                                                             <Building2 size={80} />
@@ -468,7 +508,7 @@ function JobsContent() {
                                                                 入社後のリアルギャップ予防
                                                             </p>
                                                             <p className="text-xs font-bold text-amber-900 leading-snug">
-                                                                {company.rjpNegatives}
+                                                                {company.rjp_negatives}
                                                             </p>
                                                         </div>
                                                     </div>

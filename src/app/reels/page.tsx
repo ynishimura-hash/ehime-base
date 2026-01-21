@@ -29,7 +29,13 @@ function ReelsContent() {
         const fetchMedia = async () => {
             const { data, error } = await supabase
                 .from('media_library')
-                .select('*')
+                .select(`
+                    *,
+                    organization:organizations!inner (
+                        id, status, name, industry, location, logo_url
+                    )
+                `)
+                .eq('organization.status', 'approved')
                 .order('created_at', { ascending: false });
 
             if (data) {
@@ -38,44 +44,29 @@ function ReelsContent() {
                     reel: {
                         id: item.id,
                         url: item.type === 'youtube' ? `https://www.youtube.com/embed/${getYouTubeID(item.public_url)}` : item.public_url,
-                        title: item.filename || 'No Title', // Use filename or description
+                        title: item.title || item.filename || 'No Title',
+                        caption: item.caption,
+                        link_url: item.link_url,
+                        link_text: item.link_text,
                         likes: 0,
                         comments: 0,
                         shares: 0,
                         type: item.type === 'youtube' ? 'youtube' : 'file'
                     },
-                    entityName: item.company_id
-                        ? (companies.find(c => c.id === item.company_id)?.name || 'Company')
-                        : (item.job_id ? 'Job/Quest' : 'Official'),
-                    entityId: item.company_id || item.job_id || 'admin',
-                    type: item.company_id ? 'company' : (item.job_id ? 'job' : 'company'), // Default to company type for now or generic
-                    companyId: item.company_id
+                    organization: item.organization, // Store organization info for filtering
+                    entityName: item.organization?.name || 'Company',
+                    entityId: item.organization_id || item.job_id || 'admin',
+                    type: item.organization_id ? 'company' : (item.job_id ? 'job' : 'company'),
+                    companyId: item.organization_id
                 }));
                 setMediaReels(items);
             }
         };
         fetchMedia();
-    }, [companies]);
+    }, []);
 
-    // Aggregate all reels from companies and jobs + Media Library
-    const allReels: { reel: Reel, entityName: string, entityId: string, type: 'company' | 'job', companyId?: string }[] = [...mediaReels];
-
-    companies.forEach(company => {
-        if (company.reels) {
-            company.reels.forEach(reel => {
-                allReels.push({
-                    reel,
-                    entityName: company.name,
-                    entityId: company.id,
-                    type: 'company'
-                });
-            });
-        }
-    });
-
-    jobs.forEach(job => {
-        // jobs logic (currently empty for dummy data reels, but media_library might cover this)
-    });
+    // Aggregate only Supabase media
+    const allReels: { reel: Reel, entityName: string, entityId: string, type: 'company' | 'job', companyId?: string, organization?: any }[] = [...mediaReels];
 
 
     // Reel State
@@ -112,14 +103,18 @@ function ReelsContent() {
 
     // Filter Logic
     const filteredReels = allReels.filter(item => {
-        const company = companies.find(c => c.id === item.entityId || c.id === item.companyId);
+        // item will have company information if it came from media_library join
+        const company = (item as any).organization || companies.find(c => c.id === item.entityId || c.id === item.companyId);
 
         const query = searchQuery.toLowerCase();
+
+        // 1. Match either the reel's company info OR the reel's title
         const matchesSearch = !query ||
             item.entityName.toLowerCase().includes(query) ||
             item.reel.title.toLowerCase().includes(query) ||
-            company?.location.toLowerCase().includes(query);
+            company?.location?.toLowerCase().includes(query);
 
+        // 2. Area Filter
         const regionCities: Record<string, string[]> = {
             '中予': ['松山', '伊予', '東温', '久万高原', '松前', '砥部'],
             '東予': ['今治', '新居浜', '西条', '四国中央', '上島'],
@@ -127,9 +122,10 @@ function ReelsContent() {
         };
         const cities = regionCities[selectedArea] || [];
         const matchesArea = !selectedArea ||
-            company?.location.includes(selectedArea) ||
-            cities.some(city => company?.location.includes(city));
+            company?.location?.includes(selectedArea) ||
+            cities.some((city: string) => company?.location?.includes(city));
 
+        // 3. Industry Filter
         const matchesIndustry = !selectedIndustry || company?.industry === selectedIndustry;
 
         return matchesSearch && matchesArea && matchesIndustry;
@@ -200,12 +196,80 @@ function ReelsContent() {
                                 )}
                                 {/* Filter button placeholder - disabled style until filters exist */}
                                 <button
-                                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all whitespace-nowrap shadow-sm border bg-white text-slate-400 border-slate-200 opacity-50 cursor-not-allowed"
+                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all whitespace-nowrap shadow-sm border ${isFilterOpen || (selectedArea || selectedIndustry)
+                                        ? 'bg-slate-800 text-white border-slate-800 shadow-md'
+                                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                                        }`}
                                 >
                                     <Filter size={18} />
                                     <span className="hidden md:inline">絞り込み</span>
-                                    <ChevronDown size={16} />
+                                    {(selectedArea || selectedIndustry) && (
+                                        <span className="bg-pink-500 text-white text-[10px] px-1.5 py-0.5 rounded-full ml-1">
+                                            {(selectedArea ? 1 : 0) + (selectedIndustry ? 1 : 0)}
+                                        </span>
+                                    )}
+                                    {isFilterOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                 </button>
+                            </div>
+                        </div>
+
+                        {/* Collapsible Detailed Filters */}
+                        <div
+                            className={`overflow-hidden transition-all duration-300 ease-in-out ${isFilterOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+                                }`}
+                        >
+                            <div className="p-4 md:p-6 border-t border-slate-200 bg-white/50 rounded-b-xl space-y-6 mt-2">
+                                <div className="flex flex-col md:flex-row gap-6">
+                                    {/* Area Filter */}
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <span className="text-sm font-black text-slate-700">エリア</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['中予', '東予', '南予'].map(area => (
+                                                <button
+                                                    key={area}
+                                                    onClick={() => setSelectedArea(selectedArea === area ? '' : area)}
+                                                    className={`px-4 py-2.5 rounded-full text-sm font-bold transition-all border shadow-sm hover:-translate-y-0.5 ${selectedArea === area
+                                                        ? 'bg-amber-500 text-white border-amber-500 ring-2 ring-amber-200'
+                                                        : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:shadow-md'
+                                                        }`}
+                                                >
+                                                    {area}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Industry Filter */}
+                                    <div className="flex-1 md:border-l md:border-slate-100 md:pl-6">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <span className="text-sm font-black text-slate-700">業種</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {[
+                                                'IT・システム開発',
+                                                '製造・エンジニアリング',
+                                                'サービス・観光・飲食店',
+                                                '農業・一次産業',
+                                                '物流・運送',
+                                                '医療・福祉'
+                                            ].map(industry => (
+                                                <button
+                                                    key={industry}
+                                                    onClick={() => setSelectedIndustry(selectedIndustry === industry ? '' : industry)}
+                                                    className={`px-4 py-2.5 rounded-full text-sm font-bold transition-all border shadow-sm hover:-translate-y-0.5 ${selectedIndustry === industry
+                                                        ? 'bg-indigo-600 text-white border-indigo-600 ring-2 ring-indigo-200'
+                                                        : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:shadow-md'
+                                                        }`}
+                                                >
+                                                    {industry}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

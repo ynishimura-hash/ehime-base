@@ -287,10 +287,21 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                         <p className="text-sm font-medium mb-1 drop-shadow-md line-clamp-2">
                             {currentReel.title}
                         </p>
-                        {currentReel.description && (
-                            <p className="text-xs text-slate-200 drop-shadow-md line-clamp-2 opacity-90">
-                                {currentReel.description}
+                        {(currentReel.caption || currentReel.description) && (
+                            <p className="text-xs text-slate-200 drop-shadow-md line-clamp-2 opacity-90 mb-3">
+                                {currentReel.caption || currentReel.description}
                             </p>
+                        )}
+                        {currentReel.link_url && (
+                            <Link
+                                href={currentReel.link_url}
+                                target="_blank"
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm font-black transition-all shadow-lg shadow-blue-900/40 group/btn"
+                            >
+                                {currentReel.link_text || '詳細を見る'}
+                                <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+                            </Link>
                         )}
                     </div>
 

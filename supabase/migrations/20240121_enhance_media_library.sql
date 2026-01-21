@@ -1,8 +1,8 @@
-
--- Enhance media_library table to support YouTube and Entity Linking
+-- Enhance media_library table with metadata for videos
 ALTER TABLE media_library 
-ADD COLUMN IF NOT EXISTS type text DEFAULT 'file', -- 'file' or 'youtube'
-ADD COLUMN IF NOT EXISTS organization_id uuid REFERENCES organizations(id),
-ADD COLUMN IF NOT EXISTS job_id uuid REFERENCES jobs(id), -- Can be job or quest (job table handles both)
 ADD COLUMN IF NOT EXISTS title text,
-ADD COLUMN IF NOT EXISTS description text;
+ADD COLUMN IF NOT EXISTS caption text,
+ADD COLUMN IF NOT EXISTS link_url text,
+ADD COLUMN IF NOT EXISTS link_text text DEFAULT '詳細を見る';
+
+-- Note: company_id and job_id already exist in the schema.

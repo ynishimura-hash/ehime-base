@@ -88,7 +88,7 @@ export default function OrganizationRegistration() {
                 description: '確認メールを送信しました。'
             });
 
-            router.push('/dashboard/organization'); // Redirect to Org Dashboard (todo)
+            router.push('/organizations/pending');
 
         } catch (error: any) {
             console.error(error);

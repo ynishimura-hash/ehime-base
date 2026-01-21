@@ -3,13 +3,17 @@
 import React from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/appStore';
-import { Building2, MapPin, Users, ArrowRight, ShieldCheck, Eye, Briefcase, Search, X, Filter, ChevronUp, ChevronDown } from 'lucide-react';
+import { Building2, MapPin, Users, ArrowRight, ShieldCheck, Eye, Briefcase, Search, X, Filter, ChevronUp, ChevronDown, Loader2 } from 'lucide-react';
 import { JOBS, Reel } from '@/lib/dummyData';
 import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
+import { createClient } from '@/utils/supabase/client';
+import { toast } from 'sonner';
 
 export default function CompaniesPage() {
-    const { companies } = useAppStore();
+    const supabase = createClient();
+    const [companies, setCompanies] = React.useState<any[]>([]);
+    const [loading, setLoading] = React.useState(true);
     const [searchQuery, setSearchQuery] = React.useState('');
     const [selectedIndustry, setSelectedIndustry] = React.useState<string | null>(null);
     const [selectedFeatures, setSelectedFeatures] = React.useState<string[]>([]);
@@ -19,9 +23,32 @@ export default function CompaniesPage() {
     const [isReelModalOpen, setIsReelModalOpen] = React.useState(false);
     const [activeReels, setActiveReels] = React.useState<Reel[]>([]);
     const [activeEntity, setActiveEntity] = React.useState<{ name: string, id: string }>({ name: '', id: '' });
+    // Fetch Companies from Supabase
+    const fetchCompanies = async () => {
+        setLoading(true);
+        const { data, error } = await supabase
+            .from('organizations')
+            .select(`
+                *,
+                jobs (id)
+            `)
+            .eq('status', 'approved');
+
+        if (error) {
+            console.error('Error fetching companies:', error);
+            toast.error('企業情報の取得に失敗しました');
+        } else {
+            setCompanies(data || []);
+        }
+        setLoading(false);
+    };
+
+    React.useEffect(() => {
+        fetchCompanies();
+    }, []);
 
     // Derived Data
-    const industries = Array.from(new Set(companies.map(c => c.industry)));
+    const industries = Array.from(new Set(companies.map(c => c.industry).filter(Boolean)));
 
     // Filtering
     const filteredCompanies = companies.filter(c => {
@@ -40,15 +67,15 @@ export default function CompaniesPage() {
         let matchesFeatures = true;
         if (selectedFeatures.length > 0) {
             // AND logic: must match ALL selected features
-            if (selectedFeatures.includes('premium') && !c.isPremium) matchesFeatures = false;
+            if (selectedFeatures.includes('premium') && !c.is_premium) matchesFeatures = false;
 
             if (selectedFeatures.includes('transparent')) {
                 // "Transparent" = Has RJP negatives (Reality Check)
-                if (!c.rjpNegatives) matchesFeatures = false;
+                if (!c.rjp_negatives) matchesFeatures = false;
             }
 
             if (selectedFeatures.includes('hiring')) {
-                const hasJobs = JOBS.some(j => j.companyId === c.id);
+                const hasJobs = c.jobs && c.jobs.length > 0;
                 if (!hasJobs) matchesFeatures = false;
             }
         }
@@ -205,7 +232,11 @@ export default function CompaniesPage() {
                     <div className="col-span-1 md:col-span-3 flex items-center justify-between px-2 mb-2">
                         <span className="text-sm font-bold text-slate-500">{filteredCompanies.length}社の企業</span>
                     </div>
-                    {filteredCompanies.length > 0 ? (
+                    {loading ? (
+                        <div className="col-span-3 flex justify-center p-20">
+                            <Loader2 className="animate-spin text-slate-400" />
+                        </div>
+                    ) : filteredCompanies.length > 0 ? (
                         filteredCompanies.map(company => (
                             <Link
                                 href={`/companies/${company.id}`}
@@ -225,11 +256,11 @@ export default function CompaniesPage() {
                                 {/* Larger Image Area */}
                                 <div className="relative h-56 bg-slate-200 overflow-hidden">
                                     <img
-                                        src={company.image}
+                                        src={company.cover_image_url || company.image}
                                         alt={company.name}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                     />
-                                    {company.isPremium && (
+                                    {company.is_premium && (
                                         <div className="absolute top-4 right-4 bg-yellow-400 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg backdrop-blur-sm">
                                             ★ PREMIUM
                                         </div>
@@ -260,10 +291,10 @@ export default function CompaniesPage() {
                                         <span className="group-hover:text-blue-600 transition-colors flex items-center gap-1">
                                             詳細を見る <ArrowRight size={12} />
                                         </span>
-                                        {company.employeeCount && (
+                                        {company.employee_count && (
                                             <div className="flex items-center gap-1">
                                                 <Users size={12} />
-                                                {company.employeeCount}
+                                                {company.employee_count}
                                             </div>
                                         )}
                                     </div>

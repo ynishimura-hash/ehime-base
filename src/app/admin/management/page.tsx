@@ -50,6 +50,8 @@ function AdminManagementContent() {
         setSelectedIds(new Set()); // Clear selection on tab change
         if (currentTab === 'media') {
             fetchMedia();
+            fetchCompanies();
+            fetchJobs();
         } else if (currentTab === 'users') {
             fetchUsers();
         } else if (currentTab === 'companies') {
@@ -1023,25 +1025,33 @@ function AdminManagementContent() {
                                     {/* Info Area */}
                                     <div className="flex-1 min-w-0 py-1">
                                         <div className="flex justify-between items-start">
-                                            <div>
-                                                <p className="font-black text-slate-800 text-sm truncate pr-4" title={item.filename}>
-                                                    {item.filename || 'No Title'}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-black text-slate-900 text-sm">
+                                                    {item.title || item.filename || 'No Title'}
                                                 </p>
-                                                {/* Linked Info Tags */}
-                                                {(item.organization_id || item.job_id) && (
-                                                    <div className="flex flex-wrap gap-2 mt-1.5">
-                                                        {item.organization_id && (
-                                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-600">
-                                                                <Building2 size={10} /> {realCompanies.find(c => c.id === item.organization_id)?.name}
-                                                            </span>
-                                                        )}
-                                                        {item.job_id && (
-                                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md text-blue-600">
-                                                                <Briefcase size={10} /> {realJobs.find(j => j.id === item.job_id)?.title}
-                                                            </span>
-                                                        )}
-                                                    </div>
+                                                {item.caption && (
+                                                    <p className="text-xs text-slate-500 font-bold mt-1 line-clamp-1">
+                                                        {item.caption}
+                                                    </p>
                                                 )}
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {/* Linked Info Tags */}
+                                                    {item.organization_id && (
+                                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-600">
+                                                            <Building2 size={10} /> {realCompanies.find(c => c.id === item.organization_id)?.name}
+                                                        </span>
+                                                    )}
+                                                    {item.job_id && (
+                                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md text-blue-600">
+                                                            <Briefcase size={10} /> {realJobs.find(j => j.id === item.job_id)?.title}
+                                                        </span>
+                                                    )}
+                                                    {item.link_url && (
+                                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md text-slate-500">
+                                                            <LinkIcon size={10} /> {item.link_text || 'リンクあり'}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             {/* Date & Actions */}

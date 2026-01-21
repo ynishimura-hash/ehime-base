@@ -5,7 +5,7 @@ import { useAppStore } from '@/lib/appStore';
 import {
     Building2, Briefcase, GraduationCap, Users,
     Search, Edit3, Trash2, Eye, X, CheckSquare, Square,
-    Plus, ChevronLeft, ChevronRight, Upload, Video, FileVideo, Save, ArrowRight, Link as LinkIcon
+    Plus, ChevronLeft, ChevronRight, Upload, Video, FileVideo, Save, ArrowRight, ExternalLink, Zap, Link as LinkIcon
 } from 'lucide-react';
 
 import Link from 'next/link';
@@ -19,7 +19,10 @@ function AdminManagementContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const currentTab = searchParams.get('tab') || 'companies';
-    const { companies, jobs, activeRole, courses, fetchCourses, addCourses } = useAppStore();
+    const {
+        companies, jobs, activeRole, courses,
+        fetchCourses, addCourses, updateCourse, deleteCourse
+    } = useAppStore();
     const [searchQuery, setSearchQuery] = useState('');
 
     const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -35,7 +38,7 @@ function AdminManagementContent() {
 
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [editingItem, setEditingItem] = useState<any | null>(null);
-    const [editMode, setEditMode] = useState<'company' | 'job' | 'user' | 'media' | null>(null);
+    const [editMode, setEditMode] = useState<'company' | 'job' | 'user' | 'media' | 'course' | null>(null);
     const [actionType, setActionType] = useState<'create' | 'edit'>('edit');
     const [modalTab, setModalTab] = useState<'basic' | 'detail' | 'activity' | 'analysis'>('basic');
     const [relatedData, setRelatedData] = useState<any>({ applications: [], logs: [], bookmarks: [], courses: [] });
@@ -56,8 +59,9 @@ function AdminManagementContent() {
             fetchUsers();
         } else if (currentTab === 'companies') {
             fetchCompanies();
-        } else if (currentTab === 'jobs') {
+        } else if (currentTab === 'jobs' || currentTab === 'quests') {
             fetchJobs();
+            fetchCompanies();
         }
     }, [currentTab]);
 
@@ -678,10 +682,10 @@ function AdminManagementContent() {
         </div>
     );
 
-    const renderJobs = () => (
+    const renderJobs = (typeFilter: 'job' | 'quest' = 'job') => (
         <div className="space-y-4">
             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-black text-slate-900">求人・クエスト管理</h2>
+                <h2 className="text-2xl font-black text-slate-900">{typeFilter === 'quest' ? 'クエスト管理' : '求人管理'}</h2>
                 <div className="flex gap-2">
                     <input
                         type="file"
@@ -698,7 +702,11 @@ function AdminManagementContent() {
                     </button>
                     <button className="bg-slate-100 text-slate-600 px-6 py-3 rounded-2xl font-black text-sm hover:bg-slate-200 transition-all cursor-pointer">一括公開停止</button>
                     <button
-                        onClick={() => { setEditingItem({}); setEditMode('job'); setActionType('create'); }}
+                        onClick={() => {
+                            setEditingItem({ type: typeFilter });
+                            setEditMode('job');
+                            setActionType('create');
+                        }}
                         className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all cursor-pointer"
                     >
                         <Plus size={18} /> 新規追加
@@ -709,7 +717,7 @@ function AdminManagementContent() {
                 <Search size={20} className="text-slate-400" />
                 <input
                     type="text"
-                    placeholder="求人タイトルまたは企業名で検索..."
+                    placeholder={`${typeFilter === 'quest' ? 'クエスト' : '求人'}タイトルまたは企業名で検索...`}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="flex-1 bg-transparent border-none outline-none font-bold text-slate-900 text-sm placeholder:text-slate-400"
@@ -720,11 +728,11 @@ function AdminManagementContent() {
                     <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
                             <th className="px-6 py-4 w-12">
-                                <button onClick={() => toggleAll(realJobs.map(j => j.id))}>
-                                    {selectedIds.size === realJobs.length && realJobs.length > 0 ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
+                                <button onClick={() => toggleAll(realJobs.filter(j => j.type === typeFilter).map(j => j.id))}>
+                                    {selectedIds.size === realJobs.filter(j => j.type === typeFilter).length && realJobs.filter(j => j.type === typeFilter).length > 0 ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
                                 </button>
                             </th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">求人タイトル</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{typeFilter === 'quest' ? 'クエストタイトル' : '求人タイトル'}</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">タイプ</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">企業</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">操作</th>
@@ -732,9 +740,10 @@ function AdminManagementContent() {
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {realJobs
+                            .filter(j => (j.type === typeFilter || (!j.type && typeFilter === 'job')))
                             .filter(j =>
                                 (j.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                realCompanies.find(c => c.id === j.company_id)?.name.toLowerCase().includes(searchQuery.toLowerCase())
+                                realCompanies.find(c => c.id === j.organization_id)?.name.toLowerCase().includes(searchQuery.toLowerCase())
                             )
                             .map(job => (
                                 <tr key={job.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(job.id) ? 'bg-blue-50/50' : ''}`}>
@@ -749,7 +758,7 @@ function AdminManagementContent() {
                                             {(job.type || 'job').toUpperCase()}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-bold text-slate-500">{realCompanies.find(c => c.id === job.company_id)?.name || job.company_id}</td>
+                                    <td className="px-6 py-4 text-sm font-bold text-slate-500">{realCompanies.find(c => c.id === job.organization_id)?.name || job.organization_id}</td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2 text-slate-400">
                                             <button
@@ -786,7 +795,10 @@ function AdminManagementContent() {
                     >
                         <Upload size={18} /> CSVから一括登録
                     </button>
-                    <button className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all cursor-pointer">
+                    <button
+                        onClick={() => { setEditingItem({}); setEditMode('course'); setActionType('create'); }}
+                        className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all cursor-pointer"
+                    >
                         <Plus size={18} /> 新規追加
                     </button>
                 </div>
@@ -811,7 +823,10 @@ function AdminManagementContent() {
                                 <h3 className="font-black text-slate-800 leading-tight">{course.title}</h3>
                                 <p className="text-xs text-slate-400 font-bold mt-1">{course.category} | {course.level}</p>
                                 <div className="flex items-center gap-4 mt-4">
-                                    <button className="text-xs font-black text-blue-600 flex items-center gap-1 hover:underline">
+                                    <button
+                                        onClick={() => { setEditingItem(course); setEditMode('course'); setActionType('edit'); }}
+                                        className="text-xs font-black text-blue-600 flex items-center gap-1 hover:underline cursor-pointer"
+                                    >
                                         <Edit3 size={12} /> 編集
                                     </button>
                                     <button className="text-xs font-black text-slate-400 flex items-center gap-1 hover:underline">
@@ -1076,9 +1091,9 @@ function AdminManagementContent() {
                         動画はまだアップロードされていません
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {mediaItems.map((item) => (
-                            <div key={item.id} className="group bg-slate-50 border border-slate-200 rounded-[2rem] overflow-hidden hover:shadow-xl hover:shadow-slate-200 transition-all duration-300">
+                            <div key={item.id} className="group bg-slate-50 border border-slate-200 rounded-3xl overflow-hidden hover:shadow-xl hover:shadow-slate-200 transition-all duration-300">
                                 <div className="aspect-video bg-black relative">
                                     {item.type === 'youtube' ? (
                                         <iframe
@@ -1136,6 +1151,11 @@ function AdminManagementContent() {
                                         {item.job_id && (
                                             <span className="inline-flex items-center gap-1 text-[9px] font-black bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-lg text-blue-600">
                                                 <Briefcase size={8} /> {realJobs.find(j => j.id === item.job_id)?.title || '求人あり'}
+                                            </span>
+                                        )}
+                                        {item.link_url && (
+                                            <span className="inline-flex items-center gap-1 text-[9px] font-black bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-lg text-purple-600">
+                                                <ExternalLink size={8} /> リンクあり
                                             </span>
                                         )}
                                     </div>
@@ -1270,6 +1290,12 @@ function AdminManagementContent() {
                 if (error) throw error;
                 toast.success('更新しました');
                 fetchMedia();
+            } else if (editMode === 'course') {
+                if (actionType === 'create') {
+                    await addCourses([editingItem]);
+                } else {
+                    await updateCourse(editingItem);
+                }
             }
             setEditingItem(null);
         } catch (error: any) {
@@ -1424,21 +1450,247 @@ function AdminManagementContent() {
         );
     };
 
-    const renderEditModal = () => (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className={`bg-white w-full rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] ${editMode === 'media' ? 'max-w-5xl' : 'max-w-lg p-8 space-y-6 overflow-y-auto'}`}>
-                {editMode !== 'media' && (
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-black text-slate-900">{actionType === 'create' ? '新規登録' : '詳細編集'}</h3>
-                        <button onClick={() => setEditingItem(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-                            <X size={20} />
-                        </button>
-                    </div>
-                )}
 
+
+    const renderCourseEdit = () => (
+        <div className="space-y-8">
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">コースタイトル</label>
+                        <input
+                            type="text"
+                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 shadow-sm focus:border-blue-500 outline-none transition-all"
+                            value={editingItem.title || ''}
+                            onChange={e => setEditingItem({ ...editingItem, title: e.target.value })}
+                            placeholder="コース名を入力..."
+                        />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">カテゴリ</label>
+                            <input
+                                type="text"
+                                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 shadow-sm focus:border-blue-500 outline-none transition-all"
+                                value={editingItem.category || ''}
+                                onChange={e => setEditingItem({ ...editingItem, category: e.target.value })}
+                                placeholder="例: ITスキル"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">難易度</label>
+                            <select
+                                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 shadow-sm focus:border-blue-500 outline-none transition-all"
+                                value={editingItem.level || '初級'}
+                                onChange={e => setEditingItem({ ...editingItem, level: e.target.value })}
+                            >
+                                <option>初級</option>
+                                <option>中級</option>
+                                <option>上級</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">サムネイルURL</label>
+                        <input
+                            type="text"
+                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 shadow-sm focus:border-blue-500 outline-none transition-all"
+                            value={editingItem.image || ''}
+                            onChange={e => setEditingItem({ ...editingItem, image: e.target.value })}
+                            placeholder="https://..."
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">コース説明</label>
+                        <textarea
+                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 font-bold text-slate-900 shadow-sm focus:border-blue-500 outline-none transition-all min-h-[50px]"
+                            value={editingItem.description || ''}
+                            onChange={e => setEditingItem({ ...editingItem, description: e.target.value })}
+                            placeholder="コースの概要説明..."
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-black text-slate-900">カリキュラム構成 (章・レッスン)</h4>
+                    <button
+                        onClick={() => {
+                            const newCurrs = [...(editingItem.curriculums || [])];
+                            newCurrs.push({ id: Math.random().toString(36).substr(2, 9), title: '新章', lessons: [] });
+                            setEditingItem({ ...editingItem, curriculums: newCurrs });
+                        }}
+                        className="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl font-black text-xs flex items-center gap-2 hover:bg-slate-200 transition-all cursor-pointer"
+                    >
+                        <Plus size={14} /> 章を追加
+                    </button>
+                </div>
+
+                <div className="space-y-6">
+                    {(editingItem.curriculums || []).map((curr: any, currIdx: number) => (
+                        <div key={curr.id} className="bg-white border-2 border-slate-100 rounded-[2rem] overflow-hidden">
+                            <div className="bg-slate-50/50 px-6 py-4 flex items-center justify-between border-b border-slate-100">
+                                <div className="flex items-center gap-3 flex-1">
+                                    <span className="bg-slate-200 text-slate-600 text-[10px] font-black px-2 py-1 rounded-lg">章 {currIdx + 1}</span>
+                                    <input
+                                        type="text"
+                                        className="bg-transparent border-none outline-none font-black text-slate-800 text-lg flex-1"
+                                        value={curr.title || ''}
+                                        onChange={e => {
+                                            const newCurrs = [...editingItem.curriculums];
+                                            newCurrs[currIdx].title = e.target.value;
+                                            setEditingItem({ ...editingItem, curriculums: newCurrs });
+                                        }}
+                                        placeholder="章のタイトル..."
+                                    />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => {
+                                            const newCurrs = [...editingItem.curriculums];
+                                            newCurrs[currIdx].lessons.push({
+                                                id: Math.random().toString(36).substr(2, 9),
+                                                title: '新規レッスン',
+                                                duration: '5:00',
+                                                video_url: ''
+                                            });
+                                            setEditingItem({ ...editingItem, curriculums: newCurrs });
+                                        }}
+                                        className="text-blue-600 text-xs font-black flex items-center gap-1 hover:bg-blue-50 px-3 py-1.5 rounded-lg cursor-pointer transition-all"
+                                    >
+                                        <Plus size={14} /> レッスン追加
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            const newCurrs = editingItem.curriculums.filter((_: any, i: number) => i !== currIdx);
+                                            setEditingItem({ ...editingItem, curriculums: newCurrs });
+                                        }}
+                                        className="text-red-400 hover:text-red-600 p-1.5 cursor-pointer"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="p-6 space-y-3">
+                                {curr.lessons.length === 0 ? (
+                                    <div className="text-center py-4 text-xs font-bold text-slate-300">レッスンがありません。追加してください。</div>
+                                ) : (
+                                    curr.lessons.map((lesson: any, lessonIdx: number) => (
+                                        <div key={lesson.id} className="bg-slate-50 rounded-2xl p-4 flex flex-col gap-4 border border-transparent hover:border-slate-200 transition-all">
+                                            <div className="flex items-center justify-between gap-4">
+                                                <div className="flex items-center gap-3 flex-1">
+                                                    <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[10px] font-black text-slate-400 border border-slate-100">{lessonIdx + 1}</span>
+                                                    <input
+                                                        type="text"
+                                                        className="bg-transparent border-none outline-none font-black text-slate-700 text-sm flex-1"
+                                                        value={lesson.title || ''}
+                                                        onChange={e => {
+                                                            const newCurrs = [...editingItem.curriculums];
+                                                            newCurrs[currIdx].lessons[lessonIdx].title = e.target.value;
+                                                            setEditingItem({ ...editingItem, curriculums: newCurrs });
+                                                        }}
+                                                        placeholder="レッスンのタイトル..."
+                                                    />
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-xl border border-slate-100">
+                                                        <Video size={12} className="text-slate-400" />
+                                                        <input
+                                                            type="text"
+                                                            className="bg-transparent border-none outline-none font-bold text-[10px] text-slate-600 w-16 text-center"
+                                                            value={lesson.duration || ''}
+                                                            onChange={e => {
+                                                                const newCurrs = [...editingItem.curriculums];
+                                                                newCurrs[currIdx].lessons[lessonIdx].duration = e.target.value;
+                                                                setEditingItem({ ...editingItem, curriculums: newCurrs });
+                                                            }}
+                                                            placeholder="5:00"
+                                                        />
+                                                    </div>
+                                                    <button
+                                                        onClick={() => {
+                                                            const newCurrs = [...editingItem.curriculums];
+                                                            newCurrs[currIdx].lessons = newCurrs[currIdx].lessons.filter((_: any, i: number) => i !== lessonIdx);
+                                                            setEditingItem({ ...editingItem, curriculums: newCurrs });
+                                                        }}
+                                                        className="text-slate-300 hover:text-red-500 transition-colors cursor-pointer"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-100">
+                                                <LinkIcon size={14} className="text-slate-400" />
+                                                <input
+                                                    type="text"
+                                                    className="bg-transparent border-none outline-none font-bold text-[10px] text-slate-500 flex-1"
+                                                    value={lesson.video_url || ''}
+                                                    onChange={e => {
+                                                        const newCurrs = [...editingItem.curriculums];
+                                                        newCurrs[currIdx].lessons[lessonIdx].video_url = e.target.value;
+                                                        setEditingItem({ ...editingItem, curriculums: newCurrs });
+                                                        // Also update the public_url of the editingItem if it's a media item being edited
+                                                        // This part is tricky as editingItem is a course, not a media item directly.
+                                                        // If a lesson's video_url is being edited, it's part of the course structure.
+                                                        // No direct public_url update on editingItem itself is needed here.
+                                                    }}
+                                                    placeholder="YouTube動画URL (例: https://www.youtube.com/watch?v=...)"
+                                                />
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderEditModal = () => (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4 md:p-10 animate-in fade-in duration-300">
+            <div className={`bg-white w-full rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-500 ${editMode === 'media' || editMode === 'course' ? 'max-w-5xl h-[90vh]' : 'max-w-xl max-h-[90vh]'}`}>
+                {/* Header */}
+                <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+                    <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg ${editMode === 'job' ? 'bg-blue-600' :
+                            editMode === 'company' ? 'bg-indigo-600' :
+                                editMode === 'course' ? 'bg-emerald-600' :
+                                    editMode === 'media' ? 'bg-rose-600' :
+                                        'bg-slate-600'
+                            }`}>
+                            {editMode === 'user' ? <Users size={24} /> :
+                                editMode === 'company' ? <Building2 size={24} /> :
+                                    editMode === 'course' ? <GraduationCap size={24} /> :
+                                        editMode === 'media' ? <Video size={24} /> :
+                                            <Briefcase size={24} />}
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-black text-slate-900">
+                                {actionType === 'create' ? '新規作成' : '情報の編集'}
+                            </h3>
+                            <p className="text-xs text-slate-400 font-bold mt-1">
+                                {editMode === 'user' && 'ユーザープロフィール管理'}
+                                {editMode === 'company' && '企業・団体情報管理'}
+                                {editMode === 'job' && '求人・案件詳細管理'}
+                                {editMode === 'course' && 'eラーニング教材管理'}
+                                {editMode === 'media' && '動画・メディア素材管理'}
+                            </p>
+                        </div>
+                    </div>
+                    <button onClick={() => setEditingItem(null)} className="p-3 hover:bg-slate-100 rounded-full transition-all cursor-pointer">
+                        <X size={24} className="text-slate-400" />
+                    </button>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-8 space-y-8">
                     {editMode === 'user' && (
-                        <>
+                        <div className="space-y-6">
                             <div className="flex bg-slate-100 rounded-xl p-1 mb-6">
                                 {['basic', 'detail', 'activity', 'analysis'].map((tab) => (
                                     <button
@@ -1448,678 +1700,187 @@ function AdminManagementContent() {
                                     >
                                         {tab === 'basic' && '基本情報'}
                                         {tab === 'detail' && '詳細情報'}
-                                        {tab === 'activity' && '活動履歴'}
-                                        {tab === 'analysis' && '診断・分析'}
+                                        {tab === 'activity' && '履歴'}
+                                        {tab === 'analysis' && '診断結果'}
                                     </button>
                                 ))}
                             </div>
-
                             {modalTab === 'basic' && (
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">姓 (Last Name)</label>
-                                            <input
-                                                type="text"
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                                value={editingItem.last_name || ''}
-                                                onChange={e => setEditingItem({ ...editingItem, last_name: e.target.value, full_name: `${e.target.value} ${editingItem.first_name || ''}` })}
-                                            />
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">姓</label>
+                                            <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.last_name || ''} onChange={e => setEditingItem({ ...editingItem, last_name: e.target.value })} />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">名 (First Name)</label>
-                                            <input
-                                                type="text"
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                                value={editingItem.first_name || ''}
-                                                onChange={e => setEditingItem({ ...editingItem, first_name: e.target.value, full_name: `${editingItem.last_name || ''} ${e.target.value}` })}
-                                            />
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">名</label>
+                                            <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.first_name || ''} onChange={e => setEditingItem({ ...editingItem, first_name: e.target.value })} />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">表示氏名 (Full Name)</label>
-                                        <input
-                                            type="text"
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                            value={editingItem.full_name || editingItem.name || ''}
-                                            onChange={e => setEditingItem({ ...editingItem, full_name: e.target.value })}
-                                        />
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">メールアドレス</label>
+                                        <input type="email" className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold" value={editingItem.email || ''} onChange={e => setEditingItem({ ...editingItem, email: e.target.value })} />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">メールアドレス {actionType === 'edit' && '(参照のみ)'}</label>
-                                            <input
-                                                type="text"
-                                                className={`w-full border border-slate-200 rounded-xl px-4 py-3 font-bold ${actionType === 'edit' ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : 'bg-slate-50 text-slate-900'}`}
-                                                value={editingItem.email || ''}
-                                                readOnly={actionType === 'edit'}
-                                                onChange={e => actionType === 'create' && setEditingItem({ ...editingItem, email: e.target.value })}
-                                                placeholder="メールアドレス"
-                                            />
-                                        </div>
-                                        {actionType === 'create' && (
-                                            <div>
-                                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">初期パスワード</label>
-                                                <input
-                                                    type="text"
-                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                                    value={editingItem.password || ''}
-                                                    onChange={e => setEditingItem({ ...editingItem, password: e.target.value })}
-                                                    placeholder="未入力の場合: tempPassword123!"
-                                                />
-                                            </div>
-                                        )}
-                                        <div>
-                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">電話番号</label>
-                                            <input
-                                                type="text"
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                                value={editingItem.phone || ''}
-                                                onChange={e => setEditingItem({ ...editingItem, phone: e.target.value })}
-                                                placeholder="090-0000-0000"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">生年月日</label>
-                                            <input
-                                                type="date"
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                                value={editingItem.dob || ''}
-                                                onChange={e => setEditingItem({ ...editingItem, dob: e.target.value })}
-                                            />
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">電話番号</label>
+                                            <input type="text" className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold" value={editingItem.phone || ''} onChange={e => setEditingItem({ ...editingItem, phone: e.target.value })} />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">年齢</label>
-                                            <div className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-500">
-                                                {editingItem.dob ? Math.floor((new Date().getTime() - new Date(editingItem.dob).getTime()) / 3.15576e10) + '歳' : '-'}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">性別</label>
-                                            <select
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                                value={editingItem.gender || 'unspecified'}
-                                                onChange={e => setEditingItem({ ...editingItem, gender: e.target.value })}
-                                            >
-                                                <option value="male">男性</option>
-                                                <option value="female">女性</option>
-                                                <option value="other">その他</option>
-                                                <option value="unspecified">未指定</option>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">ユーザータイプ</label>
+                                            <select className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold" value={editingItem.user_type || 'student'} onChange={e => setEditingItem({ ...editingItem, user_type: e.target.value })}>
+                                                <option value="student">求職者</option>
+                                                <option value="company">企業ユーザー</option>
+                                                <option value="admin">管理者</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">ユーザータイプ</label>
-                                        <select
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                            value={editingItem.user_type || 'student'}
-                                            onChange={e => setEditingItem({ ...editingItem, user_type: e.target.value })}
-                                        >
-                                            <option value="student">Student (求職者)</option>
-                                            <option value="company">Company (企業)</option>
-                                            <option value="specialist">Specialist</option>
-                                            <option value="admin">Admin</option>
-                                        </select>
-                                    </div>
                                 </div>
                             )}
-
                             {modalTab === 'detail' && (
                                 <div className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 gap-4">
                                         <div>
-                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">会社名</label>
-                                            <input
-                                                type="text"
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                                value={editingItem.company_name || ''}
-                                                onChange={e => setEditingItem({ ...editingItem, company_name: e.target.value })}
-                                                placeholder="会社名（社会人の場合）"
-                                            />
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">所属大学 / 現在の組織</label>
+                                            <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.university || editingItem.company_name || ''} onChange={e => setEditingItem({ ...editingItem, university: e.target.value })} />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">部署・所属</label>
-                                            <input
-                                                type="text"
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                                value={editingItem.department || ''}
-                                                onChange={e => setEditingItem({ ...editingItem, department: e.target.value })}
-                                                placeholder="部署名"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">大学・所属</label>
-                                            <input
-                                                type="text"
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                                value={editingItem.university || ''}
-                                                onChange={e => setEditingItem({ ...editingItem, university: e.target.value })}
-                                                placeholder="例：愛媛大学"
-                                            />
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">学部 / 部署</label>
+                                            <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.faculty || editingItem.department || ''} onChange={e => setEditingItem({ ...editingItem, faculty: e.target.value })} />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">学部・部署</label>
-                                            <input
-                                                type="text"
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                                value={editingItem.faculty || ''}
-                                                onChange={e => setEditingItem({ ...editingItem, faculty: e.target.value })}
-                                                placeholder="例：法文学部"
-                                            />
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">自己紹介</label>
+                                            <textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold min-h-[100px]" value={editingItem.bio || ''} onChange={e => setEditingItem({ ...editingItem, bio: e.target.value })} />
                                         </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">自己紹介 (Bio)</label>
-                                        <textarea
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[100px]"
-                                            value={editingItem.bio || ''}
-                                            onChange={e => setEditingItem({ ...editingItem, bio: e.target.value })}
-                                            placeholder="自己紹介文..."
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">タグ</label>
-                                        <input
-                                            type="text"
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                            value={Array.isArray(editingItem.tags) ? editingItem.tags.join(',') : (editingItem.tags || '')}
-                                            onChange={e => setEditingItem({ ...editingItem, tags: e.target.value.split(',') })}
-                                            placeholder="カンマ区切り"
-                                        />
                                     </div>
                                 </div>
                             )}
-
                             {modalTab === 'activity' && (
                                 <div className="space-y-6">
                                     <div>
-                                        <h4 className="text-sm font-black text-slate-900 mb-2">eラーニング受講履歴</h4>
-                                        <div className="bg-slate-50 rounded-xl p-4 min-h-[50px] text-xs">
-                                            {relatedData.courses?.length > 0 ? (
-                                                relatedData.courses.map((c: any) => (
-                                                    <div key={c.id} className="flex justify-between py-1 border-b border-slate-100 last:border-0">
-                                                        <span>{c.courses?.title || 'Unknown Course'}</span>
-                                                        <span className={c.status === 'completed' ? 'text-green-600 font-bold' : 'text-slate-500'}>{c.status}</span>
-                                                    </div>
-                                                ))
-                                            ) : <div className="text-slate-400">履歴なし</div>}
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">eラーニング受講状況</h4>
+                                        <div className="space-y-2">
+                                            {relatedData.courses?.length > 0 ? relatedData.courses.map((c: any) => (
+                                                <div key={c.id} className="bg-slate-50 p-3 rounded-xl flex justify-between items-center">
+                                                    <span className="font-bold text-slate-700 text-xs">{c.courses?.title}</span>
+                                                    <span className={`text-[10px] font-black px-2 py-1 rounded-lg ${c.status === 'completed' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-200 text-slate-500'}`}>{c.status === 'completed' ? '修了' : '受講中'}</span>
+                                                </div>
+                                            )) : <div className="text-center py-4 text-xs font-bold text-slate-300">履歴なし</div>}
                                         </div>
                                     </div>
                                     <div>
-                                        <h4 className="text-sm font-black text-slate-900 mb-2">求人応募履歴</h4>
-                                        <div className="bg-slate-50 rounded-xl p-4 min-h-[50px] text-xs">
-                                            {relatedData.applications?.length > 0 ? (
-                                                relatedData.applications.map((app: any) => (
-                                                    <div key={app.id} className="flex justify-between py-1 border-b border-slate-100 last:border-0">
-                                                        <span>{app.jobs?.title || 'Unknown Job'}</span>
-                                                        <span className="font-bold text-blue-600">{app.status}</span>
-                                                    </div>
-                                                ))
-                                            ) : <div className="text-slate-400">応募履歴なし</div>}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h4 className="text-sm font-black text-slate-900 mb-2">気になるリスト (Saved)</h4>
-                                        <div className="bg-slate-50 rounded-xl p-4 min-h-[50px] text-xs">
-                                            {relatedData.bookmarks?.length > 0 ? (
-                                                relatedData.bookmarks.map((b: any) => (
-                                                    <div key={b.id} className="py-1 border-b border-slate-100 last:border-0">
-                                                        {b.item_type}: {b.item_id}
-                                                    </div>
-                                                ))
-                                            ) : <div className="text-slate-400">保存アイテムなし</div>}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h4 className="text-sm font-black text-slate-900 mb-2">閲覧履歴 (Views)</h4>
-                                        <div className="bg-slate-50 rounded-xl p-4 min-h-[50px] text-xs max-h-[150px] overflow-y-auto">
-                                            {relatedData.logs?.length > 0 ? (
-                                                relatedData.logs.map((log: any) => (
-                                                    <div key={log.id} className="flex justify-between py-1 border-b border-slate-100 last:border-0">
-                                                        <span>{log.item_type} viewed</span>
-                                                        <span className="text-slate-400">{new Date(log.viewed_at).toLocaleDateString()}</span>
-                                                    </div>
-                                                ))
-                                            ) : <div className="text-slate-400">履歴なし</div>}
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">求人応募履歴</h4>
+                                        <div className="space-y-2">
+                                            {relatedData.applications?.length > 0 ? relatedData.applications.map((app: any) => (
+                                                <div key={app.id} className="bg-slate-50 p-3 rounded-xl flex justify-between items-center">
+                                                    <span className="font-bold text-slate-700 text-xs">{app.jobs?.title}</span>
+                                                    <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">{app.status}</span>
+                                                </div>
+                                            )) : <div className="text-center py-4 text-xs font-bold text-slate-300">履歴なし</div>}
                                         </div>
                                     </div>
                                 </div>
                             )}
-
                             {modalTab === 'analysis' && (
                                 <div className="space-y-4">
-                                    <div className="bg-slate-50 p-4 rounded-xl">
-                                        <h4 className="font-black text-slate-900 mb-2">診断結果 (JSON)</h4>
-                                        <pre className="text-xs text-slate-600 overflow-x-auto">
-                                            {JSON.stringify(editingItem.diagnosis_result || {}, null, 2)}
+                                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <Zap size={16} className="text-yellow-500" />
+                                            <h4 className="font-black text-slate-900 text-sm">ポテンシャル診断結果</h4>
+                                        </div>
+                                        <pre className="text-[10px] font-mono text-slate-600 bg-white p-4 rounded-xl border border-slate-100 overflow-x-auto">
+                                            {JSON.stringify(editingItem.diagnosis_result || { message: "診断結果はありません" }, null, 2)}
                                         </pre>
-                                    </div>
-                                    <div className="text-center p-4">
-                                        <p className="text-xs text-slate-400">※ 占い結果や詳細診断は実装に合わせてここに表示されます</p>
                                     </div>
                                 </div>
                             )}
-                        </>
+                        </div>
                     )}
-                    {editMode === 'media' && (
-                        <div className="flex flex-col h-full">
-                            {/* Header for Media Modal */}
-                            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
+
+                    {editMode === 'company' && (
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-1 gap-4">
                                 <div>
-                                    <h3 className="font-black text-xl text-slate-900">メディア編集</h3>
-                                    <p className="text-xs text-slate-400 font-bold mt-1">動画のタイトル、説明、および紐付け先を管理できます</p>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">企業名</label>
+                                    <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.name || ''} onChange={e => setEditingItem({ ...editingItem, name: e.target.value })} />
                                 </div>
-                                <button onClick={() => setEditingItem(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors cursor-pointer text-slate-400">
-                                    <X size={24} />
-                                </button>
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto p-8 space-y-8 pb-32">
-                                <div className="aspect-video bg-black rounded-[2rem] overflow-hidden shadow-lg relative shrink-0">
-                                    {editingItem.type === 'youtube' ? (
-                                        <iframe
-                                            width="100%"
-                                            height="100%"
-                                            src={`https://www.youtube.com/embed/${getYouTubeID(editingItem.public_url)}`}
-                                            frameBorder="0"
-                                            allowFullScreen
-                                        />
-                                    ) : (
-                                        <video src={editingItem.public_url} className="w-full h-full object-contain" controls />
-                                    )}
-                                    <div className="absolute top-4 left-4">
-                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black text-white shadow-lg ${editingItem.type === 'youtube' ? 'bg-red-600' : 'bg-blue-600'}`}>
-                                            {editingItem.type.toUpperCase()}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 gap-6">
+                                <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1">タイトル</label>
-                                        <input
-                                            type="text"
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 shadow-sm focus:bg-white focus:border-blue-500 outline-none transition-all"
-                                            value={editingItem.title || editingItem.filename || ''}
-                                            onChange={e => setEditingItem({ ...editingItem, title: e.target.value })}
-                                        />
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">業界</label>
+                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.industry || ''} onChange={e => setEditingItem({ ...editingItem, industry: e.target.value })} />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1">キャプション</label>
-                                        <textarea
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 min-h-[100px] shadow-sm focus:bg-white focus:border-blue-500 outline-none transition-all"
-                                            value={editingItem.caption || ''}
-                                            onChange={e => setEditingItem({ ...editingItem, caption: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1">カスタムアクションURL</label>
-                                            <input
-                                                type="text"
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 shadow-sm focus:bg-white focus:border-blue-500 outline-none transition-all"
-                                                value={editingItem.link_url || ''}
-                                                onChange={e => setEditingItem({ ...editingItem, link_url: e.target.value })}
-                                                placeholder="https://..."
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1">ボタンラベル</label>
-                                            <input
-                                                type="text"
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-900 shadow-sm focus:bg-white focus:border-blue-500 outline-none transition-all"
-                                                value={editingItem.link_text || ''}
-                                                onChange={e => setEditingItem({ ...editingItem, link_text: e.target.value })}
-                                                placeholder="詳細をチェック"
-                                            />
-                                        </div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">所在地</label>
+                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.location || ''} onChange={e => setEditingItem({ ...editingItem, location: e.target.value })} />
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* Bottom Picker Section */}
-                            <div className="bg-slate-50 border-t border-slate-200 p-6 space-y-4 shrink-0 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-                                <div className="flex flex-col gap-4">
-                                    <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-none">
-                                        <span className="text-[10px] font-black text-slate-400 uppercase whitespace-nowrap">1. 関連：</span>
-                                        <div className="flex gap-2">
-                                            {(['none', 'company', 'job', 'quest'] as const).map(type => {
-                                                const isActive = (type === 'none' && !editingItem.organization_id && !editingItem.job_id) ||
-                                                    (type === 'company' && editingItem.organization_id && !editingItem.job_id) ||
-                                                    (type === 'job' && editingItem.job_id && realJobs.find(j => j.id === editingItem.job_id)?.type !== 'quest') ||
-                                                    (type === 'quest' && realJobs.find(j => j.id === editingItem.job_id)?.type === 'quest');
-
-                                                return (
-                                                    <button
-                                                        key={type}
-                                                        onClick={() => {
-                                                            if (type === 'none') setEditingItem({ ...editingItem, organization_id: null, job_id: null });
-                                                            else if (type === 'company') setEditingItem({ ...editingItem, job_id: null });
-                                                            setLinkTargetType(type);
-                                                        }}
-                                                        className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all border-2 whitespace-nowrap cursor-pointer ${isActive ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-400 hover:border-blue-200'}`}
-                                                    >
-                                                        {type === 'none' && 'なし'}
-                                                        {type === 'company' && '企業'}
-                                                        {type === 'job' && '求人'}
-                                                        {type === 'quest' && 'クエスト'}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-
-                                    {(editingItem.organization_id || editingItem.job_id || linkTargetType !== 'none') && (
-                                        <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-none animate-in fade-in slide-in-from-bottom-2">
-                                            <span className="text-[10px] font-black text-slate-400 uppercase whitespace-nowrap">2. コンテンツ：</span>
-                                            <div className="flex gap-2">
-                                                {linkTargetType === 'company' && realCompanies.map(c => (
-                                                    <button
-                                                        key={c.id}
-                                                        onClick={() => setEditingItem({ ...editingItem, organization_id: c.id, job_id: null })}
-                                                        className={`px-4 py-3 rounded-xl text-xs font-bold transition-all border-2 whitespace-nowrap cursor-pointer ${editingItem.organization_id === c.id && !editingItem.job_id ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-200'}`}
-                                                    >
-                                                        {c.name}
-                                                    </button>
-                                                ))}
-                                                {(linkTargetType === 'job' || linkTargetType === 'quest') && (
-                                                    <div className="flex gap-2 items-center">
-                                                        {realJobs
-                                                            .filter(j => linkTargetType === 'job' ? j.type !== 'quest' : j.type === 'quest')
-                                                            .map(j => (
-                                                                <button
-                                                                    key={j.id}
-                                                                    onClick={() => setEditingItem({ ...editingItem, organization_id: j.organization_id, job_id: j.id })}
-                                                                    className={`px-4 py-3 rounded-xl text-xs font-bold transition-all border-2 whitespace-nowrap cursor-pointer ${editingItem.job_id === j.id ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-200'}`}
-                                                                >
-                                                                    <div className="flex flex-col items-start">
-                                                                        <span className="text-[8px] opacity-50 uppercase">{realCompanies.find(c => c.id === j.organization_id)?.name}</span>
-                                                                        {j.title}
-                                                                    </div>
-                                                                </button>
-                                                            ))
-                                                        }
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="flex justify-end gap-3 pt-2">
-                                    <button onClick={() => setEditingItem(null)} className="px-6 py-3 font-bold text-slate-500 hover:bg-white rounded-xl transition-all cursor-pointer">キャンセル</button>
-                                    <button onClick={handleSaveEdit} className="bg-blue-600 text-white px-10 py-3 rounded-[1.25rem] font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all cursor-pointer shadow-xl shadow-blue-100">
-                                        <Save size={18} />
-                                        変更を保存
-                                    </button>
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">事業内容</label>
+                                    <textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold min-h-[100px]" value={editingItem.business_content || ''} onChange={e => setEditingItem({ ...editingItem, business_content: e.target.value })} />
                                 </div>
                             </div>
                         </div>
                     )}
-                    {editMode === 'company' && (
-                        <>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">企業名</label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                    value={editingItem.name || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">業界</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.industry || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, industry: e.target.value })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">所在地</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.location || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, location: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">代表者名</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.representative_name || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, representative_name: e.target.value })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">設立日</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.established_date || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, established_date: e.target.value })}
-                                        placeholder="例: 2000年4月1日"
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">従業員数</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.employee_count || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, employee_count: e.target.value })}
-                                        placeholder="例: 100名"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">資本金</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.capital || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, capital: e.target.value })}
-                                        placeholder="例: 1000万円"
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">電話番号</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.phone || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, phone: e.target.value })}
-                                        placeholder="089-000-0000"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">WebサイトURL</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.website_url || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, website_url: e.target.value })}
-                                        placeholder="https://example.com"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">正直な不完全さ (RJP)</label>
-                                <textarea
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[80px]"
-                                    value={editingItem.rjp_negatives || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, rjp_negatives: e.target.value })}
-                                    placeholder="「完璧な会社はありません。真実を語ることで、より良いマッチングを目指しています。」など"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">ロゴ・テーマカラー (Tailwindクラス)</label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                    value={editingItem.logo_color || 'bg-blue-500'}
-                                    onChange={e => setEditingItem({ ...editingItem, logo_color: e.target.value })}
-                                    placeholder="bg-blue-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">事業内容</label>
-                                <textarea
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[80px]"
-                                    value={editingItem.business_content || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, business_content: e.target.value })}
-                                    placeholder="事業内容の概要..."
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">説明文 (詳細)</label>
-                                <textarea
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[100px]"
-                                    value={editingItem.description || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, description: e.target.value })}
-                                />
-                            </div>
-                        </>
-                    )}
+
                     {editMode === 'job' && (
-                        <>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">タイトル</label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                    value={editingItem.title || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, title: e.target.value })}
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-1 gap-4">
                                 <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">タイプ</label>
-                                    <select
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.type || 'job'}
-                                        onChange={e => setEditingItem({ ...editingItem, type: e.target.value })}
-                                    >
-                                        <option value="job">求人 (Job)</option>
-                                        <option value="quest">クエスト (Quest)</option>
-                                    </select>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">タイトル</label>
+                                    <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.title || ''} onChange={e => setEditingItem({ ...editingItem, title: e.target.value })} />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">タイプ</label>
+                                        <select className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.type || 'job'} onChange={e => setEditingItem({ ...editingItem, type: e.target.value })}>
+                                            <option value="job">求人</option>
+                                            <option value="quest">クエスト</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">企業</label>
+                                        <select className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.organization_id || ''} onChange={e => setEditingItem({ ...editingItem, organization_id: e.target.value })}>
+                                            <option value="">企業を選択...</option>
+                                            {realCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                        </select>
+                                    </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">企業 (Organization)</label>
-                                    <select
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.organization_id || editingItem.company_id || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, organization_id: e.target.value, company_id: e.target.value })}
-                                    >
-                                        <option value="">企業を選択...</option>
-                                        {realCompanies.map(c => (
-                                            <option key={c.id} value={c.id}>{c.name}</option>
-                                        ))}
-                                    </select>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">詳細内容</label>
+                                    <textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold min-h-[150px]" value={editingItem.content || editingItem.description || ''} onChange={e => setEditingItem({ ...editingItem, content: e.target.value })} />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">給与</label>
+                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.salary || ''} onChange={e => setEditingItem({ ...editingItem, salary: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">雇用形態</label>
+                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.employment_type || ''} onChange={e => setEditingItem({ ...editingItem, employment_type: e.target.value })} />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">勤務時間</label>
+                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.working_hours || ''} onChange={e => setEditingItem({ ...editingItem, working_hours: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">休日</label>
+                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" value={editingItem.holidays || ''} onChange={e => setEditingItem({ ...editingItem, holidays: e.target.value })} />
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">詳細内容 (Content)</label>
-                                <textarea
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[150px]"
-                                    value={editingItem.content || editingItem.description || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, content: e.target.value, description: e.target.value })}
-                                    placeholder="求人の詳細内容..."
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">給与</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.salary || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, salary: e.target.value })}
-                                        placeholder="例: 月給 25万円〜"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">雇用形態</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.employment_type || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, employment_type: e.target.value })}
-                                        placeholder="例: 正社員"
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">勤務時間</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.working_hours || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, working_hours: e.target.value })}
-                                        placeholder="例: 9:00 - 18:00"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">休日</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                        value={editingItem.holidays || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, holidays: e.target.value })}
-                                        placeholder="例: 土日祝"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">福利厚生</label>
-                                <textarea
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[60px]"
-                                    value={editingItem.benefits || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, benefits: e.target.value })}
-                                    placeholder="福利厚生..."
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">応募条件</label>
-                                <textarea
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[60px]"
-                                    value={editingItem.qualifications || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, qualifications: e.target.value })}
-                                    placeholder="必要な資格や経験..."
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">アクセス</label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
-                                    value={editingItem.access || ''}
-                                    onChange={e => setEditingItem({ ...editingItem, access: e.target.value })}
-                                    placeholder="アクセス..."
-                                />
-                            </div>
-                        </>
+                        </div>
                     )}
                 </div>
 
-                <div className="flex gap-3 pt-4 border-t border-slate-100">
-                    <button onClick={() => setEditingItem(null)} className="flex-1 py-3 font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer">キャンセル</button>
-                    <button onClick={handleSaveEdit} className="flex-1 py-3 bg-blue-600 text-white font-black rounded-xl hover:bg-blue-500 transition-colors flex items-center justify-center gap-2 cursor-pointer">
-                        <Save size={18} /> 保存する
+                <div className="p-8 border-t border-slate-100 flex gap-4 bg-white shrink-0">
+                    <button onClick={() => setEditingItem(null)} className="flex-1 py-4 font-bold text-slate-500 hover:bg-slate-50 rounded-2xl transition-all cursor-pointer">
+                        キャンセル
+                    </button>
+                    <button onClick={handleSaveEdit} className="flex-[2] py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-500 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xl shadow-blue-100">
+                        <Save size={20} />
+                        {actionType === 'create' ? '新規登録' : '変更を保存'}
                     </button>
                 </div>
             </div>
@@ -2151,7 +1912,13 @@ function AdminManagementContent() {
                             onClick={() => router.push('?tab=jobs')}
                             className={`px-8 py-3.5 rounded-3xl text-sm font-black transition-all cursor-pointer ${currentTab === 'jobs' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:bg-white/50'}`}
                         >
-                            <Briefcase size={16} className="inline mr-2" /> 求人・クエスト
+                            <Briefcase size={16} className="inline mr-2" /> 求人管理
+                        </button>
+                        <button
+                            onClick={() => router.push('?tab=quests')}
+                            className={`px-8 py-3.5 rounded-3xl text-sm font-black transition-all cursor-pointer ${currentTab === 'quests' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:bg-white/50'}`}
+                        >
+                            <Zap size={16} className="inline mr-2" /> クエスト管理
                         </button>
                         <button
                             onClick={() => router.push('?tab=learning')}
@@ -2170,7 +1937,8 @@ function AdminManagementContent() {
                     <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
                         {currentTab === 'users' && renderUsers()}
                         {currentTab === 'companies' && renderCompanies()}
-                        {currentTab === 'jobs' && renderJobs()}
+                        {currentTab === 'jobs' && renderJobs('job')}
+                        {currentTab === 'quests' && renderJobs('quest')}
                         {currentTab === 'learning' && renderLearning()}
                         {currentTab === 'media' && renderMedia()}
                     </div>

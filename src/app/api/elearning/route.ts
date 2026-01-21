@@ -86,3 +86,44 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
     }
 }
+
+export async function PUT(request: Request) {
+    try {
+        const body = await request.json();
+        const currentData = readData();
+
+        const existingIndex = currentData.findIndex((c: any) => c.id === body.id);
+        if (existingIndex === -1) {
+            return NextResponse.json({ success: false, error: 'Course not found' }, { status: 404 });
+        }
+
+        // Update the course data
+        currentData[existingIndex] = {
+            ...currentData[existingIndex],
+            ...body
+        };
+
+        writeData(currentData);
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Error updating course:', error);
+        return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    }
+}
+
+export async function DELETE(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+        if (!id) return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 });
+
+        const currentData = readData();
+        const updatedData = currentData.filter((c: any) => c.id !== id);
+
+        writeData(updatedData);
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting course:', error);
+        return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    }
+}

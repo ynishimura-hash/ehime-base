@@ -156,6 +156,8 @@ interface AppState {
     updateLastViewedLesson: (lessonId: string) => void;
     fetchCourses: () => Promise<void>;
     addCourses: (newCourses: Partial<Course>[]) => Promise<void>;
+    updateCourse: (course: Partial<Course> & { id: string }) => Promise<void>;
+    deleteCourse: (id: string) => Promise<void>;
 
     // Analysis Actions
     setAnalysisResults: (results: Partial<UserAnalysis>) => void;
@@ -568,11 +570,44 @@ export const useAppStore = create<AppState>()(
                     });
                     const result = await response.json();
                     if (result.success) {
-                        // Refresh courses after adding
                         get().fetchCourses();
                     }
                 } catch (error) {
                     console.error('Failed to add courses:', error);
+                }
+            },
+
+            updateCourse: async (course) => {
+                try {
+                    const response = await fetch('/api/elearning', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(course)
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        toast.success('コースを更新しました');
+                        get().fetchCourses();
+                    }
+                } catch (error) {
+                    console.error('Failed to update course:', error);
+                    toast.error('更新に失敗しました');
+                }
+            },
+
+            deleteCourse: async (id) => {
+                try {
+                    const response = await fetch(`/api/elearning?id=${id}`, {
+                        method: 'DELETE'
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        toast.success('コースを削除しました');
+                        get().fetchCourses();
+                    }
+                } catch (error) {
+                    console.error('Failed to delete course:', error);
+                    toast.error('削除に失敗しました');
                 }
             },
 

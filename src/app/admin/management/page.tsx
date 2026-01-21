@@ -195,9 +195,29 @@ function AdminManagementContent() {
                 return;
             }
 
-            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            // Robust CSV parsing (handling quotes)
+            const parseCSVLine = (line: string) => {
+                const result = [];
+                let current = '';
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        result.push(current.trim().replace(/^"|"$/g, ''));
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                result.push(current.trim().replace(/^"|"$/g, ''));
+                return result;
+            };
+
+            const headers = parseCSVLine(lines[0]);
             const data = lines.slice(1).map(line => {
-                const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+                const values = parseCSVLine(line);
                 return headers.reduce((obj, header, index) => {
                     obj[header] = values[index] || '';
                     return obj;
@@ -207,7 +227,7 @@ function AdminManagementContent() {
             setCsvHeaders(headers);
             setCsvData(data);
 
-            // Auto-guess mapping
+            // AI-like Auto Mapping
             const initialMapping: Record<string, string> = {};
             let targetFields = {};
             if (type === 'company') targetFields = COMPANY_FIELDS;
@@ -215,19 +235,55 @@ function AdminManagementContent() {
             else if (type === 'user') targetFields = USER_FIELDS;
             else if (type === 'course') targetFields = COURSE_FIELDS;
 
-            headers.forEach(header => {
-                // Try to find a matching key or label
-                const match = Object.entries(targetFields).find(([key, label]) =>
-                    header === key || (typeof label === 'string' && (header === label || label.includes(header)))
-                );
-                if (match) {
-                    initialMapping[match[0]] = header;
+            // Synonym Dictionary
+            const synonyms: Record<string, string[]> = {
+                name: ['企業名', '会社名', 'Company', 'Name', '事業所名', '商号'],
+                website_url: ['URL', 'Web', 'HP', 'ホームページ', 'リンク', 'サイト'],
+                industry: ['業界', '業種', 'Industry', 'Category', '分野'],
+                location: ['住所', '所在地', 'Location', 'Address', '勤務地'],
+                phone: ['電話', 'TEL', 'Phone', 'Mobile', '連絡先'],
+                representative_name: ['代表', '社長', 'Representative', 'CEO'],
+                established_date: ['設立', '創業', 'Established', 'Date'],
+                employee_count: ['従業員', '社員数', 'Staff', 'Count', '人数'],
+                email: ['メール', 'Email', 'Address', 'Mail'],
+                salary: ['給与', '賃金', 'Salary', 'Pay', '年収', '月給'],
+                title: ['タイトル', '職種', 'Title', 'Role', 'Position'],
+            };
+
+            const sampleRow = data[0] || {};
+
+            Object.keys(targetFields).forEach(dbField => {
+                // 1. Check Header Synonyms
+                let bestMatch = headers.find(h => {
+                    const cleanHeader = h.toLowerCase().replace(/[\s_]/g, '');
+                    const fieldSynonyms = synonyms[dbField] || [];
+                    return fieldSynonyms.some(s => cleanHeader.includes(s.toLowerCase()));
+                });
+
+                // 2. Check Content Patterns (Heuristics) if no header match or for verification
+                if (!bestMatch) {
+                    // Try to guess from content
+                    const potentialMatch = headers.find(h => {
+                        const val = String(sampleRow[h] || '');
+                        if (!val || val.length > 200) return false; // Skip too long text
+
+                        if (dbField === 'website_url' && (val.startsWith('http') || val.includes('www.'))) return true;
+                        if (dbField === 'email' && val.includes('@') && val.includes('.')) return true;
+                        if (dbField === 'phone' && (val.match(/^[\d-]{10,15}$/) || val.startsWith('0'))) return true;
+                        if (dbField === 'name' && (val.includes('株式会社') || val.includes('有限会社'))) return true;
+                        return false;
+                    });
+                    if (potentialMatch) bestMatch = potentialMatch;
+                }
+
+                if (bestMatch) {
+                    initialMapping[dbField] = bestMatch;
                 }
             });
+
             setCsvMapping(initialMapping);
             setShowCsvModal(true);
 
-            // Reset file input
             if (event.target) event.target.value = '';
         };
         reader.readAsText(file);

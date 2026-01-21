@@ -1317,7 +1317,7 @@ function AdminManagementContent() {
                             qualifications: editingItem.qualifications,
                             access: editingItem.access,
                             content: editingItem.content,
-                            cover_image_url: editingItem.cover_image_url || editingItem.cover_image
+                            cover_image: editingItem.cover_image_url || editingItem.cover_image
                         })
                         .eq('id', editingItem.id);
                     if (error) throw error;

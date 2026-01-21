@@ -1249,7 +1249,8 @@ function AdminManagementContent() {
                             university: editingItem.university,
                             faculty: editingItem.faculty,
                             bio: editingItem.bio,
-                            tags: editingItem.tags
+                            tags: editingItem.tags,
+                            avatar_url: editingItem.avatar_url
                         })
                         .eq('id', editingItem.id);
                     if (error) throw error;
@@ -1258,13 +1259,13 @@ function AdminManagementContent() {
                 }
             } else if (editMode === 'company') {
                 if (actionType === 'create') {
-                    const { error } = await supabase.from('companies').insert([editingItem]);
+                    const { error } = await supabase.from('organizations').insert([editingItem]);
                     if (error) throw error;
                     toast.success('企業を作成しました');
                     fetchCompanies();
                 } else {
                     const { error } = await supabase
-                        .from('companies')
+                        .from('organizations')
                         .update({
                             name: editingItem.name,
                             industry: editingItem.industry,
@@ -1276,7 +1277,9 @@ function AdminManagementContent() {
                             business_content: editingItem.business_content,
                             phone: editingItem.phone,
                             website_url: editingItem.website_url,
-                            description: editingItem.description
+                            description: editingItem.description,
+                            logo_url: editingItem.logo_url,
+                            cover_image_url: editingItem.cover_image_url
                         })
                         .eq('id', editingItem.id);
                     if (error) throw error;
@@ -1303,7 +1306,8 @@ function AdminManagementContent() {
                             benefits: editingItem.benefits,
                             qualifications: editingItem.qualifications,
                             access: editingItem.access,
-                            content: editingItem.content
+                            content: editingItem.content,
+                            cover_image_url: editingItem.cover_image_url || editingItem.cover_image
                         })
                         .eq('id', editingItem.id);
                     if (error) throw error;

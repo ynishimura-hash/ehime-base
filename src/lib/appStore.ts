@@ -425,7 +425,7 @@ export const useAppStore = create<AppState>()(
             logout: async () => {
                 const supabase = createClient();
                 await supabase.auth.signOut();
-                localStorage.removeItem('eis-app-store-v3'); // Clear persisted state
+                // localStorage.removeItem('eis-app-store-v3'); // Removed to prevent conflict with Zustand persist
                 set({
                     authStatus: 'unauthenticated',
                     activeRole: 'seeker',

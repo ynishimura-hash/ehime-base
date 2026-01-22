@@ -30,7 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     const handleLogout = async () => {
         await logout();
-        window.location.href = '/';
+        window.location.replace('/');
     };
 
     return (

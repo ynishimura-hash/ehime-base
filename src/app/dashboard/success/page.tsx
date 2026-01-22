@@ -43,9 +43,9 @@ export default function SuccessDashboard() {
         ? (userAnalysis.fortune?.traits || ['誠実', '努力家'])
         : [];
 
-    // if (!hasData && !isAdmin) { 
-    // サクセスモード解放リクエストにより、一時的に制限解除
-    if (false) {
+    if (!hasData && !isAdmin) {
+        // サクセスモード解放リクエストにより、一時的に制限解除
+        // if (false) {
         return (
             <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center">
                 <div className="max-w-md space-y-8">

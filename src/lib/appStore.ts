@@ -301,7 +301,28 @@ export const useAppStore = create<AppState>()(
             jobs: JOBS,
             courses: [], // Will be fetched via API
 
-            userAnalysis: {},
+            userAnalysis: {
+                isFortuneIntegrated: true,
+                fortune: {
+                    dayMaster: '甲',
+                    traits: ['誠実', '向上心', '体系的思考']
+                },
+                diagnosisScores: {
+                    // Category A: 構造力 (1-10)
+                    1: 5, 2: 4, 3: 5, 4: 4, 5: 5, 6: 4, 7: 5, 8: 4, 9: 5, 10: 4,
+                    // Category B: 創造力 (11-20)
+                    11: 3, 12: 4, 13: 3, 14: 4, 15: 3, 16: 4, 17: 3, 18: 4, 19: 3, 20: 4,
+                    // Category C: 共感力 (21-30)
+                    21: 5, 22: 5, 23: 5, 24: 5, 25: 5, 26: 5, 27: 5, 28: 5, 29: 5, 30: 5,
+                    // Category D: 行動力 (31-40)
+                    31: 2, 32: 3, 33: 2, 34: 3, 35: 2, 36: 3, 37: 2, 38: 3, 39: 2, 40: 3,
+                    // Category E: 受容力 (41-50)
+                    41: 4, 42: 4, 43: 4, 44: 4, 45: 4, 46: 4, 47: 4, 48: 4, 49: 4, 50: 4
+                },
+                selectedValues: [1, 5, 12, 23, 45], // Assuming these are valid value card IDs
+                publicValues: [1, 5, 23],
+                strengths: { 'Comm': 80, 'Tech': 60, 'Mng': 70 }
+            },
 
             chats: [],
             interactions: [],

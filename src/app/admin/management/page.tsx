@@ -1905,21 +1905,12 @@ function AdminManagementContent() {
                                     <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">タイトル</label>
                                     <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.title || ''} onChange={e => setEditingItem({ ...editingItem, title: e.target.value })} />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">タイプ</label>
-                                        <select className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.type || 'job'} onChange={e => setEditingItem({ ...editingItem, type: e.target.value })}>
-                                            <option value="job">求人</option>
-                                            <option value="quest">クエスト</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">企業</label>
-                                        <select className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.organization_id || ''} onChange={e => setEditingItem({ ...editingItem, organization_id: e.target.value })}>
-                                            <option value="">企業を選択...</option>
-                                            {realCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                        </select>
-                                    </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">企業</label>
+                                    <select className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.organization_id || ''} onChange={e => setEditingItem({ ...editingItem, organization_id: e.target.value })}>
+                                        <option value="">企業を選択...</option>
+                                        {realCompanies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                    </select>
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">詳細内容</label>

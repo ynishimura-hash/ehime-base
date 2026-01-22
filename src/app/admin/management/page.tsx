@@ -13,6 +13,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createClient } from '@/utils/supabase/client';
 import { ImageUpload } from '@/components/ImageUpload';
+import { ReelIcon } from '@/components/reels/ReelIcon'; // Add import
 
 
 
@@ -64,6 +65,7 @@ function AdminManagementContent() {
         } else if (currentTab === 'jobs' || currentTab === 'quests') {
             fetchJobs();
             fetchCompanies();
+            fetchMedia(); // Fetch media for video column
         }
     }, [currentTab]);
 
@@ -774,6 +776,27 @@ function AdminManagementContent() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
+                                            {/* Video Icon */}
+                                            <div className="flex-shrink-0">
+                                                <ReelIcon
+                                                    reels={mediaItems.filter(m => m.job_id === job.id).map(m => ({
+                                                        id: m.id,
+                                                        type: m.type || 'file',
+                                                        url: m.public_url,
+                                                        thumbnail: m.thumbnail_url || m.public_url,
+                                                        title: m.filename,
+                                                        likes: 0 // Mock value for type compatibility
+                                                    }))}
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        const reels = mediaItems.filter(m => m.job_id === job.id);
+                                                        if (reels.length > 0) {
+                                                            window.open(reels[0].public_url, '_blank');
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+
                                             <img
                                                 src={job.cover_image_url || job.cover_image || 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=100&h=100&fit=crop'}
                                                 className="w-10 h-10 rounded-xl object-cover"

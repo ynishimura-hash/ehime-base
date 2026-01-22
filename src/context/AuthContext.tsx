@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     setRoleState(userRole);
 
                     // Update AppStore
-                    loginAs(userRole);
+                    loginAs(userRole, session.user.id);
 
                     // Sync Analysis Resuls
                     if (profile.diagnosis_result) {

@@ -3,17 +3,41 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/appStore';
+import { createClient } from '@/utils/supabase/client';
 import { toast } from 'sonner';
 import { Building2 } from 'lucide-react';
 
 export default function CompanyLoginPage() {
     const router = useRouter();
-    const loginAs = useAppStore(state => state.loginAs);
+    const supabase = createClient();
+    const [email, setEmail] = React.useState('');
+    const [password, setPassword] = React.useState('');
+    const [loading, setLoading] = React.useState(false);
 
-    const handleLogin = () => {
-        loginAs('company');
-        toast.success('企業アカウントとしてログインしました');
-        router.push('/dashboard/company');
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
+
+            if (error) {
+                toast.error(error.message || 'ログインに失敗しました');
+                return;
+            }
+
+            toast.success('ログインしました');
+            router.push('/dashboard/company');
+            router.refresh();
+        } catch (error) {
+            toast.error('エラーが発生しました');
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -27,38 +51,40 @@ export default function CompanyLoginPage() {
                     <p className="text-slate-500 text-sm">採用担当者専用ページ</p>
                 </div>
 
-                <div className="space-y-4">
+                <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-slate-700">メールアドレス</label>
                         <input
                             type="email"
-                            disabled
-                            value="hr@eis.co.jp"
-                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-500"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:border-slate-400 transition-colors"
+                            placeholder="hr@example.com"
                         />
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-slate-700">パスワード</label>
                         <input
                             type="password"
-                            disabled
-                            value="password"
-                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-500"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:border-slate-400 transition-colors"
+                            placeholder="••••••••"
                         />
                     </div>
-                </div>
 
-                <div className="pt-4">
-                    <button
-                        onClick={handleLogin}
-                        className="w-full py-4 bg-slate-900 text-white font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all active:scale-[0.98]"
-                    >
-                        ログイン (デモ)
-                    </button>
-                    <p className="text-center text-xs text-slate-400 mt-4">
-                        デモ環境のため、パスワード入力なしでログインできます。
-                    </p>
-                </div>
+                    <div className="pt-4">
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full py-4 bg-slate-900 text-white font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all active:scale-[0.98] disabled:opacity-70 flex items-center justify-center"
+                        >
+                            {loading ? <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" /> : 'ログイン'}
+                        </button>
+                    </div>
+                </form>
             </div>
 
             <button

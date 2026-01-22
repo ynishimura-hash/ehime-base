@@ -86,7 +86,7 @@ export interface ChatSettings {
 
 interface AppState {
     // Current Session Mode
-    authStatus: 'guest' | 'authenticated';
+    authStatus: 'guest' | 'authenticated' | 'unauthenticated';
     activeRole: 'seeker' | 'company' | 'admin';
     personaMode: 'seeker' | 'reskill';
     currentUserId: string;
@@ -121,7 +121,7 @@ interface AppState {
     bbPosts: SpecialistPost[];
 
     // Actions
-    loginAs: (role: 'seeker' | 'company' | 'admin') => void;
+    loginAs: (role: 'seeker' | 'company' | 'admin', userId?: string, companyId?: string) => void;
     logout: () => void;
     switchRole: (role: 'seeker' | 'company' | 'admin') => void;
     setPersonaMode: (mode: 'seeker' | 'reskill') => void;
@@ -294,11 +294,11 @@ const INITIAL_USERS: User[] = [
 export const useAppStore = create<AppState>()(
     persist(
         (set, get) => ({
-            authStatus: 'guest',
-            activeRole: 'seeker',
+            authStatus: 'unauthenticated',
+            activeRole: 'seeker', // Default role but not logged in
             personaMode: 'seeker',
-            currentUserId: 'u_yuji',
-            currentCompanyId: 'c_eis',
+            currentUserId: '',
+            currentCompanyId: '',
 
             users: INITIAL_USERS,
             companies: COMPANIES,
@@ -414,15 +414,15 @@ export const useAppStore = create<AppState>()(
             },
 
             // User Actions
-            loginAs: (role) => set({
+            loginAs: (role, userId, companyId) => set({
                 authStatus: 'authenticated',
                 activeRole: role,
-                // Ensure correct ID is set when logging in (simple mock logic)
-                currentUserId: role === 'admin' ? 'u_admin' : 'u_yuji',
-                currentCompanyId: 'c_eis',
+                // Use provided ID or fallback to demo ID if missing (for legacy calls)
+                currentUserId: userId || (role === 'admin' ? 'u_admin' : 'u_yuji'),
+                currentCompanyId: companyId || 'c_eis',
             }),
             logout: () => set({
-                authStatus: 'guest',
+                authStatus: 'unauthenticated', // changed from 'guest' to match new default
                 currentUserId: '',
                 currentCompanyId: ''
             }),

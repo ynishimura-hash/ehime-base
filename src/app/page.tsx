@@ -43,7 +43,7 @@ export default function HomePage() {
           <span className="font-black text-xl tracking-tighter text-white drop-shadow-lg">Ehime Base</span>
         </Link>
         <div className="flex items-center gap-4">
-          {authStatus === 'guest' ? (
+          {authStatus !== 'authenticated' ? (
             <button
               onClick={() => router.push('/welcome')}
               className="bg-white text-blue-600 px-5 py-2 rounded-full font-black text-xs hover:bg-blue-50 transition-all shadow-lg active:scale-95"

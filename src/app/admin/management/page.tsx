@@ -13,7 +13,8 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createClient } from '@/utils/supabase/client';
 import { ImageUpload } from '@/components/ImageUpload';
-import { ReelIcon } from '@/components/reels/ReelIcon'; // Add import
+import { ReelIcon } from '@/components/reels/ReelIcon';
+import { COMPANIES, JOBS } from '@/lib/dummyData';
 
 
 
@@ -98,13 +99,13 @@ function AdminManagementContent() {
                 toast.error('企業の取得に失敗 (デモデータを表示): ' + error.message);
             }
             // Fallback to dummy data
-            setRealCompanies(companies.map(c => ({ ...c, logo_url: c.image, type: 'company', status: 'approved' })) || []);
+            setRealCompanies(COMPANIES.map(c => ({ ...c, logo_url: c.image, type: 'company', status: 'approved' })) || []);
         } else {
             if (data && data.length > 0) {
                 setRealCompanies(data);
             } else {
                 console.log('DB empty, falling back to dummy data');
-                setRealCompanies(companies.map(c => ({ ...c, logo_url: c.image, type: 'company', status: 'approved' })) || []);
+                setRealCompanies(COMPANIES.map(c => ({ ...c, logo_url: c.image, type: 'company', status: 'approved' })) || []);
             }
         }
     };
@@ -117,12 +118,12 @@ function AdminManagementContent() {
                 // toast.error('求人の取得に失敗しました');
                 console.warn('Job fetch failed, using fallback');
             }
-            setRealJobs(jobs.map(j => ({ ...j, organization_id: j.companyId, status: 'active' })) || []);
+            setRealJobs(JOBS.map(j => ({ ...j, organization_id: j.companyId, status: 'active' })) || []);
         } else {
             if (data && data.length > 0) {
                 setRealJobs(data);
             } else {
-                setRealJobs(jobs.map(j => ({ ...j, organization_id: j.companyId, status: 'active' })) || []);
+                setRealJobs(JOBS.map(j => ({ ...j, organization_id: j.companyId, status: 'active' })) || []);
             }
         }
     };

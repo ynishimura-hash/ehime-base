@@ -677,35 +677,39 @@ function AdminManagementContent() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            {/* Video Icon */}
-                                            <div className="flex-shrink-0">
-                                                <ReelIcon
-                                                    reels={mediaItems.filter(m => m.organization_id === company.id).map(m => ({
-                                                        id: m.id,
-                                                        type: m.type || 'file',
-                                                        url: m.public_url,
-                                                        thumbnail: m.thumbnail_url || m.public_url,
-                                                        title: m.filename,
-                                                        likes: 0
-                                                    }))}
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        const reels = mediaItems.filter(m => m.organization_id === company.id);
-                                                        if (reels.length > 0) {
-                                                            window.open(reels[0].public_url, '_blank');
-                                                        }
-                                                    }}
-                                                />
+                                            {/* Video Icon Container - Fixed Width */}
+                                            <div className="flex-shrink-0 w-8 flex justify-center">
+                                                {mediaItems.filter(m => m.organization_id === company.id).length > 0 ? (
+                                                    <ReelIcon
+                                                        reels={mediaItems.filter(m => m.organization_id === company.id).map(m => ({
+                                                            id: m.id,
+                                                            type: m.type || 'file',
+                                                            url: m.public_url,
+                                                            thumbnail: m.thumbnail_url || m.public_url,
+                                                            title: m.filename,
+                                                            likes: 0
+                                                        }))}
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            const reels = mediaItems.filter(m => m.organization_id === company.id);
+                                                            if (reels.length > 0) {
+                                                                window.open(reels[0].public_url, '_blank');
+                                                            }
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div className="w-8" />
+                                                )}
                                             </div>
-                                            <span className="text-sm font-bold text-slate-500">{company.industry}</span>
+                                            <span className="text-sm font-bold text-slate-500 flex-1">{company.industry}</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <button
                                             onClick={() => handleStatusToggle(company.id, 'company', company.status || 'approved')}
                                             className={`px-3 py-1 rounded-full text-[10px] font-black border transition-all ${(company.status === 'private')
-                                                    ? 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
-                                                    : 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100'
+                                                ? 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
+                                                : 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100'
                                                 }`}
                                         >
                                             {company.status === 'private' ? 'Private' : 'Active'}
@@ -819,25 +823,29 @@ function AdminManagementContent() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            {/* Video Icon */}
-                                            <div className="flex-shrink-0">
-                                                <ReelIcon
-                                                    reels={mediaItems.filter(m => m.job_id === job.id).map(m => ({
-                                                        id: m.id,
-                                                        type: m.type || 'file',
-                                                        url: m.public_url,
-                                                        thumbnail: m.thumbnail_url || m.public_url,
-                                                        title: m.filename,
-                                                        likes: 0
-                                                    }))}
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        const reels = mediaItems.filter(m => m.job_id === job.id);
-                                                        if (reels.length > 0) {
-                                                            window.open(reels[0].public_url, '_blank');
-                                                        }
-                                                    }}
-                                                />
+                                            {/* Video Icon Container - Fixed Width for Alignment */}
+                                            <div className="flex-shrink-0 w-8 flex justify-center">
+                                                {mediaItems.filter(m => m.job_id === job.id).length > 0 ? (
+                                                    <ReelIcon
+                                                        reels={mediaItems.filter(m => m.job_id === job.id).map(m => ({
+                                                            id: m.id,
+                                                            type: m.type || 'file',
+                                                            url: m.public_url,
+                                                            thumbnail: m.thumbnail_url || m.public_url,
+                                                            title: m.filename,
+                                                            likes: 0
+                                                        }))}
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            const reels = mediaItems.filter(m => m.job_id === job.id);
+                                                            if (reels.length > 0) {
+                                                                window.open(reels[0].public_url, '_blank');
+                                                            }
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div className="w-8" />
+                                                )}
                                             </div>
                                             <span className={`px-2 py-0.5 rounded text-[10px] font-black ${job.type === 'quest' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>
                                                 {(job.type || 'job').toUpperCase()}

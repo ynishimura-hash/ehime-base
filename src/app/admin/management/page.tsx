@@ -707,7 +707,12 @@ function AdminManagementContent() {
                                 </button>
                             </th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">企業名</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">業界</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 flex-shrink-0" />
+                                    <span>業界</span>
+                                </div>
+                            </th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">ステータス</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">アクション</th>
                         </tr>
@@ -844,7 +849,12 @@ function AdminManagementContent() {
                                 </button>
                             </th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{typeFilter === 'quest' ? 'クエストタイトル' : '求人タイトル'}</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">タイプ</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 flex-shrink-0 mr-2" />
+                                    <span>タイプ</span>
+                                </div>
+                            </th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">企業</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">ステータス</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">操作</th>

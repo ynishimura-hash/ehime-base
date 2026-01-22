@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, use, useRef } from 'react';
 import { useAppStore } from '@/lib/appStore';
-import { COURSES } from '@/lib/learningData';
 import {
     ChevronLeft, FileText, Download, CheckSquare,
     PlayCircle, CheckCircle2, ChevronRight, Menu,
@@ -14,6 +13,8 @@ import { toast } from 'sonner';
 export default function LessonPlayerPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const {
+        courses,
+        fetchCourses,
         completeLesson,
         updateLastViewedLesson,
         isLessonCompleted,
@@ -26,10 +27,16 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ id: str
     const [quizSubmitted, setQuizSubmitted] = useState(false);
     const [showCelebration, setShowCelebration] = useState(false);
 
+    useEffect(() => {
+        if (courses.length === 0) {
+            fetchCourses();
+        }
+    }, [courses.length, fetchCourses]);
+
     // Find lesson and course
-    const allLessons = COURSES.flatMap(c => c.curriculums.flatMap(curr => curr.lessons));
+    const allLessons = courses.flatMap(c => c.curriculums.flatMap(curr => curr.lessons));
     const lesson = allLessons.find(l => l.id === id);
-    const course = COURSES.find(c => c.curriculums.some(curr => curr.id === lesson?.curriculumId));
+    const course = courses.find(c => c.curriculums.some(curr => curr.id === lesson?.curriculumId));
     const curriculum = course?.curriculums.find(curr => curr.id === lesson?.curriculumId);
 
     // --- YouTube API Integration ---

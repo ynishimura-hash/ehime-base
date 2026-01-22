@@ -1,20 +1,27 @@
 "use client";
 
 import React, { use } from 'react';
-import { COURSES } from '@/lib/learningData';
-import {
-    ChevronLeft, PlayCircle, Clock, Award,
-    BookOpen, CheckCircle2, ArrowRight
-} from 'lucide-react';
+import { ChevronLeft, PlayCircle, Clock, Award, BookOpen, CheckCircle2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/appStore';
+import { useEffect } from 'react';
 
 export default function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const course = COURSES.find(c => c.id === id);
-    const { isLessonCompleted } = useAppStore();
+    const { courses, fetchCourses, isLessonCompleted } = useAppStore();
 
-    if (!course) return <div>Course not found</div>;
+    useEffect(() => {
+        if (courses.length === 0) {
+            fetchCourses();
+        }
+    }, [courses.length, fetchCourses]);
+
+    const course = courses.find(c => c.id === id);
+
+    if (!course) {
+        if (courses.length === 0) return <div className="p-10 text-center font-bold text-slate-500">Loading courses...</div>;
+        return <div className="p-10 text-center font-bold text-slate-500">Course not found</div>;
+    }
 
     return (
         <div className="min-h-screen bg-white">

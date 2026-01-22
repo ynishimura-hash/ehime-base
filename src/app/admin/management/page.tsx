@@ -23,7 +23,7 @@ function AdminManagementContent() {
     const router = useRouter();
     const currentTab = searchParams.get('tab') || 'companies';
     const {
-        companies, jobs, activeRole, courses,
+        companies, jobs, activeRole, courses, users,
         fetchCourses, addCourses, updateCourse, deleteCourse
     } = useAppStore();
     const [searchQuery, setSearchQuery] = useState('');
@@ -73,7 +73,12 @@ function AdminManagementContent() {
 
     const fetchUsers = async () => {
         const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
-        if (!error && data) setRealUsers(data);
+        if (error || !data || data.length === 0) {
+            console.warn('Fetch Users failed or empty, using fallback');
+            setRealUsers(users || []);
+        } else {
+            setRealUsers(data);
+        }
     };
 
     const fetchRelatedData = async (userId: string) => {
@@ -134,11 +139,22 @@ function AdminManagementContent() {
             .select('*')
             .order('created_at', { ascending: false });
 
-        if (error) {
-            console.error('Error fetching media:', error);
-            // toast.error('メディア情報の取得に失敗しました');
+        if (error || !data || data.length === 0) {
+            console.warn('Fetch Media failed or empty, using fallback');
+            // Extract Reels from Dummy Companies
+            const dummyMedia = COMPANIES.flatMap(c =>
+                (c.reels || []).map(r => ({
+                    id: r.id,
+                    public_url: r.url,
+                    thumbnail_url: r.thumbnail || r.url,
+                    filename: r.title,
+                    type: r.type,
+                    organization_id: c.id
+                }))
+            );
+            setMediaItems(dummyMedia);
         } else {
-            setMediaItems(data || []);
+            setMediaItems(data);
         }
     };
 

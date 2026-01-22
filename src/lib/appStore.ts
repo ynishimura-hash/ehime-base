@@ -122,7 +122,7 @@ interface AppState {
 
     // Actions
     loginAs: (role: 'seeker' | 'company' | 'admin', userId?: string, companyId?: string) => void;
-    logout: () => void;
+    logout: () => Promise<void>;
     switchRole: (role: 'seeker' | 'company' | 'admin') => void;
     setPersonaMode: (mode: 'seeker' | 'reskill') => void;
     updateUser: (userId: string, updates: Partial<User>) => void;
@@ -422,11 +422,16 @@ export const useAppStore = create<AppState>()(
                 currentUserId: userId || (role === 'admin' ? 'u_admin' : 'u_yuji'),
                 currentCompanyId: companyId || 'c_eis',
             }),
-            logout: () => set({
-                authStatus: 'unauthenticated', // changed from 'guest' to match new default
-                currentUserId: '',
-                currentCompanyId: ''
-            }),
+            logout: async () => {
+                const supabase = createClient();
+                await supabase.auth.signOut();
+                set({
+                    authStatus: 'unauthenticated',
+                    activeRole: 'seeker',
+                    currentUserId: '',
+                    currentCompanyId: ''
+                });
+            },
 
             updateUser: (userId: string, updates: Partial<User>) => {
                 set((state) => ({

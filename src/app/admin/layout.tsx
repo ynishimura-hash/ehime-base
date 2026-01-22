@@ -28,8 +28,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
     const { logout } = useAppStore();
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
         window.location.href = '/';
     };
 

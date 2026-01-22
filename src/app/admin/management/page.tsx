@@ -575,7 +575,7 @@ function AdminManagementContent() {
     const renderUsers = () => (
         <div className="space-y-4">
             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-black text-slate-900">求職者一覧</h2>
+                <h2 className="text-2xl font-black text-slate-900">ユーザー一覧</h2>
                 <div className="flex gap-2">
                     <input
                         type="file"
@@ -664,7 +664,7 @@ function AdminManagementContent() {
     const renderCompanies = () => (
         <div className="space-y-4">
             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-black text-slate-900">企業管理一覧</h2>
+                <h2 className="text-2xl font-black text-slate-900">企業アカウント一覧</h2>
                 <div className="flex gap-2">
                     <input
                         type="file"
@@ -2409,13 +2409,13 @@ function AdminManagementContent() {
                             onClick={() => router.push('?tab=users')}
                             className={`px-8 py-3.5 rounded-3xl text-sm font-black transition-all cursor-pointer ${currentTab === 'users' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:bg-white/50'}`}
                         >
-                            <Users size={16} className="inline mr-2" /> 求職者
+                            <Users size={16} className="inline mr-2" /> ユーザー
                         </button>
                         <button
                             onClick={() => router.push('?tab=companies')}
                             className={`px-8 py-3.5 rounded-3xl text-sm font-black transition-all cursor-pointer ${currentTab === 'companies' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:bg-white/50'}`}
                         >
-                            <Building2 size={16} className="inline mr-2" /> 企業管理
+                            <Building2 size={16} className="inline mr-2" /> 企業アカウント
                         </button>
                         <button
                             onClick={() => router.push('?tab=jobs')}

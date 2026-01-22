@@ -43,6 +43,7 @@ function AdminManagementContent() {
     const [actionType, setActionType] = useState<'create' | 'edit'>('edit');
     const [modalTab, setModalTab] = useState<'basic' | 'detail' | 'activity' | 'analysis'>('basic');
     const [relatedData, setRelatedData] = useState<any>({ applications: [], logs: [], bookmarks: [], courses: [] });
+    const [pendingVideos, setPendingVideos] = useState<{ type: 'file' | 'youtube', file?: File, url?: string, title: string }[]>([]);
 
     const usersFileInputRef = React.useRef<HTMLInputElement>(null);
     const companiesFileInputRef = React.useRef<HTMLInputElement>(null);
@@ -1154,6 +1155,9 @@ function AdminManagementContent() {
                                     <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button
                                             onClick={() => {
+                                                const asType = item.organization_id ? 'company' :
+                                                    item.job_id ? (realJobs.find(j => j.id === item.job_id)?.type === 'quest' ? 'quest' : 'job') : null;
+                                                setAssociationType(asType);
                                                 setEditingItem(item);
                                                 setEditMode('media');
                                                 setActionType('edit');
@@ -1265,8 +1269,11 @@ function AdminManagementContent() {
                 }
             } else if (editMode === 'company') {
                 if (actionType === 'create') {
-                    const { error } = await supabase.from('organizations').insert([editingItem]);
+                    const { data, error } = await supabase.from('organizations').insert([{ ...editingItem, type: 'company' }]).select();
                     if (error) throw error;
+                    if (data && data[0]) {
+                        await processPendingVideos(data[0].id, 'company');
+                    }
                     toast.success('企業を作成しました');
                     fetchCompanies();
                 } else {
@@ -1297,14 +1304,18 @@ function AdminManagementContent() {
                         console.error('Save error:', error);
                         throw error;
                     }
+                    await processPendingVideos(editingItem.id, 'company');
                     console.log('Save successful!');
                     toast.success('更新しました');
                     fetchCompanies();
                 }
             } else if (editMode === 'job') {
                 if (actionType === 'create') {
-                    const { error } = await supabase.from('jobs').insert([editingItem]);
+                    const { data, error } = await supabase.from('jobs').insert([editingItem]).select();
                     if (error) throw error;
+                    if (data && data[0]) {
+                        await processPendingVideos(data[0].id, 'job');
+                    }
                     toast.success('求人を作成しました');
                     fetchJobs();
                 } else {
@@ -1326,6 +1337,7 @@ function AdminManagementContent() {
                         })
                         .eq('id', editingItem.id);
                     if (error) throw error;
+                    await processPendingVideos(editingItem.id, 'job');
                     toast.success('更新しました');
                     fetchJobs();
                 }
@@ -1701,6 +1713,118 @@ function AdminManagementContent() {
         </div>
     );
 
+    const processPendingVideos = async (parentId: string, parentType: 'company' | 'job') => {
+        if (pendingVideos.length === 0) return;
+
+        const toastId = toast.loading('動画を保存中...');
+        try {
+            for (const v of pendingVideos) {
+                let publicUrl = '';
+                let storageFilePath = '';
+
+                if (v.type === 'file' && v.file) {
+                    const fileExt = v.file.name.split('.').pop();
+                    storageFilePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+                    const { error: upErr } = await supabase.storage.from('videos').upload(storageFilePath, v.file);
+                    if (upErr) {
+                        console.error('Failed to upload video', v.title, upErr);
+                        continue;
+                    }
+                    const { data } = supabase.storage.from('videos').getPublicUrl(storageFilePath);
+                    publicUrl = data.publicUrl;
+                } else if (v.type === 'youtube' && v.url) {
+                    publicUrl = v.url;
+                    storageFilePath = 'youtube';
+                }
+
+                if (publicUrl) {
+                    await supabase.from('media_library').insert({
+                        filename: v.title,
+                        public_url: publicUrl,
+                        storage_path: storageFilePath,
+                        type: v.type, // 'file' or 'youtube'
+                        organization_id: parentType === 'company' ? parentId : null,
+                        job_id: parentType === 'job' ? parentId : null
+                    });
+                }
+            }
+            setPendingVideos([]);
+            toast.dismiss(toastId);
+            toast.success('動画を保存しました');
+            fetchMedia(); // Refresh media list
+        } catch (e) {
+            console.error(e);
+            toast.dismiss(toastId);
+            toast.error('動画の保存に失敗しました');
+        }
+    };
+
+    const renderVideoSection = (parentId: string | null) => (
+        <div className="border-t border-slate-100 pt-6 mt-6">
+            <h4 className="text-sm font-black text-slate-900 mb-4 flex items-center gap-2">
+                <Video size={16} className="text-blue-600" /> PR動画 / メディア
+            </h4>
+
+            {/* List Existing & Pending */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                {/* Existing */}
+                {parentId && mediaItems.filter(m => m.organization_id === parentId || m.job_id === parentId).map(m => (
+                    <div key={m.id} className="relative aspect-video bg-slate-100 rounded-xl overflow-hidden group border border-slate-200">
+                        {m.type === 'youtube' ? (
+                            <img src={`https://img.youtube.com/vi/${getYouTubeID(m.public_url)}/0.jpg`} className="w-full h-full object-cover opacity-80" />
+                        ) : (
+                            <video src={m.public_url} className="w-full h-full object-cover opacity-80" />
+                        )}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/40 transition-all">
+                            <a href={m.public_url} target="_blank" rel="noopener noreferrer" className="text-white hover:scale-110 transition-transform"><ExternalLink size={16} /></a>
+                        </div>
+                    </div>
+                ))}
+
+                {/* Pending */}
+                {pendingVideos.map((v, i) => (
+                    <div key={i} className="relative aspect-video bg-blue-50 rounded-xl overflow-hidden border border-blue-200 flex items-center justify-center">
+                        <span className="text-[10px] font-black text-blue-600 uppercase">{v.type}</span>
+                        <button onClick={() => setPendingVideos(pendingVideos.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-white/50 hover:bg-white rounded-full p-1 cursor-pointer"><X size={12} /></button>
+                        <div className="absolute bottom-1 left-2 text-[10px] font-bold truncate w-full pr-4">{v.title}</div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Add New - Simple One-by-One */}
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div className="flex gap-4 mb-2">
+                    <button onClick={() => setVideoLinkType('file')} className={`text-xs font-black px-3 py-1.5 rounded-lg transition-all cursor-pointer ${videoLinkType === 'file' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400'}`}>ファイルアップロード</button>
+                    <button onClick={() => setVideoLinkType('youtube')} className={`text-xs font-black px-3 py-1.5 rounded-lg transition-all cursor-pointer ${videoLinkType === 'youtube' ? 'bg-white shadow-sm text-red-600' : 'text-slate-400'}`}>YouTubeリンク</button>
+                </div>
+
+                <div className="flex gap-2">
+                    {videoLinkType === 'file' ? (
+                        <input type="file" accept="video/*" ref={videoInputRef} className="text-xs font-bold text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+                    ) : (
+                        <input type="text" placeholder="https://youtu.be/..." value={youtubeUrl} onChange={e => setYoutubeUrl(e.target.value)} className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold" />
+                    )}
+                    <button
+                        onClick={() => {
+                            if (videoLinkType === 'file' && videoInputRef.current?.files?.[0]) {
+                                const file = videoInputRef.current.files[0];
+                                setPendingVideos([...pendingVideos, { type: 'file', file, title: file.name }]);
+                                videoInputRef.current.value = '';
+                            } else if (videoLinkType === 'youtube' && youtubeUrl) {
+                                setPendingVideos([...pendingVideos, { type: 'youtube', url: youtubeUrl, title: 'YouTube Video' }]);
+                                setYoutubeUrl('');
+                            }
+                        }}
+                        className="bg-slate-900 text-white px-4 rounded-xl font-black text-xs hover:bg-slate-700 cursor-pointer"
+                    >
+                        追加
+                    </button>
+                </div>
+                <p className="text-[10px] text-slate-400 font-bold mt-2">※保存時にアップロード/登録されます</p>
+            </div>
+        </div>
+    );
+
     const renderEditModal = () => (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4 md:p-10 animate-in fade-in duration-300">
             <div className={`bg-white w-full rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-500 ${editMode === 'media' || editMode === 'course' ? 'max-w-5xl h-[90vh]' : 'max-w-xl max-h-[90vh]'}`}>
@@ -1790,6 +1914,15 @@ function AdminManagementContent() {
                                                 <option value="admin">管理者</option>
                                             </select>
                                         </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">生年月日 (YYYY-MM-DD) <span className="text-blue-500 ml-2 text-xs normal-case">※サクセスモード解禁条件</span></label>
+                                        <input
+                                            type="date"
+                                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                            value={editingItem.dob || editingItem.birthDate || ''} // Handle both potential key names if needed, though dob seems standard in this form
+                                            onChange={e => setEditingItem({ ...editingItem, dob: e.target.value, birthDate: e.target.value })}
+                                        />
                                     </div>
                                 </div>
                             )}
@@ -1888,6 +2021,7 @@ function AdminManagementContent() {
                                     <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">事業内容</label>
                                     <textarea className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 min-h-[100px]" value={editingItem.business_content || ''} onChange={e => setEditingItem({ ...editingItem, business_content: e.target.value })} />
                                 </div>
+                                {renderVideoSection(editingItem.id || null)}
                             </div>
                         </div>
                     )}
@@ -1931,12 +2065,13 @@ function AdminManagementContent() {
                                         <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">勤務時間</label>
                                         <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.working_hours || ''} onChange={e => setEditingItem({ ...editingItem, working_hours: e.target.value })} />
                                     </div>
-                                    <div>
-                                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">休日</label>
-                                        <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.holidays || ''} onChange={e => setEditingItem({ ...editingItem, holidays: e.target.value })} />
-                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">休日</label>
+                                    <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900" value={editingItem.holidays || ''} onChange={e => setEditingItem({ ...editingItem, holidays: e.target.value })} />
                                 </div>
                             </div>
+                            {renderVideoSection(editingItem.id || null)}
                         </div>
                     )}
 
@@ -2087,7 +2222,7 @@ function AdminManagementContent() {
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 
     return (

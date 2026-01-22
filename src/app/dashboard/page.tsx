@@ -10,6 +10,7 @@ import {
     GraduationCap, Search, Bell, ArrowRight, ArrowLeft
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getRecommendations } from '@/lib/recommendation';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
@@ -22,6 +23,7 @@ export default function SeekerDashboard() {
         currentUserId,
         users,
         userAnalysis,
+        activeRole, // Add activeRole
         jobs,
         courses,
         interactions,
@@ -30,7 +32,17 @@ export default function SeekerDashboard() {
         getUserChats
     } = useAppStore();
 
+    const router = useRouter();
     const currentUser = users.find(u => u.id === currentUserId);
+
+    // Redirect Admin logic
+    React.useEffect(() => {
+        if (activeRole === 'admin') {
+            router.push('/admin');
+        }
+    }, [activeRole, router]);
+
+    // Restore Deleted Logic:
     const userChats = getUserChats(currentUserId);
     const unreadCount = userChats.reduce((acc, chat) => acc + chat.messages.filter(m => !m.isRead && m.senderId !== currentUserId).length, 0);
 
@@ -53,7 +65,15 @@ export default function SeekerDashboard() {
         allLessons.find(l => l.id === id)
     ).filter(Boolean);
 
-    if (!currentUser) return null;
+    if (activeRole === 'admin') {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-4">
+                <h1 className="text-xl font-bold">Redirecting to Admin Console...</h1>
+            </div>
+        );
+    }
+
+    if (!currentUser) return <div className="p-10 text-center text-slate-400">Loading user profile...</div>;
 
     return (
         <div className="min-h-screen bg-slate-50 pb-24">

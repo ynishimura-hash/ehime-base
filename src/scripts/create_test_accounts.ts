@@ -31,37 +31,87 @@ async function createTestAccounts() {
     console.log('Starting Test Account Creation...');
     const supabase = createAdminClient();
 
-    // 1. Create Test Seeker (test_seeker@example.com)
-    // Note: In a real script we might check existence first, but createUser handles duplicates (returns error usually)
-    // Actually, createUser with same email throws error. We should try/catch.
-
+    // 0. Cleanup Orphans
     try {
-        console.log('Creating Test Seeker...');
-        const { data: seeker, error: seekerError } = await supabase.auth.admin.createUser({
-            email: 'test_seeker@example.com',
-            password: 'password123',
-            email_confirm: true,
-            user_metadata: {
-                full_name: 'Test Seeker',
-                user_type: 'seeker'
-            }
-        });
+        console.log('Checking for orphaned profiles...');
+        const { data: { users }, error: listError } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+        if (listError) throw listError;
+        const { data: profiles, error: profilesError } = await supabase.from('profiles').select('id');
+        if (profilesError) throw profilesError;
 
-        if (seekerError) {
-            console.log('Seeker creation result:', seekerError.message);
+        console.log('Existing Auth Users:', users.map(u => `${u.email} (${u.id})`));
+
+        const userIds = new Set(users.map(u => u.id));
+        const orphans = profiles.filter(p => !userIds.has(p.id));
+
+        // Check for email collision in profiles directly if email column exists (optimistic try)
+        try {
+            // Try to see if profiles has email column
+            const { data: collision, error: colError } = await supabase.from('profiles').select('*').eq('email', 'test_seeker@example.com');
+            if (collision && collision.length > 0) {
+                console.log('Found profile with colliding email (but maybe different ID?):', collision);
+                // If ID matches a user, it's fine. If not, it's a zombie.
+                // But wait, if ID is not in userIds, it should have been caught by orphans check?
+                // Unless the orphan check (p.id) matched a user ID?
+                // If collision[0].id is in userIds, then we found the user! But listUsers missed it?
+                // No, listUsers is the source of userIds.
+            }
+        } catch (ignored) { }
+
+        if (orphans.length > 0) {
+            console.log(`Found ${orphans.length} orphaned profiles. Deleting...`);
+            const orphanIds = orphans.map(p => p.id);
+            const { error: deleteError } = await supabase.from('profiles').delete().in('id', orphanIds);
+            if (deleteError) console.error('Failed to cleanup orphans:', deleteError);
+            else console.log('Orphans deleted.');
         } else {
-            console.log('Seeker created:', seeker.user.id);
-            // Create Profile
-            await supabase.from('profiles').upsert({
-                id: seeker.user.id,
-                full_name: 'Test Seeker',
-                user_type: 'seeker',
-                university: 'Ehime Test Univ',
-                bio: 'This is a test seeker account.'
-            });
+            console.log('No orphans found (by ID check).');
         }
+
+        // Logic for Seeker Creation
+        const existingSeeker = users.find(u => u.email === 'test_seeker@example.com');
+        if (existingSeeker) {
+            console.log('Found existing Seeker:', existingSeeker.id);
+            // Update password
+            console.log('Updating password...');
+            const { error: updateError } = await supabase.auth.admin.updateUserById(existingSeeker.id, {
+                password: 'password123',
+                email_confirm: true,
+                user_metadata: {
+                    full_name: 'Test Seeker',
+                    user_type: 'student' // Fixed from 'seeker' to match DB constraint
+                }
+            });
+            if (updateError) console.error('Update failed:', updateError.message);
+            else console.log('Password updated.');
+        } else {
+            console.log('Creating Test Seeker...');
+            // ... creation code
+            const { data: seeker, error: seekerError } = await supabase.auth.admin.createUser({
+                email: 'test_seeker@example.com',
+                password: 'password123',
+                email_confirm: true,
+                user_metadata: {
+                    full_name: 'Test Seeker',
+                    user_type: 'student' // Fixed from 'seeker' to match DB constraint
+                }
+            });
+
+            if (seekerError) {
+                console.log('Seeker creation result:', seekerError.message);
+            } else {
+                console.log('Seeker created:', seeker.user.id);
+                // Profile might be created by trigger, so upsert
+                await supabase.from('profiles').upsert({
+                    id: seeker.user.id,
+                    full_name: 'Test Seeker',
+                    user_type: 'student', // Fixed from 'seeker'
+                });
+            }
+        }
+
     } catch (e: any) {
-        console.log('Seeker error:', e.message);
+        console.error('Cleanup/Seeker Error:', e.message);
     }
 
     // 2. Create Test Company (test_company@example.com)

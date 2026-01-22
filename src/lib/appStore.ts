@@ -126,6 +126,7 @@ interface AppState {
     switchRole: (role: 'seeker' | 'company' | 'admin') => void;
     setPersonaMode: (mode: 'seeker' | 'reskill') => void;
     updateUser: (userId: string, updates: Partial<User>) => void;
+    addUser: (user: User) => void;
     toggleInteraction: (type: Interaction['type'], fromId: string, toId: string, metadata?: any) => void;
 
     // Chat Actions
@@ -431,6 +432,12 @@ export const useAppStore = create<AppState>()(
                 set((state) => ({
                     users: state.users.map((u) => (u.id === userId ? { ...u, ...updates } : u)),
                 }));
+            },
+            addUser: (user: User) => {
+                set((state) => {
+                    if (state.users.some(u => u.id === user.id)) return { users: state.users };
+                    return { users: [...state.users, user] };
+                });
             },
             switchRole: (role) => set({ activeRole: role }),
             setPersonaMode: (mode) => set({ personaMode: mode }),

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { useAppStore } from '@/lib/appStore';
+import { useAppStore, User } from '@/lib/appStore';
 
 type UserRole = 'seeker' | 'company';
 
@@ -17,7 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [role, setRoleState] = useState<UserRole>('seeker');
     const [isLoading, setIsLoading] = useState(true);
-    const { loginAs, logout, setAnalysisResults } = useAppStore();
+    const { loginAs, logout, setAnalysisResults, addUser } = useAppStore();
     const supabase = createClient();
 
     useEffect(() => {
@@ -39,6 +39,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     setRoleState(userRole);
 
                     // Update AppStore
+                    // Construct User object from profile
+                    // Note: Schema doesn't have all fields yet, using defaults for now.
+                    const newUser: User = {
+                        id: session.user.id,
+                        name: profile.full_name || 'Guest',
+                        age: 21, // Default
+                        university: profile.university || '愛媛大学', // Default or from profile if exists (schema update needed)
+                        faculty: '法文学部', // Default
+                        bio: '',
+                        tags: [],
+                        image: profile.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + session.user.id,
+                        isOnline: true,
+                    };
+                    addUser(newUser);
                     loginAs(userRole, session.user.id);
 
                     // Sync Analysis Resuls

@@ -93,14 +93,16 @@ function AdminManagementContent() {
         const { data, error } = await supabase.from('organizations').select('*').eq('type', 'company').order('created_at', { ascending: false });
         if (error) {
             console.error('Fetch Companies Error:', error);
-            toast.error('企業の取得に失敗しました: ' + error.message);
+            // Squelch AbortError
+            if (!error.message?.includes('aborted') && !error.message?.includes('AbortError')) {
+                toast.error('企業の取得に失敗 (デモデータを表示): ' + error.message);
+            }
             // Fallback to dummy data
             setRealCompanies(companies.map(c => ({ ...c, logo_url: c.image, type: 'company', status: 'approved' })) || []);
         } else {
             if (data && data.length > 0) {
                 setRealCompanies(data);
             } else {
-                // If DB is empty, use dummy data (Optional: remove this if we want strict DB view, but useful for demo)
                 console.log('DB empty, falling back to dummy data');
                 setRealCompanies(companies.map(c => ({ ...c, logo_url: c.image, type: 'company', status: 'approved' })) || []);
             }
@@ -111,7 +113,10 @@ function AdminManagementContent() {
         const { data, error } = await supabase.from('jobs').select('*').order('created_at', { ascending: false });
         if (error) {
             console.error('Fetch Jobs Error:', error);
-            // toast.error('求人の取得に失敗しました'); // Squelch common error if just empty? No, error is error.
+            if (!error.message?.includes('aborted') && !error.message?.includes('AbortError')) {
+                // toast.error('求人の取得に失敗しました');
+                console.warn('Job fetch failed, using fallback');
+            }
             setRealJobs(jobs.map(j => ({ ...j, organization_id: j.companyId, status: 'active' })) || []);
         } else {
             if (data && data.length > 0) {

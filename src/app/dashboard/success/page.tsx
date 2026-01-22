@@ -20,11 +20,14 @@ import { getRecommendations } from '@/lib/recommendation';
 import { COMPANIES } from '@/lib/dummyData';
 
 export default function SuccessDashboard() {
-    const { userAnalysis, jobs, courses, toggleFortuneIntegration } = useAppStore();
+    const { userAnalysis, jobs, courses, toggleFortuneIntegration, user } = useAppStore();
 
     // 診断データの取得
     const radarData = calculateCategoryRadarData(userAnalysis.diagnosisScores || {});
     const hasData = (userAnalysis.selectedValues || []).length > 0;
+
+    // 管理者チェック
+    const isAdmin = user?.user_type === 'admin';
 
     // レコメンドロジックの適用
     const { jobs: recommendedJobs } = useMemo(() =>
@@ -40,7 +43,7 @@ export default function SuccessDashboard() {
         ? (userAnalysis.fortune?.traits || ['誠実', '努力家'])
         : [];
 
-    if (!hasData) {
+    if (!hasData && !isAdmin) {
         return (
             <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center">
                 <div className="max-w-md space-y-8">

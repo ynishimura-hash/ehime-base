@@ -23,14 +23,23 @@ export default function AdminDashboardPage() {
             const safeCount = async (table: string, fallback: number) => {
                 try {
                     const { count, error } = await supabase.from(table).select('*', { count: 'exact', head: true });
-                    if (error || count === null) return fallback;
-                    // If DB returns 0, it might be real 0, or permission denied acting as 0. 
-                    // Given previous issues, let's treat 0 as "might need fallback if we expect data".
-                    // But for now, if error, fallback. If 0, maybe valid.
-                    // However, user said "not reflecting", implying they see 0 but expect more.
-                    if (count === 0) return fallback;
+
+                    if (error) {
+                        // Ignore AbortError
+                        if (error.message?.includes('aborted') || error.message?.includes('AbortError')) {
+                            return 0; // Wait for next fetch or treat as 0 temporarily
+                        }
+                        console.error(`Error counting ${table}:`, error);
+                        return fallback;
+                    }
+
+                    // If count is null (shouldn't happen with count: 'exact'), fallback
+                    if (count === null) return fallback;
+
+                    // 0 is valid, do not fallback
                     return count;
-                } catch {
+                } catch (e) {
+                    console.error(`Exception counting ${table}:`, e);
                     return fallback;
                 }
             };

@@ -73,8 +73,13 @@ function AdminManagementContent() {
 
     const fetchUsers = async () => {
         const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+
         if (error) {
-            console.warn('Fetch Users failed, using fallback');
+            // Ignore AbortError (cancellation)
+            if (error.message?.includes('aborted') || error.message?.includes('AbortError')) {
+                return;
+            }
+            console.warn('Fetch Users failed, using fallback:', error);
             setRealUsers(users || []);
         } else {
             setRealUsers(data || []);
@@ -140,6 +145,10 @@ function AdminManagementContent() {
             .order('created_at', { ascending: false });
 
         if (error) {
+            // Ignore AbortError (cancellation)
+            if (error.message?.includes('aborted') || error.message?.includes('AbortError')) {
+                return;
+            }
             console.warn('Fetch Media failed, using fallback');
             // Extract Reels from Dummy Companies
             const dummyMedia = COMPANIES.flatMap(c =>

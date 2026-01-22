@@ -616,7 +616,7 @@ function AdminManagementContent() {
                                     <div className="flex items-center gap-3">
                                         <img src={user.avatar_url || 'https://via.placeholder.com/40'} className="w-10 h-10 rounded-full object-cover" alt="" />
                                         <div>
-                                            <div className="font-black text-slate-900">{user.full_name || 'No Name'}</div>
+                                            <div className="font-black text-slate-900">{user.full_name || user.name || 'No Name'}</div>
                                             <div className="text-xs text-slate-500 font-bold">{user.email}</div>
                                         </div>
                                     </div>

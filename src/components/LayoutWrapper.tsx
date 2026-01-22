@@ -7,7 +7,6 @@ import { Home, Building2, Search, Film, Heart, GraduationCap, FileEdit, UserCirc
 import { useAppStore } from '@/lib/appStore';
 import MobileBottomNav from './MobileBottomNav';
 import ScrollToTop from './ScrollToTop';
-import DebugRoleSwitcher from './debug/DebugRoleSwitcher';
 
 interface NavItem {
     name: string;
@@ -231,7 +230,6 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
             <ScrollToTop />
             {/* Mobile Bottom Nav */}
             <MobileBottomNav />
-            {isAdmin && <DebugRoleSwitcher />}
         </div>
     );
 }

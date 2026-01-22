@@ -140,6 +140,8 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
 
     const handleConsultConfirm = () => {
         setIsConsultModalOpen(false);
+        // Ensure company exists in store for Chat UI to resolve name
+        useAppStore.getState().upsertCompany(company);
         // Create chat in the unified store
         const chatId = createChat(company.id, currentUserId, `「${job.title}」について相談がしたいです。`);
         toast.success('カジュアル面談の希望を送信しました');

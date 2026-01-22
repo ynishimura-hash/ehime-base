@@ -159,6 +159,10 @@ interface AppState {
     updateCourse: (course: Partial<Course> & { id: string }) => Promise<void>;
     deleteCourse: (id: string) => Promise<void>;
 
+    // Data Sync Actions
+    upsertCompany: (company: Company) => void;
+    upsertUser: (user: User) => void;
+
     // Analysis Actions
     setAnalysisResults: (results: Partial<UserAnalysis>) => void;
     setDiagnosisScore: (questionId: number, score: number) => void;
@@ -631,6 +635,22 @@ export const useAppStore = create<AppState>()(
                     toast.error('削除に失敗しました');
                 }
             },
+
+            upsertCompany: (company) => set(state => {
+                const exists = state.companies.some(c => c.id === company.id);
+                if (exists) {
+                    return { companies: state.companies.map(c => c.id === company.id ? { ...c, ...company } : c) };
+                }
+                return { companies: [...state.companies, company] };
+            }),
+
+            upsertUser: (user) => set(state => {
+                const exists = state.users.some(u => u.id === user.id);
+                if (exists) {
+                    return { users: state.users.map(u => u.id === user.id ? { ...u, ...user } : u) };
+                }
+                return { users: [...state.users, user] };
+            }),
 
             getChat: (threadId) => get().chats.find(c => c.id === threadId),
             getUserChats: (userId) => get().chats.filter(c => c.userId === userId).sort((a, b) => b.updatedAt - a.updatedAt),

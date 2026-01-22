@@ -62,6 +62,7 @@ function AdminManagementContent() {
             fetchUsers();
         } else if (currentTab === 'companies') {
             fetchCompanies();
+            fetchMedia();
         } else if (currentTab === 'jobs' || currentTab === 'quests') {
             fetchJobs();
             fetchCompanies();
@@ -674,11 +675,41 @@ function AdminManagementContent() {
                                             <span className="font-black text-slate-800">{company.name}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-bold text-slate-500">{company.industry}</td>
                                     <td className="px-6 py-4">
-                                        <span className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black border border-emerald-100">
-                                            Active
-                                        </span>
+                                        <div className="flex items-center gap-3">
+                                            {/* Video Icon */}
+                                            <div className="flex-shrink-0">
+                                                <ReelIcon
+                                                    reels={mediaItems.filter(m => m.organization_id === company.id).map(m => ({
+                                                        id: m.id,
+                                                        type: m.type || 'file',
+                                                        url: m.public_url,
+                                                        thumbnail: m.thumbnail_url || m.public_url,
+                                                        title: m.filename,
+                                                        likes: 0
+                                                    }))}
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        const reels = mediaItems.filter(m => m.organization_id === company.id);
+                                                        if (reels.length > 0) {
+                                                            window.open(reels[0].public_url, '_blank');
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                            <span className="text-sm font-bold text-slate-500">{company.industry}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <button
+                                            onClick={() => handleStatusToggle(company.id, 'company', company.status || 'approved')}
+                                            className={`px-3 py-1 rounded-full text-[10px] font-black border transition-all ${(company.status === 'private')
+                                                    ? 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
+                                                    : 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100'
+                                                }`}
+                                        >
+                                            {company.status === 'private' ? 'Private' : 'Active'}
+                                        </button>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
@@ -757,6 +788,7 @@ function AdminManagementContent() {
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{typeFilter === 'quest' ? 'クエストタイトル' : '求人タイトル'}</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">タイプ</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">企業</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">ステータス</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">操作</th>
                         </tr>
                     </thead>
@@ -776,6 +808,17 @@ function AdminManagementContent() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
+                                            {/* Moved Video Icon from here */}
+                                            <img
+                                                src={job.cover_image_url || job.cover_image || 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=100&h=100&fit=crop'}
+                                                className="w-10 h-10 rounded-xl object-cover"
+                                                alt=""
+                                            />
+                                            <span className="font-black text-slate-800">{job.title}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3">
                                             {/* Video Icon */}
                                             <div className="flex-shrink-0">
                                                 <ReelIcon
@@ -785,7 +828,7 @@ function AdminManagementContent() {
                                                         url: m.public_url,
                                                         thumbnail: m.thumbnail_url || m.public_url,
                                                         title: m.filename,
-                                                        likes: 0 // Mock value for type compatibility
+                                                        likes: 0
                                                     }))}
                                                     size="sm"
                                                     onClick={() => {
@@ -796,21 +839,23 @@ function AdminManagementContent() {
                                                     }}
                                                 />
                                             </div>
-
-                                            <img
-                                                src={job.cover_image_url || job.cover_image || 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=100&h=100&fit=crop'}
-                                                className="w-10 h-10 rounded-xl object-cover"
-                                                alt=""
-                                            />
-                                            <span className="font-black text-slate-800">{job.title}</span>
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-black ${job.type === 'quest' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>
+                                                {(job.type || 'job').toUpperCase()}
+                                            </span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-0.5 rounded text-[10px] font-black ${job.type === 'quest' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>
-                                            {(job.type || 'job').toUpperCase()}
-                                        </span>
-                                    </td>
                                     <td className="px-6 py-4 text-sm font-bold text-slate-500">{realCompanies.find(c => c.id === job.organization_id)?.name || job.organization_id}</td>
+                                    <td className="px-6 py-4">
+                                        <button
+                                            onClick={() => handleStatusToggle(job.id, 'job', job.is_active)}
+                                            className={`px-3 py-1 rounded-full text-[10px] font-black border transition-all ${!job.is_active
+                                                ? 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
+                                                : 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100'
+                                                }`}
+                                        >
+                                            {!job.is_active ? 'Private' : 'Active'}
+                                        </button>
+                                    </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2 text-slate-400">
                                             <button
@@ -1292,7 +1337,7 @@ function AdminManagementContent() {
                 }
             } else if (editMode === 'company') {
                 if (actionType === 'create') {
-                    const { data, error } = await supabase.from('organizations').insert([{ ...editingItem, type: 'company' }]).select();
+                    const { data, error } = await supabase.from('organizations').insert([{ ...editingItem, type: 'company', status: 'approved' }]).select();
                     if (error) throw error;
                     if (data && data[0]) {
                         await processPendingVideos(data[0].id, 'company');
@@ -1334,7 +1379,7 @@ function AdminManagementContent() {
                 }
             } else if (editMode === 'job') {
                 if (actionType === 'create') {
-                    const { data, error } = await supabase.from('jobs').insert([editingItem]).select();
+                    const { data, error } = await supabase.from('jobs').insert([{ ...editingItem, is_active: true }]).select();
                     if (error) throw error;
                     if (data && data[0]) {
                         await processPendingVideos(data[0].id, 'job');
@@ -1735,6 +1780,36 @@ function AdminManagementContent() {
             </div>
         </div>
     );
+
+    const handleStatusToggle = async (id: string, type: 'company' | 'job', currentStatus: any) => {
+        const table = type === 'company' ? 'organizations' : 'jobs';
+        let updateData = {};
+
+        if (type === 'job') {
+            // Jobs use is_active (boolean)
+            updateData = { is_active: !currentStatus };
+        } else {
+            // Companies use status (text)
+            const newStatus = currentStatus === 'approved' ? 'private' : 'approved';
+            updateData = { status: newStatus };
+        }
+
+        try {
+            const { error } = await supabase.from(table).update(updateData).eq('id', id);
+
+            if (error) throw error;
+
+            toast.success(`${type === 'company' ? '企業' : '求人'}のステータスを更新しました`);
+
+            // Refresh data
+            if (type === 'company') fetchCompanies();
+            else fetchJobs();
+
+        } catch (e) {
+            console.error(e);
+            toast.error('ステータスの更新に失敗しました');
+        }
+    };
 
     const processPendingVideos = async (parentId: string, parentType: 'company' | 'job') => {
         if (pendingVideos.length === 0) return;

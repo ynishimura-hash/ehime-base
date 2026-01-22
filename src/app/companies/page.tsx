@@ -270,7 +270,8 @@ export default function CompaniesPage() {
                                 <div className="absolute top-4 left-4 z-10 text-white drop-shadow-md">
                                     <ReelIcon
                                         reels={company.reels || []}
-                                        fallbackImage={company.cover_image_url}
+                                        fallbackImage={company.cover_image_url || '/images/defaults/company_cover.jpg'}
+                                        size="md"
                                         onClick={() => {
                                             setActiveReels(company.reels || []);
                                             setActiveEntity({ name: company.name, id: company.id });
@@ -281,7 +282,7 @@ export default function CompaniesPage() {
                                 {/* Larger Image Area */}
                                 <div className="relative h-56 bg-slate-200 overflow-hidden">
                                     <img
-                                        src={company.cover_image_url || company.image}
+                                        src={company.cover_image_url || company.image || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200'}
                                         alt={company.name}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                     />

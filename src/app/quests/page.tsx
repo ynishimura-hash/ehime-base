@@ -328,7 +328,7 @@ function QuestsContent() {
                                 key={quest.id}
                                 className="block bg-white p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-slate-100 group relative"
                             >
-                                <div className="absolute right-4 top-4 z-10 transition-transform group-hover:scale-105">
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 transition-transform group-hover:scale-105">
                                     <ReelIcon
                                         reels={company?.reels || []}
                                         fallbackImage={company?.cover_image_url}

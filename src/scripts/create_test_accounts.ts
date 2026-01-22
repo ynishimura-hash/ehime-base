@@ -1,0 +1,127 @@
+
+import dotenv from 'dotenv';
+import path from 'path';
+import { createClient } from '@supabase/supabase-js';
+
+// Load env from root
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
+function createAdminClient() {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!url || !key) {
+        console.error('Admin Client Init Error: Missing URL or Key', {
+            hasUrl: !!url,
+            hasKey: !!key
+        });
+        throw new Error(`Admin configuration missing. URL: ${!!url}, Key: ${!!key}`);
+    }
+
+    return createClient(url, key, {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false
+        }
+    });
+}
+
+async function createTestAccounts() {
+    console.log('Starting Test Account Creation...');
+    const supabase = createAdminClient();
+
+    // 1. Create Test Seeker (test_seeker@example.com)
+    // Note: In a real script we might check existence first, but createUser handles duplicates (returns error usually)
+    // Actually, createUser with same email throws error. We should try/catch.
+
+    try {
+        console.log('Creating Test Seeker...');
+        const { data: seeker, error: seekerError } = await supabase.auth.admin.createUser({
+            email: 'test_seeker@example.com',
+            password: 'password123',
+            email_confirm: true,
+            user_metadata: {
+                full_name: 'Test Seeker',
+                user_type: 'seeker'
+            }
+        });
+
+        if (seekerError) {
+            console.log('Seeker creation result:', seekerError.message);
+        } else {
+            console.log('Seeker created:', seeker.user.id);
+            // Create Profile
+            await supabase.from('profiles').upsert({
+                id: seeker.user.id,
+                full_name: 'Test Seeker',
+                user_type: 'seeker',
+                university: 'Ehime Test Univ',
+                bio: 'This is a test seeker account.'
+            });
+        }
+    } catch (e: any) {
+        console.log('Seeker error:', e.message);
+    }
+
+    // 2. Create Test Company (test_company@example.com)
+    try {
+        console.log('Creating Test Company...');
+        const { data: company, error: companyError } = await supabase.auth.admin.createUser({
+            email: 'test_company@example.com',
+            password: 'password123',
+            email_confirm: true,
+            user_metadata: {
+                full_name: 'Test Company User',
+                user_type: 'company'
+            }
+        });
+
+        if (companyError) {
+            console.log('Company creation result:', companyError.message);
+        } else {
+            console.log('Company created:', company.user.id);
+
+            // Create Profile
+            await supabase.from('profiles').upsert({
+                id: company.user.id,
+                full_name: 'Test Company User',
+                user_type: 'company',
+                company_name: 'Test Corp Inc.',
+                bio: 'Official Test Company Account'
+            });
+
+            // Create Organization for this company
+            // (Assuming 1-to-1 mapping or just linking user to org)
+            // In this app, organization creation is separate, usually.
+            // But for demo, let's create a new Org.
+
+            const { data: org, error: orgError } = await supabase.from('organizations').insert({
+                name: 'Test Corp Inc.',
+                industry: 'Technology',
+                location: 'Matsuyama',
+                status: 'approved',
+                owner_id: company.user.id,
+                description: 'A test corporation for demo purposes.',
+                email: 'test_company@example.com'
+            }).select().single();
+
+            if (org) {
+                console.log('Organization created:', org.id);
+                // Update profile with org id if necessary? 
+                // It seems AuthContext derives companyId? 
+                // Actually `useEffect` in AuthContext fetches `profiles` but app needs `currentCompanyId`.
+                // Who sets `currentCompanyId`? `RoleSwitcher` set it to 'c_eis'.
+                // Real auth needs to find the organization associated with the user.
+                // We might need a table `organization_members` or `owner_id` in `organizations`.
+                // I see `organizations` has `owner_id` in my insert above.
+            }
+        }
+    } catch (e: any) {
+        console.log('Company error:', e.message);
+    }
+
+    console.log('Done.');
+}
+
+createTestAccounts();

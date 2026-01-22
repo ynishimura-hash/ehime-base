@@ -188,7 +188,7 @@ function SearchResultsContent() {
                 <section>
                     <SectionHeader title="企業" icon={Building2} count={companyResults.length} href={`/companies?q=${query}&area=${area}&industry=${industry}`} />
                     {companyResults.length > 0 ? (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {companyResults.slice(0, 4).map(comp => (
                                 <CompanyCard key={comp.id} company={comp} />
                             ))}

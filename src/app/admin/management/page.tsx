@@ -73,11 +73,11 @@ function AdminManagementContent() {
 
     const fetchUsers = async () => {
         const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
-        if (error || !data || data.length === 0) {
-            console.warn('Fetch Users failed or empty, using fallback');
+        if (error) {
+            console.warn('Fetch Users failed, using fallback');
             setRealUsers(users || []);
         } else {
-            setRealUsers(data);
+            setRealUsers(data || []);
         }
     };
 
@@ -139,8 +139,8 @@ function AdminManagementContent() {
             .select('*')
             .order('created_at', { ascending: false });
 
-        if (error || !data || data.length === 0) {
-            console.warn('Fetch Media failed or empty, using fallback');
+        if (error) {
+            console.warn('Fetch Media failed, using fallback');
             // Extract Reels from Dummy Companies
             const dummyMedia = COMPANIES.flatMap(c =>
                 (c.reels || []).map(r => ({
@@ -154,7 +154,7 @@ function AdminManagementContent() {
             );
             setMediaItems(dummyMedia);
         } else {
-            setMediaItems(data);
+            setMediaItems(data || []);
         }
     };
 
@@ -869,7 +869,7 @@ function AdminManagementContent() {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             {/* Video Icon Container - Fixed Width for Alignment */}
-                                            <div className="flex-shrink-0 w-10 flex justify-center">
+                                            <div className="flex-shrink-0 w-12 flex justify-center mr-2">
                                                 {mediaItems.filter(m => m.job_id === job.id).length > 0 ? (
                                                     <ReelIcon
                                                         reels={mediaItems.filter(m => m.job_id === job.id).map(m => ({

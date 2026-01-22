@@ -7,9 +7,10 @@ interface ReelIconProps {
     onClick: () => void;
     fallbackImage?: string;
     size?: 'sm' | 'md' | 'lg' | 'xl';
+    className?: string;
 }
 
-export const ReelIcon: React.FC<ReelIconProps> = ({ reels, onClick, fallbackImage, size = 'xl' }) => {
+export const ReelIcon: React.FC<ReelIconProps> = ({ reels, onClick, fallbackImage, size = 'xl', className = 'mr-2' }) => {
     const [isHovered, setIsHovered] = useState(false);
 
     if (!reels || reels.length === 0) return null;
@@ -33,7 +34,7 @@ export const ReelIcon: React.FC<ReelIconProps> = ({ reels, onClick, fallbackImag
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            className="relative group mr-2"
+            className={`relative group ${className}`}
         >
             <div className={`${sizeClasses[size]} rounded-full bg-gradient-to-tr from-yellow-400 via-orange-500 to-purple-600 animate-pulse-slow active:scale-95 transition-transform shadow-2xl`}>
                 <div className="w-full h-full rounded-full bg-white border-2 border-transparent flex items-center justify-center relative overflow-hidden bg-black">

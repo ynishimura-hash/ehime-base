@@ -678,7 +678,7 @@ function AdminManagementContent() {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             {/* Video Icon Container - Fixed Width */}
-                                            <div className="flex-shrink-0 w-8 flex justify-center">
+                                            <div className="flex-shrink-0 w-10 flex justify-center">
                                                 {mediaItems.filter(m => m.organization_id === company.id).length > 0 ? (
                                                     <ReelIcon
                                                         reels={mediaItems.filter(m => m.organization_id === company.id).map(m => ({
@@ -690,6 +690,7 @@ function AdminManagementContent() {
                                                             likes: 0
                                                         }))}
                                                         size="sm"
+                                                        className="mr-0"
                                                         onClick={() => {
                                                             const reels = mediaItems.filter(m => m.organization_id === company.id);
                                                             if (reels.length > 0) {
@@ -698,7 +699,7 @@ function AdminManagementContent() {
                                                         }}
                                                     />
                                                 ) : (
-                                                    <div className="w-8" />
+                                                    <div className="w-10" />
                                                 )}
                                             </div>
                                             <span className="text-sm font-bold text-slate-500 flex-1">{company.industry}</span>
@@ -824,7 +825,7 @@ function AdminManagementContent() {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             {/* Video Icon Container - Fixed Width for Alignment */}
-                                            <div className="flex-shrink-0 w-8 flex justify-center">
+                                            <div className="flex-shrink-0 w-10 flex justify-center">
                                                 {mediaItems.filter(m => m.job_id === job.id).length > 0 ? (
                                                     <ReelIcon
                                                         reels={mediaItems.filter(m => m.job_id === job.id).map(m => ({
@@ -836,6 +837,7 @@ function AdminManagementContent() {
                                                             likes: 0
                                                         }))}
                                                         size="sm"
+                                                        className="mr-0"
                                                         onClick={() => {
                                                             const reels = mediaItems.filter(m => m.job_id === job.id);
                                                             if (reels.length > 0) {
@@ -844,7 +846,7 @@ function AdminManagementContent() {
                                                         }}
                                                     />
                                                 ) : (
-                                                    <div className="w-8" />
+                                                    <div className="w-10" />
                                                 )}
                                             </div>
                                             <span className={`px-2 py-0.5 rounded text-[10px] font-black ${job.type === 'quest' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>

@@ -48,81 +48,25 @@ function JobsContent() {
     const fetchJobs = async () => {
         setLoading(true);
         try {
-            // Try fetching via Server Action first (bypasses RLS issues)
-            const result = await fetchJobsAction();
+            const { fetchPublicJobsAction } = await import('@/app/admin/actions');
+            const result = await fetchPublicJobsAction();
+
             if (result.success && result.data) {
-                await processJobs(result.data);
-                setLoading(false);
-                return;
+                // Client-side filtering for 'job' type
+                const filtered = result.data.filter((job: any) => {
+                    const type = job.type || job.value_tags_ai?.type;
+                    return type === 'job' || !type;
+                });
+                setJobs(filtered);
+            } else {
+                console.error('Error fetching jobs:', result.error);
+                toast.error('求人の取得に失敗しました');
             }
-            console.warn('Server action fetch failed, falling back to client-side fetch:', result.error);
         } catch (e) {
             console.error('Server action error:', e);
+        } finally {
+            setLoading(false);
         }
-
-        // Fallback to direct supabase client
-        const { data, error } = await supabase
-            .from('jobs')
-            .select(`
-                *,
-                organization:organizations!inner (
-                    id, name, industry, location, is_premium,
-                    cover_image_url
-                )
-            `);
-        // .eq('organization.status', 'approved');
-
-        if (error) {
-            console.error('Error fetching jobs:', error);
-        } else {
-            const rawJobs = data || [];
-            await processJobs(rawJobs);
-        }
-        setLoading(false);
-    };
-
-    const processJobs = async (unfilteredJobs: any[]) => {
-        // Client-side filtering
-        const filtered = unfilteredJobs.filter((job: any) => {
-            const type = job.type || job.value_tags_ai?.type;
-            return type === 'job' || !type;
-        });
-
-        // Fetch media for each job/company
-        const jobsWithReels = await Promise.all(filtered.map(async (job: any) => {
-            // Fetch reels for this job
-            const { data: jobReels } = await supabase
-                .from('media_library')
-                .select('*')
-                .eq('job_id', job.id);
-
-            // Fetch reels for the company
-            const { data: companyReels } = await supabase
-                .from('media_library')
-                .select('*')
-                .eq('organization_id', job.organization.id)
-                .is('job_id', null);
-
-            // Combine and transform to Reel format
-            const allReels = [...(jobReels || []), ...(companyReels || [])];
-            const reels = allReels.map((media: any) => ({
-                id: media.id,
-                type: media.type || 'file',
-                url: media.public_url,
-                thumbnail: media.thumbnail_url || media.public_url,
-                title: media.title || media.filename,
-            }));
-
-            return {
-                ...job,
-                organization: {
-                    ...job.organization,
-                    reels: reels,
-                }
-            };
-        }));
-
-        setJobs(jobsWithReels);
     };
 
     useEffect(() => {

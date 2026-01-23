@@ -26,45 +26,21 @@ export default function CompaniesPage() {
     // Fetch Companies from Supabase
     const fetchCompanies = async () => {
         setLoading(true);
-        const { data, error } = await supabase
-            .from('organizations')
-            .select(`
-                *,
-                jobs (id)
-            `)
-            .eq('status', 'approved');
+        try {
+            const { fetchPublicCompaniesAction } = await import('@/app/admin/actions');
+            const result = await fetchPublicCompaniesAction();
 
-        if (error) {
-            console.error('Error fetching companies:', error);
-            toast.error('企業情報の取得に失敗しました');
-        } else {
-            // Fetch media for each company
-            const companiesWithReels = await Promise.all((data || []).map(async (company: any) => {
-                // Fetch reels for this company
-                const { data: companyReels } = await supabase
-                    .from('media_library')
-                    .select('*')
-                    .eq('organization_id', company.id)
-                    .is('job_id', null);
-
-                // Transform to Reel format
-                const reels = (companyReels || []).map((media: any) => ({
-                    id: media.id,
-                    type: media.type || 'file',
-                    url: media.public_url,
-                    thumbnail: media.thumbnail_url || media.public_url,
-                    title: media.title || media.filename,
-                }));
-
-                return {
-                    ...company,
-                    reels: reels,
-                };
-            }));
-
-            setCompanies(companiesWithReels);
+            if (!result.success) {
+                console.error('Error fetching companies:', result.error);
+                toast.error('企業情報の取得に失敗しました');
+            } else {
+                setCompanies(result.data || []);
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     React.useEffect(() => {

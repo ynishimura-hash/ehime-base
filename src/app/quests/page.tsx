@@ -79,41 +79,19 @@ function QuestsContent() {
     const fetchQuests = async () => {
         setLoading(true);
         try {
-            // Try fetching via Server Action first (bypasses RLS issues)
-            const result = await fetchQuestsAction();
+            const { fetchPublicQuestsAction } = await import('@/app/admin/actions');
+            const result = await fetchPublicQuestsAction();
             if (result.success && result.data) {
-                await processQuests(result.data);
-                setLoading(false);
-                return;
+                setQuests(result.data);
+            } else {
+                console.error('Error fetching quests:', result.error);
+                toast.error('クエスト情報の取得に失敗しました');
             }
-            console.warn('Server action fetch failed, falling back to client-side fetch:', result.error);
         } catch (e) {
             console.error('Server action error:', e);
+        } finally {
+            setLoading(false);
         }
-
-        // Fallback to direct supabase client
-        const { data, error } = await supabase
-            .from('jobs')
-            .select(`
-                *,
-                organization:organizations!inner (
-                    id, name, industry, location, is_premium,
-                    cover_image_url, logo_color, category
-                )
-            `)
-            .eq('type', 'quest');
-
-        if (error) {
-            if (error.message === 'Fetch is aborted' || (error as any).name === 'AbortError') {
-                setLoading(false);
-                return;
-            }
-            console.error('Error fetching quests:', error);
-            toast.error('クエスト情報の取得に失敗しました');
-        } else {
-            await processQuests(data || []);
-        }
-        setLoading(false);
     };
 
     const filteredQuests = quests.filter(quest => {

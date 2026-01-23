@@ -192,3 +192,185 @@ export async function fetchAdminMediaAction() {
         return { success: false, error: error.message || String(error), data: [] };
     }
 }
+export async function fetchPublicQuestsAction() {
+    try {
+        console.log('fetchPublicQuestsAction: querying quests...');
+        const { data, error } = await supabaseAdmin
+            .from('jobs')
+            .select(`
+                *,
+                organization:organizations!inner (
+                    id, name, industry, location, is_premium,
+                    cover_image_url, logo_color, category, logo_url
+                )
+            `)
+            .eq('type', 'quest')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Fetch reels for these quests and companies
+        const { data: allReels } = await supabaseAdmin
+            .from('media_library')
+            .select('*');
+
+        const dataWithReels = (data || []).map(quest => {
+            const questReels = (allReels || []).filter(r => r.job_id === quest.id);
+            const companyReels = (allReels || []).filter(r => r.organization_id === quest.organization?.id && !r.job_id);
+            const reels = [...questReels, ...companyReels].map(media => ({
+                id: media.id,
+                type: media.type || 'file',
+                url: media.public_url,
+                thumbnail: media.thumbnail_url || media.public_url,
+                title: media.title || media.filename,
+            }));
+
+            return {
+                ...quest,
+                organization: quest.organization ? {
+                    ...quest.organization,
+                    reels: reels
+                } : null
+            };
+        });
+
+        console.log(`fetchPublicQuestsAction: SUCCESS, found ${data?.length} rows`);
+        return { success: true, data: dataWithReels };
+    } catch (error: any) {
+        console.error('fetchPublicQuestsAction: ERROR', error);
+        return { success: false, error: error.message || String(error), data: [] };
+    }
+}
+
+export async function fetchPublicCompaniesAction() {
+    try {
+        console.log('fetchPublicCompaniesAction: querying organizations...');
+        const { data, error } = await supabaseAdmin
+            .from('organizations')
+            .select('*')
+            .order('name', { ascending: true });
+
+        if (error) throw error;
+
+        // Fetch reels for these companies in one go to avoid N+1
+        const { data: allReels } = await supabaseAdmin
+            .from('media_library')
+            .select('*')
+            .is('job_id', null);
+
+        const dataWithReels = (data || []).map(company => ({
+            ...company,
+            reels: (allReels || [])
+                .filter(r => r.organization_id === company.id)
+                .map(media => ({
+                    id: media.id,
+                    type: media.type || 'file',
+                    url: media.public_url,
+                    thumbnail: media.thumbnail_url || media.public_url,
+                    title: media.title || media.filename,
+                }))
+        }));
+
+        console.log(`fetchPublicCompaniesAction: SUCCESS, found ${data?.length} rows`);
+        return { success: true, data: dataWithReels };
+    } catch (error: any) {
+        console.error('fetchPublicCompaniesAction: ERROR', error);
+        return { success: false, error: error.message || String(error), data: [] };
+    }
+}
+
+export async function fetchPublicJobsAction() {
+    try {
+        console.log('fetchPublicJobsAction: querying jobs...');
+        const { data, error } = await supabaseAdmin
+            .from('jobs')
+            .select(`
+                *,
+                organization:organizations (
+                    id, name, industry, location, is_premium,
+                    cover_image_url, rjp_negatives, logo_url
+                )
+            `)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Fetch reels for these jobs and companies in one go
+        const { data: allReels } = await supabaseAdmin
+            .from('media_library')
+            .select('*');
+
+        const dataWithReels = (data || []).map(job => {
+            const jobReels = (allReels || []).filter(r => r.job_id === job.id);
+            const companyReels = (allReels || []).filter(r => r.organization_id === job.organization?.id && !r.job_id);
+            const reels = [...jobReels, ...companyReels].map(media => ({
+                id: media.id,
+                type: media.type || 'file',
+                url: media.public_url,
+                thumbnail: media.thumbnail_url || media.public_url,
+                title: media.title || media.filename,
+            }));
+
+            return {
+                ...job,
+                organization: job.organization ? {
+                    ...job.organization,
+                    reels: reels
+                } : null
+            };
+        });
+
+        console.log(`fetchPublicJobsAction: SUCCESS, found ${data?.length} rows`);
+        return { success: true, data: dataWithReels };
+    } catch (error: any) {
+        console.error('fetchPublicJobsAction: ERROR', error);
+        return { success: false, error: error.message || String(error), data: [] };
+    }
+}
+
+export async function fetchPublicReelsAction() {
+    try {
+        console.log('fetchPublicReelsAction: querying media_library...');
+        const { data: mediaData, error: mediaError } = await supabaseAdmin
+            .from('media_library')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (mediaError) throw mediaError;
+
+        const { data: orgsData } = await supabaseAdmin
+            .from('organizations')
+            .select('id, name, logo_url, location, industry, is_premium');
+
+        const orgMap = new Map(orgsData?.map((o: any) => [o.id, o]) || []);
+
+        const items = (mediaData || []).map((item: any) => {
+            const org = item.organization_id ? orgMap.get(item.organization_id) : null;
+            return {
+                reel: {
+                    id: item.id,
+                    url: item.public_url,
+                    title: item.title || item.filename || 'No Title',
+                    caption: item.caption,
+                    link_url: item.link_url,
+                    link_text: item.link_text,
+                    likes: 0,
+                    comments: 0,
+                    shares: 0,
+                    type: item.type || 'file'
+                },
+                organization: org,
+                entityName: org?.name || 'Ehime Base',
+                entityId: item.organization_id || item.job_id || 'admin',
+                type: item.organization_id ? 'company' : (item.job_id ? 'job' : 'company'),
+                companyId: item.organization_id
+            };
+        });
+
+        console.log(`fetchPublicReelsAction: SUCCESS, found ${items.length} items`);
+        return { success: true, data: items };
+    } catch (error: any) {
+        console.error('fetchPublicReelsAction: ERROR', error);
+        return { success: false, error: error.message || String(error), data: [] };
+    }
+}

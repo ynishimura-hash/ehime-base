@@ -112,3 +112,83 @@ export async function fetchJobsAction() {
         };
     }
 }
+
+export async function fetchAdminUsersAction() {
+    try {
+        console.log('fetchAdminUsersAction: querying profiles...');
+        const { data, error } = await supabaseAdmin
+            .from('profiles')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        console.log(`fetchAdminUsersAction: SUCCESS, found ${data?.length} rows`);
+        return { success: true, data: data || [] };
+    } catch (error: any) {
+        console.error('fetchAdminUsersAction: ERROR', error);
+        return { success: false, error: error.message || String(error), data: [] };
+    }
+}
+
+export async function fetchAdminCompaniesAction() {
+    try {
+        console.log('fetchAdminCompaniesAction: querying organizations...');
+        const { data, error } = await supabaseAdmin
+            .from('organizations')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Log types for debugging
+        if (data) {
+            const types = [...new Set(data.map(o => o.type))];
+            console.log(`fetchAdminCompaniesAction: SUCCESS, found ${data.length} rows. Types: ${types.join(', ')}`);
+        }
+
+        return { success: true, data: data || [] };
+    } catch (error: any) {
+        console.error('fetchAdminCompaniesAction: ERROR', error);
+        return { success: false, error: error.message || String(error), data: [] };
+    }
+}
+
+export async function fetchAdminJobsAction() {
+    try {
+        console.log('fetchAdminJobsAction: querying jobs...');
+        const { data, error } = await supabaseAdmin
+            .from('jobs')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Log types for debugging
+        if (data) {
+            const types = [...new Set(data.map(j => j.type))];
+            console.log(`fetchAdminJobsAction: SUCCESS, found ${data.length} rows. Types: ${types.join(', ')}`);
+        }
+
+        return { success: true, data: data || [] };
+    } catch (error: any) {
+        console.error('fetchAdminJobsAction: ERROR', error);
+        return { success: false, error: error.message || String(error), data: [] };
+    }
+}
+
+export async function fetchAdminMediaAction() {
+    try {
+        console.log('fetchAdminMediaAction: querying media_library...');
+        const { data, error } = await supabaseAdmin
+            .from('media_library')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        console.log(`fetchAdminMediaAction: SUCCESS, found ${data?.length} rows`);
+        return { success: true, data: data || [] };
+    } catch (error: any) {
+        console.error('fetchAdminMediaAction: ERROR', error);
+        return { success: false, error: error.message || String(error), data: [] };
+    }
+}

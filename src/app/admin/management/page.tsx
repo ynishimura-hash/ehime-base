@@ -15,8 +15,14 @@ import { createClient } from '@/utils/supabase/client';
 import { ImageUpload } from '@/components/ImageUpload';
 import { ReelIcon } from '@/components/reels/ReelIcon';
 import { COMPANIES, JOBS } from '@/lib/dummyData';
+import {
+    fetchAdminUsersAction,
+    fetchAdminCompaniesAction,
+    fetchAdminJobsAction,
+    fetchAdminMediaAction
+} from '../actions';
 
-
+const supabaseClient = createClient();
 
 function AdminManagementContent() {
     const searchParams = useSearchParams();
@@ -51,9 +57,10 @@ function AdminManagementContent() {
     const companiesFileInputRef = React.useRef<HTMLInputElement>(null);
     const jobsFileInputRef = React.useRef<HTMLInputElement>(null);
 
-    const supabase = createClient();
+    const supabase = supabaseClient;
 
     React.useEffect(() => {
+        console.log('AdminManagementContent: currentTab changed to:', currentTab);
         setSelectedIds(new Set()); // Clear selection on tab change
         if (currentTab === 'media') {
             fetchMedia();
@@ -71,18 +78,25 @@ function AdminManagementContent() {
         }
     }, [currentTab]);
 
-    const fetchUsers = async () => {
-        const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+    React.useEffect(() => {
+        console.log('State Monitor:', {
+            realUsersCount: realUsers.length,
+            realCompaniesCount: realCompanies.length,
+            realJobsCount: realJobs.length,
+            mediaItemsCount: mediaItems.length
+        });
+    }, [realUsers, realCompanies, realJobs, mediaItems]);
 
-        if (error) {
-            // Ignore AbortError (cancellation)
-            if (error.message?.includes('aborted') || error.message?.includes('AbortError')) {
-                return;
-            }
-            console.warn('Fetch Users failed, using fallback:', error);
+    const fetchUsers = async () => {
+        console.log('fetchUsers: starting...');
+        const result = await fetchAdminUsersAction();
+
+        if (!result.success) {
+            console.warn('fetchUsers: FAILED', result.error);
             setRealUsers(users || []);
         } else {
-            setRealUsers(data || []);
+            console.log('fetchUsers: SUCCESS, count:', result.data?.length);
+            setRealUsers(result.data || []);
         }
     };
 
@@ -101,54 +115,40 @@ function AdminManagementContent() {
     };
 
     const fetchCompanies = async () => {
-        const { data, error } = await supabase.from('organizations').select('*').eq('type', 'company').order('created_at', { ascending: false });
-        if (error) {
-            console.error('Fetch Companies Error:', error);
-            // Squelch AbortError
-            if (!error.message?.includes('aborted') && !error.message?.includes('AbortError')) {
-                toast.error('企業の取得に失敗 (デモデータを表示): ' + error.message);
-            }
-            // Fallback to dummy data
-            setRealCompanies(COMPANIES.map(c => ({ ...c, logo_url: c.image, type: 'company', status: 'approved' })) || []);
-        } else {
-            if (data && data.length > 0) {
-                setRealCompanies(data);
-            } else {
-                console.log('DB empty, falling back to dummy data');
+        console.log('fetchCompanies: starting...');
+        const result = await fetchAdminCompaniesAction();
+        if (!result.success) {
+            console.error('fetchCompanies: FAILED', result.error);
+            toast.error('企業の取得に失敗しました');
+            // ONLY fallback if absolutely no data and it's a critical error
+            if (realCompanies.length === 0) {
                 setRealCompanies(COMPANIES.map(c => ({ ...c, logo_url: c.image, type: 'company', status: 'approved' })) || []);
             }
+        } else {
+            console.log('fetchCompanies: SUCCESS, count:', result.data?.length);
+            setRealCompanies(result.data || []);
         }
     };
 
     const fetchJobs = async () => {
-        const { data, error } = await supabase.from('jobs').select('*').order('created_at', { ascending: false });
-        if (error) {
-            console.error('Fetch Jobs Error:', error);
-            if (!error.message?.includes('aborted') && !error.message?.includes('AbortError')) {
-                // toast.error('求人の取得に失敗しました');
-                console.warn('Job fetch failed, using fallback');
-            }
-            setRealJobs(JOBS.map(j => ({ ...j, organization_id: j.companyId, status: 'active' })) || []);
-        } else {
-            if (data && data.length > 0) {
-                setRealJobs(data);
-            } else {
+        console.log('fetchJobs: starting...');
+        const result = await fetchAdminJobsAction();
+        if (!result.success) {
+            console.error('fetchJobs: FAILED', result.error);
+            toast.error('求人の取得に失敗しました');
+            if (realJobs.length === 0) {
                 setRealJobs(JOBS.map(j => ({ ...j, organization_id: j.companyId, status: 'active' })) || []);
             }
+        } else {
+            console.log('fetchJobs: SUCCESS, count:', result.data?.length);
+            setRealJobs(result.data || []);
         }
     };
 
     const fetchMedia = async () => {
-        const { data, error } = await supabase
-            .from('media_library')
-            .select('*')
-            .order('created_at', { ascending: false });
+        const result = await fetchAdminMediaAction();
 
-        if (error) {
-            // Ignore AbortError (cancellation)
-            if (error.message?.includes('aborted') || error.message?.includes('AbortError')) {
-                return;
-            }
+        if (!result.success) {
             console.warn('Fetch Media failed, using fallback');
             // Extract Reels from Dummy Companies
             const dummyMedia = COMPANIES.flatMap(c =>
@@ -163,7 +163,7 @@ function AdminManagementContent() {
             );
             setMediaItems(dummyMedia);
         } else {
-            setMediaItems(data || []);
+            setMediaItems(result.data || []);
         }
     };
 
@@ -575,7 +575,7 @@ function AdminManagementContent() {
     const renderUsers = () => (
         <div className="space-y-4">
             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-black text-slate-900">ユーザー一覧</h2>
+                <h2 className="text-2xl font-black text-slate-900">ユーザー一覧 ({realUsers.length}件)</h2>
                 <div className="flex gap-2">
                     <input
                         type="file"
@@ -613,7 +613,14 @@ function AdminManagementContent() {
                             <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest text-right">アクション</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-slate-100 font-bold">
+                        {realUsers.length === 0 && (
+                            <tr>
+                                <td colSpan={5} className="px-6 py-20 text-center text-slate-400">
+                                    ユーザーが見つかりません
+                                </td>
+                            </tr>
+                        )}
                         {realUsers.map(user => (
                             <tr key={user.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(user.id) ? 'bg-blue-50/50' : ''}`}>
                                 <td className="px-6 py-4">
@@ -664,7 +671,7 @@ function AdminManagementContent() {
     const renderCompanyAccounts = () => (
         <div className="space-y-4">
             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-black text-slate-900">企業アカウント管理</h2>
+                <h2 className="text-2xl font-black text-slate-900">企業アカウント管理 ({realCompanies.length}件)</h2>
                 <div className="flex gap-2">
                     <button
                         onClick={() => { setEditingItem({}); setEditMode('company'); setActionType('create'); }}
@@ -927,12 +934,19 @@ function AdminManagementContent() {
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">操作</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-slate-100 font-bold">
+                        {realJobs.filter(j => (j.type === typeFilter || (!j.type && typeFilter === 'job'))).length === 0 && (
+                            <tr>
+                                <td colSpan={6} className="px-6 py-20 text-center text-slate-400">
+                                    データが見つかりません
+                                </td>
+                            </tr>
+                        )}
                         {realJobs
                             .filter(j => (j.type === typeFilter || (!j.type && typeFilter === 'job')))
                             .filter(j =>
                                 (j.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                realCompanies.find(c => c.id === j.organization_id)?.name.toLowerCase().includes(searchQuery.toLowerCase())
+                                (realCompanies.find(c => c.id === j.organization_id)?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
                             )
                             .map(job => (
                                 <tr key={job.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(job.id) ? 'bg-blue-50/50' : ''}`}>
@@ -2471,6 +2485,16 @@ function AdminManagementContent() {
                 </Link>
 
                 <main className="space-y-10">
+                    {/* DEBUG PANEL */}
+                    <div className="bg-red-50 border border-red-100 p-4 rounded-3xl text-[10px] font-mono text-red-600 flex gap-6">
+                        <span>DEBUG MODE</span>
+                        <span>Users: {realUsers.length}</span>
+                        <span>Companies: {realCompanies.length}</span>
+                        <span>Jobs: {realJobs.length}</span>
+                        <span>Media: {mediaItems.length}</span>
+                        <span>Tab: {currentTab}</span>
+                    </div>
+
                     <div className="flex gap-1 bg-slate-200 p-1.5 rounded-[2rem] self-start inline-flex flex-wrap shadow-inner">
                         {[
                             { id: 'users', label: 'ユーザー', icon: Users },

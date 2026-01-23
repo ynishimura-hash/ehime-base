@@ -81,7 +81,7 @@ export default function ScoutPage() {
                                         <div>
                                             <h3 className="font-black text-slate-800 text-lg flex items-center gap-2">
                                                 {user.name}
-                                                {user.id === 'u_yuji' && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md">YOU</span>}
+                                                {user.id === '061fbf87-f36e-4612-80b4-dedc77b55d5e' && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md">YOU</span>}
                                             </h3>
                                             <p className="text-xs font-bold text-slate-500">{user.university}</p>
                                         </div>

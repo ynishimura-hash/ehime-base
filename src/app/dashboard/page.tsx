@@ -35,7 +35,7 @@ export default function SeekerDashboard() {
     const router = useRouter();
     // Admin can view Seeker Dashboard (using Yuji's data as fallback if no profile)
     const currentUser = users.find(u => u.id === currentUserId) ||
-        (activeRole === 'admin' ? users.find(u => u.id === 'u_yuji') : undefined);
+        (activeRole === 'admin' ? users.find(u => u.id === '061fbf87-f36e-4612-80b4-dedc77b55d5e') : undefined);
 
     // Restore Deleted Logic:
     const userChats = getUserChats(currentUserId);
@@ -97,7 +97,6 @@ export default function SeekerDashboard() {
                 <AnimatePresence mode="wait">
                     {personaMode === 'seeker' ? (
                         <motion.div
-                            key="seeker"
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 20 }}

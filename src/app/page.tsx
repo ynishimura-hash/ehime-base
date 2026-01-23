@@ -8,11 +8,16 @@ import Link from 'next/link';
 
 export default function HomePage() {
   const router = useRouter();
-  const { authStatus, activeRole, jobs, companies, users, currentUserId } = useAppStore();
+  const { authStatus, activeRole, jobs, companies, users, currentUserId, fetchJobs } = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArea, setSelectedArea] = useState('all');
   const [selectedIndustry, setSelectedIndustry] = useState('all');
   const currentUser = users.find(u => u.id === currentUserId);
+
+  // Initial Fetches
+  useEffect(() => {
+    fetchJobs();
+  }, []);
 
   // Redirect Company to Dashboard immediately
   useEffect(() => {

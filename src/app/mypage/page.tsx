@@ -9,13 +9,17 @@ import { calculateDayMasterIndex, JIKKAN, JIKKAN_READING, JIKKAN_ELEMENTS, getDa
 import { useGameStore } from '@/lib/gameStore';
 import { Trophy, Swords, ArrowRight } from 'lucide-react';
 
+const DEMO_USER_ID = '061fbf87-f36e-4612-80b4-dedc77b55d5e';
+
 export default function MyPage() {
     const { users, currentUserId } = useAppStore();
     const { isInitialized, stats } = useGameStore();
 
     // Demo Mode: If admin or user not found, show Yuji's data
-    const currentUser = users.find(u => u.id === currentUserId) ||
-        (currentUserId === 'u_admin' ? users.find(u => u.id === 'u_yuji') : undefined);
+    // Improved migration: if currentUserId is 'u_yuji', treat as DEMO_USER_ID
+    const effectiveId = currentUserId === 'u_yuji' ? DEMO_USER_ID : currentUserId;
+    const currentUser = users.find(u => u.id === effectiveId) ||
+        (currentUserId === 'u_admin' ? users.find(u => u.id === DEMO_USER_ID) : undefined);
 
     if (!currentUser) return <div className="p-10 text-center font-bold text-slate-400">Loading Profile...</div>;
 

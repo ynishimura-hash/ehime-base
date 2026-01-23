@@ -17,7 +17,7 @@ import { calculateSelectedValues, calculateCategoryRadarData } from '@/lib/analy
 import { toast } from 'sonner';
 
 export default function PreciseDiagnosis() {
-    const { userAnalysis, setAnalysisResults, setDiagnosisScore, togglePublicValue } = useAppStore();
+    const { userAnalysis, setAnalysisResults, setDiagnosisScore, setAllDiagnosisScores, togglePublicValue } = useAppStore();
     const [currentStep, setCurrentStep] = useState(0); // 0: Start, 1: Quiz, 2: Result
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [tempAnswers, setTempAnswers] = useState<Record<number, number>>(userAnalysis.diagnosisScores || {});
@@ -35,12 +35,10 @@ export default function PreciseDiagnosis() {
     };
 
     const completeDiagnosis = (finalAnswers: Record<number, number>) => {
-        // 全スコアを保存
-        Object.entries(finalAnswers).forEach(([id, score]) => {
-            setDiagnosisScore(Number(id), score);
-        });
+        // 全スコアを一括保存
+        setAllDiagnosisScores(finalAnswers);
 
-        // アンロックされる価値観を計算
+        // アンロックされる価値観を計算して保存
         const selectedValues = calculateSelectedValues(finalAnswers);
         setAnalysisResults({ selectedValues });
 

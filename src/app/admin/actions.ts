@@ -53,3 +53,62 @@ export async function fetchAdminStats() {
         };
     }
 }
+
+export async function fetchQuestsAction() {
+    try {
+        console.log('Fetching quests with Service Role...');
+        const { data, error } = await supabaseAdmin
+            .from('jobs')
+            .select(`
+                *,
+                organization:organizations!inner (
+                    id, name, industry, location, is_premium,
+                    cover_image_url
+                )
+            `)
+            .eq('type', 'quest');
+
+        if (error) throw error;
+
+        return {
+            success: true,
+            data: data || []
+        };
+    } catch (error) {
+        console.error('Fetch Quests Error:', error);
+        return {
+            success: false,
+            error: error,
+            data: []
+        };
+    }
+}
+export async function fetchJobsAction() {
+    try {
+        console.log('Fetching jobs with Service Role...');
+        const { data, error } = await supabaseAdmin
+            .from('jobs')
+            .select(`
+                *,
+                organization:organizations!inner (
+                    id, name, industry, location, is_premium,
+                    cover_image_url
+                )
+            `)
+            .or('type.eq.job,type.is.null');
+
+        if (error) throw error;
+
+        return {
+            success: true,
+            data: data || []
+        };
+    } catch (error) {
+        console.error('Fetch Jobs Error:', error);
+        return {
+            success: false,
+            error: error,
+            data: []
+        };
+    }
+}

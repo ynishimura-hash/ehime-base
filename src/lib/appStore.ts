@@ -9,6 +9,8 @@ import { BB_SPECIALISTS, BB_EVENTS, BB_ARTICLES, BB_POSTS } from './babybaseData
 import { useGameStore } from './gameStore';
 import { toast } from 'sonner';
 import { createClient } from '@/utils/supabase/client';
+import { fetchAdminStats, fetchQuestsAction, fetchJobsAction } from '@/app/admin/actions';
+import { fetchUserAnalysisAction, saveUserAnalysisAction } from '@/app/analysis/actions';
 
 // --- Types ---
 
@@ -142,6 +144,7 @@ interface AppState {
     addJob: (job: Job) => void;
     updateJob: (jobId: string, updates: Partial<Job>) => void;
     deleteJob: (jobId: string) => void;
+    fetchJobs: () => Promise<void>;
 
     // Settings Actions
     updateChatSettings: (ownerId: string, chatId: string, settings: Partial<ChatSettings>) => void;
@@ -169,6 +172,7 @@ interface AppState {
     // Analysis Actions
     setAnalysisResults: (results: Partial<UserAnalysis>) => void;
     setDiagnosisScore: (questionId: number, score: number) => void;
+    setAllDiagnosisScores: (scores: Record<number, number>) => void;
     toggleFortuneIntegration: () => void;
     togglePublicValue: (valueId: number) => void;
     setMoneySimulationInput: (input: LifePlanInput) => void;
@@ -208,7 +212,7 @@ export interface Invitation {
 // --- Initial Data ---
 const INITIAL_USERS: User[] = [
     {
-        id: 'u_yuji',
+        id: '061fbf87-f36e-4612-80b4-dedc77b55d5e',
         name: '西村 裕二',
         age: 29,
         university: '愛媛大学',
@@ -423,16 +427,20 @@ export const useAppStore = create<AppState>()(
 
             // User Actions
             loginAs: (role, userId, companyId) => {
+                const legacyId = 'u_yuji';
+                const newId = '061fbf87-f36e-4612-80b4-dedc77b55d5e';
+                const effectiveUserId = (userId === legacyId || !userId)
+                    ? (role === 'admin' ? 'u_admin' : newId)
+                    : userId;
+
                 set({
                     authStatus: 'authenticated',
                     activeRole: role,
-                    // Use provided ID or fallback to demo ID if missing (for legacy calls)
-                    currentUserId: userId || (role === 'admin' ? 'u_admin' : 'u_yuji'),
+                    currentUserId: effectiveUserId,
                     currentCompanyId: companyId || 'c_eis',
                 });
                 // Fetch analysis if seeker login
                 if (role === 'seeker') {
-                    const effectiveUserId = userId || 'u_yuji';
                     get().fetchUserAnalysis(effectiveUserId);
                 }
             },
@@ -769,6 +777,13 @@ export const useAppStore = create<AppState>()(
                         userAnalysis: { ...state.userAnalysis, diagnosisScores }
                     };
                 });
+                // Note: We avoid auto-saving here for every single click as it's too frequent.
+                // We'll rely on explicit save calls or batch save later.
+            },
+            setAllDiagnosisScores: (scores) => {
+                set(state => ({
+                    userAnalysis: { ...state.userAnalysis, diagnosisScores: scores }
+                }));
                 const state = get();
                 if (state.authStatus === 'authenticated' && state.currentUserId) {
                     state.saveUserAnalysis(state.currentUserId);
@@ -830,57 +845,67 @@ export const useAppStore = create<AppState>()(
 
             // User Analysis Persistence Implementation
             fetchUserAnalysis: async (userId) => {
-                if (!userId) return;
-                const supabase = createClient();
-                const { data, error } = await supabase
-                    .from('user_analysis')
-                    .select('*')
-                    .eq('user_id', userId)
-                    .single();
+                const legacyId = 'u_yuji';
+                const newId = '061fbf87-f36e-4612-80b4-dedc77b55d5e';
+                const targetId = userId === legacyId ? newId : userId;
 
-                if (error) {
-                    console.log('No analysis data found or error:', error.message);
+                if (!targetId) return;
+
+                // Use Server Action to fetch data securely
+                const result = await fetchUserAnalysisAction(targetId);
+
+                if (!result.success || !result.data) {
+                    // If failed or no data, we keep current (likely dummy) data
                     return;
                 }
 
-                if (data) {
-                    set(state => ({
-                        userAnalysis: {
-                            ...state.userAnalysis,
-                            diagnosisScores: data.diagnosis_scores || state.userAnalysis.diagnosisScores,
-                            selectedValues: data.selected_values || state.userAnalysis.selectedValues,
-                            publicValues: data.public_values || state.userAnalysis.publicValues,
-                            isFortuneIntegrated: data.is_fortune_integrated ?? state.userAnalysis.isFortuneIntegrated,
-                            fortune: {
-                                dayMaster: state.userAnalysis.fortune?.dayMaster || '甲',
-                                traits: data.fortune_traits || state.userAnalysis.fortune?.traits || []
-                            }
+                const data = result.data;
+                set(state => ({
+                    userAnalysis: {
+                        ...state.userAnalysis,
+                        diagnosisScores: data.diagnosisScores || state.userAnalysis.diagnosisScores,
+                        selectedValues: data.selectedValues || state.userAnalysis.selectedValues,
+                        publicValues: data.publicValues || state.userAnalysis.publicValues,
+                        isFortuneIntegrated: data.isFortuneIntegrated ?? state.userAnalysis.isFortuneIntegrated,
+                        fortune: {
+                            dayMaster: state.userAnalysis.fortune?.dayMaster || '甲',
+                            traits: data.fortune?.traits || state.userAnalysis.fortune?.traits || []
                         }
-                    }));
+                    }
+                }));
+            },
+
+            fetchJobs: async () => {
+                try {
+                    const result = await fetchJobsAction();
+                    if (result.success && result.data) {
+                        set({ jobs: result.data });
+                    }
+                } catch (error) {
+                    console.error('Error fetching jobs in store:', error);
                 }
             },
 
             saveUserAnalysis: async (userId, data) => {
                 if (!userId) return;
-                const currentState = get().userAnalysis; // Get latest state
-                const payload = {
-                    user_id: userId,
-                    diagnosis_scores: currentState.diagnosisScores,
-                    selected_values: currentState.selectedValues,
-                    public_values: currentState.publicValues,
-                    is_fortune_integrated: currentState.isFortuneIntegrated,
-                    fortune_traits: currentState.fortune?.traits,
-                    updated_at: new Date().toISOString(),
-                    ...data // Allow overriding
+
+                const currentState = get().userAnalysis;
+                const mergedData = {
+                    ...currentState,
+                    ...(data || {})
                 };
 
-                const supabase = createClient();
-                const { error } = await supabase
-                    .from('user_analysis')
-                    .upsert(payload);
+                // 1. Update local state immediately for snappy UI
+                if (data) {
+                    set({ userAnalysis: mergedData });
+                }
 
-                if (error) {
-                    console.error('Failed to save analysis:', error);
+                // 2. Persist to server via Server Action
+                const result = await saveUserAnalysisAction(userId, mergedData);
+
+                if (!result.success) {
+                    console.error('Failed to save analysis:', result.error);
+                    toast.error('分析データの保存に失敗しました');
                 }
             },
         }),

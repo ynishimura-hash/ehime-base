@@ -23,12 +23,12 @@ async function runMigration() {
 
     if (!dbUrl && process.env.SUPABASE_DB_PASSWORD && process.env.NEXT_PUBLIC_SUPABASE_URL) {
         const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        // Extract project ref from https://<ref>.supabase.co
+        // Extract project ref
         const projectRef = projectUrl.match(/https:\/\/([^.]+)\.supabase\.co/)[1];
         const password = encodeURIComponent(process.env.SUPABASE_DB_PASSWORD);
-        // Try Pooler URL (Tokyo region assumption)
-        dbUrl = `postgresql://postgres.${projectRef}:${password}@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres`;
-        console.log('Constructed DATABASE_URL (Pooler):', dbUrl.replace(password, '****'));
+        // Use Direct Connection for Migrations (DDL)
+        dbUrl = `postgresql://postgres:${password}@db.${projectRef}.supabase.co:5432/postgres`;
+        console.log('Constructed DATABASE_URL (Direct):', dbUrl.replace(password, '****'));
     }
 
     if (!dbUrl) {

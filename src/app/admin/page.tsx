@@ -66,17 +66,17 @@ export default function AdminDashboardPage() {
                 }
             };
 
-            const userCount = await safeCount('profiles', 8); // 'users' table is auth.users usually, public profiles is 'profiles'
-            const orgCount = await safeCount('organizations', COMPANIES.length);
-            const jobCount = await safeCount('jobs', JOBS.length);
+            const userCount = await safeCount('profiles', 0); // fallback to 0 instead of 8
+            const orgCount = await safeCount('organizations', 0);
+            const jobCount = await safeCount('jobs', 0);
 
             if (courses.length === 0) fetchCourses();
 
             setCounts({
-                users: userCount || 8,
-                companies: orgCount || COMPANIES.length,
-                jobs: jobCount || JOBS.length,
-                learning: courses.length || 5
+                users: userCount, // Allow 0
+                companies: orgCount,
+                jobs: jobCount,
+                learning: courses.length || 0
             });
         };
         fetchStats();

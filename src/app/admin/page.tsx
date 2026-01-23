@@ -13,7 +13,7 @@ import { createClient } from '@/utils/supabase/client';
 import { COMPANIES, JOBS } from '@/lib/dummyData';
 
 export default function AdminDashboardPage() {
-    const { interactions, activeRole, courses, fetchCourses } = useAppStore();
+    const { interactions, activeRole, courses, fetchCourses, users, currentUserId } = useAppStore();
     const [counts, setCounts] = React.useState({ users: 0, companies: 0, jobs: 0, learning: 0 });
 
     React.useEffect(() => {
@@ -155,11 +155,21 @@ export default function AdminDashboardPage() {
                     </button>
                     <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
                         <div className="text-right">
-                            <p className="text-sm font-black text-slate-900 leading-none">SYSTEM ADMIN</p>
-                            <p className="text-[10px] font-bold text-slate-400 mt-1">Super User</p>
+                            <p className="text-sm font-black text-slate-900 leading-none">
+                                {activeRole === 'admin' ? '管理者アカウント' : users.find(u => u.id === currentUserId)?.name || 'Guest User'}
+                            </p>
+                            <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">
+                                {activeRole === 'admin' ? 'System Operator' : activeRole}
+                            </p>
                         </div>
-                        <div className="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-white font-black text-xs">
-                            AD
+                        <div className="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-white font-black text-xs overflow-hidden">
+                            {activeRole === 'admin' ? 'AD' : (
+                                <img
+                                    src={users.find(u => u.id === currentUserId)?.image || 'https://via.placeholder.com/40'}
+                                    alt="Admin"
+                                    className="w-full h-full object-cover"
+                                />
+                            )}
                         </div>
                     </div>
                 </div>

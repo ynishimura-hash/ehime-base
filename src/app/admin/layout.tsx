@@ -26,7 +26,15 @@ const sidebarItems = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-    const { logout } = useAppStore();
+    const { logout, activeRole } = useAppStore();
+
+    React.useEffect(() => {
+        // Strict Auth Guard
+        // If not admin, redirect to login page (admin root handles the password input)
+        if (activeRole !== 'admin' && pathname !== '/admin') {
+            window.location.replace('/admin');
+        }
+    }, [activeRole, pathname]);
 
     const handleLogout = async () => {
         await logout();

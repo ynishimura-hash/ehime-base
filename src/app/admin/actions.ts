@@ -288,7 +288,7 @@ export async function fetchPublicJobsAction() {
                 *,
                 organization:organizations (
                     id, name, industry, location, is_premium,
-                    cover_image_url, rjp_negatives, logo_url
+                    cover_image_url, logo_url
                 )
             `)
             .order('created_at', { ascending: false });

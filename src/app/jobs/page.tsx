@@ -52,11 +52,14 @@ function JobsContent() {
             const result = await fetchPublicJobsAction();
 
             if (result.success && result.data) {
-                // Client-side filtering for 'job' type
+                console.log('fetchJobs: SUCCESS', result.data.length, 'rows found');
+                // Client-side filtering for 'job' type - be more inclusive
                 const filtered = result.data.filter((job: any) => {
                     const type = job.type || job.value_tags_ai?.type;
-                    return type === 'job' || !type;
+                    console.log(`Job ID: ${job.id}, Type: ${type}`);
+                    return !type || type === 'job' || type === 'null' || type === 'company'; // Loosen for debug
                 });
+                console.log('fetchJobs: FILTERED', filtered.length, 'rows remaining');
                 setJobs(filtered);
             } else {
                 console.error('Error fetching jobs:', result.error);

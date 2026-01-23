@@ -9,8 +9,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { fetchAdminStats } from './actions';
 import { createClient } from '@/utils/supabase/client';
-import { COMPANIES, JOBS } from '@/lib/dummyData';
 
 export default function AdminDashboardPage() {
     const { interactions, activeRole, courses, fetchCourses, users, currentUserId } = useAppStore();
@@ -20,62 +20,18 @@ export default function AdminDashboardPage() {
         const validateSession = async () => {
             const supabase = createClient();
             const { data: { session } } = await supabase.auth.getSession();
-
-            // If we are admin but have no Supabase session, we are in a 'Fake Admin' state.
-            // If the data fetching relies on RLS that requires authentication, this will fail.
-            // However, if we simply want to allow 'admin123' access, we should probably allow it 
-            // but ensure we don't get stuck.
-            // But the user's issue is they can't logout. 
-            // Let's ensure that if they are 'admin' and want to logout, the logout function works.
-            // But here, let's try to detect if the state is corrupted.
-            // actually, for 'admin123' login, we DO NOT have a supabase session. 
-            // So this check would force logout every time!
-            // That's bad if the design is intended to be 'Fake Admin'.
-
-            // The real issue is the user is 'Stuck'.
-            // Why is the logout button unresponsive? 
-            // Maybe because `logout` calls `supabase.auth.signOut()` and if network is bad it hangs?
-            // let's pass { scope: 'local' } to signOut to avoid network hang? 
         };
-        // validateSession(); 
 
         const fetchStats = async () => {
-            const supabase = createClient();
-
-            const safeCount = async (table: string, fallback: number) => {
-                try {
-                    const { count, error } = await supabase.from(table).select('*', { count: 'exact', head: true });
-
-                    if (error) {
-                        // Ignore AbortError
-                        if (error.message?.includes('aborted') || error.message?.includes('AbortError')) {
-                            return 0; // Wait for next fetch or treat as 0 temporarily
-                        }
-                        console.error(`Error counting ${table}:`, error);
-                        return fallback;
-                    }
-
-                    // If count is null (shouldn't happen with count: 'exact'), fallback
-                    if (count === null) return fallback;
-
-                    // 0 is valid, do not fallback
-                    return count;
-                } catch (e) {
-                    console.error(`Exception counting ${table}:`, e);
-                    return fallback;
-                }
-            };
-
-            const userCount = await safeCount('profiles', 0); // fallback to 0 instead of 8
-            const orgCount = await safeCount('organizations', 0);
-            const jobCount = await safeCount('jobs', 0);
+            // Use Server Action to fetch data securely (bypassing RLS)
+            const stats = await fetchAdminStats();
 
             if (courses.length === 0) fetchCourses();
 
             setCounts({
-                users: userCount, // Allow 0
-                companies: orgCount,
-                jobs: jobCount,
+                users: stats.users,
+                companies: stats.companies,
+                jobs: stats.jobs,
                 learning: courses.length || 0
             });
         };

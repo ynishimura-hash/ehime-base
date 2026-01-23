@@ -19,10 +19,21 @@ async function runMigration() {
     // Supabase JS client doesn't support generic SQL execution on client side usually, unless via RPC.
     // But I noticed `pg` package is installed.
 
-    const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+    let dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+
+    if (!dbUrl && process.env.SUPABASE_DB_PASSWORD && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+        const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        // Extract project ref from https://<ref>.supabase.co
+        const projectRef = projectUrl.match(/https:\/\/([^.]+)\.supabase\.co/)[1];
+        const password = encodeURIComponent(process.env.SUPABASE_DB_PASSWORD);
+        // Try Pooler URL (Tokyo region assumption)
+        dbUrl = `postgresql://postgres.${projectRef}:${password}@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres`;
+        console.log('Constructed DATABASE_URL (Pooler):', dbUrl.replace(password, '****'));
+    }
+
     if (!dbUrl) {
-        console.error('Error: DATABASE_URL not found in environment.');
-        console.log('Please ensure DATABASE_URL is set in .env.local for migration.');
+        console.error('Error: DATABASE_URL not found in environment and could not be constructed.');
+        console.log('Please ensure SUPABASE_DB_PASSWORD and NEXT_PUBLIC_SUPABASE_URL are set in .env.local.');
         process.exit(1);
     }
 

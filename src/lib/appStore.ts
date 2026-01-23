@@ -439,7 +439,12 @@ export const useAppStore = create<AppState>()(
 
             logout: async () => {
                 const supabase = createClient();
-                await supabase.auth.signOut();
+                try {
+                    await supabase.auth.signOut({ scope: 'local' }); // Use local scope to avoid network hang
+                } catch (e) {
+                    console.error('SignOut failed', e);
+                }
+
                 // localStorage.removeItem('eis-app-store-v3'); // Removed to prevent conflict with Zustand persist
                 set({
                     authStatus: 'unauthenticated',

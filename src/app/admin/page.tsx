@@ -17,6 +17,28 @@ export default function AdminDashboardPage() {
     const [counts, setCounts] = React.useState({ users: 0, companies: 0, jobs: 0, learning: 0 });
 
     React.useEffect(() => {
+        const validateSession = async () => {
+            const supabase = createClient();
+            const { data: { session } } = await supabase.auth.getSession();
+
+            // If we are admin but have no Supabase session, we are in a 'Fake Admin' state.
+            // If the data fetching relies on RLS that requires authentication, this will fail.
+            // However, if we simply want to allow 'admin123' access, we should probably allow it 
+            // but ensure we don't get stuck.
+            // But the user's issue is they can't logout. 
+            // Let's ensure that if they are 'admin' and want to logout, the logout function works.
+            // But here, let's try to detect if the state is corrupted.
+            // actually, for 'admin123' login, we DO NOT have a supabase session. 
+            // So this check would force logout every time!
+            // That's bad if the design is intended to be 'Fake Admin'.
+
+            // The real issue is the user is 'Stuck'.
+            // Why is the logout button unresponsive? 
+            // Maybe because `logout` calls `supabase.auth.signOut()` and if network is bad it hangs?
+            // let's pass { scope: 'local' } to signOut to avoid network hang? 
+        };
+        // validateSession(); 
+
         const fetchStats = async () => {
             const supabase = createClient();
 

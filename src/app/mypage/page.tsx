@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { User, Settings, LogOut, Sparkles, CircleDollarSign, Target, Zap } from 'lucide-react';
 import { useAppStore } from '@/lib/appStore';
 
@@ -9,19 +9,41 @@ import { calculateDayMasterIndex, JIKKAN, JIKKAN_READING, JIKKAN_ELEMENTS, getDa
 import { useGameStore } from '@/lib/gameStore';
 import { Trophy, Swords, ArrowRight } from 'lucide-react';
 
+import { useRouter } from 'next/navigation';
+
 const DEMO_USER_ID = '061fbf87-f36e-4612-80b4-dedc77b55d5e';
 
 export default function MyPage() {
-    const { users, currentUserId } = useAppStore();
+    const { users, currentUserId, authStatus } = useAppStore();
     const { isInitialized, stats } = useGameStore();
+    const router = useRouter();
+
+    useEffect(() => {
+        // If unauthenticated after a short delay, go to login
+        if (authStatus === 'unauthenticated') {
+            const timer = setTimeout(() => {
+                router.replace('/login');
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [authStatus, router]);
 
     // Demo Mode: If admin or user not found, show Yuji's data
-    // Improved migration: if currentUserId is 'u_yuji', treat as DEMO_USER_ID
     const effectiveId = currentUserId === 'u_yuji' ? DEMO_USER_ID : currentUserId;
     const currentUser = users.find(u => u.id === effectiveId) ||
         (currentUserId === 'u_admin' ? users.find(u => u.id === DEMO_USER_ID) : undefined);
 
-    if (!currentUser) return <div className="p-10 text-center font-bold text-slate-400">Loading Profile...</div>;
+    if (!currentUser) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center p-10 bg-slate-50 gap-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                <div className="text-center">
+                    <p className="font-bold text-slate-800">プロファイルを取得中...</p>
+                    <p className="text-xs text-slate-400 mt-2">ログインしていない場合は自動的にログイン画面に移動します</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 pb-24">

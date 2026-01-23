@@ -44,17 +44,20 @@ export function getRecommendations(
         const jobPool = jobs.map(job => {
             let score = 0;
             const tags = job.tags || [];
+            const title = (job.title || '').toLowerCase();
 
             // 1. コアバリューとの一致（最優先: 50点/件）
-            coreTraitNames.forEach(trait => {
-                if (tags.includes(trait)) score += 50;
-            });
+            if (Array.isArray(tags)) {
+                coreTraitNames.forEach(trait => {
+                    if (tags.includes(trait)) score += 50;
+                });
+            }
 
             // 2. カテゴリ適性（20点）
-            if (topCategory === 'A' && (job.title.includes('DX') || job.title.includes('企画') || job.title.includes('クリエイティブ'))) score += 20;
-            if (topCategory === 'B' && (job.title.includes('営業') || job.title.includes('マネジメント'))) score += 20;
-            if (topCategory === 'C' && (job.title.includes('エンジニア') || job.title.includes('製造'))) score += 20;
-            if (topCategory === 'D' && (job.title.includes('サービス') || job.title.includes('医療') || job.title.includes('福祉'))) score += 20;
+            if (topCategory === 'A' && (title.includes('dx') || title.includes('企画') || title.includes('クリエイティブ'))) score += 20;
+            if (topCategory === 'B' && (title.includes('営業') || title.includes('マネジメント'))) score += 20;
+            if (topCategory === 'C' && (title.includes('エンジニア') || title.includes('製造'))) score += 20;
+            if (topCategory === 'D' && (title.includes('サービス') || title.includes('医療') || title.includes('福祉'))) score += 20;
 
             return { job, score };
         });

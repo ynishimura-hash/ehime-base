@@ -70,9 +70,9 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     const [mounted, setMounted] = React.useState(false);
     React.useEffect(() => setMounted(true), []);
 
-    const handleLogout = () => {
-        logout();
-        window.location.href = '/'; // Simple hard redirect for logout
+    const handleLogout = async () => {
+        await logout();
+        window.location.replace('/');
     };
 
     // メニュー項目（PC/モバイル共通）

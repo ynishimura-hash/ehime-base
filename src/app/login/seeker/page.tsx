@@ -30,7 +30,7 @@ export default function SeekerLoginPage() {
             }
 
             toast.success('ログインしました');
-            router.push('/');
+            router.push('/dashboard');
             router.refresh();
         } catch (error) {
             toast.error('エラーが発生しました');

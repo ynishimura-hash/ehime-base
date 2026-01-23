@@ -33,9 +33,9 @@ export default function CompanyDashboardLayout({ children }: { children: React.R
 
     const isMessagesPage = pathname?.startsWith('/dashboard/company/messages');
 
-    const handleLogout = () => {
-        logout();
-        window.location.href = '/';
+    const handleLogout = async () => {
+        await logout();
+        window.location.replace('/');
     };
 
     return (

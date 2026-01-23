@@ -33,14 +33,9 @@ export default function SeekerDashboard() {
     } = useAppStore();
 
     const router = useRouter();
-    const currentUser = users.find(u => u.id === currentUserId);
-
-    // Redirect Admin logic
-    React.useEffect(() => {
-        if (activeRole === 'admin') {
-            router.push('/admin');
-        }
-    }, [activeRole, router]);
+    // Admin can view Seeker Dashboard (using Yuji's data as fallback if no profile)
+    const currentUser = users.find(u => u.id === currentUserId) ||
+        (activeRole === 'admin' ? users.find(u => u.id === 'u_yuji') : undefined);
 
     // Restore Deleted Logic:
     const userChats = getUserChats(currentUserId);
@@ -64,14 +59,6 @@ export default function SeekerDashboard() {
     const recentlyViewedLessons = lastViewedLessonIds.map(id =>
         allLessons.find(l => l.id === id)
     ).filter(Boolean);
-
-    if (activeRole === 'admin') {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-4">
-                <h1 className="text-xl font-bold">Redirecting to Admin Console...</h1>
-            </div>
-        );
-    }
 
     if (!currentUser) return <div className="p-10 text-center text-slate-400">Loading user profile...</div>;
 

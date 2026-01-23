@@ -183,6 +183,11 @@ interface AppState {
     isLessonCompleted: (lessonId: string) => boolean;
     getLastViewedLesson: () => string | undefined;
 
+
+    // User Analysis Persistence
+    fetchUserAnalysis: (userId: string) => Promise<void>;
+    saveUserAnalysis: (userId: string, data?: Partial<UserAnalysis>) => Promise<void>;
+
     // Invitation Actions
     invitations: Invitation[];
     createInvitation: (orgId: string, role?: 'admin' | 'member') => Promise<string | null>; // Returns token
@@ -415,13 +420,21 @@ export const useAppStore = create<AppState>()(
             },
 
             // User Actions
-            loginAs: (role, userId, companyId) => set({
-                authStatus: 'authenticated',
-                activeRole: role,
-                // Use provided ID or fallback to demo ID if missing (for legacy calls)
-                currentUserId: userId || (role === 'admin' ? 'u_admin' : 'u_yuji'),
-                currentCompanyId: companyId || 'c_eis',
-            }),
+            loginAs: (role, userId, companyId) => {
+                set({
+                    authStatus: 'authenticated',
+                    activeRole: role,
+                    // Use provided ID or fallback to demo ID if missing (for legacy calls)
+                    currentUserId: userId || (role === 'admin' ? 'u_admin' : 'u_yuji'),
+                    currentCompanyId: companyId || 'c_eis',
+                });
+                // Fetch analysis if seeker login
+                if (role === 'seeker') {
+                    const effectiveUserId = userId || 'u_yuji';
+                    get().fetchUserAnalysis(effectiveUserId);
+                }
+            },
+
             logout: async () => {
                 const supabase = createClient();
                 await supabase.auth.signOut();
@@ -669,35 +682,58 @@ export const useAppStore = create<AppState>()(
             getUserChats: (userId) => get().chats.filter(c => c.userId === userId).sort((a, b) => b.updatedAt - a.updatedAt),
             getCompanyChats: (companyId) => get().chats.filter(c => c.companyId === companyId).sort((a, b) => b.updatedAt - a.updatedAt),
 
-            setAnalysisResults: (results) => set(state => ({
-                userAnalysis: { ...state.userAnalysis, ...results }
-            })),
-            setDiagnosisScore: (questionId, score) => set(state => {
-                const diagnosisScores = { ...state.userAnalysis.diagnosisScores, [questionId]: score };
-                // Logic to update selectedValues based on scores could go here or in a separate hook
-                return {
-                    userAnalysis: { ...state.userAnalysis, diagnosisScores }
-                };
-            }),
-            toggleFortuneIntegration: () => set(state => ({
-                userAnalysis: { ...state.userAnalysis, isFortuneIntegrated: !state.userAnalysis.isFortuneIntegrated }
-            })),
-            togglePublicValue: (valueId) => set(state => {
-                const current = state.userAnalysis.publicValues || [];
-                const updated = current.includes(valueId)
-                    ? current.filter(id => id !== valueId)
-                    : current.length < 5 ? [...current, valueId] : current;
+            setAnalysisResults: (results) => {
+                set(state => ({
+                    userAnalysis: { ...state.userAnalysis, ...results }
+                }));
+                const state = get();
+                if (state.authStatus === 'authenticated' && state.currentUserId) {
+                    state.saveUserAnalysis(state.currentUserId);
+                }
+            },
+            setDiagnosisScore: (questionId, score) => {
+                set(state => {
+                    const diagnosisScores = { ...state.userAnalysis.diagnosisScores, [questionId]: score };
+                    return {
+                        userAnalysis: { ...state.userAnalysis, diagnosisScores }
+                    };
+                });
+                const state = get();
+                if (state.authStatus === 'authenticated' && state.currentUserId) {
+                    state.saveUserAnalysis(state.currentUserId);
+                }
+            },
+            toggleFortuneIntegration: () => {
+                set(state => ({
+                    userAnalysis: { ...state.userAnalysis, isFortuneIntegrated: !state.userAnalysis.isFortuneIntegrated }
+                }));
+                const state = get();
+                if (state.authStatus === 'authenticated' && state.currentUserId) {
+                    state.saveUserAnalysis(state.currentUserId);
+                }
+            },
+            togglePublicValue: (valueId) => {
+                set(state => {
+                    const current = state.userAnalysis.publicValues || [];
+                    const updated = current.includes(valueId)
+                        ? current.filter(id => id !== valueId)
+                        : current.length < 5 ? [...current, valueId] : current;
 
-                // Sync with users array
-                const users = state.users.map(u =>
-                    u.id === state.currentUserId ? { ...u, publicValues: updated } : u
-                );
+                    // Sync with users array
+                    const users = state.users.map(u =>
+                        u.id === state.currentUserId ? { ...u, publicValues: updated } : u
+                    );
 
-                return {
-                    users,
-                    userAnalysis: { ...state.userAnalysis, publicValues: updated }
-                };
-            }),
+                    return {
+                        users,
+                        userAnalysis: { ...state.userAnalysis, publicValues: updated }
+                    };
+                });
+                const state = get();
+                if (state.authStatus === 'authenticated' && state.currentUserId) {
+                    state.saveUserAnalysis(state.currentUserId);
+                }
+            },
             setMoneySimulationInput: (input) => set({ lastMoneySimulationInput: input }),
             hasInteraction: (type, fromId, toId) => get().interactions.some(i =>
                 i.type === type && i.fromId === fromId && i.toId === toId
@@ -720,6 +756,62 @@ export const useAppStore = create<AppState>()(
                     ? { ...state.momProfile, children: state.momProfile.children.filter(c => c.id !== childId) }
                     : null
             })),
+
+            // User Analysis Persistence Implementation
+            fetchUserAnalysis: async (userId) => {
+                if (!userId) return;
+                const supabase = createClient();
+                const { data, error } = await supabase
+                    .from('user_analysis')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .single();
+
+                if (error) {
+                    console.log('No analysis data found or error:', error.message);
+                    return;
+                }
+
+                if (data) {
+                    set(state => ({
+                        userAnalysis: {
+                            ...state.userAnalysis,
+                            diagnosisScores: data.diagnosis_scores || state.userAnalysis.diagnosisScores,
+                            selectedValues: data.selected_values || state.userAnalysis.selectedValues,
+                            publicValues: data.public_values || state.userAnalysis.publicValues,
+                            isFortuneIntegrated: data.is_fortune_integrated ?? state.userAnalysis.isFortuneIntegrated,
+                            fortune: {
+                                dayMaster: state.userAnalysis.fortune?.dayMaster || '甲',
+                                traits: data.fortune_traits || state.userAnalysis.fortune?.traits || []
+                            }
+                        }
+                    }));
+                }
+            },
+
+            saveUserAnalysis: async (userId, data) => {
+                if (!userId) return;
+                const currentState = get().userAnalysis; // Get latest state
+                const payload = {
+                    user_id: userId,
+                    diagnosis_scores: currentState.diagnosisScores,
+                    selected_values: currentState.selectedValues,
+                    public_values: currentState.publicValues,
+                    is_fortune_integrated: currentState.isFortuneIntegrated,
+                    fortune_traits: currentState.fortune?.traits,
+                    updated_at: new Date().toISOString(),
+                    ...data // Allow overriding
+                };
+
+                const supabase = createClient();
+                const { error } = await supabase
+                    .from('user_analysis')
+                    .upsert(payload);
+
+                if (error) {
+                    console.error('Failed to save analysis:', error);
+                }
+            },
         }),
         {
             name: 'eis-app-store-v3',

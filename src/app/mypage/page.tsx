@@ -57,23 +57,21 @@ export default function MyPage() {
                 ) : null}
 
                 {/* Success Mode Widget */}
-                {currentUser.birthDate ? (
-                    <Link href="/dashboard/success" className="bg-slate-900 rounded-[2rem] p-6 text-white shadow-xl mb-6 flex items-center justify-between group relative overflow-hidden ring-2 ring-indigo-500/20">
-                        <div className="absolute right-[-5%] top-[-10%] opacity-20">
-                            <Target size={120} className="text-indigo-600" />
+                <Link href="/dashboard/success" className="bg-slate-900 rounded-[2rem] p-6 text-white shadow-xl mb-6 flex items-center justify-between group relative overflow-hidden ring-2 ring-indigo-500/20">
+                    <div className="absolute right-[-5%] top-[-10%] opacity-20">
+                        <Target size={120} className="text-indigo-600" />
+                    </div>
+                    <div className="relative z-10 space-y-1">
+                        <div className="flex items-center gap-2">
+                            <span className="bg-indigo-600 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest">Master Dashboard</span>
                         </div>
-                        <div className="relative z-10 space-y-1">
-                            <div className="flex items-center gap-2">
-                                <span className="bg-indigo-600 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest">Master Dashboard</span>
-                            </div>
-                            <h3 className="font-black text-lg italic tracking-tighter">SUCCESS MODE</h3>
-                            <p className="text-[10px] font-bold text-slate-500">資質・スキル・未来の可視化</p>
-                        </div>
-                        <div className="bg-indigo-600 p-3 rounded-2xl shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-all z-10">
-                            <Zap size={24} className="text-yellow-400" />
-                        </div>
-                    </Link>
-                ) : null}
+                        <h3 className="font-black text-lg italic tracking-tighter">SUCCESS MODE</h3>
+                        <p className="text-[10px] font-bold text-slate-500">資質・スキル・未来の可視化</p>
+                    </div>
+                    <div className="bg-indigo-600 p-3 rounded-2xl shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-all z-10">
+                        <Zap size={24} className="text-yellow-400" />
+                    </div>
+                </Link>
 
                 {/* Daily Fortune Widget */}
                 {currentUser.birthDate ? (
@@ -175,7 +173,14 @@ export default function MyPage() {
                     <div className="flex-1 font-bold text-slate-700">設定</div>
                     <div className="text-slate-400">→</div>
                 </Link>
-                <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-colors text-red-500">
+                <div
+                    onClick={async () => {
+                        const { logout } = useAppStore.getState();
+                        await logout();
+                        window.location.replace('/');
+                    }}
+                    className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-colors text-red-500"
+                >
                     <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center">
                         <LogOut size={20} />
                     </div>

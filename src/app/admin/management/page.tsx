@@ -21,7 +21,7 @@ import { COMPANIES, JOBS } from '@/lib/dummyData';
 function AdminManagementContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const currentTab = searchParams.get('tab') || 'companies';
+    const currentTab = searchParams.get('tab') || 'users';
     const {
         companies, jobs, activeRole, courses, users,
         fetchCourses, addCourses, updateCourse, deleteCourse
@@ -61,7 +61,7 @@ function AdminManagementContent() {
             fetchJobs();
         } else if (currentTab === 'users') {
             fetchUsers();
-        } else if (currentTab === 'companies') {
+        } else if (currentTab === 'company_accounts' || currentTab === 'company_infos') {
             fetchCompanies();
             fetchMedia();
         } else if (currentTab === 'jobs' || currentTab === 'quests') {
@@ -661,10 +661,96 @@ function AdminManagementContent() {
         </div >
     );
 
-    const renderCompanies = () => (
+    const renderCompanyAccounts = () => (
         <div className="space-y-4">
             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-black text-slate-900">企業アカウント一覧</h2>
+                <h2 className="text-2xl font-black text-slate-900">企業アカウント管理</h2>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => { setEditingItem({}); setEditMode('company'); setActionType('create'); }}
+                        className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all cursor-pointer"
+                    >
+                        <Plus size={18} /> 新規アカウント発行
+                    </button>
+                </div>
+            </div>
+            <div className="mb-6 bg-white p-4 rounded-2xl border border-slate-200 flex items-center gap-3">
+                <Search size={20} className="text-slate-400" />
+                <input
+                    type="text"
+                    placeholder="企業名またはIDで検索..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 bg-transparent border-none outline-none font-bold text-slate-900 text-sm placeholder:text-slate-400"
+                />
+            </div>
+            <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
+                <table className="w-full text-left border-collapse">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th className="px-6 py-4 w-12">
+                                <button onClick={() => toggleAll(realCompanies.map(c => c.id))}>
+                                    {selectedIds.size === realCompanies.length && realCompanies.length > 0 ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
+                                </button>
+                            </th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">企業名 / ID</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">プラン</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">ステータス</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">アクション</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {realCompanies
+                            .filter(c => (c.name || '').toLowerCase().includes(searchQuery.toLowerCase()))
+                            .map(company => (
+                                <tr key={company.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(company.id) ? 'bg-blue-50/50' : ''}`}>
+                                    <td className="px-6 py-4">
+                                        <button onClick={() => toggleSelection(company.id)}>
+                                            {selectedIds.has(company.id) ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
+                                        </button>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div>
+                                            <div className="font-black text-slate-800">{company.name}</div>
+                                            <div className="text-[10px] font-bold text-slate-400 font-mono">{company.id}</div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-2 py-1 rounded-lg text-xs font-black ${company.isPremium ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>
+                                            {company.isPremium ? 'Premium' : 'Free'}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <button
+                                            onClick={() => handleStatusToggle(company.id, 'company', company.status || 'approved')}
+                                            className={`px-3 py-1 rounded-full text-[10px] font-black border transition-all ${(company.status === 'private')
+                                                ? 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
+                                                : 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100'
+                                                }`}
+                                        >
+                                            {company.status === 'private' ? '停止中 (Private)' : '有効 (Active)'}
+                                        </button>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <button
+                                            onClick={() => { setEditingItem(company); setEditMode('company'); setActionType('edit'); }}
+                                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer"
+                                        >
+                                            <Edit3 size={18} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+
+    const renderCompanyInfos = () => (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-black text-slate-900">企業情報一覧</h2>
                 <div className="flex gap-2">
                     <input
                         type="file"
@@ -677,13 +763,13 @@ function AdminManagementContent() {
                         onClick={() => companiesFileInputRef.current?.click()}
                         className="bg-slate-100 text-slate-700 px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-slate-200 transition-all"
                     >
-                        <Upload size={18} /> CSV登録
+                        <Upload size={18} /> CSV一括登録
                     </button>
                     <button
                         onClick={() => { setEditingItem({}); setEditMode('company'); setActionType('create'); }}
                         className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all"
                     >
-                        <Plus size={18} /> 新規企業登録
+                        <Plus size={18} /> 情報追加
                     </button>
                 </div>
             </div>
@@ -707,14 +793,9 @@ function AdminManagementContent() {
                                 </button>
                             </th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">企業名</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 flex-shrink-0" />
-                                    <span>業界</span>
-                                </div>
-                            </th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">ステータス</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">アクション</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">業界 / 所在地</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">PR動画</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">編集</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -734,45 +815,37 @@ function AdminManagementContent() {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            {/* Video Icon Container - Fixed Width */}
-                                            <div className="flex-shrink-0 w-10 flex justify-center">
-                                                {mediaItems.filter(m => m.organization_id === company.id).length > 0 ? (
-                                                    <ReelIcon
-                                                        reels={mediaItems.filter(m => m.organization_id === company.id).map(m => ({
-                                                            id: m.id,
-                                                            type: m.type || 'file',
-                                                            url: m.public_url,
-                                                            thumbnail: m.thumbnail_url || m.public_url,
-                                                            title: m.filename,
-                                                            likes: 0
-                                                        }))}
-                                                        size="sm"
-                                                        className="mr-0"
-                                                        onClick={() => {
-                                                            const reels = mediaItems.filter(m => m.organization_id === company.id);
-                                                            if (reels.length > 0) {
-                                                                window.open(reels[0].public_url, '_blank');
-                                                            }
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <div className="w-10" />
-                                                )}
-                                            </div>
-                                            <span className="text-sm font-bold text-slate-500 flex-1">{company.industry}</span>
+                                        <div>
+                                            <div className="font-bold text-slate-700 text-xs">{company.industry}</div>
+                                            <div className="text-[10px] font-bold text-slate-400">{company.location}</div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <button
-                                            onClick={() => handleStatusToggle(company.id, 'company', company.status || 'approved')}
-                                            className={`px-3 py-1 rounded-full text-[10px] font-black border transition-all ${(company.status === 'private')
-                                                ? 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
-                                                : 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100'
-                                                }`}
-                                        >
-                                            {company.status === 'private' ? 'Private' : 'Active'}
-                                        </button>
+                                        {/* Video Icon Container - Fixed Width */}
+                                        <div className="flex-shrink-0 w-10 flex justify-center">
+                                            {mediaItems.filter(m => m.organization_id === company.id).length > 0 ? (
+                                                <ReelIcon
+                                                    reels={mediaItems.filter(m => m.organization_id === company.id).map(m => ({
+                                                        id: m.id,
+                                                        type: m.type || 'file',
+                                                        url: m.public_url,
+                                                        thumbnail: m.thumbnail_url || m.public_url,
+                                                        title: m.filename,
+                                                        likes: 0
+                                                    }))}
+                                                    size="sm"
+                                                    className="mr-0"
+                                                    onClick={() => {
+                                                        const reels = mediaItems.filter(m => m.organization_id === company.id);
+                                                        if (reels.length > 0) {
+                                                            window.open(reels[0].public_url, '_blank');
+                                                        }
+                                                    }}
+                                                />
+                                            ) : (
+                                                <span className="text-[10px] text-slate-300 font-bold">-</span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
@@ -781,12 +854,6 @@ function AdminManagementContent() {
                                                 className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer"
                                             >
                                                 <Edit3 size={18} />
-                                            </button>
-                                            <button
-                                                onClick={() => toast.error(`${company.name}を削除してよろしいですか？`)}
-                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
-                                            >
-                                                <Trash2 size={18} />
                                             </button>
                                         </div>
                                     </td>
@@ -2404,48 +2471,34 @@ function AdminManagementContent() {
                 </Link>
 
                 <main className="space-y-10">
-                    <div className="flex gap-1 bg-slate-200 p-1.5 rounded-[2rem] self-start inline-flex flex-wrap">
-                        <button
-                            onClick={() => router.push('?tab=users')}
-                            className={`px-8 py-3.5 rounded-3xl text-sm font-black transition-all cursor-pointer ${currentTab === 'users' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:bg-white/50'}`}
-                        >
-                            <Users size={16} className="inline mr-2" /> ユーザー
-                        </button>
-                        <button
-                            onClick={() => router.push('?tab=companies')}
-                            className={`px-8 py-3.5 rounded-3xl text-sm font-black transition-all cursor-pointer ${currentTab === 'companies' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:bg-white/50'}`}
-                        >
-                            <Building2 size={16} className="inline mr-2" /> 企業アカウント
-                        </button>
-                        <button
-                            onClick={() => router.push('?tab=jobs')}
-                            className={`px-8 py-3.5 rounded-3xl text-sm font-black transition-all cursor-pointer ${currentTab === 'jobs' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:bg-white/50'}`}
-                        >
-                            <Briefcase size={16} className="inline mr-2" /> 求人管理
-                        </button>
-                        <button
-                            onClick={() => router.push('?tab=quests')}
-                            className={`px-8 py-3.5 rounded-3xl text-sm font-black transition-all cursor-pointer ${currentTab === 'quests' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:bg-white/50'}`}
-                        >
-                            <Zap size={16} className="inline mr-2" /> クエスト管理
-                        </button>
-                        <button
-                            onClick={() => router.push('?tab=learning')}
-                            className={`px-8 py-3.5 rounded-3xl text-sm font-black transition-all cursor-pointer ${currentTab === 'learning' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:bg-white/50'}`}
-                        >
-                            <GraduationCap size={16} className="inline mr-2" /> Eラーニング
-                        </button>
-                        <button
-                            onClick={() => router.push('?tab=media')}
-                            className={`px-8 py-3.5 rounded-3xl text-sm font-black transition-all cursor-pointer ${currentTab === 'media' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:bg-white/50'}`}
-                        >
-                            <Video size={16} className="inline mr-2" /> 動画管理
-                        </button>
+                    <div className="flex gap-1 bg-slate-200 p-1.5 rounded-[2rem] self-start inline-flex flex-wrap shadow-inner">
+                        {[
+                            { id: 'users', label: 'ユーザー', icon: Users },
+                            { id: 'company_accounts', label: '企業アカウント', icon: Building2 },
+                            { id: 'company_infos', label: '企業情報', icon: Building2 },
+                            { id: 'jobs', label: '求人', icon: Briefcase },
+                            { id: 'quests', label: 'クエスト', icon: Zap },
+                            { id: 'media', label: '動画管理', icon: Video },
+                            { id: 'learning', label: 'e-ラーニング', icon: GraduationCap }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => router.push(`?tab=${tab.id}`)}
+                                className={`px-5 py-3 rounded-3xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 ${currentTab === tab.id
+                                    ? 'bg-white text-slate-900 shadow-md transform scale-105'
+                                    : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                                    }`}
+                            >
+                                <tab.icon size={16} />
+                                {tab.label}
+                            </button>
+                        ))}
                     </div>
 
                     <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
                         {currentTab === 'users' && renderUsers()}
-                        {currentTab === 'companies' && renderCompanies()}
+                        {currentTab === 'company_accounts' && renderCompanyAccounts()}
+                        {currentTab === 'company_infos' && renderCompanyInfos()}
                         {currentTab === 'jobs' && renderJobs('job')}
                         {currentTab === 'quests' && renderJobs('quest')}
                         {currentTab === 'learning' && renderLearning()}

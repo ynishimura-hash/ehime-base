@@ -163,6 +163,8 @@ interface AppState {
     // Data Sync Actions
     upsertCompany: (company: Company) => void;
     upsertUser: (user: User) => void;
+    fetchUsers: () => Promise<void>;
+    fetchCompanies: () => Promise<void>;
 
     // Analysis Actions
     setAnalysisResults: (results: Partial<UserAnalysis>) => void;
@@ -677,6 +679,70 @@ export const useAppStore = create<AppState>()(
                 }
                 return { users: [...state.users, user] };
             }),
+
+            fetchUsers: async () => {
+                const supabase = createClient();
+                const { data, error } = await supabase.from('profiles').select('*');
+                if (error) {
+                    console.error('Failed to fetch users:', error);
+                    return;
+                }
+                if (data) {
+                    // Map Supabase profiles to AppStore User objects
+                    const mappedUsers: User[] = data.map(p => ({
+                        id: p.id,
+                        name: p.full_name || 'Guest',
+                        age: 21, // Default or calc from birthday
+                        university: p.university || '未設定',
+                        faculty: p.department || '',
+                        bio: '',
+                        tags: [],
+                        image: p.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + p.id,
+                        isOnline: false,
+                        birthDate: p.birth_date, // Ensure this field matches your User interface
+                        // Map other fields as necessary
+                        qualifications: [],
+                        skills: [],
+                        workHistory: []
+                    }));
+                    set({ users: mappedUsers });
+                }
+            },
+
+            fetchCompanies: async () => {
+                const supabase = createClient();
+                const { data, error } = await supabase.from('organizations').select('*');
+                if (error) {
+                    console.error('Failed to fetch companies:', error);
+                    return;
+                }
+                if (data) {
+                    // Map Supabase organizations to AppStore Company objects
+                    const mappedCompanies: Company[] = data.map(org => ({
+                        id: org.id,
+                        name: org.name,
+                        industry: org.industry || 'IT・通信', // Default
+                        location: org.location || '愛媛県松山市',
+                        description: org.description || '',
+                        image: org.logo_url || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=200',
+                        coverImage: org.cover_image_url || 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&q=80',
+                        tags: [], // Need separate table or json col
+                        features: [],
+                        salary: '',
+                        employees: '未設定',
+                        established: '未設定',
+                        url: org.website_url || '',
+                        address: org.address || '',
+                        president: org.representative || '',
+                        status: org.status || 'pending',
+                        videoUrl: undefined, // Or fetch from videos table
+                        rjpNegatives: '', // Default string, not array
+                        isPremium: false,
+                        logoColor: 'from-blue-500 to-indigo-500' // Default check
+                    }));
+                    set({ companies: mappedCompanies });
+                }
+            },
 
             getChat: (threadId) => get().chats.find(c => c.id === threadId),
             getUserChats: (userId) => get().chats.filter(c => c.userId === userId).sort((a, b) => b.updatedAt - a.updatedAt),

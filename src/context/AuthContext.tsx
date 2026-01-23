@@ -55,6 +55,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     addUser(newUser);
                     loginAs(userRole, session.user.id);
 
+                    // Critical: Fetch all users and companies to ensure AppStore has latest data
+                    // This fixes the "Infinite Loading" (missing profile) and "Dummy Admin Data" issues
+                    const { fetchUsers, fetchCompanies } = useAppStore.getState();
+                    fetchUsers();
+                    fetchCompanies();
+
                     // Sync Analysis Resuls
                     if (profile.diagnosis_result) {
                         console.log('Syncing diagnosis result:', profile.diagnosis_result);

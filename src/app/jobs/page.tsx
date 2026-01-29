@@ -4,13 +4,14 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/appStore';
 import { useSearchParams } from 'next/navigation';
-import { Building2, Heart, Search, Filter, X, ChevronDown, ChevronUp, MapPin, Briefcase, JapaneseYen, Clock, ArrowRight, Loader2 } from 'lucide-react';
+import { Building2, Heart, Search, Filter, X, ChevronDown, ChevronUp, MapPin, Briefcase, JapaneseYen, Clock, ArrowRight, Loader2, ShieldCheck } from 'lucide-react';
 import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
-import { Reel } from '@/lib/dummyData';
+import { Reel } from '@/types/shared';
 import { createClient } from '@/utils/supabase/client';
 import { toast } from 'sonner';
 import { fetchJobsAction } from '@/app/admin/actions';
+import { JobCardSkeleton } from '@/components/skeletons/JobCardSkeleton';
 
 function JobsContent() {
     const searchParams = useSearchParams();
@@ -127,9 +128,17 @@ function JobsContent() {
                 const isWeekend = tags.includes('土日祝休み') || jobData.holidays?.includes('土日');
                 if (!isWeekend) matchesConditions = false;
             }
+            if (selectedConditions.includes('premium')) {
+                if (!company?.is_premium) matchesConditions = false;
+            }
         }
 
         return matchesSearch && matchesArea && matchesIndustry && matchesTags && matchesConditions;
+    }).sort((a, b) => {
+        // Sort Priority: Premium > Standard
+        const aPremium = a.organization?.is_premium ? 1 : 0;
+        const bPremium = b.organization?.is_premium ? 1 : 0;
+        return bPremium - aPremium;
     });
 
     const isLiked = (jobId: string) => {
@@ -171,7 +180,7 @@ function JobsContent() {
     return (
         <div className="min-h-screen bg-slate-50 pb-24 md:pb-0 text-slate-900">
             {/* Unified Header Section */}
-            <div className="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-20">
+            <div className="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto p-4 md:p-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                         <div>
@@ -337,12 +346,19 @@ function JobsContent() {
                                     <div className="flex items-center gap-2 mb-3">
                                         <span className="text-sm font-black text-slate-700">こだわり条件</span>
                                     </div>
-                                    <div className="flex flex-wrap gap-3">
+                                    <div className="flex flex-wrap gap-2">
+                                        <button
+                                            onClick={() => toggleCondition('premium')}
+                                            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-bold transition-all border shadow-sm hover:-translate-y-0.5 ${selectedConditions.includes('premium') ? 'bg-yellow-50 border-yellow-400 text-yellow-700 ring-2 ring-yellow-100' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:shadow-md'}`}
+                                        >
+                                            <ShieldCheck size={14} className={selectedConditions.includes('premium') ? 'text-yellow-500' : 'text-slate-400'} />
+                                            認定企業
+                                        </button>
                                         <button
                                             onClick={() => toggleCondition('unexperienced')}
-                                            className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all border shadow-sm hover:-translate-y-0.5 ${selectedConditions.includes('unexperienced') ? 'bg-green-50 border-green-400 text-green-700 ring-2 ring-green-100' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:shadow-md'}`}
+                                            className={`px-4 py-2.5 rounded-full text-sm font-bold transition-all border shadow-sm hover:-translate-y-0.5 ${selectedConditions.includes('unexperienced') ? 'bg-blue-600 text-white border-blue-600 shadow-md ring-2 ring-blue-200' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:shadow-md'}`}
                                         >
-                                            🔰 未経験歓迎
+                                            未経験OK
                                         </button>
                                         <button
                                             onClick={() => toggleCondition('remote')}
@@ -393,9 +409,11 @@ function JobsContent() {
 
                 <div className="space-y-4">
                     {loading ? (
-                        <div className="flex justify-center p-20">
-                            <Loader2 className="animate-spin text-slate-400" />
-                        </div>
+                        <>
+                            <JobCardSkeleton />
+                            <JobCardSkeleton />
+                            <JobCardSkeleton />
+                        </>
                     ) : filteredJobs.length > 0 ? (
                         filteredJobs.map(job => {
                             const company = job.organization;
@@ -407,21 +425,7 @@ function JobsContent() {
                                 <Link href={`/jobs/${job.id}`} key={job.id} className="block group">
                                     <div className="bg-white rounded-[2rem] p-4 md:p-6 shadow-sm border border-slate-100 transition-all hover:shadow-lg hover:-translate-y-1 relative">
 
-                                        <div className="absolute right-6 top-1/2 -translate-y-1/2 z-20 transition-transform group-hover:scale-110">
-                                            <div onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                setActiveReels(company.reels || []);
-                                                setActiveEntity({ name: job.title, id: job.id, companyId: company.id });
-                                                setIsReelModalOpen(true);
-                                            }}>
-                                                <ReelIcon
-                                                    reels={company.reels || []}
-                                                    fallbackImage={company.cover_image_url}
-                                                    onClick={() => { }}
-                                                />
-                                            </div>
-                                        </div>
+
 
                                         <button
                                             onClick={(e) => toggleLike(job.id, e)}
@@ -446,6 +450,18 @@ function JobsContent() {
                                                                 ★ PREMIUM
                                                             </span>
                                                         )}
+                                                        <div className="absolute right-2 bottom-2 z-20 transition-transform group-hover:scale-110">
+                                                            <ReelIcon
+                                                                reels={job.reels || []}
+                                                                fallbackImage={company.cover_image_url}
+                                                                size="md"
+                                                                onClick={() => {
+                                                                    setActiveReels(job.reels || []);
+                                                                    setActiveEntity({ name: jobData.title, id: job.id, companyId: company.id });
+                                                                    setIsReelModalOpen(true);
+                                                                }}
+                                                            />
+                                                        </div>
                                                     </div>
                                                     <div className="grid grid-cols-3 gap-2">
                                                         {subImages.slice(0, 3).map((img: string, idx: number) => (
@@ -457,7 +473,7 @@ function JobsContent() {
                                                 </div>
                                             </div>
 
-                                            <div className="flex-1 min-w-0 flex flex-col pr-24 md:pr-36">
+                                            <div className="flex-1 min-w-0 flex flex-col pr-12 md:pr-16">
                                                 <div className="mb-1">
                                                     <div className="text-xs font-bold text-slate-500 flex items-center gap-1.5 mb-1.5">
                                                         <Building2 size={12} />
@@ -476,18 +492,18 @@ function JobsContent() {
                                                     ))}
                                                 </div>
 
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 mb-4 text-xs font-bold text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                                    <div className="flex items-center gap-2">
-                                                        <MapPin size={14} className="text-slate-400 shrink-0" />
-                                                        <span className="truncate">{jobData.location || company.location}</span>
+                                                <div className="flex flex-wrap gap-3 mb-5">
+                                                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-100 text-xs font-bold text-slate-600">
+                                                        <MapPin size={14} className="text-slate-400" />
+                                                        <span className="truncate max-w-[100px]">{jobData.location || company.location}</span>
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-blue-600">
-                                                        <JapaneseYen size={14} className="text-blue-400 shrink-0" />
-                                                        <span className="truncate text-base">{jobData.reward || jobData.salary || '要相談'}</span>
+                                                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-100 text-xs font-bold text-blue-700 shadow-sm">
+                                                        <JapaneseYen size={14} className="text-blue-500" />
+                                                        <span className="truncate">{jobData.reward || jobData.salary || '要相談'}</span>
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-slate-600 md:col-span-2">
-                                                        <Clock size={14} className="text-slate-400 shrink-0" />
-                                                        <span className="truncate">{jobData.working_hours || '9:00 - 18:00'}</span>
+                                                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-100 text-xs font-bold text-slate-600">
+                                                        <Clock size={14} className="text-slate-400" />
+                                                        <span className="truncate max-w-[120px]">{jobData.working_hours || '9:00 - 18:00'}</span>
                                                     </div>
                                                 </div>
 

@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/appStore';
 import { createClient } from '@/utils/supabase/client';
 import { toast } from 'sonner';
-import { Building2 } from 'lucide-react';
+import { Building2, Eye, EyeOff } from 'lucide-react';
 
 export default function CompanyLoginPage() {
     const router = useRouter();
     const supabase = createClient();
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
+    const [showPassword, setShowPassword] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -19,19 +20,32 @@ export default function CompanyLoginPage() {
         setLoading(true);
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabase.auth.signInWithPassword({
                 email,
                 password
             });
 
             if (error) {
-                toast.error(error.message || 'ログインに失敗しました');
+                const message = error.message.includes('Invalid login credentials')
+                    ? 'メールアドレスまたはパスワードが間違っています'
+                    : 'ログインに失敗しました';
+                toast.error(message);
+                setLoading(false);
                 return;
             }
 
+            if (!data.user) {
+                toast.error('ユーザー情報の取得に失敗しました');
+                setLoading(false);
+                return;
+            }
+
+            // Sync with AppStore
+            const loginAs = useAppStore.getState().loginAs;
+            loginAs('company', undefined, data.user.id);
+
             toast.success('ログインしました');
-            router.push('/dashboard/company');
-            router.refresh();
+            window.location.href = '/dashboard/company';
         } catch (error) {
             toast.error('エラーが発生しました');
             console.error(error);
@@ -65,14 +79,32 @@ export default function CompanyLoginPage() {
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-slate-700">パスワード</label>
-                        <input
-                            type="password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:border-slate-400 transition-colors"
-                            placeholder="••••••••"
-                        />
+                        <div className="relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 outline-none focus:border-slate-400 transition-colors pr-12"
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
+                        <div className="text-right mt-1">
+                            <button
+                                type="button"
+                                onClick={() => router.push('/auth/forgot-password')}
+                                className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors"
+                            >
+                                パスワードをお忘れの方はこちら
+                            </button>
+                        </div>
                     </div>
 
                     <div className="pt-4">
@@ -87,12 +119,21 @@ export default function CompanyLoginPage() {
                 </form>
             </div>
 
-            <button
-                onClick={() => router.push('/')}
-                className="mt-8 text-slate-400 text-sm font-bold hover:text-slate-600 transition-colors"
-            >
-                ホームに戻る
-            </button>
+            <div className="mt-8 flex flex-col items-center gap-4">
+                <button
+                    onClick={() => router.push('/organizations/register')}
+                    className="text-slate-600 text-sm font-black hover:underline transition-colors"
+                >
+                    アカウントをお持ちでない企業の方はこちら
+                </button>
+
+                <button
+                    onClick={() => router.push('/')}
+                    className="text-slate-400 text-sm font-bold hover:text-slate-600 transition-colors"
+                >
+                    ホームに戻る
+                </button>
+            </div>
         </div>
     );
 }

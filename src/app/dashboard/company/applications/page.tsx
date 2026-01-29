@@ -7,6 +7,7 @@ import { useAppStore } from '@/lib/appStore';
 import { toast } from 'sonner';
 import { User, MessageSquare, Calendar, ChevronRight, MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
+import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
 
 // Types
 type ApplicationStatus = 'applied' | 'screening' | 'interview' | 'offer' | 'hired' | 'rejected';
@@ -18,7 +19,7 @@ interface Application {
     status: ApplicationStatus;
     created_at: string;
     jobs: { title: string };
-    profiles: { full_name: string; email: string; avatar_url: string; user_type: string };
+    profiles: { full_name: string; email: string; avatar_url: string; user_type: string; gender?: string };
 }
 
 const STATUS_COLUMNS: { id: ApplicationStatus; label: string; color: string }[] = [
@@ -51,7 +52,7 @@ export default function CompanyATSPage() {
             .select(`
                 *,
                 jobs (title),
-                profiles (full_name, email, avatar_url, user_type)
+                profiles (full_name, email, avatar_url, user_type, gender)
             `)
             .eq('organization_id', currentCompanyId)
             .order('created_at', { ascending: false });
@@ -115,11 +116,20 @@ export default function CompanyATSPage() {
                                         <div key={app.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all group">
                                             <div className="flex items-center gap-3 mb-3">
                                                 <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
-                                                    {app.profiles.avatar_url ? (
-                                                        <img src={app.profiles.avatar_url} alt={app.profiles.full_name} className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <User size={20} className="text-slate-400" />
-                                                    )}
+                                                    <img
+                                                        src={app.profiles.avatar_url || getFallbackAvatarUrl(app.user_id, app.profiles.gender)}
+                                                        alt={app.profiles.full_name}
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            if (!target.getAttribute('data-error-tried')) {
+                                                                target.setAttribute('data-error-tried', 'true');
+                                                                target.src = getFallbackAvatarUrl(app.user_id, app.profiles.gender);
+                                                            } else {
+                                                                target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(app.profiles.full_name || 'U') + '&background=random';
+                                                            }
+                                                        }}
+                                                    />
                                                 </div>
                                                 <div>
                                                     <h4 className="font-black text-slate-800 text-sm">{app.profiles.full_name}</h4>

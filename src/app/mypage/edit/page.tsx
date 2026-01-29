@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useAppStore } from '@/lib/appStore';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Camera, ChevronRight, Save } from 'lucide-react';
+import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
 
 export default function ProfileEditPage() {
     const { users, currentUserId, updateUser } = useAppStore();
@@ -17,6 +18,7 @@ export default function ProfileEditPage() {
         bio: currentUser?.bio || '',
         faculty: currentUser?.faculty || '',
         graduationYear: currentUser?.graduationYear || '',
+        gender: currentUser?.gender || 'other',
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -49,13 +51,22 @@ export default function ProfileEditPage() {
                 <div className="flex flex-col items-center">
                     <div className="relative">
                         <img
-                            src={currentUser.image}
+                            src={currentUser.image || getFallbackAvatarUrl(currentUser.id, form.gender)}
                             alt={currentUser.name}
-                            className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md"
+                            className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md transition-all"
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                if (!target.getAttribute('data-error-tried')) {
+                                    target.setAttribute('data-error-tried', 'true');
+                                    target.src = getFallbackAvatarUrl(currentUser.id, form.gender);
+                                } else {
+                                    target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser.name || 'U') + '&background=random';
+                                }
+                            }}
                         />
-                        <button className="absolute bottom-0 right-0 w-8 h-8 bg-slate-800 text-white rounded-full flex items-center justify-center border-2 border-white">
+                        <div className="absolute bottom-0 right-0 w-8 h-8 bg-slate-800 text-white rounded-full flex items-center justify-center border-2 border-white">
                             <Camera size={14} />
-                        </button>
+                        </div>
                     </div>
                 </div>
 
@@ -82,7 +93,27 @@ export default function ProfileEditPage() {
                             className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800 focus:outline-none focus:border-blue-500"
                         />
                     </div>
-
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-400 uppercase">性別（デフォルトアイコンに反映されます）</label>
+                        <div className="grid grid-cols-3 gap-3">
+                            {[
+                                { id: 'male', label: '男性' },
+                                { id: 'female', label: '女性' },
+                                { id: 'other', label: 'その他' }
+                            ].map((g) => (
+                                <button
+                                    key={g.id}
+                                    onClick={() => setForm({ ...form, gender: g.id })}
+                                    className={`py-3 rounded-xl font-bold text-sm transition-all border-2 ${form.gender === g.id
+                                        ? 'bg-blue-50 border-blue-500 text-blue-600'
+                                        : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
+                                        }`}
+                                >
+                                    {g.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-400 uppercase">学部</label>

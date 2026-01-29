@@ -27,7 +27,9 @@ export async function GET() {
                 )
             `)
             .order('order_index', { ascending: true })
+            .order('created_at', { ascending: true })
             .order('order_index', { foreignTable: 'course_curriculums', ascending: true })
+            .order('created_at', { foreignTable: 'course_curriculums', ascending: true })
         // .order('order_index', { foreignTable: 'course_curriculums.course_lessons', ascending: true }); // standard select doesn't support deep order easy?
         // We might need to sort in JS.
 
@@ -44,10 +46,13 @@ export async function GET() {
                         .sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
                         .map((lesson: any) => ({
                             ...lesson,
+                            ...lesson,
                             youtubeUrl: lesson.youtube_url, // Map back to CamelCase
                             curriculumId: lesson.curriculum_id
                         }))
-                }))
+                })),
+            viewCount: course.view_count, // Explicit map
+            tags: course.tags // Explicit map
         }));
 
         return NextResponse.json(formattedData);

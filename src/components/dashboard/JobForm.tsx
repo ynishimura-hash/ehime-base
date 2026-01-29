@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Sparkles, Globe, FileText, Upload, RefreshCcw } from 'lucide-react';
 import { toast } from 'sonner';
-import { Job } from '@/lib/dummyData';
+import { Job } from '@/types/shared';
 
 interface JobFormProps {
     initialData?: Partial<Job>;

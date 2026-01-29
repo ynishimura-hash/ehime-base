@@ -3,16 +3,27 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/appStore';
-import { JOBS, COMPANIES } from '@/lib/dummyData';
 import { ChevronLeft, MapPin, Heart, ArrowRight, CheckCircle2, Building2, Briefcase, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { ReelIcon } from '@/components/reels/ReelIcon';
+import { ReelModal } from '@/components/reels/ReelModal';
+import { Reel } from '@/types/shared';
+
 type Tab = 'quest' | 'job' | 'company';
 
 export default function SavedJobsPage() {
-    const { interactions, toggleInteraction, currentUserId } = useAppStore();
+    const { interactions, toggleInteraction, currentUserId, jobs, companies, fetchJobs, fetchCompanies } = useAppStore();
     const [activeTab, setActiveTab] = useState<Tab>('quest');
+    const [isReelModalOpen, setIsReelModalOpen] = useState(false);
+    const [activeReels, setActiveReels] = useState<Reel[]>([]);
+    const [activeEntity, setActiveEntity] = useState<{ name: string, id: string, entityType: 'company' | 'job' | 'quest', companyId?: string }>({ name: '', id: '', entityType: 'company' });
+
+    React.useEffect(() => {
+        if (jobs.length === 0) fetchJobs();
+        if (companies.length === 0) fetchCompanies();
+    }, []);
 
     // Helper to check if item is liked
     const isLiked = (type: 'like_job' | 'like_company', id: string) => {
@@ -20,21 +31,21 @@ export default function SavedJobsPage() {
     };
 
     // Filter jobs based on interactions
-    const savedQuests = JOBS.filter(job =>
-        isLiked('like_job', job.id) && job.type === 'quest'
-    ).map(job => {
-        const company = COMPANIES.find(c => c.id === job.companyId);
-        return { ...job, company };
+    const savedQuests = jobs.filter(job =>
+        isLiked('like_job', job.id) && (job.type === 'quest')
+    ).map((job: any) => {
+        const company = job.organization || companies.find(c => c.id === job.companyId) || {};
+        return { ...job, company, organization: company };
     });
 
-    const savedJobs = JOBS.filter(job =>
-        isLiked('like_job', job.id) && job.type === 'job'
-    ).map(job => {
-        const company = COMPANIES.find(c => c.id === job.companyId);
-        return { ...job, company };
+    const savedJobs = jobs.filter(job =>
+        isLiked('like_job', job.id) && (job.type === 'job')
+    ).map((job: any) => {
+        const company = job.organization || companies.find(c => c.id === job.companyId) || {};
+        return { ...job, company, organization: company };
     });
 
-    const savedCompanies = COMPANIES.filter(company =>
+    const savedCompanies = companies.filter(company =>
         isLiked('like_company', company.id)
     );
 
@@ -51,6 +62,15 @@ export default function SavedJobsPage() {
     const handleToggleLikeCompany = (companyId: string) => {
         toggleInteraction('like_company', currentUserId, companyId);
         toast.success('「気になる」を解除しました');
+    };
+
+
+
+    const handleOpenReel = (reels: Reel[], entityName: string, entityId: string, entityType: 'company' | 'job' | 'quest', companyId?: string) => {
+        if (!reels || reels.length === 0) return;
+        setActiveReels(reels);
+        setActiveEntity({ name: entityName, id: entityId, entityType, companyId });
+        setIsReelModalOpen(true);
     };
 
     const getCount = (tab: Tab) => {
@@ -122,12 +142,24 @@ export default function SavedJobsPage() {
                                     exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
                                     className="group relative bg-white rounded-3xl p-5 shadow-sm border border-zinc-100 hover:shadow-lg transition-shadow"
                                 >
+
                                     <div className="flex items-center gap-4">
-                                        <img
-                                            src={company.image} // dummyData uses 'image' but safeguard
-                                            alt={company.name}
-                                            className="w-16 h-16 rounded-2xl object-cover border border-zinc-100"
-                                        />
+                                        <div className="relative">
+                                            <img
+                                                src={company.cover_image_url || company.image}
+                                                alt={company.name}
+                                                className="w-16 h-16 rounded-2xl object-cover border border-zinc-100"
+                                            />
+                                            {company.reels && company.reels.length > 0 && (
+                                                <div className="absolute -bottom-2 -right-2 z-10">
+                                                    <ReelIcon
+                                                        reels={company.reels}
+                                                        size="sm"
+                                                        onClick={() => handleOpenReel(company.reels!, company.name, company.id, 'company', company.id)}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-[10px] text-zinc-400 font-black tracking-wider uppercase mb-1">{company.industry}</p>
                                             <h3 className="text-base font-black text-zinc-800 truncate leading-tight group-hover:text-blue-600 transition-colors">{company.name}</h3>
@@ -172,12 +204,24 @@ export default function SavedJobsPage() {
                                         )}
 
                                         {/* Company Info */}
+
                                         <div className="flex items-center gap-3 mb-3">
-                                            <img
-                                                src={job.company?.image}
-                                                alt={job.company?.name}
-                                                className="w-10 h-10 rounded-full object-cover border border-zinc-100"
-                                            />
+                                            <div className="relative">
+                                                <img
+                                                    src={job.company?.cover_image_url || job.company?.image}
+                                                    alt={job.company?.name}
+                                                    className="w-10 h-10 rounded-full object-cover border border-zinc-100"
+                                                />
+                                                {job.reels && job.reels.length > 0 && (
+                                                    <div className="absolute -bottom-1 -right-1 z-10">
+                                                        <ReelIcon
+                                                            reels={job.reels}
+                                                            size="sm"
+                                                            onClick={() => handleOpenReel(job.reels!, job.title, job.id, job.type === 'quest' ? 'quest' : 'job', job.companyId)}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
                                             <div>
                                                 <p className="text-[10px] text-zinc-400 font-black tracking-wider uppercase">{job.company?.industry}</p>
                                                 <p className="text-xs font-bold text-zinc-600">{job.company?.name}</p>
@@ -228,6 +272,22 @@ export default function SavedJobsPage() {
                     </AnimatePresence>
                 )}
             </main>
+
+            {/* Reel Modal */}
+            <AnimatePresence>
+                {isReelModalOpen && (
+                    <ReelModal
+                        isOpen={isReelModalOpen}
+                        onClose={() => setIsReelModalOpen(false)}
+                        reels={activeReels}
+                        entityName={activeEntity.name}
+                        entityId={activeEntity.id}
+                        entityType={activeEntity.entityType}
+                        companyId={activeEntity.companyId}
+                    />
+                )}
+            </AnimatePresence>
         </div>
+
     );
 }

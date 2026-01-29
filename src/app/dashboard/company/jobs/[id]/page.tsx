@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/appStore';
 import { toast } from 'sonner';
-import { Job } from '@/lib/dummyData';
+import { Job } from '@/types/shared';
 import JobForm from '@/components/dashboard/JobForm';
 
 export default function JobEditPage({ params }: { params: { id: string } }) {

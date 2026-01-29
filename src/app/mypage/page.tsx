@@ -1,37 +1,58 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import { User, Settings, LogOut, Sparkles, CircleDollarSign, Target, Zap } from 'lucide-react';
+import { User, Settings, LogOut, Sparkles, CircleDollarSign, Target, Zap, Home, Swords, Trophy, ArrowRight, ChevronRight } from 'lucide-react';
 import { useAppStore } from '@/lib/appStore';
 
 import Link from 'next/link';
 import { calculateDayMasterIndex, JIKKAN, JIKKAN_READING, JIKKAN_ELEMENTS, getDailyFortune } from '@/lib/fortune';
 import { useGameStore } from '@/lib/gameStore';
-import { Trophy, Swords, ArrowRight } from 'lucide-react';
 
 import { useRouter } from 'next/navigation';
+import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
 
 const DEMO_USER_ID = '061fbf87-f36e-4612-80b4-dedc77b55d5e';
 
 export default function MyPage() {
-    const { users, currentUserId, authStatus } = useAppStore();
+    const { users, currentUserId, authStatus, activeRole, fetchUsers } = useAppStore();
     const { isInitialized, stats } = useGameStore();
     const router = useRouter();
 
     useEffect(() => {
+        // If authenticated but no users, try to fetch
+        if (authStatus === 'authenticated' && users.length === 0) {
+            fetchUsers();
+        }
+
         // If unauthenticated after a short delay, go to login
         if (authStatus === 'unauthenticated') {
             const timer = setTimeout(() => {
                 router.replace('/login');
-            }, 2000);
+            }, 3000);
             return () => clearTimeout(timer);
         }
-    }, [authStatus, router]);
+    }, [authStatus, users.length, fetchUsers, router]);
 
-    // Demo Mode: If admin or user not found, show Yuji's data
+    // Demo Mode & Fallbacks
     const effectiveId = currentUserId === 'u_yuji' ? DEMO_USER_ID : currentUserId;
-    const currentUser = users.find(u => u.id === effectiveId) ||
-        (currentUserId === 'u_admin' ? users.find(u => u.id === DEMO_USER_ID) : undefined);
+
+    // 1. Try to find the actual user
+    let currentUser = users.find((u: any) => u.id === effectiveId);
+
+    // 2. If not found and is Admin, fallback to Demo User
+    if (!currentUser && activeRole === 'admin') {
+        currentUser = users.find((u: any) => u.id === DEMO_USER_ID) || users[0];
+    }
+
+    // 3. Last resort fallback if still loading/not found but authenticated
+    // Show loading state, but with a timeout to show demo data or error
+    if (!currentUser && authStatus === 'authenticated') {
+        // Provide a small buffer before showing loading forever
+        if (users.length > 0) {
+            // If users are loaded but STILL not found, show the first user if admin
+            if (activeRole === 'admin') currentUser = users[0];
+        }
+    }
 
     if (!currentUser) {
         return (
@@ -47,12 +68,25 @@ export default function MyPage() {
 
     return (
         <div className="min-h-screen bg-slate-50 pb-24">
-            <div className="bg-white p-6 pb-10 rounded-b-[2rem] shadow-sm mb-6">
+            <div className="bg-white p-6 pb-10 rounded-b-[2rem] shadow-sm mb-6 relative">
+                <Link href="/dashboard" className="absolute top-6 left-6 text-slate-400 hover:text-blue-600 transition-colors flex items-center gap-1 text-xs font-bold">
+                    <Home size={16} />
+                    ホームへ戻る
+                </Link>
                 <div className="flex flex-col items-center">
                     <img
-                        src={currentUser.image}
+                        src={currentUser.image || getFallbackAvatarUrl(currentUser.id, currentUser.gender)}
                         alt={currentUser.name}
                         className="w-24 h-24 rounded-full object-cover border-4 border-slate-50 shadow-md mb-4"
+                        onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            if (!target.getAttribute('data-error-tried')) {
+                                target.setAttribute('data-error-tried', 'true');
+                                target.src = getFallbackAvatarUrl(currentUser.id, currentUser.gender);
+                            } else {
+                                target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser.name || 'U') + '&background=random';
+                            }
+                        }}
                     />
                     <h1 className="text-xl font-black text-slate-800 mb-1">{currentUser.name}</h1>
                     <p className="text-sm text-slate-500 font-bold">{currentUser.university || '所属なし'}</p>
@@ -173,6 +207,33 @@ export default function MyPage() {
                     </div>
                     <div className="flex-1 font-bold text-slate-700">自己分析・資質診断</div>
                     <div className="text-slate-400">→</div>
+                </Link>
+
+                <Link href="/mypage/profile-checklist" className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 rounded-xl shadow-lg flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform text-white mb-2">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center border-2 border-white/30 backdrop-blur-sm relative">
+                        {(() => {
+                            // Calculate Score Inline (Simplified for preview)
+                            // Ideally, this should be a hook or shared util, but for now we duplicate simple logic or just check basic fields
+                            let pts = 0;
+                            if (currentUser.name) pts++;
+                            if (currentUser.university) pts++;
+                            if (currentUser.bio) pts++;
+                            if (currentUser.image) pts++;
+                            if (currentUser.skills?.length) pts++;
+                            // Rough estimate for display
+                            const percent = Math.min(100, Math.round((pts / 5) * 100)); // Just a dummy mostly, better to rely on store or util
+                            // Actually let's just make it generic or use a Trophy icon if we can't calc easily here
+                            return <Target size={24} />;
+                        })()}
+                    </div>
+                    <div className="flex-1">
+                        <p className="text-[10px] font-bold opacity-80 uppercase tracking-widest">Profile Status</p>
+                        <p className="font-black text-lg">プロフィール充実度</p>
+                        <p className="text-xs font-bold text-blue-100">機能解放まであと少し！</p>
+                    </div>
+                    <div className="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full">
+                        <ChevronRight size={18} />
+                    </div>
                 </Link>
 
                 <Link href="/game" className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-colors">

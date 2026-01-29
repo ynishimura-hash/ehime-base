@@ -3,8 +3,11 @@
 import React from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/appStore';
-import { Building2, MapPin, Users, ArrowRight, ShieldCheck, Eye, Briefcase, Search, X, Filter, ChevronUp, ChevronDown, Loader2 } from 'lucide-react';
-import { JOBS, Reel } from '@/lib/dummyData';
+import { Building2, MapPin, Users, ArrowRight, ShieldCheck, Eye, Briefcase, Search, X, Filter, ChevronUp, ChevronDown, Loader2, Heart } from 'lucide-react';
+import { fetchPublicCompaniesAction } from '@/app/admin/actions';
+import { CompanyCardSkeleton } from '@/components/skeletons/CompanyCardSkeleton';
+// import { JOBS, Reel } from '@/lib/dummyData';
+import { Reel } from '@/types/shared';
 import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
 import { createClient } from '@/utils/supabase/client';
@@ -12,7 +15,7 @@ import { toast } from 'sonner';
 
 export default function CompaniesPage() {
     const supabase = createClient();
-    const [companies, setCompanies] = React.useState<any[]>([]);
+    const { companies, jobs, interactions, toggleInteraction, currentUserId, fetchCompanies } = useAppStore();
     const [loading, setLoading] = React.useState(true);
     const [searchQuery, setSearchQuery] = React.useState('');
     const [selectedIndustry, setSelectedIndustry] = React.useState<string | null>(null);
@@ -24,27 +27,15 @@ export default function CompaniesPage() {
     const [activeReels, setActiveReels] = React.useState<Reel[]>([]);
     const [activeEntity, setActiveEntity] = React.useState<{ name: string, id: string }>({ name: '', id: '' });
     // Fetch Companies from Supabase
-    const fetchCompanies = async () => {
-        setLoading(true);
-        try {
-            const { fetchPublicCompaniesAction } = await import('@/app/admin/actions');
-            const result = await fetchPublicCompaniesAction();
 
-            if (!result.success) {
-                console.error('Error fetching companies:', result.error);
-                toast.error('企業情報の取得に失敗しました');
-            } else {
-                setCompanies(result.data || []);
-            }
-        } catch (error) {
-            console.error('Fetch error:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     React.useEffect(() => {
-        fetchCompanies();
+        const init = async () => {
+            setLoading(true);
+            await fetchCompanies();
+            setLoading(false);
+        };
+        init();
     }, []);
 
     // Derived Data
@@ -71,21 +62,32 @@ export default function CompaniesPage() {
 
             if (selectedFeatures.includes('transparent')) {
                 // "Transparent" = Has RJP negatives (Reality Check)
-                if (!c.rjp_negatives) matchesFeatures = false;
+                if (!c.rjpNegatives) matchesFeatures = false;
             }
 
             if (selectedFeatures.includes('hiring')) {
-                const hasJobs = c.jobs && c.jobs.length > 0;
+                const hasJobs = jobs.filter(j => j.companyId === c.id).length > 0; // Removed status check if strict, or kept if valid
                 if (!hasJobs) matchesFeatures = false;
             }
         }
 
         return matchesSearch && matchesIndustry && matchesFeatures;
+    }).sort((a, b) => {
+        // Sort Priority: Premium > Standard
+        const aPremium = a.is_premium ? 1 : 0;
+        const bPremium = b.is_premium ? 1 : 0;
+        return bPremium - aPremium;
     });
+
+    const isLiked = (companyId: string) => {
+        return interactions.some(i => i.type === 'like_company' && i.fromId === currentUserId && i.toId === companyId);
+    };
 
     const toggleFeature = (feature: string) => {
         if (selectedFeatures.includes(feature)) {
             setSelectedFeatures(selectedFeatures.filter(f => f !== feature));
+        } else {
+            setSelectedFeatures([...selectedFeatures, feature]);
         }
     };
 
@@ -100,7 +102,7 @@ export default function CompaniesPage() {
     return (
         <div className="min-h-screen bg-slate-50 pb-24 md:pb-0">
             {/* Unified Header Section */}
-            <div className="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-20">
+            <div className="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto p-4 md:p-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                         <div>
@@ -227,15 +229,17 @@ export default function CompaniesPage() {
                 {/* Header & Controls removed (moved to sticky) */}
 
                 {/* Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
                     {/* Count */}
-                    <div className="col-span-1 md:col-span-3 flex items-center justify-between px-2 mb-2">
+                    <div className="col-span-1 sm:col-span-2 xl:col-span-3 flex items-center justify-between px-2 mb-2">
                         <span className="text-sm font-bold text-slate-500">{filteredCompanies.length}社の企業</span>
                     </div>
                     {loading ? (
-                        <div className="col-span-3 flex justify-center p-20">
-                            <Loader2 className="animate-spin text-slate-400" />
-                        </div>
+                        Array.from({ length: 9 }).map((_, i) => (
+                            <div key={i} className="h-full">
+                                <CompanyCardSkeleton />
+                            </div>
+                        ))
                     ) : filteredCompanies.length > 0 ? (
                         filteredCompanies.map(company => (
                             <Link
@@ -243,30 +247,45 @@ export default function CompaniesPage() {
                                 key={company.id}
                                 className="block bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all border border-slate-100 group flex flex-col h-full relative"
                             >
-                                <div className="absolute top-4 left-4 z-10 text-white drop-shadow-md">
-                                    <ReelIcon
-                                        reels={company.reels || []}
-                                        fallbackImage={company.cover_image_url || '/images/defaults/company_cover.jpg'}
-                                        size="md"
-                                        onClick={() => {
-                                            setActiveReels(company.reels || []);
-                                            setActiveEntity({ name: company.name, id: company.id });
-                                            setIsReelModalOpen(true);
-                                        }}
+
+
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        toggleInteraction('like_company', currentUserId, company.id);
+                                    }}
+                                    className="absolute top-4 right-4 z-10 bg-white/80 backdrop-blur-sm p-3 rounded-full shadow-sm hover:bg-red-50 hover:scale-110 transition-all group/heart"
+                                >
+                                    <Heart
+                                        size={20}
+                                        className={`transition-colors ${isLiked(company.id) ? 'text-red-500 fill-red-500' : 'text-slate-300 group-hover/heart:text-red-500'}`}
                                     />
-                                </div>
+                                </button>
                                 {/* Larger Image Area */}
-                                <div className="relative h-56 bg-slate-200 overflow-hidden">
+                                <div className="relative aspect-video bg-slate-200 overflow-hidden">
                                     <img
                                         src={company.cover_image_url || company.image || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200'}
                                         alt={company.name}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                     />
                                     {company.is_premium && (
-                                        <div className="absolute top-4 right-4 bg-yellow-400 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg backdrop-blur-sm">
+                                        <div className="absolute top-4 left-4 bg-yellow-400 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg backdrop-blur-sm z-10">
                                             ★ PREMIUM
                                         </div>
                                     )}
+                                    <div className="absolute right-4 bottom-4 z-20 group-hover:scale-110 transition-transform">
+                                        <ReelIcon
+                                            reels={company.reels || []}
+                                            fallbackImage={company.cover_image_url || '/images/defaults/company_cover.jpg'}
+                                            size="md"
+                                            onClick={() => {
+                                                setActiveReels(company.reels || []);
+                                                setActiveEntity({ name: company.name, id: company.id });
+                                                setIsReelModalOpen(true);
+                                            }}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="p-6 flex-1 flex flex-col">
@@ -293,10 +312,10 @@ export default function CompaniesPage() {
                                         <span className="group-hover:text-blue-600 transition-colors flex items-center gap-1">
                                             詳細を見る <ArrowRight size={12} />
                                         </span>
-                                        {company.employee_count && (
+                                        {company.employeeCount && (
                                             <div className="flex items-center gap-1">
                                                 <Users size={12} />
-                                                {company.employee_count}
+                                                {company.employeeCount}
                                             </div>
                                         )}
                                     </div>
@@ -304,7 +323,7 @@ export default function CompaniesPage() {
                             </Link>
                         ))
                     ) : (
-                        <div className="col-span-1 md:col-span-3 text-center py-20">
+                        <div className="col-span-1 sm:col-span-2 lg:col-span-3 text-center py-20">
                             <p className="text-slate-400 font-bold">条件に一致する企業が見つかりませんでした。</p>
                             <button
                                 onClick={() => { setSearchQuery(''); setSelectedIndustry(null); }}

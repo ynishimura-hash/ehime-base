@@ -22,7 +22,7 @@ export interface GameCalendar {
     week: number;
 }
 
-export type GameMode = 'strategy' | 'novel' | 'quiz' | 'action' | 'action_menu';
+export type GameMode = 'strategy' | 'novel' | 'quiz' | 'action' | 'action_menu' | 'izakaya' | 'job_select' | 'sns' | 'play_select' | 'report' | 'battle';
 
 interface GameState {
     stats: GameStats;
@@ -101,6 +101,9 @@ export const useGameStore = create<GameState>()(
                 // Clamp values
                 newStats.stamina = Math.min(newStats.maxStamina, Math.max(0, newStats.stamina));
                 newStats.stress = Math.min(newStats.maxStress, Math.max(0, newStats.stress));
+                newStats.knowledge = Math.max(0, newStats.knowledge); // No upper limit for stats? Or 100? Let's keep uncapped or 100 based on usage. Rank S is >= 100 so likely uncapped or high cap.
+                // Money
+                newStats.money = Math.max(0, newStats.money);
 
                 return { stats: newStats };
             }),
@@ -136,7 +139,13 @@ export const useGameStore = create<GameState>()(
                     }
                 }
 
-                return { calendar: { year, month, week } };
+                // Recover Stamina on new week
+                const recoveredStamina = Math.min(state.stats.maxStamina, state.stats.stamina + 30); // +30 per week
+
+                return {
+                    calendar: { year, month, week },
+                    stats: { ...state.stats, stamina: recoveredStamina }
+                };
             }),
 
             setGameMode: (gameMode) => set({ gameMode }),
@@ -153,6 +162,8 @@ export const useGameStore = create<GameState>()(
                 // Clamp values
                 newStats.stamina = Math.min(newStats.maxStamina, Math.max(0, newStats.stamina));
                 newStats.stress = Math.min(newStats.maxStress, Math.max(0, newStats.stress));
+                newStats.money = Math.max(0, newStats.money);
+                // Stats (Knowledge etc) can go up indefinitely or cap at some point, letting them go up for now.
 
                 return { stats: newStats };
             }),

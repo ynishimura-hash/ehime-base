@@ -57,7 +57,7 @@ export default function OrganizationProgressPage() {
                 // Since we can't easily do `where user_id in (...)` for a large list without hitting limits or RLS issues if strict,
                 // but here RLS allows us to just select * from course_progress if we are admin.
                 // However, fetching ALL progress might be heavy. Let's fetch for the specific users we found.
-                const userIds = memberData.map(m => m.user_id);
+                const userIds = memberData.map((m: any) => m.user_id);
 
                 if (userIds.length === 0) {
                     setMembers([]);
@@ -75,9 +75,9 @@ export default function OrganizationProgressPage() {
                 // 3. Process and aggregation
                 const processedMembers: MemberProgress[] = memberData.map((m: any) => {
                     const profile = m.profiles;
-                    const userProgress = progressData?.filter(p => p.user_id === m.user_id) || [];
+                    const userProgress = progressData?.filter((p: any) => p.user_id === m.user_id) || [];
 
-                    const completedCount = userProgress.filter(p => p.status === 'completed').length;
+                    const completedCount = userProgress.filter((p: any) => p.status === 'completed').length;
 
                     // Find latest access
                     let lastActiveDate = '-';

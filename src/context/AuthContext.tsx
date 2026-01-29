@@ -23,7 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (event, session) => {
+        } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
             if (session?.user) {
                 // Fetch Profile Data
                 const { data: profile } = await supabase
@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     }
                 }
             } else if (event === 'SIGNED_OUT') {
-                logout();
+                useAppStore.getState().resetState();
                 setRoleState('seeker');
             }
             setIsLoading(false);

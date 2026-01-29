@@ -5,6 +5,7 @@ import { Search, MoreHorizontal, Send, Paperclip, Phone, ChevronLeft, MessageSqu
 import { useAppStore, ChatThread, Attachment } from '@/lib/appStore';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import ChatDetailModal from './ChatDetailModal';
+import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
 
 interface UnifiedChatInterfaceProps {
     mode: 'fullscreen' | 'embedded'; // fullscreen for Seeker, embedded for Company Dashboard
@@ -32,12 +33,14 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
         isCompactMode,
         setChatSortBy,
         toggleChatFilterPriority,
-        setCompactMode
+        setCompactMode,
+        fetchChats
     } = useAppStore();
 
     const [mounted, setMounted] = useState(false);
     useEffect(() => {
         setMounted(true);
+        fetchChats();
     }, []);
 
     // Determine which chats to show based on role
@@ -222,16 +225,21 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
         let partner = { name: '', image: '', isImageColor: false };
         if (activeRole === 'seeker') {
             const c = companies.find(c => c.id === chat.companyId);
+            // Fix: Prioritize image, then default image. Avoid forcing isImageColor.
+            // User requested a default image if no image is present.
+            const hasImage = !!c?.image;
+            const defaultImage = '/images/defaults/default_company_icon.png';
+
             partner = {
                 name: c?.name || 'Unknown Company',
-                image: c?.logoColor || 'bg-slate-400',
-                isImageColor: true
+                image: hasImage ? c.image : defaultImage,
+                isImageColor: false // Always use image (real or default) to ensure icon visibility
             };
         } else {
             const u = users.find(u => u.id === chat.userId);
             partner = {
                 name: u?.name || 'Unknown User',
-                image: u?.image || '',
+                image: u?.image || '/images/defaults/default_user_icon.png', // Reasonable fallback if we had one, but stick to empty for now if not requested
                 isImageColor: false
             };
         }
@@ -390,7 +398,23 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
                                                 {partner.name.slice(0, 1)}
                                             </div>
                                         ) : (
-                                            <img src={partner.image} alt={partner.name} className={`${isCompactMode ? 'w-10 h-10' : 'w-12 h-12'} rounded-full object-cover`} />
+                                            <img
+                                                src={partner.image}
+                                                alt={partner.name}
+                                                className={`${isCompactMode ? 'w-10 h-10' : 'w-12 h-12'} rounded-full object-cover`}
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement;
+                                                    if (!target.getAttribute('data-error-tried')) {
+                                                        target.setAttribute('data-error-tried', 'true');
+                                                        // Attempt fallback using avatarUtils if we have context
+                                                        target.src = activeRole === 'seeker'
+                                                            ? '/images/defaults/default_company_icon.png'
+                                                            : getFallbackAvatarUrl(chat.userId, (users.find(u => u.id === chat.userId) as any)?.gender);
+                                                    } else {
+                                                        target.src = '/images/defaults/default_user_avatar.png';
+                                                    }
+                                                }}
+                                            />
                                         )}
 
                                         {/* Priority Badge (Bottom-Left) */}
@@ -470,7 +494,22 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
                                                 {partner.name.slice(0, 1)}
                                             </div>
                                         ) : (
-                                            <img src={partner.image} alt={partner.name} className="w-8 h-8 rounded-full object-cover" />
+                                            <img
+                                                src={partner.image}
+                                                alt={partner.name}
+                                                className="w-8 h-8 rounded-full object-cover"
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement;
+                                                    if (!target.getAttribute('data-error-tried')) {
+                                                        target.setAttribute('data-error-tried', 'true');
+                                                        target.src = activeRole === 'seeker'
+                                                            ? '/images/defaults/default_company_icon.png'
+                                                            : getFallbackAvatarUrl(selectedChat.userId, (users.find(u => u.id === selectedChat.userId) as any)?.gender);
+                                                    } else {
+                                                        target.src = '/images/defaults/default_user_avatar.png';
+                                                    }
+                                                }}
+                                            />
                                         )}
                                         <span className="font-black text-slate-800 truncate max-w-[200px]">{partner.name}</span>
                                     </div>
@@ -498,7 +537,22 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
                                                                 {partner.name.slice(0, 1)}
                                                             </div>
                                                         ) : (
-                                                            <img src={partner.image} alt={partner.name} className="w-8 h-8 rounded-full object-cover mt-1 shrink-0" />
+                                                            <img
+                                                                src={partner.image}
+                                                                alt={partner.name}
+                                                                className="w-8 h-8 rounded-full object-cover mt-1 shrink-0"
+                                                                onError={(e) => {
+                                                                    const target = e.target as HTMLImageElement;
+                                                                    if (!target.getAttribute('data-error-tried')) {
+                                                                        target.setAttribute('data-error-tried', 'true');
+                                                                        target.src = activeRole === 'seeker'
+                                                                            ? '/images/defaults/default_company_icon.png'
+                                                                            : getFallbackAvatarUrl(selectedChat.userId, (users.find(u => u.id === selectedChat.userId) as any)?.gender);
+                                                                    } else {
+                                                                        target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(partner.name || 'U') + '&background=random';
+                                                                    }
+                                                                }}
+                                                            />
                                                         )
                                                     )}
 

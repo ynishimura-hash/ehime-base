@@ -1,4 +1,4 @@
-import { Job, Course, Company } from './dummyData';
+import { Job, Company, Course } from '@/types/shared';
 import { UserAnalysis } from './types/analysis';
 import { getPublicValueCards } from './analysisUtils';
 
@@ -82,7 +82,8 @@ export function getRecommendations(
 
         if (targetTag) {
             jobs.forEach(job => {
-                if (job.tags.includes(targetTag) && !matchedJobs.find(mj => mj.id === job.id)) {
+                const tags = job.tags || [];
+                if (Array.isArray(tags) && tags.includes(targetTag) && !matchedJobs.find(mj => mj.id === job.id)) {
                     matchedJobs.push(job);
                 }
             });

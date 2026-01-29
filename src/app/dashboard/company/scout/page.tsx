@@ -5,6 +5,7 @@ import { Search, MapPin, Briefcase, GraduationCap, MessageSquare, ChevronDown, F
 import { toast } from 'sonner';
 import { useAppStore } from '@/lib/appStore';
 import { VALUE_CARDS } from '@/lib/constants/analysisData';
+import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
 
 export default function ScoutPage() {
     const { users, currentCompanyId, interactions, addInteraction, createChat } = useAppStore();
@@ -73,7 +74,20 @@ export default function ScoutPage() {
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-center gap-3">
                                         <div className="relative">
-                                            <img src={user.image} alt={user.name} className="w-12 h-12 rounded-full object-cover border border-slate-100" />
+                                            <img
+                                                src={user.image || getFallbackAvatarUrl(user.id, user.gender)}
+                                                alt={user.name}
+                                                className="w-12 h-12 rounded-full object-cover border border-slate-100"
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement;
+                                                    if (!target.getAttribute('data-error-tried')) {
+                                                        target.setAttribute('data-error-tried', 'true');
+                                                        target.src = getFallbackAvatarUrl(user.id, user.gender);
+                                                    } else {
+                                                        target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name || 'U') + '&background=random';
+                                                    }
+                                                }}
+                                            />
                                             {user.isOnline && (
                                                 <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                                             )}

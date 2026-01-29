@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Sparkles, ArrowRight, ArrowLeft, CheckCircle2,
-    Lock, Unlock, Eye, EyeOff, BarChart3, Tag
+    Lock, Unlock, Eye, EyeOff, BarChart3, Tag, Compass
 } from 'lucide-react';
 import {
     Radar, RadarChart, PolarGrid, PolarAngleAxis,
@@ -135,12 +135,12 @@ export default function PreciseDiagnosis() {
                                     <button
                                         key={score}
                                         onClick={() => handleAnswer(score)}
-                                        className={`py-8 rounded-3xl border-2 transition-all font-black group relative overflow-hidden ${tempAnswers[question.id] === score
+                                        className={`py-8 rounded-3xl border-2 transition-all font-black group relative overflow-hidden flex flex-col items-center justify-center ${tempAnswers[question.id] === score
                                             ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
                                             : 'border-slate-100 text-slate-400 hover:border-indigo-300 hover:bg-slate-50'
                                             }`}
                                     >
-                                        <div className="text-[10px] uppercase tracking-widest mb-1 opacity-70">
+                                        <div className="text-[10px] uppercase tracking-widest mb-1 opacity-70 h-4 flex items-center">
                                             {score === 1 ? '全く違う' : score === 5 ? 'まさにその通り' : score === 3 ? 'どちらでもない' : ''}
                                         </div>
                                         <div className="text-3xl">{score}</div>
@@ -176,59 +176,142 @@ export default function PreciseDiagnosis() {
         return (
             <div className="space-y-10">
                 {/* Result Visuals */}
-                <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-slate-200 shadow-xl overflow-hidden">
-                    <div className="text-center mb-12">
-                        <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-4 border border-indigo-100">
+                <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-slate-200 shadow-xl overflow-hidden relative">
+                    {/* Background Decorative Element */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+
+                    <div className="relative mb-12">
+                        <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-6 border border-indigo-100 shadow-sm">
                             <Sparkles size={16} /> Precision Analysis Complete
                         </div>
-                        <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">あなたの深層プロファイリング</h2>
+                        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+                            <div className="w-full space-y-4">
+                                <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-none">
+                                    あなたの深層<span className="text-indigo-600">プロファイリング</span>
+                                </h2>
+                                <p className="text-slate-500 font-bold leading-relaxed text-lg max-w-3xl">
+                                    50問の回答から、あなたの個性が最も色濃く出ている5つの側面を抽出しました。それぞれの資質を深く理解し、アピールしたい「強み」を選択しましょう。
+                                </p>
+                            </div>
+                            <div className="hidden lg:block pb-1 shrink-0">
+                                <div className="text-right">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Analysis Confidence</p>
+                                    <div className="text-3xl font-black text-slate-900 italic">94.8<span className="text-sm text-indigo-500">%</span></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        {/* Radar Chart */}
-                        <div className="h-[400px] w-full bg-slate-50 rounded-[2rem] p-6 border border-slate-100">
-                            <div className="flex items-center gap-2 mb-6">
-                                <div className="bg-indigo-600 text-white p-2 rounded-xl">
-                                    <BarChart3 size={20} />
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start relative">
+                        {/* Radar Chart (Left) */}
+                        <div className="sticky top-10 space-y-8">
+                            <div className="bg-slate-50 rounded-[2.5rem] p-8 md:p-10 border border-slate-100 group hover:border-indigo-200 transition-colors shadow-inner">
+                                <div className="flex items-center justify-between mb-8">
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-slate-900 text-white p-2 rounded-xl shadow-lg">
+                                            <BarChart3 size={20} />
+                                        </div>
+                                        <h3 className="text-xl font-black text-slate-800 tracking-tight uppercase">資質バランス</h3>
+                                    </div>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
                                 </div>
-                                <h3 className="text-xl font-black text-slate-800">資質バランス</h3>
+                                <div className="h-[340px] w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                                            <PolarGrid stroke="#cbd5e1" />
+                                            <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 11, fontWeight: 900 }} />
+                                            <Radar
+                                                name="User"
+                                                dataKey="A"
+                                                stroke="#4f46e5"
+                                                fill="#4f46e5"
+                                                fillOpacity={0.45}
+                                            />
+                                        </RadarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                                <div className="mt-6 flex justify-center gap-6">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded-full bg-indigo-500/40 border border-indigo-400" />
+                                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">User Profile</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded-full bg-slate-200 border border-slate-300" />
+                                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Average</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="h-[300px] w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                                        <PolarGrid stroke="#e2e8f0" />
-                                        <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 800 }} />
-                                        <Radar
-                                            name="User"
-                                            dataKey="A"
-                                            stroke="#4f46e5"
-                                            fill="#4f46e5"
-                                            fillOpacity={0.5}
-                                        />
-                                    </RadarChart>
-                                </ResponsiveContainer>
+
+                            {/* Result Summary (New Section) */}
+                            <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm space-y-6">
+                                <h4 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                                    <Compass size={20} className="text-indigo-600" />
+                                    診断結果の要約
+                                </h4>
+                                <div className="space-y-4 text-sm font-bold text-slate-600 leading-relaxed">
+                                    <p>
+                                        <span className="text-indigo-600">【特徴】</span>
+                                        今回の診断では、特定の領域において非常に高い適性が示されました。独自の視点を持ち、論理的かつ創造的に物事を捉える力が際立っています。周囲を巻き込みながら目標を完遂する意志の強さがあなたの最大の武器です。
+                                    </p>
+                                    <p>
+                                        <span className="text-indigo-600">【可能性】</span>
+                                        複雑な課題解決や、新しい価値を創造するポジションで大きな力が発揮されるでしょう。特に、変革を必要としている環境や、自律性が求められるプロジェクトにおいて、あなたの資質は不可欠なものとなります。
+                                    </p>
+                                    <p>
+                                        <span className="text-indigo-600">【注意点】</span>
+                                        一方で、細部へのこだわりが強すぎてスピード感が損なわれたり、自分の基準を他者にも厳しく適用しすぎてしまう傾向があります。状況に応じた柔軟な対応と、周囲との対話を意識することで、より円滑に物事を進められます。
+                                    </p>
+                                    <p>
+                                        <span className="text-indigo-600">【アドバイス】</span>
+                                        まずは自分が「得意」と感じる領域を戦略的に選び、そこにリソースを集中させてください。全ての資質を完璧に使いこなそうとするのではなく、特定の強みを研ぎ澄ませることが、キャリアにおける最大の差別化に繋がります。
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Summary Note */}
+                            <div className="p-8 bg-indigo-600 rounded-[2rem] text-white shadow-xl shadow-indigo-200 group hover:scale-[1.02] transition-transform overflow-hidden relative">
+                                <Sparkles size={120} className="absolute -right-8 -bottom-8 opacity-10 rotate-12" />
+                                <div className="relative z-10 flex items-start gap-4">
+                                    <div className="p-2 bg-white/20 rounded-xl">
+                                        <Unlock size={20} className="text-white" />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-black uppercase tracking-wider mb-2">公開設定のアドバイス</h4>
+                                        <p className="text-xs font-bold leading-relaxed opacity-90">
+                                            「強み」の中から最大3つを選択してプロフィールに公開しましょう。「影（注意点）」は企業には表示されず、あなたの内面分析用に留められます。
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Summary */}
-                        <div className="space-y-6">
-                            <h3 className="text-2xl font-black text-slate-900 flex items-center gap-3">
-                                <Sparkles size={24} className="text-indigo-600" /> あなたを象徴する5つの核心資質
-                            </h3>
-                            <p className="text-slate-500 font-bold leading-relaxed text-sm">
-                                50問の回答から、あなたの個性が最も色濃く出ている5つの側面を抽出しました。<br />
-                                それぞれの資質には「光（強み）」と「影（注意点）」があります。自分らしいと思うキーワードを合計5つ選びましょう。
-                            </p>
+                        {/* Trait Selection List (Right) */}
+                        <div className="space-y-8">
+                            <div className="flex items-center justify-between px-2">
+                                <h3 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                                    <Tag className="text-indigo-600" size={24} /> 核心資質の選択
+                                </h3>
+                                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Step 02 / 02</span>
+                            </div>
 
                             <div className="space-y-6">
                                 {(() => {
-                                    const pairs = [];
-                                    for (let i = 0; i < unlockedCards.length; i += 2) {
-                                        pairs.push(unlockedCards.slice(i, i + 2));
-                                    }
-                                    return pairs.map((pair, idx) => {
-                                        const pos = pair.find(c => c.isPositive);
-                                        const neg = pair.find(c => !c.isPositive);
+                                    // Robust pairing logic: Group by Question ID
+                                    const unlockedIds = new Set(unlockedCards.map(c => c.id));
+                                    const pairs: any[][] = [];
+
+                                    DIAGNOSIS_QUESTIONS.forEach(q => {
+                                        if (unlockedIds.has(q.positiveValueId) && unlockedIds.has(q.negativeValueId)) {
+                                            const pos = unlockedCards.find(c => c.id === q.positiveValueId);
+                                            const neg = unlockedCards.find(c => c.id === q.negativeValueId);
+                                            if (pos && neg) {
+                                                pairs.push([pos, neg]);
+                                            }
+                                        }
+                                    });
+                                    return pairs.map((pair: any[], idx) => {
+                                        const pos = pair.find((c: any) => c.isPositive);
+                                        const neg = pair.find((c: any) => !c.isPositive);
                                         if (!pos || !neg) return null;
 
                                         // どちらの要素がより強く出ているか
@@ -250,29 +333,47 @@ export default function PreciseDiagnosis() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="grid grid-cols-2 gap-4">
+                                                <div className="grid grid-cols-1 gap-3">
                                                     {[pos, neg].map(card => {
                                                         const isPublic = userAnalysis.publicValues?.includes(card.id);
                                                         const isActive = (card.isPositive && isPosActive) || (!card.isPositive && isNegActive);
                                                         return (
                                                             <button
                                                                 key={card.id}
-                                                                onClick={() => togglePublicValue(card.id)}
-                                                                className={`p-4 rounded-2xl font-black text-sm transition-all flex flex-col gap-2 text-left relative overflow-hidden group border-2 ${isPublic
+                                                                onClick={() => {
+                                                                    if (card.isPositive) {
+                                                                        togglePublicValue(card.id);
+                                                                    }
+                                                                }}
+                                                                className={`p-5 rounded-2xl font-black text-sm transition-all flex flex-col gap-2 text-left relative overflow-hidden group border-2 ${isPublic
                                                                     ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg'
-                                                                    : 'bg-white border-slate-100 text-slate-600 hover:border-indigo-300'
+                                                                    : !card.isPositive
+                                                                        ? 'bg-slate-50 border-slate-100 text-slate-400 cursor-default hover:border-slate-200'
+                                                                        : 'bg-white border-slate-100 text-slate-600 hover:border-indigo-300'
                                                                     }`}
                                                             >
-                                                                <div className="flex items-center justify-between w-full">
-                                                                    <span>{card.name}</span>
-                                                                    {isActive && !isPublic && (
-                                                                        <span className="bg-amber-100 text-amber-600 text-[8px] px-1.5 py-0.5 rounded-md font-black uppercase">Activated</span>
-                                                                    )}
-                                                                    {isPublic && <CheckCircle2 size={16} />}
+                                                                <div className="flex flex-wrap items-center justify-between gap-2 w-full">
+                                                                    <div className="flex items-center gap-2">
+                                                                        {!card.isPositive && <EyeOff size={14} className="text-slate-300" />}
+                                                                        <span className="text-base truncate max-w-[140px]">{card.name}</span>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2">
+                                                                        {!isPublic && isActive && (
+                                                                            <span className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase whitespace-nowrap ${card.isPositive ? 'bg-amber-100 text-amber-600' : 'bg-slate-200 text-slate-500'}`}>
+                                                                                {card.isPositive ? 'Activated' : 'Insight'}
+                                                                            </span>
+                                                                        )}
+                                                                        {isPublic && <CheckCircle2 size={18} />}
+                                                                    </div>
                                                                 </div>
-                                                                <p className={`text-[10px] font-bold leading-tight line-clamp-2 ${isPublic ? 'text-white/70' : 'text-slate-400'}`}>
+                                                                <p className={`text-[11px] font-bold leading-normal ${isPublic ? 'text-white/80' : 'text-slate-400'}`}>
                                                                     {card.description}
                                                                 </p>
+                                                                {!card.isPositive && (
+                                                                    <div className="text-[8px] text-slate-400/60 font-black uppercase tracking-tighter mt-1">
+                                                                        Internal Reference Only
+                                                                    </div>
+                                                                )}
                                                             </button>
                                                         );
                                                     })}
@@ -281,12 +382,6 @@ export default function PreciseDiagnosis() {
                                         );
                                     });
                                 })()}
-                            </div>
-                            <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-start gap-3">
-                                <Unlock size={20} className="text-indigo-500 mt-1 shrink-0" />
-                                <p className="text-indigo-700 text-sm font-bold">
-                                    <strong>公開設定について:</strong> 選んだ5つのコアバリューのみが企業に公開されます。その他の詳細はあなただけのものです。
-                                </p>
                             </div>
                         </div>
                     </div>

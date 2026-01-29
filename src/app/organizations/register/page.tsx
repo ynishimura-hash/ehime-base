@@ -134,9 +134,11 @@ export default function OrganizationRegistration() {
                                 <p className="text-sm text-slate-500 font-bold">組織を管理する方のアカウントを作成します。</p>
                             </div>
 
-                            <div className="space-y-6 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                            <div className="space-y-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-blue-100/50">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">お名前</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">
+                                        お名前 <span className="text-red-500 ml-1">必須</span>
+                                    </label>
                                     <div className="relative">
                                         <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                         <input
@@ -144,12 +146,14 @@ export default function OrganizationRegistration() {
                                             placeholder="山田 太郎"
                                             value={fullName}
                                             onChange={(e) => setFullName(e.target.value)}
-                                            className="w-full bg-slate-50 border-transparent rounded-xl py-3 pl-12 pr-4 font-bold text-sm focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-200 transition-all"
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-12 pr-4 font-bold text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
                                         />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">メールアドレス</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">
+                                        メールアドレス <span className="text-red-500 ml-1">必須</span>
+                                    </label>
                                     <div className="relative">
                                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                         <input
@@ -157,12 +161,14 @@ export default function OrganizationRegistration() {
                                             placeholder="name@company.com"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full bg-slate-50 border-transparent rounded-xl py-3 pl-12 pr-4 font-bold text-sm focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-200 transition-all"
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-12 pr-4 font-bold text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
                                         />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">パスワード</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">
+                                        パスワード <span className="text-red-500 ml-1">必須</span>
+                                    </label>
                                     <div className="relative">
                                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                         <input
@@ -170,7 +176,7 @@ export default function OrganizationRegistration() {
                                             placeholder="8文字以上"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            className="w-full bg-slate-50 border-transparent rounded-xl py-3 pl-12 pr-4 font-bold text-sm focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-200 transition-all"
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-12 pr-4 font-bold text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
                                         />
                                     </div>
                                 </div>
@@ -195,49 +201,51 @@ export default function OrganizationRegistration() {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <button
                                     onClick={() => setOrgType('company')}
-                                    className={`p-4 rounded-2xl border-2 text-left transition-all ${orgType === 'company' ? 'border-blue-500 bg-blue-50/50' : 'border-slate-200 hover:border-blue-200 bg-white'}`}
+                                    className={`p-4 rounded-3xl border-2 text-left transition-all ${orgType === 'company' ? 'border-blue-500 bg-blue-50/50' : 'border-slate-100 hover:border-blue-100 bg-white shadow-sm hover:shadow-md'}`}
                                 >
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${orgType === 'company' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                                        <Building2 size={20} />
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-colors ${orgType === 'company' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                        <Building2 size={24} />
                                     </div>
                                     <div className="font-black text-slate-800">企業</div>
-                                    <div className="text-xs font-bold text-slate-400 mt-1">採用・研修に</div>
+                                    <div className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">採用・研修に</div>
                                 </button>
                                 <button
                                     onClick={() => setOrgType('school')}
-                                    className={`p-4 rounded-2xl border-2 text-left transition-all ${orgType === 'school' ? 'border-blue-500 bg-blue-50/50' : 'border-slate-200 hover:border-blue-200 bg-white'}`}
+                                    className={`p-4 rounded-3xl border-2 text-left transition-all ${orgType === 'school' ? 'border-blue-500 bg-blue-50/50' : 'border-slate-100 hover:border-blue-100 bg-white shadow-sm hover:shadow-md'}`}
                                 >
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${orgType === 'school' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                                        <School size={20} />
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-colors ${orgType === 'school' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                        <School size={24} />
                                     </div>
                                     <div className="font-black text-slate-800">教育機関</div>
-                                    <div className="text-xs font-bold text-slate-400 mt-1">学生の管理に</div>
+                                    <div className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">学生の管理に</div>
                                 </button>
                                 <button
                                     onClick={() => setOrgType('community')}
-                                    className={`p-4 rounded-2xl border-2 text-left transition-all ${orgType === 'community' ? 'border-blue-500 bg-blue-50/50' : 'border-slate-200 hover:border-blue-200 bg-white'}`}
+                                    className={`p-4 rounded-3xl border-2 text-left transition-all ${orgType === 'community' ? 'border-blue-500 bg-blue-50/50' : 'border-slate-100 hover:border-blue-100 bg-white shadow-sm hover:shadow-md'}`}
                                 >
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${orgType === 'community' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                                        <Users size={20} />
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-colors ${orgType === 'community' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                        <Users size={24} />
                                     </div>
                                     <div className="font-black text-slate-800">コミュニティ</div>
-                                    <div className="text-xs font-bold text-slate-400 mt-1">メンバー交流に</div>
+                                    <div className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">メンバー交流に</div>
                                 </button>
                             </div>
 
-                            <div className="space-y-6 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                            <div className="space-y-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-blue-100/50">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">組織名</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">
+                                        組織名 <span className="text-red-500 ml-1">必須</span>
+                                    </label>
                                     <input
                                         type="text"
                                         placeholder="株式会社Ehime Base"
                                         value={orgName}
                                         onChange={(e) => setOrgName(e.target.value)}
-                                        className="w-full bg-slate-50 border-transparent rounded-xl py-3 px-4 font-bold text-sm focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-200 transition-all"
+                                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-4 font-bold text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">所在地</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">所在地</label>
                                     <div className="relative">
                                         <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                         <input
@@ -245,7 +253,7 @@ export default function OrganizationRegistration() {
                                             placeholder="愛媛県松山市..."
                                             value={location}
                                             onChange={(e) => setLocation(e.target.value)}
-                                            className="w-full bg-slate-50 border-transparent rounded-xl py-3 pl-12 pr-4 font-bold text-sm focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-200 transition-all"
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-12 pr-4 font-bold text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
                                         />
                                     </div>
                                 </div>
@@ -267,9 +275,9 @@ export default function OrganizationRegistration() {
                                 <p className="text-sm text-slate-500 font-bold">プロフィールを充実させましょう（後でも編集可能です）。</p>
                             </div>
 
-                            <div className="space-y-6 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                            <div className="space-y-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-blue-100/50">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">ウェブサイト</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">ウェブサイト</label>
                                     <div className="relative">
                                         <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                         <input
@@ -277,7 +285,7 @@ export default function OrganizationRegistration() {
                                             placeholder="https://..."
                                             value={website}
                                             onChange={(e) => setWebsite(e.target.value)}
-                                            className="w-full bg-slate-50 border-transparent rounded-xl py-3 pl-12 pr-4 font-bold text-sm focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-200 transition-all"
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-12 pr-4 font-bold text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
                                         />
                                     </div>
                                 </div>

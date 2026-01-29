@@ -6,6 +6,7 @@ import { createClient } from '@/utils/supabase/client';
 import { useAppStore } from '@/lib/appStore';
 import { toast } from 'sonner';
 import { User, Mail, Link as LinkIcon, Plus, Copy, Check } from 'lucide-react';
+import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
 
 interface Member {
     id: string; // organization_member id
@@ -15,6 +16,7 @@ interface Member {
         full_name: string;
         email: string;
         avatar_url: string;
+        gender?: string;
     };
 }
 
@@ -48,7 +50,7 @@ export default function CompanyMembersPage() {
             .from('organization_members')
             .select(`
                 id, role, joined_at,
-                profiles (full_name, email, avatar_url)
+                profiles (full_name, email, avatar_url, gender)
             `)
             .eq('organization_id', currentCompanyId)
             .order('joined_at', { ascending: true });
@@ -165,13 +167,20 @@ export default function CompanyMembersPage() {
                         <div key={member.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden">
-                                    {member.profiles.avatar_url ? (
-                                        <img src={member.profiles.avatar_url} alt={member.profiles.full_name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-slate-400">
-                                            <User size={20} />
-                                        </div>
-                                    )}
+                                    <img
+                                        src={member.profiles.avatar_url || getFallbackAvatarUrl(member.id, member.profiles.gender)}
+                                        alt={member.profiles.full_name}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            if (!target.getAttribute('data-error-tried')) {
+                                                target.setAttribute('data-error-tried', 'true');
+                                                target.src = getFallbackAvatarUrl(member.id, member.profiles.gender);
+                                            } else {
+                                                target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(member.profiles.full_name || 'U') + '&background=random';
+                                            }
+                                        }}
+                                    />
                                 </div>
                                 <div>
                                     <h4 className="font-bold text-slate-900 text-sm">{member.profiles.full_name}</h4>

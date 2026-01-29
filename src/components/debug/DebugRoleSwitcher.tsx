@@ -3,13 +3,33 @@
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '@/lib/appStore';
 import { useRouter, usePathname } from 'next/navigation';
-import { User, Building2, Monitor, LogOut, ShieldCheck } from 'lucide-react';
+import { User, Building2, Monitor, LogOut, ShieldCheck, Activity, CheckCircle2, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function DebugRoleSwitcher() {
     const { authStatus, activeRole, loginAs, logout } = useAppStore();
     const router = useRouter();
     const pathname = usePathname();
     const [isExpanded, setIsExpanded] = useState(false);
+    const [serverStatus, setServerStatus] = useState<'checking' | 'online' | 'error' | 'idle'>('idle');
+
+    const checkServerStatus = async () => {
+        setServerStatus('checking');
+        try {
+            const res = await fetch('/api/health'); // Assuming there's a health check or just root
+            if (res.ok) {
+                setServerStatus('online');
+                toast.success('Server is online (localhost:3000)');
+            } else {
+                setServerStatus('error');
+                toast.error('Server returned error status');
+            }
+        } catch (error) {
+            console.error('Server check failed:', error);
+            setServerStatus('error');
+            toast.error('Server is unreachable (localhost:3000)');
+        }
+    };
 
     // Auto-sync UI state with Router (Optional safety, mostly relying on Store)
     useEffect(() => {
@@ -98,6 +118,25 @@ export default function DebugRoleSwitcher() {
                         <LogOut size={14} />
                         Guest / Logout
                         {authStatus === 'guest' && <span className="ml-auto w-2 h-2 bg-red-500 rounded-full" />}
+                    </button>
+                    <div className="h-px bg-slate-100 my-1" />
+
+                    <p className="text-[10px] text-slate-400 font-bold px-2 py-1 uppercase tracking-wider">System Status</p>
+                    <button
+                        onClick={checkServerStatus}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all"
+                    >
+                        {serverStatus === 'checking' ? (
+                            <Activity size={14} className="animate-spin text-blue-500" />
+                        ) : serverStatus === 'online' ? (
+                            <CheckCircle2 size={14} className="text-green-500" />
+                        ) : serverStatus === 'error' ? (
+                            <AlertCircle size={14} className="text-red-500" />
+                        ) : (
+                            <Activity size={14} />
+                        )}
+                        Check Server
+                        {serverStatus === 'online' && <span className="ml-auto text-[10px] text-green-500">Live</span>}
                     </button>
                 </div>
             )}

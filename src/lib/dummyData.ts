@@ -31,6 +31,7 @@ export interface Reel {
     link_url?: string; // New
     link_text?: string; // New
     likes: number;
+    entityType?: 'company' | 'job' | 'quest' | 'other';
 }
 
 // --- e-Learning (Reskill University) Data Structures ---

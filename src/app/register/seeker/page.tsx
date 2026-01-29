@@ -4,141 +4,137 @@ import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { User, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
+import {
+    Mail, Lock, Loader2, ArrowRight, CheckCircle
+} from 'lucide-react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function RegisterSeekerPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [firstName, setFirstName] = useState('');
     const [loading, setLoading] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
     const router = useRouter();
     const supabase = createClient();
 
-    const handleRegister = async (e: React.FormEvent) => {
-        e.preventDefault();
+    // Sign Up Form Data
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleSignUp = async () => {
+        if (!email || !password || password.length < 8) {
+            toast.error('必須項目を入力してください（パスワードは8文字以上）');
+            return;
+        }
+
         setLoading(true);
 
         try {
-            // 1. Sign Up
-            const { data: authData, error: authError } = await supabase.auth.signUp({
-                email,
+            // Check email duplication
+            const cleanEmail = email.trim();
+            console.log('Checking email via RPC:', cleanEmail);
+            const { data: emailExists, error: checkError } = await supabase.rpc('check_email_exists', { email_check: cleanEmail });
+            console.log('Email check result:', { emailExists, checkError });
+
+            if (checkError) {
+                console.error('Email check RPC failed:', checkError);
+                throw checkError;
+            }
+
+            if (emailExists) {
+                console.log('Email already exists');
+                toast.warning('このメールアドレスは既に登録されています', {
+                    description: 'ログインページへ移動してください。',
+                    duration: 5000,
+                });
+                setLoading(false);
+                return;
+            }
+
+            console.log('Proceeding to Supabase SignUp...');
+            // Sign Up with Redirect to Onboarding
+            const { data, error: authError } = await supabase.auth.signUp({
+                email: cleanEmail,
                 password,
                 options: {
+                    // occupation_status moved to Onboarding
                     data: {
-                        full_name: `${lastName} ${firstName}`,
-                        user_type: 'student',
-                    }
+                        user_type: 'student', // Initial role default
+                    },
+                    // Redirect to Auth Callback after email verification
+                    emailRedirectTo: `${window.location.origin}/auth/callback`,
                 }
             });
+            console.log('SignUp result:', { data, authError });
 
             if (authError) throw authError;
 
-            if (authData.user) {
-                // 2. Create Profile
-                // Note: If you have a Trigger on auth.users to create profiles, this might fail with duplicate key.
-                // Assuming manual creation is needed based on RLS "Users can insert their own profile."
+            // Check if email confirmation is disabled (Auto-confirm)
+            if (data.session) {
+                toast.success('登録完了！', { description: 'セットアップへ進みます' });
 
-                // First check if profile exists (in case trigger created it)
-                const { data: existingProfile } = await supabase
-                    .from('profiles')
-                    .select('id')
-                    .eq('id', authData.user.id)
-                    .single();
-
-                if (!existingProfile) {
-                    const { error: profileError } = await supabase
-                        .from('profiles')
-                        .insert([
-                            {
-                                id: authData.user.id,
-                                email: email,
-                                last_name: lastName,
-                                first_name: firstName,
-                                full_name: `${lastName} ${firstName}`,
-                                user_type: 'student',
-                            }
-                        ]);
-
-                    if (profileError) {
-                        console.error('Profile creation error:', profileError);
-                        // Don't throw here if auth was successful, just warn. 
-                        // User can likely fix profile later or trigger might have raced.
-                        toast.warning('アカウントは作成されましたが、プロフィールの保存に失敗しました。');
-                    }
-                } else {
-                    // Update existing profile with details if it was auto-created empty
-                    await supabase
-                        .from('profiles')
-                        .update({
-                            email: email,
-                            last_name: lastName,
-                            first_name: firstName,
-                            full_name: `${lastName} ${firstName}`,
-                            user_type: 'student',
-                        })
-                        .eq('id', authData.user.id);
-                }
-
-                toast.success('アカウントを作成しました！', {
-                    description: 'ログインしてDashboardへ移動します。'
-                });
-
-                // Slight delay to ensure auth state propagates or toast is seen
-                setTimeout(() => {
-                    router.push('/babybase');
-                    router.refresh();
-                }, 1000);
+                // Force hard navigation AND pass tokens manually to guarantee restoration
+                // This bypasses cookie timing issues completely
+                const hash = `#access_token=${data.session.access_token}&refresh_token=${data.session.refresh_token}&type=recovery`;
+                window.location.assign('/onboarding/seeker' + hash);
+                return;
             }
+
+            // Success View (Only if session is null, meaning email confirmation IS required)
+            setIsSuccess(true);
+            toast.success('確認メールを送信しました！', {
+                description: 'メール内のリンクをクリックして登録を完了してください。'
+            });
 
         } catch (error: any) {
             console.error('Registration Error:', error);
-            toast.error('登録に失敗しました', {
-                description: error.message
-            });
+            toast.error('登録に失敗しました', { description: error.message });
         } finally {
             setLoading(false);
         }
     };
 
+    if (isSuccess) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+                <div className="w-full max-w-md bg-white rounded-[2rem] shadow-xl p-8 text-center space-y-6">
+                    <div className="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                        <CheckCircle size={32} />
+                    </div>
+                    <h2 className="text-2xl font-black text-slate-800">確認メールを送信しました</h2>
+                    <p className="text-sm font-bold text-slate-500 leading-relaxed">
+                        <span className="text-blue-600 font-bold">{email}</span> 宛にメールを送信しました。<br />
+                        メール内のリンクをクリックして、<br />プロフィールの作成へ進んでください。
+                    </p>
+                    <div className="pt-4 border-t border-slate-100">
+                        <p className="text-xs text-slate-400 font-bold">
+                            メールが届かない場合は、迷惑メールフォルダもご確認ください。
+                        </p>
+                    </div>
+                    <Link href="/login/seeker" className="block w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-sm transition-colors mt-4">
+                        ログイン画面へ戻る
+                    </Link>
+                </div>
+            </div>
+        )
+    }
+
     return (
-        <div className="min-h-screen bg-[#FFFBF0] flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-md bg-white rounded-[2rem] shadow-xl shadow-pink-100/50 p-8 space-y-8">
-                <div className="text-center space-y-2">
-                    <h1 className="text-2xl font-black text-slate-800">アカウント作成 (学生/求職者)</h1>
-                    <p className="text-sm font-bold text-slate-400">新しいキャリアの第一歩を踏み出しましょう</p>
+        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+            <div className="w-full max-w-lg bg-white rounded-[2rem] shadow-xl shadow-blue-100/50 p-8 space-y-6 border border-slate-100">
+
+                <div className="text-center space-y-2 pt-4">
+                    <h1 className="text-2xl font-black text-slate-800">新規アカウント作成</h1>
+                    <p className="text-sm font-bold text-slate-400">Ehime Baseで新しい可能性を見つけよう</p>
                 </div>
 
-                <form onSubmit={handleRegister} className="space-y-6">
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">姓 (Last Name)</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-4 font-bold text-sm focus:ring-2 focus:ring-pink-100 transition-all outline-none"
-                                    placeholder="山田"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">名 (First Name)</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-4 font-bold text-sm focus:ring-2 focus:ring-pink-100 transition-all outline-none"
-                                    placeholder="太郎"
-                                />
-                            </div>
-                        </div>
+                <div className="space-y-6">
+                    {/* Attribute selection removed from here */}
 
+                    <div className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">メールアドレス</label>
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">
+                                メールアドレス <span className="text-red-500 ml-1">必須</span>
+                            </label>
                             <div className="relative">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                 <input
@@ -146,43 +142,44 @@ export default function RegisterSeekerPage() {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-12 pr-6 font-bold text-sm focus:ring-2 focus:ring-pink-100 transition-all outline-none"
+                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-12 pr-6 font-bold text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
                                     placeholder="name@example.com"
                                 />
                             </div>
                         </div>
-
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">パスワード</label>
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">
+                                パスワード (英数8文字以上) <span className="text-red-500 ml-1">必須</span>
+                            </label>
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                 <input
                                     type="password"
                                     required
-                                    minLength={6}
+                                    minLength={8}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-12 pr-6 font-bold text-sm focus:ring-2 focus:ring-pink-100 transition-all outline-none"
-                                    placeholder="6文字以上"
+                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-12 pr-6 font-bold text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
+                                    placeholder="8文字以上"
                                 />
                             </div>
                         </div>
                     </div>
 
                     <button
-                        type="submit"
+                        onClick={handleSignUp}
                         disabled={loading}
-                        className="w-full bg-pink-500 hover:bg-pink-600 text-white font-black py-4 rounded-2xl transition-all flex items-center justify-center gap-2 group active:scale-95 disabled:opacity-70 shadow-lg shadow-pink-200"
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl transition-all flex items-center justify-center gap-2 group active:scale-95 disabled:opacity-70 shadow-lg shadow-blue-200"
                     >
-                        {loading ? <Loader2 className="animate-spin" /> : 'アカウントを作成して始める'}
+                        {loading ? <Loader2 className="animate-spin" /> : 'アカウントを作成'}
                         {!loading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
                     </button>
-                </form>
+                </div>
 
-                <div className="text-center">
+                <div className="text-center pt-2">
                     <p className="text-sm font-bold text-slate-400">
                         すでにアカウントをお持ちの方は
-                        <Link href="/login" className="ml-2 text-pink-500 hover:text-pink-600 font-black hover:underline transition-all">
+                        <Link href="/login/seeker" className="ml-2 text-blue-600 hover:text-blue-700 font-black hover:underline transition-all">
                             ログイン
                         </Link>
                     </p>

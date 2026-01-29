@@ -95,13 +95,36 @@ export async function fetchJobsAction() {
                     cover_image_url
                 )
             `)
-            .or('type.eq.job,type.is.null');
+            .or('type.eq.job,type.eq.quest,type.eq.internship,type.is.null');
 
         if (error) throw error;
 
+        // Fetch reels for these jobs
+        const { data: allReels } = await supabaseAdmin
+            .from('media_library')
+            .select('*');
+
+        const dataWithReels = (data || []).map(job => {
+            const jobReels = (allReels || []).filter(r => r.job_id === job.id);
+            const mappedReels = jobReels.map(media => ({
+                id: media.id,
+                type: media.type || 'file',
+                url: media.public_url,
+                thumbnail: media.thumbnail_url || (media.type === 'youtube' ? null : media.public_url),
+                title: media.title || media.filename,
+                likes: 0,
+                entityType: 'job'
+            }));
+
+            return {
+                ...job,
+                reels: mappedReels
+            };
+        });
+
         return {
             success: true,
-            data: data || []
+            data: dataWithReels
         };
     } catch (error) {
         console.error('Fetch Jobs Error:', error);
@@ -140,13 +163,32 @@ export async function fetchAdminCompaniesAction() {
 
         if (error) throw error;
 
+        // Fetch reels for these companies
+        const { data: allReels } = await supabaseAdmin
+            .from('media_library')
+            .select('*')
+            .is('job_id', null);
+
+        const dataWithReels = (data || []).map(company => ({
+            ...company,
+            reels: (allReels || [])
+                .filter(r => r.organization_id === company.id)
+                .map(media => ({
+                    id: media.id,
+                    type: media.type || 'file',
+                    url: media.public_url,
+                    thumbnail: media.thumbnail_url || (media.type === 'youtube' ? null : media.public_url),
+                    title: media.title || media.filename,
+                }))
+        }));
+
         // Log types for debugging
         if (data) {
             const types = [...new Set(data.map(o => o.type))];
             console.log(`fetchAdminCompaniesAction: SUCCESS, found ${data.length} rows. Types: ${types.join(', ')}`);
         }
 
-        return { success: true, data: data || [] };
+        return { success: true, data: dataWithReels };
     } catch (error: any) {
         console.error('fetchAdminCompaniesAction: ERROR', error);
         return { success: false, error: error.message || String(error), data: [] };
@@ -209,6 +251,17 @@ export async function fetchPublicQuestsAction() {
 
         if (error) throw error;
 
+        // Fetch application counts for these quests
+        const { data: appCounts } = await supabaseAdmin
+            .from('applications')
+            .select('job_id');
+
+        // Count applications per job
+        const countsByJob = (appCounts || []).reduce((acc: any, curr: any) => {
+            acc[curr.job_id] = (acc[curr.job_id] || 0) + 1;
+            return acc;
+        }, {});
+
         // Fetch reels for these quests and companies
         const { data: allReels } = await supabaseAdmin
             .from('media_library')
@@ -217,19 +270,37 @@ export async function fetchPublicQuestsAction() {
         const dataWithReels = (data || []).map(quest => {
             const questReels = (allReels || []).filter(r => r.job_id === quest.id);
             const companyReels = (allReels || []).filter(r => r.organization_id === quest.organization?.id && !r.job_id);
-            const reels = [...questReels, ...companyReels].map(media => ({
+
+            const mappedQuestReels = questReels.map(media => ({
                 id: media.id,
                 type: media.type || 'file',
                 url: media.public_url,
-                thumbnail: media.thumbnail_url || media.public_url,
+                thumbnail: media.thumbnail_url || (media.type === 'youtube' ? null : media.public_url),
                 title: media.title || media.filename,
+                likes: 0,
+                entityType: 'quest'
             }));
+
+            const mappedCompanyReels = companyReels.map(media => ({
+                id: media.id,
+                type: media.type || 'file',
+                url: media.public_url,
+                thumbnail: media.thumbnail_url || (media.type === 'youtube' ? null : media.public_url),
+                title: media.title || media.filename,
+                likes: 0,
+                entityType: 'company'
+            }));
+
+            // Combine for backward compatibility or use specific ones
+            // User requested strict separation, so we put quest reels on quest, company on company.
 
             return {
                 ...quest,
+                applicationCount: countsByJob[quest.id] || 0,
+                reels: mappedQuestReels,
                 organization: quest.organization ? {
                     ...quest.organization,
-                    reels: reels
+                    reels: mappedCompanyReels
                 } : null
             };
         });
@@ -245,12 +316,21 @@ export async function fetchPublicQuestsAction() {
 export async function fetchPublicCompaniesAction() {
     try {
         console.log('fetchPublicCompaniesAction: querying organizations...');
+        if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            console.error('CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing in Server Action environment!');
+        }
+
         const { data, error } = await supabaseAdmin
             .from('organizations')
             .select('*')
             .order('name', { ascending: true });
 
-        if (error) throw error;
+        if (error) {
+            console.error('fetchPublicCompaniesAction: DB Error', error);
+            throw error;
+        }
+
+        console.log(`fetchPublicCompaniesAction: Found ${data?.length} organizations.`);
 
         // Fetch reels for these companies in one go to avoid N+1
         const { data: allReels } = await supabaseAdmin
@@ -266,7 +346,7 @@ export async function fetchPublicCompaniesAction() {
                     id: media.id,
                     type: media.type || 'file',
                     url: media.public_url,
-                    thumbnail: media.thumbnail_url || media.public_url,
+                    thumbnail: media.thumbnail_url || (media.type === 'youtube' ? null : media.public_url),
                     title: media.title || media.filename,
                 }))
         }));
@@ -303,19 +383,33 @@ export async function fetchPublicJobsAction() {
         const dataWithReels = (data || []).map(job => {
             const jobReels = (allReels || []).filter(r => r.job_id === job.id);
             const companyReels = (allReels || []).filter(r => r.organization_id === job.organization?.id && !r.job_id);
-            const reels = [...jobReels, ...companyReels].map(media => ({
+
+            const mappedJobReels = jobReels.map(media => ({
                 id: media.id,
                 type: media.type || 'file',
                 url: media.public_url,
-                thumbnail: media.thumbnail_url || media.public_url,
+                thumbnail: media.thumbnail_url || (media.type === 'youtube' ? null : media.public_url),
                 title: media.title || media.filename,
+                likes: 0,
+                entityType: 'job'
+            }));
+
+            const mappedCompanyReels = companyReels.map(media => ({
+                id: media.id,
+                type: media.type || 'file',
+                url: media.public_url,
+                thumbnail: media.thumbnail_url || (media.type === 'youtube' ? null : media.public_url),
+                title: media.title || media.filename,
+                likes: 0,
+                entityType: 'company'
             }));
 
             return {
                 ...job,
+                reels: mappedJobReels,
                 organization: job.organization ? {
                     ...job.organization,
-                    reels: reels
+                    reels: mappedCompanyReels
                 } : null
             };
         });
@@ -344,8 +438,23 @@ export async function fetchPublicReelsAction() {
 
         const orgMap = new Map(orgsData?.map((o: any) => [o.id, o]) || []);
 
+        const { data: jobsData } = await supabaseAdmin
+            .from('jobs')
+            .select('id, type');
+
+        const jobMap = new Map(jobsData?.map((j: any) => [j.id, j.type]) || []);
+
         const items = (mediaData || []).map((item: any) => {
             const org = item.organization_id ? orgMap.get(item.organization_id) : null;
+
+            let type: 'company' | 'job' | 'quest' = 'company';
+            if (item.job_id) {
+                const jobType = jobMap.get(item.job_id);
+                type = jobType === 'quest' ? 'quest' : 'job';
+            } else {
+                type = 'company';
+            }
+
             return {
                 reel: {
                     id: item.id,
@@ -357,12 +466,13 @@ export async function fetchPublicReelsAction() {
                     likes: 0,
                     comments: 0,
                     shares: 0,
-                    type: item.type || 'file'
+                    type: item.type || 'file',
+                    entityType: type
                 },
                 organization: org,
                 entityName: org?.name || 'Ehime Base',
                 entityId: item.organization_id || item.job_id || 'admin',
-                type: item.organization_id ? 'company' : (item.job_id ? 'job' : 'company'),
+                type: type,
                 companyId: item.organization_id
             };
         });
@@ -372,5 +482,70 @@ export async function fetchPublicReelsAction() {
     } catch (error: any) {
         console.error('fetchPublicReelsAction: ERROR', error);
         return { success: false, error: error.message || String(error), data: [] };
+    }
+}
+
+export async function updateMediaAction(mediaItem: any) {
+    try {
+        console.log('updateMediaAction: updating media...', mediaItem.id);
+        const { error } = await supabaseAdmin
+            .from('media_library')
+            .update({
+                title: mediaItem.title,
+                caption: mediaItem.caption,
+                link_url: mediaItem.link_url,
+                link_text: mediaItem.link_text,
+                organization_id: mediaItem.organization_id,
+                job_id: mediaItem.job_id
+            })
+            .eq('id', mediaItem.id);
+
+        if (error) throw error;
+        return { success: true };
+    } catch (error: any) {
+        console.error('updateMediaAction: ERROR', error);
+        return { success: false, error: error.message || String(error) };
+    }
+}
+
+export async function fetchPublicCompanyDetailAction(id: string) {
+    try {
+        console.log('fetchPublicCompanyDetailAction: fetching company details for', id);
+
+        // 1. Fetch organization
+        const { data: org, error: orgError } = await supabaseAdmin
+            .from('organizations')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (orgError) {
+            console.error('fetchPublicCompanyDetailAction: Org Error', orgError);
+            throw orgError;
+        }
+
+        // 2. Fetch Jobs
+        const { data: jobs } = await supabaseAdmin
+            .from('jobs')
+            .select('*')
+            .eq('organization_id', id);
+
+        // 3. Fetch Reels
+        const { data: reels } = await supabaseAdmin
+            .from('media_library')
+            .select('*')
+            .eq('organization_id', id);
+
+        return {
+            success: true,
+            data: {
+                company: org,
+                jobs: jobs || [],
+                reels: reels || []
+            }
+        };
+    } catch (error: any) {
+        console.error('fetchPublicCompanyDetailAction: ERROR', error);
+        return { success: false, error: error.message || String(error) };
     }
 }

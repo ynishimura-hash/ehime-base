@@ -14,8 +14,10 @@ import { ReelModal } from '@/components/reels/ReelModal';
 import { ReelIcon } from '@/components/reels/ReelIcon';
 
 import { createClient } from '@/utils/supabase/client';
-import { Reel } from '@/lib/dummyData';
+import { Reel } from '@/types/shared';
 import { Loader2 } from 'lucide-react';
+
+import { fetchPublicCompanyDetailAction } from '@/app/admin/actions';
 
 export default function CompanyDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -34,46 +36,36 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
         const fetchCompanyData = async () => {
             setLoading(true);
 
-            // 1. Fetch organization details (status check handled by RLS)
-            const { data: org, error } = await supabase
-                .from('organizations')
-                .select('*')
-                .eq('id', id)
-                .single();
+            try {
+                // Use Server Action
+                const result = await fetchPublicCompanyDetailAction(id);
 
-            if (error || !org) {
-                console.error('Error fetching company:', error);
+                if (!result.success || !result.data) {
+                    console.error('Error fetching company:', result.error);
+                    setLoading(false);
+                    return;
+                }
+
+                setCompany(result.data.company);
+                setCompanyJobs(result.data.jobs);
+
+                const media = result.data.reels || [];
+                setReels(media.map((m: any) => ({
+                    id: m.id,
+                    url: m.public_url,
+                    type: m.type === 'youtube' ? 'youtube' : 'file',
+                    title: m.title || m.filename,
+                    caption: m.caption,
+                    description: m.caption,
+                    link_url: m.link_url,
+                    link_text: m.link_text,
+                    likes: 0
+                })));
+            } catch (err) {
+                console.error('Component Fetch Error:', err);
+            } finally {
                 setLoading(false);
-                return;
             }
-            setCompany(org);
-
-            // 2. Fetch associated jobs
-            const { data: jobs } = await supabase
-                .from('jobs')
-                .select('*')
-                .eq('organization_id', id);
-            setCompanyJobs(jobs || []);
-
-            // 3. Fetch reels
-            const { data: media } = await supabase
-                .from('media_library')
-                .select('*')
-                .eq('organization_id', id);
-
-            setReels((media || []).map(m => ({
-                id: m.id,
-                url: m.public_url,
-                type: m.type === 'youtube' ? 'youtube' : 'file',
-                title: m.title || m.filename,
-                caption: m.caption,
-                description: m.caption,
-                link_url: m.link_url,
-                link_text: m.link_text,
-                likes: 0
-            })));
-
-            setLoading(false);
         };
 
         fetchCompanyData();

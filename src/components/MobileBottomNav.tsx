@@ -3,15 +3,17 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Briefcase, MessageSquare, Heart, Video, Map, Building2, GraduationCap, TrendingUp, User } from 'lucide-react';
+import { Home, Layout as DashboardIcon, Briefcase, MessageSquare, Heart, Video, Map, Building2, GraduationCap, TrendingUp, User } from 'lucide-react';
 import { clsx } from "clsx";
 import { useAppStore } from '@/lib/appStore';
 
 export default function MobileBottomNav() {
     const pathname = usePathname();
-    const { interactions, currentUserId } = useAppStore();
+    const { currentUserId, authStatus } = useAppStore();
+    const isAuthenticated = authStatus === 'authenticated';
 
     const navItems = [
+        { name: 'ダッシュボード', href: '/dashboard', icon: DashboardIcon },
         { name: 'クエスト', href: '/quests', icon: Map },
         { name: '求人', href: '/jobs', icon: Briefcase },
         { name: '企業', href: '/companies', icon: Building2 },
@@ -20,7 +22,15 @@ export default function MobileBottomNav() {
         { name: '学び', href: '/elearning', icon: GraduationCap },
         { name: '進捗', href: '/progress', icon: TrendingUp },
         { name: 'マイページ', href: '/mypage', icon: User },
-    ];
+    ].filter(item => {
+        // Hide restricted items if not logged in
+        if (!isAuthenticated) {
+            if (item.href === '/dashboard') return false;
+            if (item.href === '/elearning') return false; // Hide e-learning if not logged in
+            if (['/saved', '/messages', '/progress', '/mypage'].includes(item.href)) return false; // Common auth routes
+        }
+        return true;
+    });
 
     // Calculate unread messages (mock logic or from store)
     const unreadCount = useAppStore(state =>

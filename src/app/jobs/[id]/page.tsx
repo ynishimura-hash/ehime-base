@@ -14,7 +14,7 @@ import { ConsultModal } from '@/components/modals/ConsultModal';
 import { LoginPromptModal } from '@/components/auth/LoginPromptModal';
 import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
-import { Reel } from '@/lib/dummyData';
+import { Reel } from '@/types/shared';
 import { createClient } from '@/utils/supabase/client';
 
 export default function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -28,7 +28,8 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
         removeInteraction,
         hasInteraction,
         createChat,
-        toggleInteraction
+        toggleInteraction,
+        upsertCompany
     } = useAppStore();
 
     const [job, setJob] = useState<any>(null);
@@ -69,7 +70,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                 .select('*')
                 .or(`job_id.eq.${id},organization_id.eq.${jobData.organization_id}`);
 
-            const formattedReels = (media || []).map(m => ({
+            const formattedReels = (media || []).map((m: any) => ({
                 id: m.id,
                 url: m.public_url,
                 type: (m.type === 'youtube' ? 'youtube' : 'file') as 'youtube' | 'file',
@@ -138,12 +139,12 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
         setIsConsultModalOpen(true);
     };
 
-    const handleConsultConfirm = () => {
+    const handleConsultConfirm = async () => {
         setIsConsultModalOpen(false);
         // Ensure company exists in store for Chat UI to resolve name
-        useAppStore.getState().upsertCompany(company);
+        upsertCompany(company);
         // Create chat in the unified store
-        const chatId = createChat(company.id, currentUserId, `「${job.title}」について相談がしたいです。`);
+        const chatId = await createChat(company.id, currentUserId, `「${job.title}」について相談がしたいです。`);
         toast.success('カジュアル面談の希望を送信しました');
         router.push(`/messages/${chatId}`);
     };
@@ -223,8 +224,21 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                         </div>
                     </div>
 
-                    <div className="p-8 space-y-8">
-                        {/* Recommended Points */}
+                    <div className="p-4 md:p-8 space-y-8">
+                        {/* Job Content / Description */}
+                        <div>
+                            <h3 className="text-xl font-black text-slate-900 mb-4 flex items-center gap-2">
+                                <Info className="text-blue-600" />
+                                仕事内容
+                            </h3>
+                            <div className="prose prose-slate max-w-none">
+                                <p className="text-zinc-700 leading-relaxed whitespace-pre-wrap font-medium">
+                                    {job.content || job.description || '仕事内容の詳細はありません。'}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Recommended Points - Keeping hardcoded for now as placeholders or template features */}
                         <div className="bg-zinc-50 rounded-[2rem] p-6 border border-zinc-100">
                             <div className="flex items-center gap-2 mb-4 text-zinc-800">
                                 <CheckCircle2 className="text-amber-400" />

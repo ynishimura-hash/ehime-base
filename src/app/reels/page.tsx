@@ -5,7 +5,7 @@ import { useAppStore } from '@/lib/appStore';
 import { useSearchParams } from 'next/navigation';
 import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
-import { Reel } from '@/lib/dummyData';
+import { Reel } from '@/types/shared';
 import { Film, Play, Search, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 
@@ -43,7 +43,7 @@ function ReelsContent() {
     }, []);
 
     // Aggregate only Supabase media
-    const allReels: { reel: Reel, entityName: string, entityId: string, type: 'company' | 'job', companyId?: string, organization?: any }[] = [...mediaReels];
+    const allReels: { reel: Reel, entityName: string, entityId: string, type: 'company' | 'job' | 'quest', companyId?: string, organization?: any }[] = [...mediaReels];
 
 
     // Reel State
@@ -51,7 +51,7 @@ function ReelsContent() {
     const [activeReels, setActiveReels] = useState<Reel[]>([]);
     const [startIndex, setStartIndex] = useState(0);
     const [activeEntity, setActiveEntity] = useState<{ name: string, id: string, companyId?: string }>({ name: '', id: '' });
-    const [activeType, setActiveType] = useState<'company' | 'job'>('company');
+    const [activeType, setActiveType] = useState<'company' | 'job' | 'quest'>('company');
 
     // Filter State
     const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
@@ -301,6 +301,17 @@ function ReelsContent() {
                                 )}
 
                                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />
+
+                                {/* Entity Type Label */}
+                                <div className="absolute top-2 left-2">
+                                    <span className={`
+                                        text-[10px] font-black px-2 py-0.5 rounded-md text-white shadow-sm border border-white/20
+                                        ${item.type === 'quest' ? 'bg-gradient-to-r from-orange-400 to-pink-500' :
+                                            item.type === 'job' ? 'bg-blue-600' : 'bg-slate-700'}
+                                    `}>
+                                        {item.type === 'quest' ? 'QUEST' : item.type === 'job' ? 'JOB' : 'COMPANY'}
+                                    </span>
+                                </div>
 
                                 <div className="absolute center inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                     <div className="bg-white/20 backdrop-blur-sm p-3 rounded-full">

@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useAppStore } from '@/lib/appStore';
-import { JOBS, COMPANIES } from '@/lib/dummyData';
+// import { JOBS, COMPANIES } from '@/lib/dummyData';
 import {
     Zap, Briefcase, BookOpen, Target,
     Sparkles, MessageSquare, Heart, TrendingUp,
     ChevronRight, PlayCircle, Award, Layout,
-    GraduationCap, Search, Bell, ArrowRight, ArrowLeft
+    GraduationCap, Search, Bell, ArrowRight, ArrowLeft, Lock
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -15,6 +15,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getRecommendations } from '@/lib/recommendation';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import { calculateCategoryRadarData } from '@/lib/analysisUtils';
+import { createClient } from '@/utils/supabase/client';
+import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
 
 export default function SeekerDashboard() {
     const {
@@ -25,17 +27,127 @@ export default function SeekerDashboard() {
         userAnalysis,
         activeRole, // Add activeRole
         jobs,
+        companies,
         courses,
         interactions,
         completedLessonIds,
         lastViewedLessonIds,
-        getUserChats
+        getUserChats,
+        authStatus
     } = useAppStore();
 
     const router = useRouter();
+    const supabase = useMemo(() => createClient(), []);
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
     // Admin can view Seeker Dashboard (using Yuji's data as fallback if no profile)
     const currentUser = users.find(u => u.id === currentUserId) ||
         (activeRole === 'admin' ? users.find(u => u.id === '061fbf87-f36e-4612-80b4-dedc77b55d5e') : undefined);
+
+    // Clear Legacy Dummy Data (Migration) - Disabled to allow manual seeding
+    // useEffect(() => {
+    //     if (userAnalysis.isFortuneIntegrated === undefined || (userAnalysis.isFortuneIntegrated && Object.keys(userAnalysis.diagnosisScores || {}).length > 0)) {
+    //         console.log('Migrating legacy diagnosis data...');
+    //         // useAppStore.getState().setAnalysisResults({ ... });
+    //     }
+    // }, [userAnalysis]);
+
+    // 認証チェック
+    useEffect(() => {
+        let checkUserInterval: NodeJS.Timeout | null = null;
+        let isMounted = true;
+
+        const checkAuth = async (retries = 3) => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                let user: any = session?.user;
+                if (!user) {
+                    const { data: { user: fetchedUser } } = await supabase.auth.getUser();
+                    user = fetchedUser || undefined;
+                }
+
+                if (!user) {
+                    if (retries > 0 && isMounted) {
+                        console.log(`Dashboard: Auth check retry (${retries})...`);
+                        setTimeout(() => checkAuth(retries - 1), 500);
+                        return;
+                    }
+
+                    // console.log('セッションが見つかりません。環境の安定性を優先し、自動リダイレクトは行わずエラー画面を表示します。');
+                    if (isMounted) {
+                        setIsCheckingAuth(false);
+                    }
+                    return;
+                }
+
+                // If we have a user, proceed to use the session.user (or fetched user)
+                // Note: session.user might be null if we fell back to getUser, so use 'user' object
+
+
+                // Direct Profile Check (Bypass Store Sync Lag)
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profileError || !profile) {
+                    // If profile doesn't exist, they MUST go to onboarding
+                    console.log('Profile not found in DB, redirecting to Onboarding');
+                    console.log('プロフィールが見つかりません。オンボーディング未完了の可能性があります。');
+                    if (isMounted) {
+                        setIsCheckingAuth(false);
+                    }
+                    return;
+                }
+
+                // Profile Exists - Sync to Store Manually & Allow Access
+                const currentStore = useAppStore.getState();
+                if (currentStore.authStatus !== 'authenticated' || currentStore.currentUserId !== user.id) {
+                    console.log('Syncing auth state in Dashboard (Direct) for user:', user.id);
+                    currentStore.loginAs('seeker', user.id);
+                    currentStore.fetchUsers();
+                }
+
+                if (isMounted) {
+                    setIsCheckingAuth(false);
+                }
+
+            } catch (error) {
+                console.error('認証チェックエラー:', error);
+                if (isMounted) {
+                    setIsCheckingAuth(false);
+                }
+            }
+        };
+
+        checkAuth();
+
+        return () => {
+            isMounted = false;
+            if (checkUserInterval) {
+                clearInterval(checkUserInterval);
+            }
+        };
+    }, [router, supabase]);
+
+    // Debug: Listen for Auth Changes
+    useEffect(() => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
+            console.log(`Dashboard Auth Event: ${event}`, session?.user?.id);
+            if (event === 'SIGNED_OUT') {
+                console.warn('Dashboard received SIGNED_OUT');
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, [supabase]);
+
+    // usersが更新されたときにcurrentUserをチェック
+    useEffect(() => {
+        if (currentUser && isCheckingAuth) {
+            setIsCheckingAuth(false);
+        }
+    }, [currentUser, isCheckingAuth]);
 
     // Restore Deleted Logic:
     const userChats = getUserChats(currentUserId);
@@ -43,24 +155,80 @@ export default function SeekerDashboard() {
 
     // Recommendations
     const { jobs: recommendedJobs } = useMemo(() =>
-        getRecommendations(userAnalysis, JOBS, courses, COMPANIES),
-        [userAnalysis, courses]);
+        getRecommendations(userAnalysis, jobs, courses, companies),
+        [userAnalysis, courses, jobs, companies]);
 
     const activeQuests = recommendedJobs.filter(j => j.type === 'quest').slice(0, 3);
     const activeJobs = recommendedJobs.filter(j => j.type === 'job').slice(0, 3);
 
+    // Profile Completion Calculation
+    const profileFields = [
+        currentUser?.lastName,
+        currentUser?.firstName,
+        currentUser?.university,
+        currentUser?.faculty,
+        currentUser?.bio,
+        (currentUser?.tags?.length || 0) > 0,
+        (currentUser?.skills?.length || 0) > 0
+    ];
+    const filledFields = profileFields.filter(Boolean).length;
+    const profileCompletion = Math.round((filledFields / profileFields.length) * 100);
+
     // Radar Data
+    const hasDiagnosis = Object.keys(userAnalysis.diagnosisScores || {}).length > 0;
     const radarData = calculateCategoryRadarData(userAnalysis.diagnosisScores || {});
 
     // Learning Progress
-    const allLessons = courses.flatMap(c => c.curriculums.flatMap(curr => curr.lessons));
+    const allLessons = courses.flatMap(c => (c.curriculums || []).flatMap(curr => curr.lessons));
     const overallProgress = allLessons.length > 0 ? Math.round((completedLessonIds.length / allLessons.length) * 100) : 0;
 
     const recentlyViewedLessons = lastViewedLessonIds.map(id =>
         allLessons.find(l => l.id === id)
     ).filter(Boolean);
 
-    if (!currentUser) return <div className="p-10 text-center text-slate-400">Loading user profile...</div>;
+    if (isCheckingAuth) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <div className="text-center space-y-4">
+                    <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    <p className="text-slate-400 font-bold">プロフィールを読み込み中...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!currentUser) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+                <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center space-y-6">
+                    <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                        <Lock size={40} />
+                    </div>
+                    <div className="space-y-2">
+                        <h2 className="text-xl font-black text-slate-800">ログインが必要です</h2>
+                        <p className="text-sm font-bold text-slate-500 leading-relaxed">
+                            セッションの有効期限が切れているか、<br />
+                            正常に接続できていない可能性があります。
+                        </p>
+                    </div>
+                    <div className="flex flex-col gap-3 pt-2">
+                        <Link
+                            href="/login/seeker"
+                            className="bg-blue-600 text-white font-black py-4 rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
+                        >
+                            ログイン画面へ
+                        </Link>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="text-slate-400 font-bold text-sm hover:text-slate-600 transition-colors"
+                        >
+                            再試行する
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 pb-24">
@@ -68,9 +236,28 @@ export default function SeekerDashboard() {
             <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200">
                 <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <img src={currentUser.image} className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-100" alt="" />
+                        <Link href="/mypage" className="relative group flex-shrink-0">
+                            <img
+                                src={currentUser.image || getFallbackAvatarUrl(currentUser.id, currentUser.gender)}
+                                className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-100 group-hover:ring-blue-400 transition-all opacity-100 group-hover:opacity-80"
+                                alt=""
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    if (!target.getAttribute('data-error-tried')) {
+                                        target.setAttribute('data-error-tried', 'true');
+                                        target.src = getFallbackAvatarUrl(currentUser.id, currentUser.gender);
+                                    } else {
+                                        // Final fallback if Dicebear also fails
+                                        target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser.name || 'U') + '&background=random';
+                                    }
+                                }}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Search size={12} className="text-white drop-shadow-md" />
+                            </div>
+                        </Link>
                         <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dashboard</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Home</p>
                             <h1 className="text-sm font-black text-slate-800">こんにちは、{currentUser.name}さん</h1>
                         </div>
                     </div>
@@ -130,12 +317,12 @@ export default function SeekerDashboard() {
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">メッセージ</p>
                                     <p className="text-xl font-black text-slate-800">{userChats.length}</p>
                                 </Link>
-                                <Link href="/analysis" className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow group text-center">
-                                    <div className="w-10 h-10 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                                        <Sparkles size={20} />
+                                <Link href="/mypage" className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow group text-center">
+                                    <div className="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                                        <Layout size={20} />
                                     </div>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">診断状況</p>
-                                    <p className="text-xl font-black text-slate-800">{Object.keys(userAnalysis.diagnosisScores || {}).length >= 50 ? '100%' : '未完了'}</p>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">充実度</p>
+                                    <p className="text-xl font-black text-slate-800">{profileCompletion}%</p>
                                 </Link>
                             </div>
 
@@ -143,46 +330,62 @@ export default function SeekerDashboard() {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                                 {/* Left Col: Analysis Results */}
                                 <div className="md:col-span-1 space-y-6">
-                                    <div className="bg-slate-900 rounded-[2.5rem] p-6 text-white relative overflow-hidden h-full">
+                                    <div className="bg-slate-900 rounded-[2.5rem] p-6 text-white relative overflow-hidden h-full flex flex-col">
                                         <div className="absolute right-[-10%] top-[-10%] opacity-10">
                                             <Target size={160} />
                                         </div>
-                                        <div className="relative z-10 space-y-4">
+                                        <div className="relative z-10 space-y-4 flex-1">
                                             <h2 className="text-lg font-black italic tracking-tighter uppercase">Success Insights</h2>
 
-                                            {/* Radar Preview */}
-                                            <div className="h-48 w-full mt-4">
-                                                <ResponsiveContainer width="100%" height="100%">
-                                                    <RadarChart cx="50%" cy="50%" outerRadius="60%" data={radarData}>
-                                                        <PolarGrid stroke="#334155" />
-                                                        <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
-                                                        <Radar
-                                                            name="Score"
-                                                            dataKey="A"
-                                                            stroke="#6366f1"
-                                                            fill="#6366f1"
-                                                            fillOpacity={0.5}
-                                                        />
-                                                    </RadarChart>
-                                                </ResponsiveContainer>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">あなたの突出した資質</p>
-                                                <div className="flex flex-wrap gap-1.5">
-                                                    {(userAnalysis.selectedValues || []).slice(0, 3).map(valId => (
-                                                        <span key={valId} className="px-2 py-0.5 bg-white/10 rounded-md text-[9px] font-black">Value #{valId}</span>
-                                                    ))}
-                                                    {(!userAnalysis.selectedValues?.length) && <p className="text-xs text-slate-500 italic">診断後に表示されます</p>}
+                                            {hasDiagnosis ? (
+                                                <div className="h-48 w-full mt-4">
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <RadarChart cx="50%" cy="50%" outerRadius="60%" data={radarData}>
+                                                            <PolarGrid stroke="#334155" />
+                                                            <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                                                            <Radar
+                                                                name="Score"
+                                                                dataKey="A"
+                                                                stroke="#6366f1"
+                                                                fill="#6366f1"
+                                                                fillOpacity={0.5}
+                                                            />
+                                                        </RadarChart>
+                                                    </ResponsiveContainer>
                                                 </div>
-                                            </div>
+                                            ) : (
+                                                <div className="h-48 w-full mt-4 flex flex-col items-center justify-center text-center space-y-3 bg-white/5 rounded-2xl p-4">
+                                                    <Sparkles className="text-slate-500" />
+                                                    <p className="text-xs text-slate-400 font-bold">
+                                                        データがありません。<br />精密診断を受けてみましょう！
+                                                    </p>
+                                                </div>
+                                            )}
 
-                                            <Link href="/dashboard/success" className="block w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-[10px] font-black text-center shadow-lg shadow-indigo-600/20 transition-all uppercase tracking-widest">
-                                                Full Analysis Details
-                                            </Link>
+                                            {hasDiagnosis ? (
+                                                <div className="space-y-2">
+                                                    <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">あなたの突出した資質</p>
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {(userAnalysis.selectedValues || []).slice(0, 3).map(valId => (
+                                                            <span key={valId} className="px-2 py-0.5 bg-white/10 rounded-md text-[9px] font-black">Value #{valId}</span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="pt-2">
+                                                    <Link href="/analysis" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 text-xs rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-indigo-600/10">
+                                                        診断を開始する <ArrowRight size={14} />
+                                                    </Link>
+                                                </div>
+                                            )}
                                         </div>
+
+                                        <Link href="/dashboard/success" className="block w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-[10px] font-black text-center shadow-lg shadow-indigo-600/20 transition-all uppercase tracking-widest mt-2">
+                                            Full Analysis Details
+                                        </Link>
                                     </div>
                                 </div>
+
 
                                 {/* Right Col: Recommendations */}
                                 <div className="md:col-span-2 space-y-6">
@@ -202,7 +405,7 @@ export default function SeekerDashboard() {
                                                     <div>
                                                         <div className="flex items-center gap-2 mb-3">
                                                             <span className="bg-amber-100 text-amber-700 font-black text-[9px] px-2 py-0.5 rounded-md uppercase">Quest</span>
-                                                            <span className="text-[9px] font-bold text-slate-400">{COMPANIES.find(c => c.id === quest.companyId)?.name}</span>
+                                                            <span className="text-[9px] font-bold text-slate-400">{companies.find(c => c.id === quest.companyId)?.name}</span>
                                                         </div>
                                                         <h3 className="text-base font-black text-slate-800 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">{quest.title}</h3>
                                                     </div>
@@ -225,7 +428,7 @@ export default function SeekerDashboard() {
                                         </h2>
                                         <div className="space-y-1">
                                             {userChats.slice(0, 2).map(chat => {
-                                                const company = COMPANIES.find(c => c.id === chat.companyId);
+                                                const company = companies.find(c => c.id === chat.companyId);
                                                 const lastMsg = chat.messages[chat.messages.length - 1];
                                                 return (
                                                     <Link key={chat.id} href={`/messages/${chat.companyId}`} className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-2xl transition-colors group">
@@ -370,10 +573,23 @@ export default function SeekerDashboard() {
                     <span className="text-[9px] font-black uppercase tracking-tighter">Chat</span>
                 </Link>
                 <Link href="/mypage" className="text-slate-400 hover:text-white transition-colors flex flex-col items-center gap-1">
-                    <img src={currentUser.image} className="w-5 h-5 rounded-full object-cover" alt="" />
+                    <img
+                        src={currentUser.image || getFallbackAvatarUrl(currentUser.id, currentUser.gender)}
+                        className="w-5 h-5 rounded-full object-cover"
+                        alt=""
+                        onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            if (!target.getAttribute('data-error-tried')) {
+                                target.setAttribute('data-error-tried', 'true');
+                                target.src = getFallbackAvatarUrl(currentUser.id, currentUser.gender);
+                            } else {
+                                target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser.name || 'U') + '&background=random';
+                            }
+                        }}
+                    />
                     <span className="text-[9px] font-black uppercase tracking-tighter">My</span>
                 </Link>
             </div>
-        </div>
+        </div >
     );
 }

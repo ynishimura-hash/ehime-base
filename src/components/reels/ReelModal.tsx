@@ -2,8 +2,11 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { X, Heart, Share2, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Reel } from '@/lib/dummyData';
+import { Reel } from '@/types/shared';
 import Link from 'next/link';
+import { getYouTubeEmbedUrl, getYouTubeID } from '@/lib/videoUtils';
+
+
 
 interface ReelModalProps {
     reels: Reel[];
@@ -12,7 +15,7 @@ interface ReelModalProps {
     onClose: () => void;
     entityName: string; // Company Name or Job Title
     entityId: string;
-    entityType: 'company' | 'job';
+    entityType: 'company' | 'job' | 'quest';
     companyId?: string; // For navigation
 }
 
@@ -41,13 +44,28 @@ export const ReelModal: React.FC<ReelModalProps> = ({
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
+            // Push history state so back button closes modal
+            window.history.pushState({ reelModalOpen: true }, '', window.location.href);
         } else {
             document.body.style.overflow = 'auto';
         }
+
+        const handlePopState = () => {
+            // If back button is pressed and we were open, close it.
+            // Note: When isOpen becomes false via parent, we don't need to do anything here strictly, 
+            // but if user hits back, this fires.
+            if (isOpen) {
+                onClose();
+            }
+        };
+
+        window.addEventListener('popstate', handlePopState);
+
         return () => {
             document.body.style.overflow = 'auto';
+            window.removeEventListener('popstate', handlePopState);
         };
-    }, [isOpen]);
+    }, [isOpen]); // Re-run when isOpen changes
 
     useEffect(() => {
         setCurrentIndex(initialReelIndex);
@@ -72,7 +90,7 @@ export const ReelModal: React.FC<ReelModalProps> = ({
             } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
                 handlePrev();
             } else if (e.key === 'Escape') {
-                onClose();
+                window.history.back();
             }
         };
         window.addEventListener('keydown', handleKeyDown);
@@ -169,7 +187,7 @@ export const ReelModal: React.FC<ReelModalProps> = ({
         <div className="fixed inset-0 z-[100] h-[100dvh] bg-black flex items-center justify-center">
             {/* Close Button */}
             <button
-                onClick={onClose}
+                onClick={() => window.history.back()}
                 className="absolute top-4 right-2 z-50 text-white p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
             >
                 <X size={24} />
@@ -232,13 +250,28 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                             )}
                         </>
                     ) : (
-                        <iframe
-                            src={`${currentReel.url}?autoplay=1&mute=0&controls=0&loop=1&playlist=${currentReel.url.split('embed/')[1]}`}
-                            className="w-full h-full pointer-events-none"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                            style={{ pointerEvents: 'none' }}
-                        />
+                        (() => {
+                            const embedUrl = getYouTubeEmbedUrl(currentReel.url);
+                            const videoId = getYouTubeID(currentReel.url);
+
+                            if (!embedUrl || !videoId) {
+                                return (
+                                    <div className="w-full h-full flex items-center justify-center text-white">
+                                        <p className="text-sm">動画の読み込みに失敗しました</p>
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <iframe
+                                    src={`${embedUrl}?autoplay=1&mute=0&controls=0&loop=1&playlist=${videoId}&rel=0&modestbranding=1`}
+                                    className="w-full h-full pointer-events-none"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    style={{ pointerEvents: 'none' }}
+                                />
+                            );
+                        })()
                     )}
 
                     {/* Gradient Overlay */}
@@ -276,7 +309,7 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                         <div className="flex items-center gap-2 mb-2">
                             <h3 className="font-bold text-lg drop-shadow-md line-clamp-1">{entityName}</h3>
                             <Link
-                                href={entityType === 'company' ? `/companies/${entityId}` : `/jobs/${entityId}`}
+                                href={entityType === 'company' ? `/companies/${entityId}` : (entityType === 'quest' ? `/quests/${entityId}` : `/jobs/${entityId}`)}
                                 onClick={(e) => e.stopPropagation()}
                                 className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold border border-white/30 hover:bg-white/30 transition-colors flex items-center gap-1"
                             >

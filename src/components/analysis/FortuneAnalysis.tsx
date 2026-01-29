@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '@/lib/appStore';
 import { getRecommendations, RecommendationResult } from '@/lib/recommendation';
-import { JOBS, COMPANIES } from '@/lib/dummyData';
+// import { JOBS, COMPANIES } from '@/lib/dummyData'; // Removed
 
 import { JIKKAN, calculateDayMasterIndex } from '@/lib/fortune';
 
@@ -161,7 +161,7 @@ const ANALYSIS_MAP: Record<string, FortuneResult> = {
 };
 
 export default function FortuneAnalysis() {
-    const { userAnalysis, setAnalysisResults, courses, fetchCourses, toggleFortuneIntegration } = useAppStore();
+    const { userAnalysis, setAnalysisResults, courses, fetchCourses, toggleFortuneIntegration, jobs, companies } = useAppStore();
     const [step, setStep] = useState(0); // 0: Input, 1: Result
     const [birthDate, setBirthDate] = useState('');
     const [result, setResult] = useState<FortuneResult | null>(null);
@@ -204,9 +204,9 @@ export default function FortuneAnalysis() {
                         traits: res.traits
                     }
                 },
-                JOBS,
+                jobs,
                 courses,
-                COMPANIES
+                companies
             );
             setRecommendations(recs);
 

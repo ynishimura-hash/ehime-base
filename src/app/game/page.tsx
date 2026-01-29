@@ -15,16 +15,25 @@ import NovelPart from '@/components/game/NovelPart';
 import QuizPart from '@/components/game/QuizPart';
 import ActionGame from '@/components/game/ActionGame';
 import ActionMenuPart from '@/components/game/ActionMenuPart';
+import JobSelectPart from '@/components/game/JobSelectPart';
+import IzakayaGame from '@/components/game/minigames/IzakayaGame';
+import PlaySelectPart from '@/components/game/PlaySelectPart';
+import SNSGame from '@/components/game/minigames/SNSGame';
+import ReportGame from '@/components/game/minigames/ReportGame';
+import InterviewBattle from '@/components/game/battle/InterviewBattle';
 import Image from 'next/image';
 
 export default function GameDashboard() {
+    // ... (previous imports)
     const {
         stats, calendar, playerName, isInitialized, gameMode,
         initGame, setGameMode, setActionType
     } = useGameStore();
 
-    // If not initialized, show intro/naming screen
+    // ... (init logic)
+
     if (!isInitialized) {
+        // ... (intro render)
         return (
             <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 relative overflow-hidden">
                 {/* Decorative background glow */}
@@ -90,6 +99,12 @@ export default function GameDashboard() {
     if (gameMode === 'quiz') return <QuizPart />;
     if (gameMode === 'action') return <ActionGame />;
     if (gameMode === 'action_menu') return <ActionMenuPart />;
+    if (gameMode === 'job_select') return <JobSelectPart />;
+    if (gameMode === 'izakaya') return <IzakayaGame />;
+    if (gameMode === 'play_select') return <PlaySelectPart />;
+    if (gameMode === 'sns') return <SNSGame />;
+    if (gameMode === 'report') return <ReportGame />;
+    if (gameMode === 'battle') return <InterviewBattle />;
 
     const handleAction = (type: string) => {
         if (stats.stamina < 20 && type !== 'rest') {
@@ -101,11 +116,13 @@ export default function GameDashboard() {
 
         switch (type) {
             case 'study':
-            case 'work':
                 setGameMode('quiz');
                 break;
+            case 'work':
+                setGameMode('job_select');
+                break;
             case 'play':
-                setGameMode('action');
+                setGameMode('play_select');
                 break;
             default:
                 setGameMode('action_menu');
@@ -238,11 +255,11 @@ export default function GameDashboard() {
                         {/* Proceed Button (Bottom Right) */}
                         <div className="absolute bottom-6 right-4 z-20">
                             <button
-                                onClick={() => toast.info('選考試験は準備中です')}
-                                className="bg-gradient-to-b from-[#333] to-[#111] text-white pl-8 pr-8 py-4 rounded-xl font-bold text-lg border-2 border-[#555] shadow-xl active:scale-95 transition-transform flex flex-col items-center"
+                                onClick={() => setGameMode('battle')}
+                                className="bg-gradient-to-b from-[#333] to-[#111] text-white pl-8 pr-8 py-4 rounded-xl font-bold text-lg border-2 border-[#555] shadow-xl active:scale-95 transition-transform flex flex-col items-center cursor-pointer hover:border-blue-500"
                             >
                                 <span className="text-sm text-gray-400 mb-0.5">NEXT PHASE</span>
-                                <span className="text-xl">選考にすすむ</span>
+                                <span className="text-xl">面接へ進む</span>
                             </button>
                         </div>
                     </div>

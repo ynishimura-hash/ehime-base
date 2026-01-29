@@ -1,16 +1,17 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Company, Job, COMPANIES, JOBS } from './dummyData';
-import { Course } from './dummyData';
+import { Company, Job, Course } from '@/types/shared';
 import { UserAnalysis } from './types/analysis';
 import { LifePlanInput } from './money-simulation/types';
 import { MomProfile, ChildProfile, Specialist, BabyBaseEvent, LearningArticle, SpecialistPost } from './types/babybase';
 import { BB_SPECIALISTS, BB_EVENTS, BB_ARTICLES, BB_POSTS } from './babybaseData';
 import { useGameStore } from './gameStore';
 import { toast } from 'sonner';
+import { getFallbackAvatarUrl } from './avatarUtils';
 import { createClient } from '@/utils/supabase/client';
-import { fetchAdminStats, fetchQuestsAction, fetchJobsAction } from '@/app/admin/actions';
+import { fetchAdminStats, fetchQuestsAction, fetchJobsAction, fetchPublicCompaniesAction } from '@/app/admin/actions';
 import { fetchUserAnalysisAction, saveUserAnalysisAction } from '@/app/analysis/actions';
+import { VALUE_CARDS, DIAGNOSIS_QUESTIONS } from './constants/analysisData';
 
 // --- Types ---
 
@@ -24,6 +25,8 @@ export interface User {
     tags: string[];
     image: string;
     isOnline: boolean;
+    lastName?: string;
+    firstName?: string;
     // New fields
     department?: string;
     graduationYear?: string;
@@ -39,6 +42,7 @@ export interface User {
     };
     birthDate?: string;
     publicValues?: number[]; // 公開設定にされたValueCardのID
+    gender?: string;
 }
 
 export interface Attachment {
@@ -68,7 +72,7 @@ export interface ChatThread {
 }
 
 export interface Interaction {
-    type: 'like_company' | 'like_job' | 'like_user' | 'apply' | 'scout';
+    type: 'like_company' | 'like_job' | 'like_user' | 'apply' | 'scout' | 'like_quest';
     fromId: string; // userId or companyId
     toId: string; // companyId, jobId, or userId
     timestamp: number;
@@ -107,12 +111,19 @@ interface AppState {
     chatSettings: ChatSettings[];
     completedLessonIds: string[];
     lastViewedLessonIds: string[];
+    userRecommendations: any[]; // UserCourseRecommendation[]
 
     // Chat Preferences
     chatSortBy: 'date' | 'priority';
     chatFilterPriority: ('high' | 'medium' | 'low')[];
     isCompactMode: boolean;
     isLessonSidebarOpen: boolean;
+    isFetching: boolean; // General/Global loading (deprecated for specific guards)
+    isFetchingJobs: boolean;
+    isFetchingCompanies: boolean;
+    isFetchingUsers: boolean;
+    isFetchingChats: boolean;
+    isFetchingCourses: boolean;
     lastMoneySimulationInput: LifePlanInput | null;
 
     // Baby Base Data
@@ -125,6 +136,7 @@ interface AppState {
     // Actions
     loginAs: (role: 'seeker' | 'company' | 'admin', userId?: string, companyId?: string) => void;
     logout: () => Promise<void>;
+    resetState: () => void;
     switchRole: (role: 'seeker' | 'company' | 'admin') => void;
     setPersonaMode: (mode: 'seeker' | 'reskill') => void;
     updateUser: (userId: string, updates: Partial<User>) => void;
@@ -132,14 +144,16 @@ interface AppState {
     toggleInteraction: (type: Interaction['type'], fromId: string, toId: string, metadata?: any) => void;
 
     // Chat Actions
-    sendMessage: (threadId: string, senderId: string, text: string, attachment?: Attachment, replyToId?: string) => void;
+    sendMessage: (threadId: string, senderId: string, text: string, attachment?: Attachment, replyToId?: string) => Promise<void>;
     deleteMessage: (threadId: string, messageId: string) => void;
-    createChat: (companyId: string, userId: string, initialMessage?: string) => string; // returns threadId
+    createChat: (companyId: string, userId: string, initialMessage?: string) => Promise<string>; // returns threadId
+    fetchChats: () => Promise<void>;
     markAsRead: (threadId: string, readerId: string) => void;
 
     // Interaction Actions
     addInteraction: (interaction: Omit<Interaction, 'timestamp'>) => void;
     removeInteraction: (type: Interaction['type'], fromId: string, toId: string) => void;
+    fetchInteractions: () => Promise<void>;
     // Job Actions
     addJob: (job: Job) => void;
     updateJob: (jobId: string, updates: Partial<Job>) => void;
@@ -162,6 +176,8 @@ interface AppState {
     addCourses: (newCourses: Partial<Course>[]) => Promise<void>;
     updateCourse: (course: Partial<Course> & { id: string }) => Promise<void>;
     deleteCourse: (id: string) => Promise<void>;
+    fetchUserRecommendations: (userId: string) => Promise<void>;
+    generateRecommendations: (userId: string, selectedValues: number[]) => Promise<void>;
 
     // Data Sync Actions
     upsertCompany: (company: Company) => void;
@@ -210,97 +226,7 @@ export interface Invitation {
 }
 
 // --- Initial Data ---
-const INITIAL_USERS: User[] = [
-    {
-        id: '061fbf87-f36e-4612-80b4-dedc77b55d5e',
-        name: '西村 裕二',
-        age: 29,
-        university: '愛媛大学',
-        faculty: '法文学部（既卒）',
-        bio: '「愛媛を面白くする」ために活動中。営業、企画、コミュニティ運営など幅広く経験。次はIT×教育の領域で、若者の可能性を広げる事業に挑戦したいと考えています。',
-        tags: ['事業開発', 'コミュニティマネジメント', '営業'],
-        image: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop',
-        isOnline: true,
-        birthDate: '1995-05-15'
-    },
-    {
-        id: 'u_hanako',
-        name: '松山 花子',
-        age: 24,
-        university: '東京の某IT企業',
-        faculty: '営業部',
-        bio: '東京でSaaS営業を経験。愛媛へのUターンを検討中。',
-        tags: ['法人営業', 'SaaS', 'カスタマーサクセス'],
-        image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop',
-        isOnline: false,
-    },
-    {
-        id: 'u4',
-        name: '田中 健太',
-        age: 21,
-        university: '愛媛大学',
-        faculty: '法文学部',
-        bio: '【Uターン希望】東京のベンチャー企業での長期インターン経験あり。地元愛媛の企業で、営業としてバリバリ働きたいです。フットワークの軽さには自信があります！',
-        tags: ['営業志望', 'Uターン', '体育会系'],
-        image: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=200',
-        isOnline: false,
-    },
-    {
-        id: 'u5',
-        name: '鈴木 明日香',
-        age: 22,
-        university: '松山大学',
-        faculty: '経営学部',
-        bio: 'デザイン思考を用いた課題解決に興味があります。サークルでは広報を担当し、SNS運用でフォロワーを2000人増やしました。クリエイティブな仕事に挑戦したいです。',
-        tags: ['デザイン', 'SNS運用', '広報'],
-        image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200',
-        isOnline: true,
-    },
-    {
-        id: 'u6',
-        name: '佐藤 翔太',
-        age: 23,
-        university: '愛媛大学',
-        faculty: '工学部 情報工学科',
-        bio: 'AI・機械学習を研究中。Python/TensolFlow触れます。地元の製造業のDX化に技術で貢献したいと考えています。ハッカソン優勝経験あり。',
-        tags: ['エンジニア', 'Python', 'AI'],
-        image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=200',
-        isOnline: false,
-    },
-    {
-        id: 'u7',
-        name: '高橋 美咲',
-        age: 21,
-        university: '聖カタリナ大学',
-        faculty: '人間健康福祉学部',
-        bio: '人と話すことが大好きで、接客アルバイトを3年間続けています。福祉業界だけでなく、サービス業全般に興味があります。明るさと笑顔は誰にも負けません！',
-        tags: ['接客', 'コミュニケーション', '福祉'],
-        image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200',
-        isOnline: true,
-    },
-    {
-        id: 'u8',
-        name: '伊藤 拓也',
-        age: 20,
-        university: '愛媛大学',
-        faculty: '社会共創学部',
-        bio: '地域活性化ボランティアに参加し、多世代の方と協働する楽しさを知りました。まだやりたいことは明確ではありませんが、色々な企業の話を聞いてみたいです。',
-        tags: ['地域活性化', 'ボランティア', '好奇心旺盛'],
-        image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200',
-        isOnline: false,
-    },
-    {
-        id: 'u9',
-        name: '渡辺 結衣',
-        age: 22,
-        university: '松山東雲女子大学',
-        faculty: '人文科学部',
-        bio: '英語の教員免許取得見込みです。教育業界だけでなく、グローバルに展開する愛媛の企業で、語学力を活かした仕事がしたいです。',
-        tags: ['英語', 'グローバル', '教職'],
-        image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200',
-        isOnline: false,
-    }
-];
+const INITIAL_USERS: User[] = [];
 
 
 export const useAppStore = create<AppState>()(
@@ -313,36 +239,28 @@ export const useAppStore = create<AppState>()(
             currentCompanyId: '',
 
             users: INITIAL_USERS,
-            companies: COMPANIES,
-            jobs: JOBS,
+            companies: [],
+            jobs: [],
             courses: [], // Will be fetched via API
 
             userAnalysis: {
-                isFortuneIntegrated: true,
-                fortune: {
-                    dayMaster: '甲',
-                    traits: ['誠実', '向上心', '体系的思考']
-                },
-                diagnosisScores: {
-                    // Category A: 構造力 (1-10)
-                    1: 5, 2: 4, 3: 5, 4: 4, 5: 5, 6: 4, 7: 5, 8: 4, 9: 5, 10: 4,
-                    // Category B: 創造力 (11-20)
-                    11: 3, 12: 4, 13: 3, 14: 4, 15: 3, 16: 4, 17: 3, 18: 4, 19: 3, 20: 4,
-                    // Category C: 共感力 (21-30)
-                    21: 5, 22: 5, 23: 5, 24: 5, 25: 5, 26: 5, 27: 5, 28: 5, 29: 5, 30: 5,
-                    // Category D: 行動力 (31-40)
-                    31: 2, 32: 3, 33: 2, 34: 3, 35: 2, 36: 3, 37: 2, 38: 3, 39: 2, 40: 3,
-                    // Category E: 受容力 (41-50)
-                    41: 4, 42: 4, 43: 4, 44: 4, 45: 4, 46: 4, 47: 4, 48: 4, 49: 4, 50: 4
-                },
-                selectedValues: [1, 5, 12, 23, 45], // Assuming these are valid value card IDs
-                publicValues: [1, 5, 23],
-                strengths: { 'Comm': 80, 'Tech': 60, 'Mng': 70 }
+                isFortuneIntegrated: false,
+                fortune: undefined,
+                diagnosisScores: {},
+                selectedValues: [],
+                publicValues: [],
+                strengths: {}
             },
 
             chats: [],
             interactions: [],
             chatSettings: [],
+            isFetching: false,
+            isFetchingJobs: false,
+            isFetchingCompanies: false,
+            isFetchingUsers: false,
+            isFetchingChats: false,
+            isFetchingCourses: false,
 
             // Chat Preferences Defaults
             chatSortBy: 'date',
@@ -350,6 +268,7 @@ export const useAppStore = create<AppState>()(
             isCompactMode: false,
             completedLessonIds: [],
             lastViewedLessonIds: [],
+            userRecommendations: [],
             isLessonSidebarOpen: true,
             lastMoneySimulationInput: null,
 
@@ -427,45 +346,95 @@ export const useAppStore = create<AppState>()(
 
             // User Actions
             loginAs: (role, userId, companyId) => {
-                const legacyId = 'u_yuji';
-                const newId = '061fbf87-f36e-4612-80b4-dedc77b55d5e';
-                const effectiveUserId = (userId === legacyId || !userId)
-                    ? (role === 'admin' ? 'u_admin' : newId)
-                    : userId;
+                // Auto-fill ID for admin if missing
+                if (role === 'admin' && !userId) {
+                    userId = 'admin_sys';
+                }
+
+                if (!userId) {
+                    console.error('loginAs called without userId!');
+                    return;
+                }
+
+                console.log('Logging in as:', { role, userId, companyId });
 
                 set({
                     authStatus: 'authenticated',
                     activeRole: role,
-                    currentUserId: effectiveUserId,
+                    currentUserId: userId,
                     currentCompanyId: companyId || 'c_eis',
                 });
+
                 // Fetch analysis if seeker login
                 if (role === 'seeker') {
-                    get().fetchUserAnalysis(effectiveUserId);
+                    get().fetchUserAnalysis(userId);
                 }
+                // Always fetch interactions and users
+                get().fetchInteractions();
+                get().fetchUsers();
             },
 
-            logout: async () => {
-                const supabase = createClient();
-                try {
-                    await supabase.auth.signOut({ scope: 'local' }); // Use local scope to avoid network hang
-                } catch (e) {
-                    console.error('SignOut failed', e);
-                }
-
-                // localStorage.removeItem('eis-app-store-v3'); // Removed to prevent conflict with Zustand persist
+            resetState: () => {
+                console.log('AppStore: Resetting state');
                 set({
                     authStatus: 'unauthenticated',
                     activeRole: 'seeker',
                     currentUserId: '',
                     currentCompanyId: ''
                 });
+                try {
+                    localStorage.removeItem('eis-app-store-v3');
+                    localStorage.removeItem('sb-wiq...-auth-token');
+                } catch (e) {
+                    console.error('LocalStorage clear failed', e);
+                }
             },
 
-            updateUser: (userId: string, updates: Partial<User>) => {
+            logout: async () => {
+                console.log('AppStore: Logout called');
+
+                // 1. Reset State
+                get().resetState();
+
+                // 2. Call Supabase SignOut
+                const supabase = createClient();
+                try {
+                    await supabase.auth.signOut();
+                } catch (e) {
+                    console.error('Supabase SignOut failed', e);
+                }
+            },
+
+            updateUser: async (userId: string, updates: Partial<User>) => {
+                // 1. Update local state for immediate feedback
                 set((state) => ({
                     users: state.users.map((u) => (u.id === userId ? { ...u, ...updates } : u)),
                 }));
+
+                // 2. Persist to Supabase
+                const supabase = createClient();
+                const dbUpdates: any = {};
+                if (updates.name !== undefined) dbUpdates.full_name = updates.name;
+                if (updates.university !== undefined) dbUpdates.school_name = updates.university;
+                if (updates.faculty !== undefined) dbUpdates.department = updates.faculty;
+                if (updates.bio !== undefined) dbUpdates.bio = updates.bio;
+                if (updates.gender !== undefined) dbUpdates.gender = updates.gender;
+                if (updates.lastName !== undefined) dbUpdates.last_name = updates.lastName;
+                if (updates.firstName !== undefined) dbUpdates.first_name = updates.firstName;
+                if (updates.birthDate !== undefined) dbUpdates.dob = updates.birthDate;
+                if (updates.image !== undefined) dbUpdates.avatar_url = updates.image;
+
+                if (Object.keys(dbUpdates).length > 0) {
+                    const { error } = await supabase
+                        .from('profiles')
+                        .update(dbUpdates)
+                        .eq('id', userId);
+
+                    if (error) {
+                        console.error('Failed to sync profile update to DB:', error);
+                        toast.error('プロフィールの保存に失敗しました');
+                    }
+                }
             },
             addUser: (user: User) => {
                 set((state) => {
@@ -477,39 +446,106 @@ export const useAppStore = create<AppState>()(
             setPersonaMode: (mode) => set({ personaMode: mode }),
 
             // Generic Interaction
-            toggleInteraction: (type, fromId, toId, metadata) => {
-                set((state) => {
-                    const exists = state.interactions.find(
-                        i => i.type === type && i.fromId === fromId && i.toId === toId
-                    );
-                    if (exists) {
-                        return { interactions: state.interactions.filter(i => i !== exists) };
-                    }
+            toggleInteraction: async (type, fromId, toId, metadata) => {
+                const state = get();
+                const exists = state.interactions.find(
+                    i => i.type === type && i.fromId === fromId && i.toId === toId
+                );
+
+                // Optimistic Update
+                if (exists) {
+                    set({ interactions: state.interactions.filter(i => i !== exists) });
+                    toast.success('お気に入りから削除しました', { duration: 1500 });
+                } else {
                     const newInteraction: Interaction = {
                         type, fromId, toId, metadata, timestamp: Date.now()
                     };
-                    return { interactions: [...state.interactions, newInteraction] };
-                });
+                    set({ interactions: [...state.interactions, newInteraction] });
+                    toast.success('お気に入りに保存しました！', { duration: 1500, icon: '❤️' });
+                }
+
+                // DB Sync
+                try {
+                    const supabase = createClient();
+                    if (exists) {
+                        // Delete from DB (Use type + user_id + target_id match)
+                        const { error } = await supabase.from('interactions')
+                            .delete()
+                            .match({ user_id: fromId, type, target_id: toId });
+                        if (error) throw error;
+                    } else {
+                        // Insert to DB
+                        const { error } = await supabase.from('interactions').insert({
+                            user_id: fromId,
+                            type,
+                            target_id: toId,
+                            metadata: metadata || {}
+                        });
+                        if (error) throw error;
+                    }
+                } catch (error: any) {
+                    console.error('Interaction sync failed:', error);
+                    toast.error(`保存に失敗しました: ${error.message || error.details || 'Unknown error'}`);
+                    // Revert state (complex without ID, so just fetching fresh might be better or complex rollback)
+                    // For now, let's just log. Perfect rollback requires keeping track of temp items.
+                }
             },
 
-            sendMessage: (threadId, senderId, text, attachment, replyToId) => set((state) => ({
-                chats: state.chats.map(chat => {
-                    if (chat.id !== threadId) return chat;
-                    return {
-                        ...chat,
-                        messages: [...chat.messages, {
-                            id: `msg_${Date.now()} `,
-                            senderId,
-                            text,
-                            timestamp: Date.now(),
-                            isRead: false,
-                            attachment,
-                            replyToId
-                        }],
-                        updatedAt: Date.now()
-                    };
-                })
-            })),
+            fetchInteractions: async () => {
+                const { currentUserId, isFetching } = get();
+                if (!currentUserId || isFetching) return;
+                set({ isFetching: true });
+
+                try {
+                    const supabase = createClient();
+                    const { data, error } = await supabase
+                        .from('interactions')
+                        .select('*')
+                        .eq('user_id', currentUserId);
+
+                    if (error) {
+                        console.error('Failed to fetch interactions:', error);
+                        return;
+                    }
+
+                    if (data) {
+                        const interactions: Interaction[] = data.map((i: any) => ({
+                            type: i.type,
+                            fromId: i.user_id,
+                            toId: i.target_id,
+                            metadata: i.metadata,
+                            timestamp: new Date(i.created_at).getTime()
+                        }));
+                        set({ interactions });
+                    }
+                } finally {
+                    set({ isFetching: false });
+                }
+            },
+
+            sendMessage: async (threadId, senderId, text, attachment, replyToId) => {
+                const supabase = createClient();
+                const newMessage = {
+                    chat_id: threadId,
+                    sender_id: senderId,
+                    content: text,
+                    attachment_url: attachment?.url,
+                    attachment_type: attachment?.type,
+                    attachment_name: attachment?.name,
+                    is_read: false
+                };
+
+                const { data, error } = await supabase.from('messages').insert(newMessage).select().single();
+
+                if (error) {
+                    console.error('Failed to send message:', error);
+                    toast.error('メッセージの送信に失敗しました');
+                    return;
+                }
+
+                // Optimistic update or fetch
+                get().fetchChats();
+            },
 
             deleteMessage: (threadId, messageId) => set((state) => ({
                 chats: state.chats.map(chat => {
@@ -522,29 +558,101 @@ export const useAppStore = create<AppState>()(
                 })
             })),
 
-            createChat: (companyId, userId, initialMessage) => {
+            createChat: async (companyId, userId, initialMessage) => {
                 const state = get();
                 const existing = state.chats.find(c => c.companyId === companyId && c.userId === userId);
                 if (existing) return existing.id;
 
-                const newId = `chat_${Date.now()} `;
-                const newChat: ChatThread = {
-                    id: newId,
-                    companyId,
-                    userId,
-                    messages: initialMessage ? [{
-                        id: `msg_${Date.now()} `,
-                        senderId: get().activeRole === 'company' ? companyId : userId,
-                        // simple heuristic: if created by company, sender is companyId
-                        text: initialMessage,
-                        timestamp: Date.now(),
-                        isRead: false
-                    }] : [],
-                    updatedAt: Date.now()
-                };
+                const supabase = createClient();
 
-                set(s => ({ chats: [newChat, ...s.chats] }));
-                return newId;
+                // 1. Create Chat Room
+                const { data: chatData, error: chatError } = await supabase
+                    .from('casual_chats')
+                    .insert({ company_id: companyId, user_id: userId })
+                    .select()
+                    .single();
+
+                if (chatError) {
+                    // Check if it already exists (constraint violation)
+                    if (chatError.code === '23505') { // unique_violation
+                        const { data: existingChat } = await supabase
+                            .from('casual_chats')
+                            .select('id')
+                            .eq('company_id', companyId)
+                            .eq('user_id', userId)
+                            .single();
+                        if (existingChat) return existingChat.id;
+                    }
+                    console.error('Failed to create chat:', chatError);
+                    toast.error('チャットの作成に失敗しました');
+                    throw chatError;
+                }
+
+                const chatId = chatData.id;
+
+                // 2. Add Initial Message
+                if (initialMessage) {
+                    const senderId = get().activeRole === 'company' ? companyId : userId;
+                    await supabase.from('messages').insert({
+                        chat_id: chatId,
+                        sender_id: senderId,
+                        content: initialMessage
+                    });
+                }
+
+                await get().fetchChats();
+                return chatId;
+            },
+
+            fetchChats: async () => {
+                const { isFetchingChats } = get();
+                if (isFetchingChats) return;
+                set({ isFetchingChats: true });
+
+                try {
+                    const supabase = createClient();
+                    const { activeRole, currentUserId, currentCompanyId } = get();
+
+                    // Fetch Logic depending on role
+                    // Since RLS policies handle visibility, we can just select all relevant chats
+                    const { data: chatsData, error } = await supabase
+                        .from('casual_chats')
+                        .select(`
+                            *,
+                            messages (*)
+                        `)
+                        .order('updated_at', { ascending: false });
+
+                    if (error) {
+                        console.error('Failed to fetch chats:', error);
+                        return;
+                    }
+
+                    if (chatsData) {
+                        const mappedChats: ChatThread[] = chatsData.map((c: any) => ({
+                            id: c.id,
+                            companyId: c.company_id,
+                            userId: c.user_id,
+                            updatedAt: new Date(c.updated_at).getTime(),
+                            messages: (c.messages || []).map((m: any) => ({
+                                id: m.id,
+                                senderId: m.sender_id,
+                                text: m.content,
+                                timestamp: new Date(m.created_at).getTime(),
+                                isRead: m.is_read,
+                                attachment: m.attachment_url ? {
+                                    id: m.id + '_att',
+                                    type: m.attachment_type as 'image' | 'file',
+                                    url: m.attachment_url,
+                                    name: m.attachment_name || 'file',
+                                } : undefined
+                            })).sort((a: any, b: any) => a.timestamp - b.timestamp)
+                        }));
+                        set({ chats: mappedChats });
+                    }
+                } finally {
+                    set({ isFetchingChats: false });
+                }
             },
 
             markAsRead: (threadId, readerId) => set(state => ({
@@ -618,12 +726,18 @@ export const useAppStore = create<AppState>()(
             })),
 
             fetchCourses: async () => {
+                const { isFetchingCourses } = get();
+                if (isFetchingCourses) return;
+                set({ isFetchingCourses: true });
+
                 try {
                     const response = await fetch('/api/elearning');
                     const data = await response.json();
                     set({ courses: data });
                 } catch (error) {
                     console.error('Failed to fetch courses:', error);
+                } finally {
+                    set({ isFetchingCourses: false });
                 }
             },
 
@@ -677,6 +791,34 @@ export const useAppStore = create<AppState>()(
                 }
             },
 
+            fetchUserRecommendations: async (userId) => {
+                try {
+                    const response = await fetch(`/api/analysis/recommendations?userId=${userId}`);
+                    const data = await response.json();
+                    if (Array.isArray(data)) {
+                        set({ userRecommendations: data });
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch recommendations:', error);
+                }
+            },
+
+            generateRecommendations: async (userId, selectedValues) => {
+                try {
+                    const response = await fetch('/api/analysis/recommendations', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId, selectedValues })
+                    });
+                    const data = await response.json();
+                    if (Array.isArray(data)) {
+                        set({ userRecommendations: data });
+                    }
+                } catch (error) {
+                    console.error('Failed to generate recommendations:', error);
+                }
+            },
+
             upsertCompany: (company) => set(state => {
                 const exists = state.companies.some(c => c.id === company.id);
                 if (exists) {
@@ -694,68 +836,65 @@ export const useAppStore = create<AppState>()(
             }),
 
             fetchUsers: async () => {
-                const supabase = createClient();
-                const { data, error } = await supabase.from('profiles').select('*');
-                if (error) {
-                    console.error('Failed to fetch users:', error);
-                    return;
-                }
-                if (data) {
-                    // Map Supabase profiles to AppStore User objects
-                    const mappedUsers: User[] = data.map(p => ({
-                        id: p.id,
-                        name: p.full_name || 'Guest',
-                        age: 21, // Default or calc from birthday
-                        university: p.university || '未設定',
-                        faculty: p.department || '',
-                        bio: '',
-                        tags: [],
-                        image: p.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + p.id,
-                        isOnline: false,
-                        birthDate: p.birth_date, // Ensure this field matches your User interface
-                        // Map other fields as necessary
-                        qualifications: [],
-                        skills: [],
-                        workHistory: []
-                    }));
-                    set({ users: mappedUsers });
+                if (get().isFetchingUsers) return;
+                set({ isFetchingUsers: true });
+
+                try {
+                    const supabase = createClient();
+                    const { data, error } = await supabase.from('profiles').select('*');
+                    if (error) {
+                        console.error('Failed to fetch users:', error);
+                        return;
+                    }
+                    if (data) {
+                        // Map Supabase profiles to AppStore User objects
+                        const mappedUsers: User[] = data.map((p: any) => ({
+                            id: p.id,
+                            name: p.full_name || 'Guest',
+                            age: 21, // Default or calc from birthday
+                            university: p.school_name || p.university || '未設定',
+                            faculty: p.department || '',
+                            bio: p.bio || '',
+                            tags: [],
+                            image: p.avatar_url || p.image || getFallbackAvatarUrl(p.id, p.gender),
+                            isOnline: false,
+                            lastName: p.last_name,
+                            firstName: p.first_name,
+                            birthDate: p.dob || p.birth_date,
+                            gender: p.gender,
+                            // Map other fields as necessary
+                            qualifications: [],
+                            skills: [],
+                            workHistory: []
+                        }));
+                        set({ users: mappedUsers });
+                    }
+                } finally {
+                    set({ isFetchingUsers: false });
                 }
             },
 
             fetchCompanies: async () => {
-                const supabase = createClient();
-                const { data, error } = await supabase.from('organizations').select('*');
-                if (error) {
-                    console.error('Failed to fetch companies:', error);
-                    return;
-                }
-                if (data) {
-                    // Map Supabase organizations to AppStore Company objects
-                    const mappedCompanies: Company[] = data.map(org => ({
-                        id: org.id,
-                        name: org.name,
-                        industry: org.industry || 'IT・通信', // Default
-                        location: org.location || '愛媛県松山市',
-                        description: org.description || '',
-                        image: org.logo_url || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=200',
-                        coverImage: org.cover_image_url || 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&q=80',
-                        tags: [], // Need separate table or json col
-                        features: [],
-                        salary: '',
-                        employees: '未設定',
-                        established: '未設定',
-                        url: org.website_url || '',
-                        address: org.address || '',
-                        president: org.representative || '',
-                        status: org.status || 'pending',
-                        videoUrl: undefined, // Or fetch from videos table
-                        rjpNegatives: '', // Default string, not array
-                        isPremium: false,
-                        logoColor: 'from-blue-500 to-indigo-500' // Default check
-                    }));
-                    set({ companies: mappedCompanies });
+                const { isFetchingCompanies } = get();
+                if (isFetchingCompanies) return;
+                set({ isFetchingCompanies: true });
+
+                try {
+                    console.log('AppStore: fetchCompanies called. Calling server action directly...');
+                    // const { fetchPublicCompaniesAction } = await import('@/app/admin/actions');
+                    const result = await fetchPublicCompaniesAction();
+                    console.log('AppStore: fetchPublicCompaniesAction result:', result?.success, result?.data?.length);
+
+                    if (result.success && result.data) {
+                        set({ companies: result.data as any[] });
+                    } else {
+                        console.error('Failed to fetch companies:', result.error);
+                    }
+                } finally {
+                    set({ isFetchingCompanies: false });
                 }
             },
+
 
             getChat: (threadId) => get().chats.find(c => c.id === threadId),
             getUserChats: (userId) => get().chats.filter(c => c.userId === userId).sort((a, b) => b.updatedAt - a.updatedAt),
@@ -799,11 +938,20 @@ export const useAppStore = create<AppState>()(
                 }
             },
             togglePublicValue: (valueId) => {
+                const valueCard = VALUE_CARDS.find((v: any) => v.id === valueId);
+                // 影の側面（isPositive=false）は公開不可
+                if (!valueCard || !valueCard.isPositive) return;
+
                 set(state => {
                     const current = state.userAnalysis.publicValues || [];
-                    const updated = current.includes(valueId)
+                    const isRemoving = current.includes(valueId);
+
+                    // すでに3つ選択されている場合は、解除のみ可能
+                    if (!isRemoving && current.length >= 3) return state;
+
+                    const updated = isRemoving
                         ? current.filter(id => id !== valueId)
-                        : current.length < 5 ? [...current, valueId] : current;
+                        : [...current, valueId];
 
                     // Sync with users array
                     const users = state.users.map(u =>
@@ -859,12 +1007,52 @@ export const useAppStore = create<AppState>()(
                     return;
                 }
 
+                // --- DATA INTEGRITY FIX ---
+                // For users migrated from older versions (like Test Seeker), negative values might be missing.
+                // We auto-repair this by checking if positive values exist without their negative pairs.
+                let repairedSelectedValues = result.data.selectedValues || [];
+                const diagnosisScores = result.data.diagnosisScores || {};
+                const originalLength = repairedSelectedValues.length;
+
+                // Set of IDs for O(1) lookup
+                const selectedSet = new Set(repairedSelectedValues);
+
+                // 1. Repair missing pairs for existing values
+                DIAGNOSIS_QUESTIONS.forEach(q => {
+                    if (selectedSet.has(q.positiveValueId) && !selectedSet.has(q.negativeValueId)) {
+                        repairedSelectedValues.push(q.negativeValueId);
+                        selectedSet.add(q.negativeValueId);
+                    }
+                });
+
+                // 2. If we still don't have 5 pairs (10 items), recalculate from scores if available
+                if (repairedSelectedValues.length < 10 && Object.keys(diagnosisScores).length > 0) {
+                    // Recalculate top 5 based on scores
+                    const rankedQuestions = [...DIAGNOSIS_QUESTIONS]
+                        .map(q => ({ ...q, score: diagnosisScores[q.id] || 0 }))
+                        .sort((a, b) => b.score - a.score)
+                        .slice(0, 5);
+
+                    // Reset and rebuild
+                    repairedSelectedValues = [];
+                    rankedQuestions.forEach(q => {
+                        repairedSelectedValues.push(q.positiveValueId);
+                        repairedSelectedValues.push(q.negativeValueId);
+                    });
+                    console.log('AppStore: Full recalculation of traits performed due to insufficient data.');
+                }
+
+                if (repairedSelectedValues.length !== originalLength) {
+                    console.log('AppStore: Auto-repaired missing negative trait values.');
+                }
+                // --------------------------
+
                 const data = result.data;
                 set(state => ({
                     userAnalysis: {
                         ...state.userAnalysis,
                         diagnosisScores: data.diagnosisScores || state.userAnalysis.diagnosisScores,
-                        selectedValues: data.selectedValues || state.userAnalysis.selectedValues,
+                        selectedValues: repairedSelectedValues.length > 0 ? repairedSelectedValues : (state.userAnalysis.selectedValues || []),
                         publicValues: data.publicValues || state.userAnalysis.publicValues,
                         isFortuneIntegrated: data.isFortuneIntegrated ?? state.userAnalysis.isFortuneIntegrated,
                         fortune: {
@@ -876,6 +1064,10 @@ export const useAppStore = create<AppState>()(
             },
 
             fetchJobs: async () => {
+                const { isFetchingJobs } = get();
+                if (isFetchingJobs) return;
+                set({ isFetchingJobs: true });
+
                 try {
                     const result = await fetchJobsAction();
                     if (result.success && result.data) {
@@ -883,6 +1075,8 @@ export const useAppStore = create<AppState>()(
                     }
                 } catch (error) {
                     console.error('Error fetching jobs in store:', error);
+                } finally {
+                    set({ isFetchingJobs: false });
                 }
             },
 
@@ -911,6 +1105,42 @@ export const useAppStore = create<AppState>()(
         }),
         {
             name: 'eis-app-store-v3',
+            partialize: (state) => ({
+                authStatus: state.authStatus,
+                activeRole: state.activeRole,
+                personaMode: state.personaMode,
+                currentUserId: state.currentUserId,
+                currentCompanyId: state.currentCompanyId,
+                users: state.users,
+                companies: state.companies,
+                jobs: state.jobs,
+                userAnalysis: state.userAnalysis,
+                chats: state.chats,
+                interactions: state.interactions,
+                chatSettings: state.chatSettings,
+                completedLessonIds: state.completedLessonIds,
+                lastViewedLessonIds: state.lastViewedLessonIds,
+                userRecommendations: state.userRecommendations,
+                chatSortBy: state.chatSortBy,
+                chatFilterPriority: state.chatFilterPriority,
+                isCompactMode: state.isCompactMode,
+                isLessonSidebarOpen: state.isLessonSidebarOpen,
+                momProfile: state.momProfile,
+                lastMoneySimulationInput: state.lastMoneySimulationInput,
+                invitations: state.invitations
+                // Exclude isFetching flags
+            }),
+            onRehydrateStorage: () => (state) => {
+                // Ensure flags are false on load
+                if (state) {
+                    state.isFetching = false;
+                    state.isFetchingJobs = false;
+                    state.isFetchingCompanies = false;
+                    state.isFetchingUsers = false;
+                    state.isFetchingChats = false;
+                    state.isFetchingCourses = false;
+                }
+            }
         }
     )
 );

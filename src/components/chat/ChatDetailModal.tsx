@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, MapPin, User as UserIcon, Building2, ExternalLink, Activity, Pin, Ban, Mail, Check, AlertCircle, Edit2 } from 'lucide-react';
 import { useAppStore, User } from '@/lib/appStore';
-import { Company } from '@/lib/dummyData';
+import { Company } from '@/types/shared';
+import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
 
 interface ChatDetailModalProps {
     isOpen: boolean;
@@ -93,11 +94,39 @@ export default function ChatDetailModal({
                                 {partnerImage.startsWith('bg-') ? (
                                     <Building2 className="text-white w-12 h-12" />
                                 ) : (
-                                    <img src={partnerImage} alt={partnerName} className="w-full h-full object-cover rounded-2xl" />
+                                    <img
+                                        src={partnerImage}
+                                        alt={partnerName}
+                                        className="w-full h-full object-cover rounded-2xl"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            if (!target.getAttribute('data-error-tried')) {
+                                                target.setAttribute('data-error-tried', 'true');
+                                                target.src = isCompany
+                                                    ? '/images/defaults/default_company_icon.png'
+                                                    : getFallbackAvatarUrl(partnerId, (partnerData as any)?.gender);
+                                            } else {
+                                                target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(partnerName || 'U') + '&background=random';
+                                            }
+                                        }}
+                                    />
                                 )}
                             </div>
                         ) : (
-                            <img src={partnerImage} alt={partnerName} className="w-24 h-24 rounded-full object-cover shadow-lg border-4 border-white" />
+                            <img
+                                src={partnerImage}
+                                alt={partnerName}
+                                className="w-24 h-24 rounded-full object-cover shadow-lg border-4 border-white"
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    if (!target.getAttribute('data-error-tried')) {
+                                        target.setAttribute('data-error-tried', 'true');
+                                        target.src = getFallbackAvatarUrl(partnerId, (partnerData as any)?.gender);
+                                    } else {
+                                        target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(partnerName || 'U') + '&background=random';
+                                    }
+                                }}
+                            />
                         )}
                         {settings?.priority && (
                             <div className={`absolute -bottom-2 -left-2 px-2 py-1 rounded-lg border-2 border-white text-xs font-bold text-white shadow-sm flex items-center justify-center z-10

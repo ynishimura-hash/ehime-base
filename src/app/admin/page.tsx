@@ -11,6 +11,8 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { fetchAdminStats } from './actions';
 import { createClient } from '@/utils/supabase/client';
+import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
+import { ALL_CONTENT } from '@/data/mock_elearning_data';
 
 export default function AdminDashboardPage() {
     const { interactions, activeRole, courses, fetchCourses, users, currentUserId } = useAppStore();
@@ -32,7 +34,7 @@ export default function AdminDashboardPage() {
                 users: stats.users,
                 companies: stats.companies,
                 jobs: stats.jobs,
-                learning: courses.length || 0
+                learning: ALL_CONTENT.length || 0
             });
         };
         fetchStats();
@@ -91,10 +93,10 @@ export default function AdminDashboardPage() {
     }
 
     const stats = [
-        { label: '登録ユーザー', value: counts.users, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', trend: 'Real' },
-        { label: '提携企業', value: counts.companies, icon: Building2, color: 'text-emerald-600', bg: 'bg-emerald-50', trend: 'Real' },
-        { label: '公開求人', value: counts.jobs, icon: Briefcase, color: 'text-amber-600', bg: 'bg-amber-50', trend: 'Real' },
-        { label: 'eラーニング数', value: counts.learning, icon: GraduationCap, color: 'text-purple-600', bg: 'bg-purple-50', trend: 'Store' },
+        { label: '登録ユーザー', value: counts.users, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+        { label: '提携企業', value: counts.companies, icon: Building2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+        { label: '公開求人', value: counts.jobs, icon: Briefcase, color: 'text-amber-600', bg: 'bg-amber-50' },
+        { label: 'eラーニング数', value: counts.learning, icon: GraduationCap, color: 'text-purple-600', bg: 'bg-purple-50' },
     ];
 
     return (
@@ -119,13 +121,25 @@ export default function AdminDashboardPage() {
                             </p>
                         </div>
                         <div className="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-white font-black text-xs overflow-hidden">
-                            {activeRole === 'admin' ? 'AD' : (
-                                <img
-                                    src={users.find(u => u.id === currentUserId)?.image || 'https://via.placeholder.com/40'}
-                                    alt="Admin"
-                                    className="w-full h-full object-cover"
-                                />
-                            )}
+                            {activeRole === 'admin' ? 'AD' : (() => {
+                                const u = users.find(u => u.id === currentUserId);
+                                return (
+                                    <img
+                                        src={u?.image || getFallbackAvatarUrl(u?.id || '', u?.gender)}
+                                        alt="User"
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            if (!target.getAttribute('data-error-tried')) {
+                                                target.setAttribute('data-error-tried', 'true');
+                                                target.src = getFallbackAvatarUrl(u?.id || '', u?.gender);
+                                            } else {
+                                                target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u?.name || 'U') + '&background=random';
+                                            }
+                                        }}
+                                    />
+                                );
+                            })()}
                         </div>
                     </div>
                 </div>
@@ -152,7 +166,7 @@ export default function AdminDashboardPage() {
                                 stat.label === '登録ユーザー' ? '/admin/management?tab=users' :
                                     stat.label === '提携企業' ? '/admin/management?tab=companies' :
                                         stat.label === '公開求人' ? '/admin/management?tab=jobs' :
-                                            stat.label === 'eラーニング数' ? '/admin/management?tab=learning' :
+                                            stat.label === 'eラーニング数' ? '/admin/elearning' :
                                                 '/admin'
                             }
                             className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm group hover:scale-[1.02] hover:shadow-xl transition-all block"
@@ -161,9 +175,7 @@ export default function AdminDashboardPage() {
                                 <div className={`${stat.bg} ${stat.color} p-3 rounded-2xl`}>
                                     <stat.icon size={24} />
                                 </div>
-                                <span className="text-emerald-500 text-xs font-black bg-emerald-50 px-2 py-1 rounded-lg">
-                                    {stat.trend}
-                                </span>
+
                             </div>
                             <div>
                                 <p className="text-slate-400 text-xs font-black uppercase tracking-widest">{stat.label}</p>

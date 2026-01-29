@@ -6,7 +6,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 const SCHEMAS = {
-    company: `
+  company: `
     [
       {
         "name": "Company Name",
@@ -23,7 +23,7 @@ const SCHEMAS = {
       }
     ]
     `,
-    job: `
+  job: `
     [
       {
         "title": "Job Title",
@@ -40,7 +40,7 @@ const SCHEMAS = {
       }
     ]
     `,
-    user: `
+  user: `
     [
       {
         "email": "Email address",
@@ -54,7 +54,7 @@ const SCHEMAS = {
       }
     ]
     `,
-    course: `
+  course: `
     [
       {
         "title": "Course Title",
@@ -69,25 +69,25 @@ const SCHEMAS = {
 };
 
 export async function POST(req: NextRequest) {
-    try {
-        const { csvData, type } = await req.json();
+  try {
+    const { csvData, type } = await req.json();
 
-        if (!process.env.GEMINI_API_KEY) {
-            return NextResponse.json({ error: 'GEMINI_API_KEY not configured' }, { status: 500 });
-        }
+    if (!process.env.GEMINI_API_KEY) {
+      return NextResponse.json({ error: 'GEMINI_API_KEY not configured' }, { status: 500 });
+    }
 
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
 
-        const schema = SCHEMAS[type as keyof typeof SCHEMAS];
-        if (!schema) {
-            return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
-        }
+    const schema = SCHEMAS[type as keyof typeof SCHEMAS];
+    if (!schema) {
+      return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
+    }
 
-        // Limit data size to prevent token limits (take first 50 rows if too large)
-        // Convert array of objects (csvData) back to string for prompt efficiency, or just send JSON string
-        const dataString = JSON.stringify(csvData.slice(0, 50));
+    // Limit data size to prevent token limits (take first 50 rows if too large)
+    // Convert array of objects (csvData) back to string for prompt efficiency, or just send JSON string
+    const dataString = JSON.stringify(csvData.slice(0, 50));
 
-        const prompt = `
+    const prompt = `
         You are an expert data parsing assistant.
         I will provide raw CSV data (converted to JSON format).
         Your task is to transform this data into a structured JSON array that matches the following schema exactly.
@@ -108,19 +108,19 @@ export async function POST(req: NextRequest) {
         ${dataString}
         `;
 
-        const result = await model.generateContent(prompt);
-        const response = result.response;
-        let text = response.text();
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    let text = response.text();
 
-        // Clean cleanup
-        text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    // Clean cleanup
+    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
 
-        const parsedData = JSON.parse(text);
+    const parsedData = JSON.parse(text);
 
-        return NextResponse.json({ data: parsedData });
+    return NextResponse.json({ data: parsedData });
 
-    } catch (error: any) {
-        console.error('AI Parse Error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+  } catch (error: any) {
+    console.error('AI Parse Error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }

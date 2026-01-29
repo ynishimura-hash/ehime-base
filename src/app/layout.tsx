@@ -32,6 +32,7 @@ export default function RootLayout({
         <AuthProvider>
           <LayoutWrapper>{children}</LayoutWrapper>
           <Toaster position="top-center" richColors />
+          <DebugRoleSwitcher />
         </AuthProvider>
       </body>
     </html>

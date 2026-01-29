@@ -1,216 +1,87 @@
 "use client";
 
-import { useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
+import React from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
+import { User, Building2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LoginPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
     const router = useRouter();
-    const supabase = createClient();
-
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-
-        try {
-            const { error } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
-
-            if (error) {
-                toast.error('ログインに失敗しました', {
-                    description: error.message
-                });
-                return;
-            }
-
-            toast.success('ログインしました');
-            router.push('/babybase');
-            router.refresh(); // Refresh to update server components
-        } catch (err) {
-            toast.error('エラーが発生しました');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleSocialLogin = async (provider: 'google' | 'line') => {
-        try {
-            const { error } = await supabase.auth.signInWithOAuth({
-                provider: 'google', // currently only google configured in schema/plan, line requires extra setup
-                options: {
-                    redirectTo: `${location.origin}/auth/callback`,
-                },
-            });
-            if (error) throw error;
-        } catch (error: any) {
-            toast.error('ソーシャルログインに失敗しました', { description: error.message });
-        }
-    };
-
-    const handleCreateDemoAccount = async () => {
-        setLoading(true);
-        try {
-            const email = 'yuji@ehime-base.com';
-            const password = 'ehimebase2024';
-
-            // 1. Sign Up
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: {
-                        full_name: '西村 裕二',
-                        user_type: 'student'
-                    }
-                }
-            });
-
-            if (error) {
-                // If user already exists, try to sign in instead
-                if (error.message.includes('already registered')) {
-                    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-                    if (signInError) throw signInError;
-
-                    // Retrigger profile update just in case
-                    const { data: { user } } = await supabase.auth.getUser();
-                    if (user) {
-                        const { DEMO_DIAGNOSIS_RESULT } = await import('@/lib/demoData');
-                        await supabase.from('profiles').update({
-                            full_name: '西村 裕二',
-                            diagnosis_result: DEMO_DIAGNOSIS_RESULT
-                        }).eq('id', user.id);
-                    }
-
-                    toast.success('デモアカウントでログインしました');
-                    router.push('/babybase');
-                    router.refresh();
-                    return;
-                }
-                throw error;
-            }
-
-            // 2. Set Demo Data (Diagnosis Result)
-            if (data.user) {
-                const { DEMO_DIAGNOSIS_RESULT } = await import('@/lib/demoData');
-                const { error: updateError } = await supabase
-                    .from('profiles')
-                    .update({
-                        full_name: '西村 裕二',
-                        diagnosis_result: DEMO_DIAGNOSIS_RESULT
-                    })
-                    .eq('id', data.user.id);
-
-                if (updateError) throw updateError;
-            }
-
-            toast.success('デモアカウントを作成しました！');
-            router.push('/babybase');
-            router.refresh();
-
-        } catch (error: any) {
-            console.error(error);
-            toast.error('デモアカウント作成に失敗しました', { description: error.message });
-        } finally {
-            setLoading(false);
-        }
-    };
 
     return (
-        <div className="min-h-screen bg-[#FFFBF0] flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-md bg-white rounded-[2rem] shadow-xl shadow-pink-100/50 p-8 space-y-8">
-                <div className="text-center space-y-2">
-                    <h1 className="text-2xl font-black text-slate-800">おかえりなさい！</h1>
-                    <p className="text-sm font-bold text-slate-400">Ehime Base / Baby Base アカウントでログイン</p>
+        <div className="min-h-screen bg-slate-50 relative flex flex-col">
+            {/* Visual Header */}
+            <div className="bg-slate-900 pt-20 pb-20 px-6 overflow-hidden relative">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-blue-600 rounded-full blur-3xl opacity-20"></div>
+
+                <div className="relative z-10 max-w-5xl mx-auto text-center space-y-4">
+                    <h1 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tight">
+                        Ehime Base ログイン
+                    </h1>
+                    <p className="text-slate-400 text-sm md:text-base font-bold max-w-2xl mx-auto">
+                        ログインするアカウントの種類を選択してください
+                    </p>
                 </div>
 
-                <form onSubmit={handleLogin} className="space-y-6">
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">メールアドレス</label>
-                            <div className="relative">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                                <input
-                                    type="email"
-                                    required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-12 pr-6 font-bold text-sm focus:ring-2 focus:ring-pink-100 transition-all outline-none"
-                                    placeholder="name@example.com"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">パスワード</label>
-                            <div className="relative">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                                <input
-                                    type="password"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-12 pr-6 font-bold text-sm focus:ring-2 focus:ring-pink-100 transition-all outline-none"
-                                    placeholder="••••••••"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-slate-900 hover:bg-slate-800 text-white font-black py-4 rounded-2xl transition-all flex items-center justify-center gap-2 group active:scale-95 disabled:opacity-70"
+                <div className="absolute top-6 left-6 z-20">
+                    <Link
+                        href="/"
+                        className="flex items-center gap-2 text-white/50 hover:text-white font-bold transition-colors bg-white/5 backdrop-blur-sm px-4 py-2 rounded-full"
                     >
-                        {loading ? <Loader2 className="animate-spin" /> : 'ログイン'}
-                        {!loading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
-                    </button>
-                </form>
-
-                <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-slate-100"></div>
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white px-4 text-slate-300 font-black">または</span>
-                    </div>
-                </div>
-
-                <button
-                    onClick={() => handleSocialLogin('google')}
-                    className="w-full bg-white border-2 border-slate-100 hover:border-slate-200 text-slate-600 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3 active:scale-95"
-                >
-                    <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
-                    Googleでログイン
-                </button>
-
-                <div className="text-center space-y-4">
-                    <Link href="/babybase/register" className="text-xs font-bold text-pink-500 hover:text-pink-600 transition-colors block">
-                        アカウントをお持ちでない方はこちら
+                        <span className="text-xs">← トップへ戻る</span>
                     </Link>
-
-                    <button
-                        type="button"
-                        onClick={handleCreateDemoAccount}
-                        disabled={loading}
-                        className="w-full py-3 border-2 border-dashed border-green-300 text-green-600 font-black rounded-xl hover:bg-green-50 transition-all text-xs"
-                    >
-                        🌱 デモアカウント作成（西村裕二）
-                    </button>
-
-                    <div className="pt-4 border-t border-slate-50">
-                        <Link href="/admin" className="text-[10px] font-bold text-slate-300 hover:text-slate-400 transition-colors">
-                            管理者ログイン
-                        </Link>
-                    </div>
                 </div>
+            </div>
+
+            {/* Selection Cards */}
+            <div className="flex-1 -mt-10 px-6 pb-20 relative z-20">
+                <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
+
+                    {/* Seeker Card */}
+                    <div
+                        onClick={() => router.push('/login/seeker')}
+                        className="bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:-translate-y-1 transition-all cursor-pointer group border border-slate-100"
+                    >
+                        <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <User size={28} />
+                        </div>
+                        <h2 className="text-xl font-black text-slate-800 mb-2">学生・求職者の方</h2>
+                        <p className="text-slate-500 text-xs font-bold leading-relaxed mb-8">
+                            マイページへログインし、<br />クエストや企業の検索を行います。
+                        </p>
+                        <button className="w-full bg-slate-900 text-white font-bold py-3 text-sm rounded-xl group-hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
+                            ログインへ進む
+                            <ArrowRight size={16} />
+                        </button>
+                    </div>
+
+                    {/* Company Card */}
+                    <div
+                        onClick={() => router.push('/login/company')}
+                        className="bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:-translate-y-1 transition-all cursor-pointer group border border-slate-100"
+                    >
+                        <div className="w-14 h-14 bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <Building2 size={28} />
+                        </div>
+                        <h2 className="text-xl font-black text-slate-800 mb-2">企業・パートナーの方</h2>
+                        <p className="text-slate-500 text-xs font-bold leading-relaxed mb-8">
+                            管理画面へログインし、<br />求人の掲載や候補者の管理を行います。
+                        </p>
+                        <button className="w-full bg-white border-2 border-slate-200 text-slate-600 font-bold py-3 text-sm rounded-xl group-hover:border-slate-400 group-hover:text-slate-800 transition-colors flex items-center justify-center gap-2">
+                            ログインへ進む
+                            <ArrowRight size={16} />
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <div className="py-8 text-center bg-slate-50 border-t border-slate-200/50">
+                <p className="text-[10px] font-bold text-slate-400">
+                    © 2026 Ehime Base Project. All rights reserved.
+                </p>
             </div>
         </div>
     );

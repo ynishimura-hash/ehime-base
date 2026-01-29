@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/appStore';
-import { JOBS, COMPANIES } from '@/lib/dummyData';
+// import { JOBS, COMPANIES } from '@/lib/dummyData'; // Removed
 import {
     ChevronLeft,
     Clock,
@@ -17,7 +17,7 @@ import {
 import { motion } from 'framer-motion';
 
 export default function ProgressPage() {
-    const { interactions, currentUserId } = useAppStore();
+    const { interactions, currentUserId, jobs, companies } = useAppStore();
 
     // Get applied interactions
     const appliedInteractions = interactions.filter(
@@ -26,8 +26,8 @@ export default function ProgressPage() {
 
     // Map interactions to job details
     const appliedJobs = appliedInteractions.map(interaction => {
-        const job = JOBS.find(j => j.id === interaction.toId);
-        const company = COMPANIES.find(c => c.id === job?.companyId);
+        const job = jobs.find(j => j.id === interaction.toId);
+        const company = companies.find(c => c.id === job?.companyId);
         return {
             ...job,
             company,

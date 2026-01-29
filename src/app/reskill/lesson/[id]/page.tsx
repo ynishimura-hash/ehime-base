@@ -34,10 +34,10 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ id: str
     }, [courses.length, fetchCourses]);
 
     // Find lesson and course
-    const allLessons = courses.flatMap(c => c.curriculums.flatMap(curr => curr.lessons));
+    const allLessons = courses.flatMap(c => (c.curriculums || []).flatMap(curr => curr.lessons));
     const lesson = allLessons.find(l => l.id === id);
-    const course = courses.find(c => c.curriculums.some(curr => curr.id === lesson?.curriculumId));
-    const curriculum = course?.curriculums.find(curr => curr.id === lesson?.curriculumId);
+    const course = courses.find(c => (c.curriculums || []).some(curr => curr.id === lesson?.curriculumId));
+    const curriculum = course?.curriculums?.find(curr => curr.id === lesson?.curriculumId);
 
     // --- YouTube API Integration ---
     const playerRef = useRef<any>(null);
@@ -124,8 +124,8 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ id: str
     const nextLesson = allLessons.find(l =>
         l.curriculumId === lesson.curriculumId && l.order === lesson.order + 1
     ) || allLessons.find(l => {
-        const currIdx = course.curriculums.findIndex(c => c.id === lesson.curriculumId);
-        return course.curriculums[currIdx + 1]?.lessons[0];
+        const currIdx = (course.curriculums || []).findIndex(c => c.id === lesson.curriculumId);
+        return (course.curriculums || [])[currIdx + 1]?.lessons[0];
     });
 
     return (
@@ -335,7 +335,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ id: str
                             <h3 className="font-black text-white text-lg tracking-tight">Curriculum Contents</h3>
                         </div>
                         <div className="flex-1 overflow-y-auto">
-                            {course.curriculums.map((curr) => (
+                            {(course.curriculums || []).map((curr) => (
                                 <div key={curr.id}>
                                     <div className="px-6 py-4 bg-white/5 border-b border-white/5">
                                         <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">Step {curr.order}</span>

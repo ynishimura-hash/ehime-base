@@ -9,6 +9,71 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+// Helper function to get fallback image based on course title
+// Only use local paths (starting with /), ignore external URLs
+const getCourseImage = (course: { image?: string; title: string }) => {
+    // Only use course.image if it's a local path (starts with /)
+    if (course.image && course.image.startsWith('/')) {
+        return course.image;
+    }
+
+    const title = course.title;
+    if (title.includes('リスキル')) return '/courses/reskill_archive.png';
+    if (title.includes('ITパスポート')) return '/courses/it_passport.png';
+    if (title.includes('基本情報')) return '/courses/fe_exam.png';
+    if (title.includes('キャリア')) return '/courses/career_support.png';
+    if (title.includes('AI')) return '/courses/ai_course.png';
+    if (title.includes('SNS') || title.includes('マーケティング')) return '/courses/sns_marketing.png';
+    if (title.includes('動画')) return '/courses/video_production.png';
+    if (title.includes('アプリ')) return '/courses/app_development.png';
+    if (title.includes('自動化')) return '/courses/automation.png';
+    if (title.includes('セキュリティ')) return '/courses/security_course.png';
+    if (title.includes('Google Apps Script') || title.includes('GAS')) return '/courses/gas_course.png';
+    if (title.includes('Google')) return '/courses/google_basics.png';
+    if (title.includes('HP') || title.includes('Web') || title.includes('ウェブ')) return '/courses/hp_course.png';
+    if (title.includes('DX')) return '/courses/track_dx.png';
+    if (title.includes('デジタル')) return '/courses/digital_basics.png';
+
+    return '/courses/digital_basics.png';
+};
+
+// Helper to sum durations
+const getTotalDuration = (course: any) => {
+    // If it has direct lessons (unlikely for tracks but possible for simple courses)
+    let lessons = course.lessons || [];
+
+    // If it has curriculums (Track/Course structure), aggregate lessons
+    if (course.curriculums) {
+        course.curriculums.forEach((curr: any) => {
+            if (curr.lessons) {
+                lessons = [...lessons, ...curr.lessons];
+            }
+        });
+    }
+
+    if (lessons.length === 0) return course.duration || '0:00';
+
+    let totalSeconds = 0;
+    lessons.forEach((l: any) => {
+        if (!l.duration) return;
+        const parts = l.duration.split(':').map(Number);
+        if (parts.length === 2) {
+            totalSeconds += parts[0] * 60 + parts[1];
+        } else if (parts.length === 3) {
+            totalSeconds += parts[0] * 3600 + parts[1] * 60 + parts[2];
+        }
+    });
+
+    if (totalSeconds === 0) return course.duration || '0:00';
+
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    // const s = totalSeconds % 60; // Usually specific down to seconds isn't needed for total course duration
+
+    if (h > 0) return `${h}h ${m}m`;
+    return `${m}m`;
+};
+
 export default function CoursesListPage() {
     const { completedLessonIds, courses, fetchCourses } = useAppStore();
     const [searchQuery, setSearchQuery] = useState('');
@@ -20,35 +85,37 @@ export default function CoursesListPage() {
         }
     }, [courses.length, fetchCourses]);
 
-    const categories = ['すべて', ...Array.from(new Set(courses.map(c => c.category)))];
+    const categories = ['すべて', ...Array.from(new Set(courses.map(c => c.category).filter((c): c is string => !!c)))];
 
-    const filteredCourses = courses.filter(course => {
+    const filteredCourses = courses.filter((course: any) => {
         const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             course.description.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesCategory = selectedCategory === 'すべて' || course.category === selectedCategory;
-        return matchesSearch && matchesCategory;
+        const isPublished = course.is_published !== false;
+        return matchesSearch && matchesCategory && isPublished;
     });
 
     const getProgress = (courseId: string) => {
         const course = courses.find(c => c.id === courseId);
         if (!course) return 0;
-        const allLessons = course.curriculums.flatMap(curr => curr.lessons);
+        const allLessons = course.lessons || course.curriculums?.flatMap(curr => curr.lessons) || [];
+        if (allLessons.length === 0) return 0;
         const completed = allLessons.filter(l => completedLessonIds.includes(l.id)).length;
         return Math.round((completed / allLessons.length) * 100);
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20">
+        <div className="min-h-screen bg-slate-50 pb-20 overflow-x-hidden w-full max-w-full">
             {/* Header Section */}
             <div className="bg-white border-b border-slate-200">
-                <div className="max-w-7xl mx-auto px-6 py-12 md:py-20 flex flex-col items-center text-center">
-                    <div className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-6 border border-blue-100 flex items-center gap-2">
-                        <GraduationCap size={16} /> Reskill University
+                <div className="max-w-7xl mx-auto px-6 py-8 md:py-12 flex flex-col items-center text-center">
+                    <div className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border border-blue-100 flex items-center gap-2">
+                        <GraduationCap size={14} /> Reskill University
                     </div>
-                    <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight mb-6 leading-tight">
+                    <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-4 leading-tight">
                         愛媛で、一生モノの<br /><span className="text-blue-600">スキルを磨こう。</span>
                     </h1>
-                    <p className="max-w-2xl text-slate-500 font-bold text-lg md:text-xl leading-relaxed">
+                    <p className="max-w-2xl text-slate-500 font-bold text-sm md:text-base leading-relaxed">
                         地域DX、ITエンジニアリング、ビジネスマナーまで。<br className="hidden md:block" />
                         地元の企業の「今」必要としているスキルを体系的に学びます。
                     </p>
@@ -56,24 +123,26 @@ export default function CoursesListPage() {
             </div>
 
             {/* Filter & Search Bar */}
-            <div className="max-w-7xl mx-auto px-6 -mt-8 relative z-20">
-                <div className="bg-white p-4 md:p-6 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-slate-100 flex flex-col md:flex-row gap-4">
-                    <div className="flex-1 relative">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <div className="max-w-4xl mx-auto px-6 -mt-8 relative z-20">
+                <div className="bg-white p-2 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-slate-100 flex flex-col gap-2">
+                    <div className="relative w-full">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
                         <input
                             type="text"
                             placeholder="コース名やキーワードで検索..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl font-bold focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                            className="w-full pl-12 pr-4 py-3 bg-transparent border-none rounded-2xl font-bold text-slate-700 placeholder:text-slate-400 focus:ring-0 transition-all outline-none"
                         />
                     </div>
-                    <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+                    <div className="w-full h-px bg-slate-100" />
+                    {/* Categories */}
+                    <div className="flex gap-2 overflow-x-auto pb-2 px-2 scrollbar-hide min-w-0 w-full">
                         {categories.map(cat => (
                             <button
                                 key={cat}
                                 onClick={() => setSelectedCategory(cat)}
-                                className={`px-6 py-4 rounded-2xl text-sm font-black transition-all whitespace-nowrap ${selectedCategory === cat
+                                className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap ${selectedCategory === cat
                                     ? 'bg-slate-900 text-white shadow-lg'
                                     : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
                                     }`}
@@ -88,8 +157,9 @@ export default function CoursesListPage() {
             <main className="max-w-7xl mx-auto px-6 py-12 space-y-12">
                 {/* Courses Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {filteredCourses.map(course => {
+                    {filteredCourses.map((course: any) => {
                         const progress = getProgress(course.id);
+                        const durationDisplay = getTotalDuration(course);
                         return (
                             <Link
                                 key={course.id}
@@ -98,7 +168,7 @@ export default function CoursesListPage() {
                             >
                                 <div className="aspect-video relative overflow-hidden">
                                     <img
-                                        src={course.image}
+                                        src={getCourseImage(course)}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                         alt={course.title}
                                     />
@@ -108,7 +178,7 @@ export default function CoursesListPage() {
                                             {course.category}
                                         </span>
                                         <div className="flex items-center gap-1.5 text-white text-[10px] font-black">
-                                            <Clock size={14} /> {course.duration}
+                                            <Clock size={14} /> {durationDisplay}
                                         </div>
                                     </div>
                                 </div>
@@ -132,8 +202,19 @@ export default function CoursesListPage() {
 
                                     <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <img src={course.instructor.image} className="w-8 h-8 rounded-full border-2 border-white shadow-md shadow-slate-200" alt="" />
-                                            <span className="text-xs font-black text-slate-700">{course.instructor.name}</span>
+                                            {course.instructor ? (
+                                                <>
+                                                    <img src={course.instructor.image} className="w-8 h-8 rounded-full border-2 border-white shadow-md shadow-slate-200 object-cover" alt="" />
+                                                    <span className="text-xs font-black text-slate-700">{course.instructor.name}</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className="w-8 h-8 rounded-full border-2 border-white shadow-md bg-slate-100 flex items-center justify-center">
+                                                        <img src="/icons/logo.png" className="w-5 h-5 opacity-50" onError={(e) => (e.currentTarget.src = '')} alt="" />
+                                                    </div>
+                                                    <span className="text-xs font-black text-slate-700">Official Course</span>
+                                                </>
+                                            )}
                                         </div>
                                         <div className="bg-slate-50 p-2 rounded-xl text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
                                             <ArrowRight size={18} />

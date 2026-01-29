@@ -3,10 +3,11 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Building2, Search, Film, Heart, GraduationCap, FileEdit, UserCircle, LogOut, LogIn, Menu, MessageCircle, Map, Briefcase, TrendingUp, User, ShieldCheck } from 'lucide-react';
+import { Home, Layout as DashboardIcon, Building2, Search, Film, Heart, GraduationCap, FileEdit, UserCircle, LogOut, LogIn, Menu, MessageCircle, Map, Briefcase, TrendingUp, User, ShieldCheck, Settings } from 'lucide-react';
 import { useAppStore } from '@/lib/appStore';
 import MobileBottomNav from './MobileBottomNav';
 import ScrollToTop from './ScrollToTop';
+import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
 
 interface NavItem {
     name: string;
@@ -40,11 +41,12 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         { name: 'メッセージ', icon: MessageCircle, href: '/messages', badge: undefined }, // Badge handled below
         { name: 'e-ラーニング', icon: GraduationCap, href: '/reskill' },
         { name: '進捗確認', icon: TrendingUp, href: '/progress' },
-        { name: 'マイページ', icon: User, href: '/mypage' },
+        { name: 'ダッシュボード', icon: DashboardIcon, href: '/dashboard' },
+        { name: 'プロフィール・設定', icon: Settings, href: '/mypage' },
         { name: '管理者画面', icon: ShieldCheck, href: '/admin' },
     ];
 
-    const authOnlyRoutes = ['/saved', '/messages', '/progress', '/mypage'];
+    const authOnlyRoutes = ['/saved', '/messages', '/progress', '/mypage', '/dashboard', '/reskill', '/elearning'];
 
     const navItems = allNavItems.filter(item => {
         if (!isAuthenticated && authOnlyRoutes.includes(item.href)) return false;
@@ -71,8 +73,14 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     React.useEffect(() => setMounted(true), []);
 
     const handleLogout = async () => {
-        await logout();
-        window.location.replace('/');
+        console.log('UI: Logout clicked');
+        try {
+            await logout();
+        } catch (e) {
+            console.error('Logout error:', e);
+        }
+        // Force reload to clear any memory states
+        window.location.href = '/';
     };
 
     // メニュー項目（PC/モバイル共通）
@@ -105,7 +113,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     return (
         <div className="min-h-screen bg-zinc-50 flex flex-col md:flex-row">
             {/* PC Sidebar */}
-            <aside className="hidden md:flex w-64 bg-white border-r border-zinc-200 flex-col h-screen sticky top-0">
+            <aside className="hidden md:flex w-64 shrink-0 bg-white border-r border-zinc-200 flex-col h-screen sticky top-0">
                 <div className="p-8 border-b border-zinc-100">
                     <Link href="/" className="w-full flex justify-center items-center group">
                         <img src="/eis_logo_mark.png" alt="EIS Logo" className="h-10 w-auto group-hover:opacity-80 transition-opacity" />
@@ -119,7 +127,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
                     {isAuthenticated ? (
                         <button
                             onClick={handleLogout}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-white bg-eis-navy rounded-xl hover:bg-slate-800 transition-colors shadow-sm"
+                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-white bg-eis-navy rounded-xl hover:bg-slate-800 transition-colors shadow-sm cursor-pointer"
                         >
                             <LogOut size={20} />
                             ログアウト
@@ -139,9 +147,19 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
                     <div className="p-4 border-t border-zinc-100 mt-auto bg-zinc-50/50">
                         <Link href="/mypage" className="flex items-center gap-3 px-2 py-2 hover:bg-white rounded-xl transition-all group">
                             <img
-                                src={currentUser?.image || 'https://via.placeholder.com/40'}
+                                src={currentUser?.image || getFallbackAvatarUrl(currentUser?.id || '', currentUser?.gender)}
                                 alt={currentUser?.name}
                                 className="w-10 h-10 rounded-full object-cover border border-zinc-200 shadow-sm"
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    if (!target.getAttribute('data-error-tried')) {
+                                        target.setAttribute('data-error-tried', 'true');
+                                        target.src = getFallbackAvatarUrl(currentUser?.id || '', currentUser?.gender);
+                                    } else {
+                                        // Hide or keep silhouette if it already failed (local path shouldn't fail though)
+                                        target.src = '/images/defaults/default_user_avatar.png';
+                                    }
+                                }}
                             />
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-zinc-700 group-hover:text-blue-600">{currentUser?.name}</span>
@@ -187,7 +205,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
                         {isAuthenticated ? (
                             <button
                                 onClick={() => { setIsMenuOpen(false); handleLogout(); }}
-                                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-white bg-eis-navy rounded-xl"
+                                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-white bg-eis-navy rounded-xl cursor-pointer"
                             >
                                 <LogOut size={20} />
                                 ログアウト
@@ -208,9 +226,18 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
                         <div className="p-4 border-t border-zinc-100 bg-zinc-50">
                             <Link href="/mypage" className="flex items-center gap-3 px-2 py-2" onClick={() => setIsMenuOpen(false)}>
                                 <img
-                                    src={currentUser?.image || 'https://via.placeholder.com/40'}
+                                    src={currentUser?.image || getFallbackAvatarUrl(currentUser?.id || '', currentUser?.gender)}
                                     alt={currentUser?.name}
                                     className="w-10 h-10 rounded-full object-cover border border-zinc-200"
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        if (!target.getAttribute('data-error-tried')) {
+                                            target.setAttribute('data-error-tried', 'true');
+                                            target.src = getFallbackAvatarUrl(currentUser?.id || '', currentUser?.gender);
+                                        } else {
+                                            target.src = '/images/defaults/default_user_avatar.png';
+                                        }
+                                    }}
                                 />
                                 <div className="flex flex-col">
                                     <span className="text-sm font-bold text-zinc-700">{currentUser?.name}</span>
@@ -223,7 +250,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
             </div>
 
             {/* Main Content */}
-            <main className="flex-1 pb-24 md:pb-0 min-h-screen">
+            <main className="flex-1 pb-24 md:pb-0 min-h-screen min-w-0">
                 {children}
             </main>
 

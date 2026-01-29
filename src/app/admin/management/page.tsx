@@ -14,12 +14,14 @@ import { toast } from 'sonner';
 import { createClient } from '@/utils/supabase/client';
 import { ImageUpload } from '@/components/ImageUpload';
 import { ReelIcon } from '@/components/reels/ReelIcon';
-import { COMPANIES, JOBS } from '@/lib/dummyData';
+import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
+// import { COMPANIES, JOBS } from '@/lib/dummyData'; // Removed
 import {
     fetchAdminUsersAction,
     fetchAdminCompaniesAction,
     fetchAdminJobsAction,
-    fetchAdminMediaAction
+    fetchAdminMediaAction,
+    updateMediaAction
 } from '../actions';
 
 const supabaseClient = createClient();
@@ -62,6 +64,7 @@ function AdminManagementContent() {
     React.useEffect(() => {
         console.log('AdminManagementContent: currentTab changed to:', currentTab);
         setSelectedIds(new Set()); // Clear selection on tab change
+        setFilterPremium(false); // Reset premium filter
         if (currentTab === 'media') {
             fetchMedia();
             fetchCompanies();
@@ -122,7 +125,8 @@ function AdminManagementContent() {
             toast.error('企業の取得に失敗しました');
             // ONLY fallback if absolutely no data and it's a critical error
             if (realCompanies.length === 0) {
-                setRealCompanies(COMPANIES.map(c => ({ ...c, logo_url: c.image, type: 'company', status: 'approved' })) || []);
+                // setRealCompanies(COMPANIES.map(c => ({ ...c, logo_url: c.image, type: 'company', status: 'approved' })) || []);
+                setRealCompanies([]);
             }
         } else {
             console.log('fetchCompanies: SUCCESS, count:', result.data?.length);
@@ -137,7 +141,8 @@ function AdminManagementContent() {
             console.error('fetchJobs: FAILED', result.error);
             toast.error('求人の取得に失敗しました');
             if (realJobs.length === 0) {
-                setRealJobs(JOBS.map(j => ({ ...j, organization_id: j.companyId, status: 'active' })) || []);
+                // setRealJobs(JOBS.map(j => ({ ...j, organization_id: j.companyId, status: 'active' })) || []);
+                setRealJobs([]);
             }
         } else {
             console.log('fetchJobs: SUCCESS, count:', result.data?.length);
@@ -151,17 +156,18 @@ function AdminManagementContent() {
         if (!result.success) {
             console.warn('Fetch Media failed, using fallback');
             // Extract Reels from Dummy Companies
-            const dummyMedia = COMPANIES.flatMap(c =>
-                (c.reels || []).map(r => ({
-                    id: r.id,
-                    public_url: r.url,
-                    thumbnail_url: r.thumbnail || r.url,
-                    filename: r.title,
-                    type: r.type,
-                    organization_id: c.id
-                }))
-            );
-            setMediaItems(dummyMedia);
+            setMediaItems([]);
+            // const dummyMedia = COMPANIES.flatMap(c =>
+            //     (c.reels || []).map(r => ({
+            //         id: r.id,
+            //         public_url: r.url,
+            //         thumbnail_url: r.thumbnail || r.url,
+            //         filename: r.title,
+            //         type: r.type,
+            //         organization_id: c.id
+            //     }))
+            // );
+            // setMediaItems(dummyMedia);
         } else {
             setMediaItems(result.data || []);
         }
@@ -186,21 +192,30 @@ function AdminManagementContent() {
     const [showMediaModal, setShowMediaModal] = useState(false);
     const [isAiParsing, setIsAiParsing] = useState(false);
     const [associationType, setAssociationType] = useState<'company' | 'job' | 'quest' | null>(null);
+    const [filterPremium, setFilterPremium] = useState(false);
+
+    const editingItemIdRef = React.useRef<string | null>(null);
 
     React.useEffect(() => {
         if (editingItem && editMode === 'media') {
-            if (editingItem.organization_id) {
-                setAssociationType('company');
-            } else if (editingItem.job_id) {
-                const linkedJob = realJobs.find(j => j.id === editingItem.job_id);
-                if (linkedJob && linkedJob.type === 'quest') {
-                    setAssociationType('quest');
+            // Only sync type from data when we switch to a NEW item
+            if (editingItem.id !== editingItemIdRef.current) {
+                editingItemIdRef.current = editingItem.id;
+
+                if (editingItem.organization_id) {
+                    setAssociationType('company');
+                } else if (editingItem.job_id) {
+                    const linkedJob = realJobs.find(j => j.id === editingItem.job_id);
+                    if (linkedJob && linkedJob.type === 'quest') {
+                        setAssociationType('quest');
+                    } else {
+                        setAssociationType('job');
+                    }
                 } else {
-                    setAssociationType('job');
+                    setAssociationType(null);
                 }
-            } else {
-                setAssociationType(null);
             }
+            // If item ID is same, we assume user is manually changing types, so don't interfere.
         }
     }, [editingItem, editMode, realJobs]);
 
@@ -630,7 +645,20 @@ function AdminManagementContent() {
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
-                                        <img src={user.avatar_url || 'https://via.placeholder.com/40'} className="w-10 h-10 rounded-full object-cover" alt="" />
+                                        <img
+                                            src={user.avatar_url || getFallbackAvatarUrl(user.id, user.gender)}
+                                            className="w-10 h-10 rounded-full object-cover"
+                                            alt=""
+                                            onError={(e) => {
+                                                const target = e.target as HTMLImageElement;
+                                                if (!target.getAttribute('data-error-tried')) {
+                                                    target.setAttribute('data-error-tried', 'true');
+                                                    target.src = getFallbackAvatarUrl(user.id, user.gender);
+                                                } else {
+                                                    target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.full_name || user.name || 'U') + '&background=random';
+                                                }
+                                            }}
+                                        />
                                         <div>
                                             <div className="font-black text-slate-900">{user.full_name || user.name || 'No Name'}</div>
                                             <div className="text-xs text-slate-500 font-bold">{user.email}</div>
@@ -690,6 +718,13 @@ function AdminManagementContent() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="flex-1 bg-transparent border-none outline-none font-bold text-slate-900 text-sm placeholder:text-slate-400"
                 />
+                <button
+                    onClick={() => setFilterPremium(!filterPremium)}
+                    className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${filterPremium ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                >
+                    <Zap size={16} className={filterPremium ? 'fill-amber-700' : ''} />
+                    {filterPremium ? 'プレミアムのみ' : '全て表示'}
+                </button>
             </div>
             <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
                 <table className="w-full text-left border-collapse">
@@ -709,6 +744,8 @@ function AdminManagementContent() {
                     <tbody className="divide-y divide-slate-100">
                         {realCompanies
                             .filter(c => (c.name || '').toLowerCase().includes(searchQuery.toLowerCase()))
+                            .filter(c => !filterPremium || c.is_premium)
+                            .sort((a, b) => (b.is_premium === a.is_premium ? 0 : b.is_premium ? 1 : -1))
                             .map(company => (
                                 <tr key={company.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(company.id) ? 'bg-blue-50/50' : ''}`}>
                                     <td className="px-6 py-4">
@@ -723,8 +760,8 @@ function AdminManagementContent() {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded-lg text-xs font-black ${company.isPremium ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>
-                                            {company.isPremium ? 'Premium' : 'Free'}
+                                        <span className={`px-2 py-1 rounded-lg text-xs font-black ${company.is_premium ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>
+                                            {company.is_premium ? 'Premium' : 'Free'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
@@ -789,6 +826,13 @@ function AdminManagementContent() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="flex-1 bg-transparent border-none outline-none font-bold text-slate-900 text-sm placeholder:text-slate-400"
                 />
+                <button
+                    onClick={() => setFilterPremium(!filterPremium)}
+                    className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${filterPremium ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                >
+                    <Zap size={16} className={filterPremium ? 'fill-amber-700' : ''} />
+                    {filterPremium ? 'プレミアムのみ' : '全て表示'}
+                </button>
             </div>
             <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
                 <table className="w-full text-left border-collapse">
@@ -801,13 +845,14 @@ function AdminManagementContent() {
                             </th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">企業名</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">業界 / 所在地</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">PR動画</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">編集</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {realCompanies
                             .filter(c => (c.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (c.industry || '').toLowerCase().includes(searchQuery.toLowerCase()))
+                            .filter(c => !filterPremium || c.is_premium)
+                            .sort((a, b) => (b.is_premium === a.is_premium ? 0 : b.is_premium ? 1 : -1))
                             .map(company => (
                                 <tr key={company.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(company.id) ? 'bg-blue-50/50' : ''}`}>
                                     <td className="px-6 py-4">
@@ -822,36 +867,36 @@ function AdminManagementContent() {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div>
-                                            <div className="font-bold text-slate-700 text-xs">{company.industry}</div>
-                                            <div className="text-[10px] font-bold text-slate-400">{company.location}</div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {/* Video Icon Container - Fixed Width */}
-                                        <div className="flex-shrink-0 w-10 flex justify-center">
-                                            {mediaItems.filter(m => m.organization_id === company.id).length > 0 ? (
-                                                <ReelIcon
-                                                    reels={mediaItems.filter(m => m.organization_id === company.id).map(m => ({
-                                                        id: m.id,
-                                                        type: m.type || 'file',
-                                                        url: m.public_url,
-                                                        thumbnail: m.thumbnail_url || m.public_url,
-                                                        title: m.filename,
-                                                        likes: 0
-                                                    }))}
-                                                    size="sm"
-                                                    className="mr-0"
-                                                    onClick={() => {
-                                                        const reels = mediaItems.filter(m => m.organization_id === company.id);
-                                                        if (reels.length > 0) {
-                                                            window.open(reels[0].public_url, '_blank');
-                                                        }
-                                                    }}
-                                                />
-                                            ) : (
-                                                <span className="text-[10px] text-slate-300 font-bold">-</span>
-                                            )}
+                                        <div className="flex items-center gap-3">
+                                            {/* Reel Icon Injected Here */}
+                                            <div className="flex-shrink-0 w-12 flex justify-center mr-2">
+                                                {mediaItems.filter(m => m.organization_id === company.id).length > 0 ? (
+                                                    <ReelIcon
+                                                        reels={mediaItems.filter(m => m.organization_id === company.id).map(m => ({
+                                                            id: m.id,
+                                                            type: m.type || 'file',
+                                                            url: m.public_url,
+                                                            thumbnail: m.thumbnail_url || m.public_url,
+                                                            title: m.filename,
+                                                            likes: 0
+                                                        }))}
+                                                        size="sm"
+                                                        className="mr-0"
+                                                        onClick={() => {
+                                                            const reels = mediaItems.filter(m => m.organization_id === company.id);
+                                                            if (reels.length > 0) {
+                                                                window.open(reels[0].public_url, '_blank');
+                                                            }
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div className="w-10" />
+                                                )}
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-slate-700 text-xs">{company.industry}</div>
+                                                <div className="text-[10px] font-bold text-slate-400">{company.location}</div>
+                                            </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-right">
@@ -912,6 +957,13 @@ function AdminManagementContent() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="flex-1 bg-transparent border-none outline-none font-bold text-slate-900 text-sm placeholder:text-slate-400"
                 />
+                <button
+                    onClick={() => setFilterPremium(!filterPremium)}
+                    className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${filterPremium ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                >
+                    <Zap size={16} className={filterPremium ? 'fill-amber-700' : ''} />
+                    {filterPremium ? 'プレミアムのみ' : '全て表示'}
+                </button>
             </div>
             <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
                 <table className="w-full text-left border-collapse">
@@ -948,6 +1000,12 @@ function AdminManagementContent() {
                                 (j.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                                 (realCompanies.find(c => c.id === j.organization_id)?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
                             )
+                            .filter(j => !filterPremium || realCompanies.find(c => c.id === j.organization_id)?.is_premium)
+                            .sort((a, b) => {
+                                const isPremA = realCompanies.find(c => c.id === a.organization_id)?.is_premium;
+                                const isPremB = realCompanies.find(c => c.id === b.organization_id)?.is_premium;
+                                return (isPremA === isPremB) ? 0 : isPremA ? -1 : 1;
+                            })
                             .map(job => (
                                 <tr key={job.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(job.id) ? 'bg-blue-50/50' : ''}`}>
                                     <td className="px-6 py-4">
@@ -1071,7 +1129,7 @@ function AdminManagementContent() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {courses
-                    .filter(c => c.title.toLowerCase().includes(searchQuery.toLowerCase()) || c.category.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .filter(c => c.title.toLowerCase().includes(searchQuery.toLowerCase()) || (c.category || '').toLowerCase().includes(searchQuery.toLowerCase()))
                     .map(course => (
                         <div key={course.id} className="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm flex items-start gap-4">
                             <img
@@ -1519,7 +1577,8 @@ function AdminManagementContent() {
                             website_url: editingItem.website_url,
                             description: editingItem.description,
                             logo_url: editingItem.logo_url,
-                            cover_image_url: editingItem.cover_image_url
+                            cover_image_url: editingItem.cover_image_url,
+                            is_premium: editingItem.is_premium
                         })
                         .eq('id', editingItem.id);
                     if (error) {
@@ -1564,18 +1623,17 @@ function AdminManagementContent() {
                     fetchJobs();
                 }
             } else if (editMode === 'media') {
-                const { error } = await supabase
-                    .from('media_library')
-                    .update({
-                        title: editingItem.title,
-                        caption: editingItem.caption,
-                        link_url: editingItem.link_url,
-                        link_text: editingItem.link_text,
-                        organization_id: editingItem.organization_id,
-                        job_id: editingItem.job_id
-                    })
-                    .eq('id', editingItem.id);
-                if (error) throw error;
+                const result = await updateMediaAction({
+                    id: editingItem.id,
+                    title: editingItem.title,
+                    caption: editingItem.caption,
+                    link_url: editingItem.link_url,
+                    link_text: editingItem.link_text,
+                    organization_id: editingItem.organization_id,
+                    job_id: editingItem.job_id
+                });
+
+                if (!result.success) throw new Error(result.error);
                 toast.success('更新しました');
                 fetchMedia();
             } else if (editMode === 'course') {
@@ -2254,6 +2312,26 @@ function AdminManagementContent() {
                                     folder="covers"
                                 />
                             </div>
+
+                            <div className="flex items-center gap-4 bg-amber-50 p-4 rounded-xl border border-amber-100">
+                                <div className="p-2 bg-amber-100 rounded-lg text-amber-600">
+                                    <Zap size={20} />
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="font-bold text-slate-800 text-sm">プレミアムプラン</h4>
+                                    <p className="text-[10px] text-slate-500 font-bold">有効にすると、求人や企業一覧で優先表示されます</p>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="sr-only peer"
+                                        checked={editingItem.is_premium || false}
+                                        onChange={(e) => setEditingItem({ ...editingItem, is_premium: e.target.checked })}
+                                    />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                                </label>
+                            </div>
+
                             <div className="grid grid-cols-1 gap-4">
                                 <div>
                                     <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">企業名</label>
@@ -2413,9 +2491,9 @@ function AdminManagementContent() {
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">関連タイプ</label>
+                                                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1 block">関連タイプ</label>
                                                 <select
-                                                    className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-2 font-bold text-sm"
+                                                    className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-2 font-bold text-sm text-slate-900"
                                                     value={associationType || ''}
                                                     onChange={e => {
                                                         const newType = e.target.value as 'company' | 'job' | 'quest' | '';
@@ -2430,11 +2508,10 @@ function AdminManagementContent() {
                                                 </select>
                                             </div>
                                             <div>
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">コンテンツ選択</label>
+                                                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1 block">コンテンツ選択</label>
                                                 <select
-                                                    className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-2 font-bold text-sm"
+                                                    className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-2 font-bold text-sm text-slate-900"
                                                     value={editingItem.organization_id || editingItem.job_id || ''}
-                                                    disabled={!associationType}
                                                     onChange={e => {
                                                         const val = e.target.value;
                                                         if (associationType === 'company') {
@@ -2486,14 +2563,15 @@ function AdminManagementContent() {
 
                 <main className="space-y-10">
                     {/* DEBUG PANEL */}
-                    <div className="bg-red-50 border border-red-100 p-4 rounded-3xl text-[10px] font-mono text-red-600 flex gap-6">
+                    {/* DEBUG PANEL */}
+                    {/* <div className="bg-red-50 border border-red-100 p-4 rounded-3xl text-[10px] font-mono text-red-600 flex gap-6">
                         <span>DEBUG MODE</span>
                         <span>Users: {realUsers.length}</span>
                         <span>Companies: {realCompanies.length}</span>
                         <span>Jobs: {realJobs.length}</span>
                         <span>Media: {mediaItems.length}</span>
                         <span>Tab: {currentTab}</span>
-                    </div>
+                    </div> */}
 
                     <div className="flex gap-1 bg-slate-200 p-1.5 rounded-[2rem] self-start inline-flex flex-wrap shadow-inner">
                         {[
@@ -2502,8 +2580,7 @@ function AdminManagementContent() {
                             { id: 'company_infos', label: '企業情報', icon: Building2 },
                             { id: 'jobs', label: '求人', icon: Briefcase },
                             { id: 'quests', label: 'クエスト', icon: Zap },
-                            { id: 'media', label: '動画管理', icon: Video },
-                            { id: 'learning', label: 'e-ラーニング', icon: GraduationCap }
+                            { id: 'media', label: '動画管理', icon: Video }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -2525,7 +2602,7 @@ function AdminManagementContent() {
                         {currentTab === 'company_infos' && renderCompanyInfos()}
                         {currentTab === 'jobs' && renderJobs('job')}
                         {currentTab === 'quests' && renderJobs('quest')}
-                        {currentTab === 'learning' && renderLearning()}
+                        {/* {currentTab === 'learning' && renderLearning()} REMOVED */}
                         {currentTab === 'media' && renderMedia()}
                     </div>
                 </main>

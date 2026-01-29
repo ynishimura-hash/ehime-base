@@ -17,10 +17,10 @@ import {
 } from 'recharts';
 import { calculateCategoryRadarData, getPublicValueCards } from '@/lib/analysisUtils';
 import { getRecommendations } from '@/lib/recommendation';
-import { COMPANIES } from '@/lib/dummyData';
+// import { COMPANIES } from '@/lib/dummyData'; // Removed
 
 export default function SuccessDashboard() {
-    const { userAnalysis, jobs, courses, toggleFortuneIntegration, activeRole } = useAppStore();
+    const { userAnalysis, jobs, courses, toggleFortuneIntegration, activeRole, companies } = useAppStore();
 
     // 診断データの取得
     const radarData = calculateCategoryRadarData(userAnalysis.diagnosisScores || {});
@@ -31,8 +31,8 @@ export default function SuccessDashboard() {
 
     // レコメンドロジックの適用
     const { jobs: recommendedJobs } = useMemo(() =>
-        getRecommendations(userAnalysis, jobs, courses, COMPANIES),
-        [userAnalysis, jobs, courses]);
+        getRecommendations(userAnalysis, jobs, courses, companies),
+        [userAnalysis, jobs, courses, companies]);
 
     const activeQuests = recommendedJobs.filter(j => j.type === 'quest').slice(0, 3);
 
@@ -110,44 +110,55 @@ export default function SuccessDashboard() {
             </div>
 
             <main className="max-w-7xl mx-auto px-6 py-12 space-y-12">
-                {/* Hero Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
-                    <div className="lg:col-span-2 space-y-8">
-                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                            <div>
-                                <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter mb-2">
-                                    SUCCESS MODE<span className="text-indigo-500">_</span>
-                                </h1>
-                                <p className="text-slate-500 font-bold text-lg">
-                                    精密診断と占いの融合。あなたの「今」を愛媛の「未来」へ。
-                                </p>
+                {/* Hero Header - Full Width */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-4">
+                    <div className="space-y-2">
+                        <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter mb-2">
+                            SUCCESS MODE<span className="text-indigo-500">_</span>
+                        </h1>
+                        <p className="text-slate-500 font-bold text-lg max-w-2xl">
+                            精密診断と占いの融合。あなたの「今」を愛媛の「未来」へ。
+                        </p>
+                    </div>
+                    <div className="flex gap-4">
+                        <div className="bg-slate-900/80 backdrop-blur p-5 rounded-3xl border border-slate-800 flex items-center gap-4 shadow-xl shadow-black/20">
+                            <div className="w-12 h-12 bg-orange-500/10 text-orange-500 rounded-2xl flex items-center justify-center">
+                                <Flame size={24} />
                             </div>
-                            <div className="flex gap-4">
-                                <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-orange-500/10 text-orange-500 rounded-xl flex items-center justify-center">
-                                        <Flame size={24} />
-                                    </div>
-                                    <div>
-                                        <div className="text-[10px] font-black text-slate-500 uppercase">Growth Streak</div>
-                                        <div className="text-xl font-black">12 Days</div>
-                                    </div>
-                                </div>
+                            <div>
+                                <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Growth Streak</div>
+                                <div className="text-xl font-black text-white">12 Days</div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
+                {/* Main Content Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-12 items-start">
+                    {/* Left Side: Main Interactive Content */}
+                    <div className="space-y-12">
                         {/* Skill Panel */}
-                        <SkillPanel />
+                        <div className="shadow-2xl shadow-indigo-500/10 rounded-[3rem]">
+                            <SkillPanel />
+                        </div>
                     </div>
 
-                    {/* Stats & Radar */}
-                    <div className="space-y-8">
-                        <div className="bg-slate-900 rounded-[3rem] p-8 border border-slate-800 relative overflow-hidden group">
-                            <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
-                                <Shield size={16} className="text-indigo-500" /> Potential Analysis
+                    {/* Right Side: Analysis Summary (Sticky) */}
+                    <div className="space-y-8 sticky top-28">
+                        {/* Radar Chart Card */}
+                        <div className="bg-slate-900 rounded-[3rem] p-8 border border-slate-800 relative overflow-hidden group shadow-2xl shadow-black/20">
+                            <div className="absolute top-0 right-0 p-8 opacity-5">
+                                <Target size={120} />
+                            </div>
+
+                            <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
+                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                                Potential Analysis
                             </h3>
-                            <div className="h-[280px] w-full">
+
+                            <div className="h-[320px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+                                    <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
                                         <PolarGrid stroke="#334155" />
                                         <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 800 }} />
                                         <Radar
@@ -162,45 +173,49 @@ export default function SuccessDashboard() {
                             </div>
 
                             {/* Tags Section */}
-                            <div className="mt-6 flex flex-wrap gap-2">
+                            <div className="mt-8 flex flex-wrap gap-2.5">
                                 {coreValues.map(v => (
-                                    <span key={v.id} className="px-3 py-1 bg-indigo-500/10 rounded-full text-[10px] font-black text-indigo-400 border border-indigo-500/20">
+                                    <span key={v.id} className="px-4 py-1.5 bg-indigo-500/5 hover:bg-indigo-500/10 rounded-full text-[10px] font-black text-indigo-400 border border-indigo-500/20 transition-colors">
                                         {v.name}
                                     </span>
                                 ))}
                                 {userAnalysis.isFortuneIntegrated && fortuneTraits.map(t => (
-                                    <span key={t} className="px-3 py-1 bg-purple-500/10 rounded-full text-[10px] font-black text-purple-400 border border-purple-500/20 flex items-center gap-1">
-                                        <Sparkles size={8} /> {t}
+                                    <span key={t} className="px-4 py-1.5 bg-purple-500/5 hover:bg-purple-500/10 rounded-full text-[10px] font-black text-purple-400 border border-purple-500/20 flex items-center gap-1.5 transition-colors">
+                                        <Sparkles size={10} /> {t}
                                     </span>
                                 ))}
                             </div>
                         </div>
 
-                        {/* Daily Message */}
-                        <div className={`rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden transition-all duration-700 ${userAnalysis.isFortuneIntegrated
-                            ? 'bg-gradient-to-br from-indigo-600 to-purple-700'
-                            : 'bg-slate-900 border border-slate-800'
+                        {/* Daily Insight / Fortune Card */}
+                        <div className={`rounded-[3rem] p-10 shadow-2xl relative overflow-hidden transition-all duration-700 hover:scale-[1.02] ${userAnalysis.isFortuneIntegrated
+                                ? 'bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 shadow-indigo-900/20'
+                                : 'bg-slate-900 border border-slate-800 shadow-black/40'
                             }`}>
-                            <div className="absolute top-[-20%] right-[-10%] opacity-20">
-                                <Sparkles size={180} />
+                            <div className="absolute top-[-20%] right-[-10%] opacity-10 pointer-events-none">
+                                <Sparkles size={240} />
                             </div>
-                            <div className="relative z-10 flex flex-col h-full justify-between gap-6">
-                                <div className="flex items-center gap-2">
-                                    <div className={`p-2 rounded-xl ${userAnalysis.isFortuneIntegrated ? 'bg-white/20' : 'bg-indigo-600/20 text-indigo-400'}`}>
-                                        <MessageSquare size={20} />
+
+                            <div className="relative z-10 flex flex-col h-full justify-between gap-8">
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-3 rounded-2xl ${userAnalysis.isFortuneIntegrated ? 'bg-white/10 text-white' : 'bg-indigo-500/10 text-indigo-400'}`}>
+                                        <MessageSquare size={24} />
                                     </div>
-                                    <span className="text-xs font-black uppercase tracking-widest">
-                                        {userAnalysis.isFortuneIntegrated ? 'Combined Insight' : 'Data Insight'}
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70">
+                                        {userAnalysis.isFortuneIntegrated ? 'Stars & Data Insight' : 'Core Strategy'}
                                     </span>
                                 </div>
-                                <p className="text-lg md:text-xl font-black leading-tight">
+
+                                <p className="text-xl md:text-2xl font-black leading-tight text-white italic tracking-tight">
                                     {userAnalysis.isFortuneIntegrated
                                         ? `「${coreValues[0]?.name || '価値観'}に基づいたあなたの力が今日、星の巡りと合致しました。${fortuneTraits[0]}さを意識することで、大きな成果が得られるでしょう。」`
                                         : `「現在の傾向に基づくと、${coreValues[0]?.name || '価値観'}を活かせるクエストへの挑戦が、最も効率的な経験値獲得に繋がります。」`
                                     }
                                 </p>
-                                <div className="text-[10px] font-black text-white/50 uppercase">
-                                    From {userAnalysis.isFortuneIntegrated ? 'Stars & Data' : 'Diagnosis Engine'}
+
+                                <div className="flex items-center gap-2 text-[9px] font-black text-white/40 uppercase tracking-widest pt-4 border-t border-white/10">
+                                    <Shield size={12} />
+                                    Analysis Engine v1.0.4
                                 </div>
                             </div>
                         </div>
@@ -234,7 +249,7 @@ export default function SuccessDashboard() {
                                         </div>
                                         <h3 className="text-lg font-black group-hover:text-indigo-400 transition-colors mb-4 line-clamp-2">{quest.title}</h3>
                                         <div className="flex flex-wrap gap-1 mb-6">
-                                            {quest.tags.slice(0, 3).map(tag => (
+                                            {(quest.tags || []).slice(0, 3).map(tag => (
                                                 <span key={tag} className="text-[8px] font-black px-1.5 py-0.5 bg-slate-800 rounded-md text-slate-400 uppercase tracking-tighter">
                                                     #{tag}
                                                 </span>

@@ -12,7 +12,8 @@ import {
     Database,
     ShieldCheck,
     FileText,
-    Eye
+    Eye,
+    GraduationCap
 } from 'lucide-react';
 import { useAppStore } from '@/lib/appStore';
 
@@ -20,6 +21,7 @@ const sidebarItems = [
     { name: 'ダッシュボード', icon: LayoutDashboard, href: '/admin' },
     { name: '企業承認申請', icon: ShieldCheck, href: '/admin/approvals' },
     { name: 'データ管理 (企業/求人)', icon: Database, href: '/admin/management' },
+    { name: 'e-ラーニング', icon: GraduationCap, href: '/admin/elearning' },
     { name: '組織アカウント発行', icon: Users, href: '/organizations/register' },
 ];
 
@@ -31,10 +33,37 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     React.useEffect(() => {
         // Strict Auth Guard
         // If not admin, redirect to login page (admin root handles the password input)
-        if (activeRole !== 'admin' && pathname !== '/admin') {
-            window.location.replace('/admin');
-        }
+        // We delay this slightly or ensure hydration to avoid redirect loops on refresh
+        const checkAuth = () => {
+            // Access hydration state if available, or just rely on the effect timing
+            const isHydrated = useAppStore.persist?.hasHydrated ? useAppStore.persist.hasHydrated() : true;
+
+            if (isHydrated && activeRole !== 'admin') {
+                // Only redirect if on a child page AND not authenticated as admin
+                // Allow /admin page itself (the login page) to render
+                if (pathname !== '/admin') {
+                    // Check if this is a fresh page load or navigation
+                    // Add a small delay to avoid race conditions with store hydration
+                    setTimeout(() => {
+                        const currentRole = useAppStore.getState().activeRole;
+                        if (currentRole !== 'admin') {
+                            window.location.replace('/admin');
+                        }
+                    }, 100);
+                }
+            }
+        };
+
+        checkAuth();
     }, [activeRole, pathname]);
+
+    const [isStoreLoaded, setIsStoreLoaded] = React.useState(false);
+    React.useEffect(() => {
+        setIsStoreLoaded(true);
+    }, []);
+
+    // Prevent hydration mismatch or flash
+    if (!isStoreLoaded) return null;
 
     const handleLogout = async () => {
         await logout();

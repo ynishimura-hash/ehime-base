@@ -3,12 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/appStore';
+import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
 import { Map, Building2, Film, Play, LogIn, ArrowRight, Sparkles, Search, MapPin, Briefcase, ChevronRight, Heart, Wallet, Clock, Users, Zap } from 'lucide-react';
 import Link from 'next/link';
+import { CompanyCarouselItem } from '@/components/home/CompanyCarouselItem';
 
 export default function HomePage() {
   const router = useRouter();
-  const { authStatus, activeRole, jobs, companies, users, currentUserId, fetchJobs } = useAppStore();
+  const { authStatus, activeRole, jobs, companies, users, currentUserId, fetchJobs, fetchCompanies } = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArea, setSelectedArea] = useState('all');
   const [selectedIndustry, setSelectedIndustry] = useState('all');
@@ -17,6 +19,7 @@ export default function HomePage() {
   // Initial Fetches
   useEffect(() => {
     fetchJobs();
+    fetchCompanies();
   }, []);
 
   // Redirect Company to Dashboard immediately
@@ -59,7 +62,7 @@ export default function HomePage() {
             <div className="flex items-center gap-3">
               <Link
                 href="/dashboard"
-                className="bg-white/20 backdrop-blur-md border border-white/30 text-white px-5 py-2 rounded-full font-black text-xs hover:bg-white/30 transition-all hidden md:block"
+                className="bg-white/20 backdrop-blur-md border border-white/30 text-white px-5 py-2 rounded-full font-black text-xs hover:bg-white/30 transition-all"
               >
                 Dashboard
               </Link>
@@ -67,7 +70,20 @@ export default function HomePage() {
                 onClick={() => router.push('/mypage')}
                 className="w-10 h-10 rounded-full border-2 border-white shadow-lg overflow-hidden active:scale-95 transition-transform"
               >
-                <img src={currentUser?.image || 'https://via.placeholder.com/40'} className="w-full h-full object-cover" alt="Profile" />
+                <img
+                  src={currentUser?.image || getFallbackAvatarUrl(currentUser?.id || '', currentUser?.gender)}
+                  className="w-full h-full object-cover"
+                  alt="Profile"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (!target.getAttribute('data-error-tried')) {
+                      target.setAttribute('data-error-tried', 'true');
+                      target.src = getFallbackAvatarUrl(currentUser?.id || '', currentUser?.gender);
+                    } else {
+                      target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser?.name || 'U') + '&background=random';
+                    }
+                  }}
+                />
               </button>
             </div>
           )}
@@ -75,9 +91,9 @@ export default function HomePage() {
       </nav>
 
       {/* 2. Hero Slider Style Area */}
-      <section className="relative overflow-hidden">
+      <section className="relative w-full min-h-[500px] md:min-h-[600px] flex items-center justify-center overflow-hidden">
         {/* Background Image / Slider Background */}
-        <div className="h-[500px] md:h-[600px] relative bg-slate-900">
+        <div className="absolute inset-0 bg-slate-900 z-0">
           <img
             src="/hero_bg_new.png"
             alt="Banner"
@@ -87,18 +103,18 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
         </div>
 
-        {/* Hero Content Overlay */}
-        <div className="absolute inset-0 flex flex-col justify-center items-center px-4 md:px-6 z-10 pt-20 md:pt-0">
+        {/* Hero Content - Relative for flow */}
+        <div className="relative z-10 w-full px-4 md:px-6 pt-32 pb-8 md:py-0 flex flex-col items-center">
           <div className="w-full text-center mb-6 md:mb-8 flex flex-col items-center">
             <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase mb-4 md:mb-6 animate-bounce">
               <Sparkles size={12} />
               New Experience in Ehime
             </div>
-            <h1 className="text-2xl md:text-[3.2rem] lg:text-6xl xl:text-7xl font-black text-white mb-2 md:mb-4 tracking-tight leading-tight drop-shadow-2xl">
-              愛媛で、<span className="text-blue-400">「働く」の枠</span>を<br className="block md:hidden" />超えていく。
+            <h1 className="text-2xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-4 md:mb-6 tracking-tight leading-tight drop-shadow-2xl">
+              あなたの<span className="text-blue-400">「可能性」</span>を<br className="block md:hidden" />見つける場所。
             </h1>
             <p className="text-slate-200 text-sm md:text-xl font-bold drop-shadow-lg leading-relaxed">
-              非対称なマッチングが、<br className="md:hidden" />あなたの新しいキャリアを拓く
+              Ehime Baseで<br className="md:hidden" />あなたの「魅力」を発見する。
             </p>
           </div>
 
@@ -183,7 +199,7 @@ export default function HomePage() {
       </section>
 
       {/* 3. Icon Menu (Quick Navigation) */}
-      <section className="max-w-7xl mx-auto px-6 mt-8 md:-mt-10 relative z-20">
+      <section className="max-w-7xl mx-auto px-6 mt-4 md:-mt-10 relative z-20">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: 'クエスト', icon: Map, color: 'bg-blue-500', href: '/quests', desc: '体験から始める', illustration: '/illustrations/quest_card.png' },
@@ -197,7 +213,7 @@ export default function HomePage() {
               className="relative bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:-translate-y-2 transition-all group border border-slate-100/50 overflow-hidden min-h-[160px] md:min-h-0 flex flex-col justify-between"
             >
               {/* Background illustration */}
-              <div className="absolute -bottom-2 -right-2 md:top-1/2 md:-translate-y-1/2 md:right-4 w-24 h-24 md:w-40 md:h-40 opacity-80 md:opacity-100 transition-opacity">
+              <div className="absolute bottom-[-10px] right-[-10px] w-[45%] max-w-[140px] aspect-square opacity-80 transition-opacity pointer-events-none">
                 <img src={item.illustration} alt="" className="w-full h-full object-contain" />
               </div>
 
@@ -230,9 +246,9 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
           {featuredQuests.map((quest) => {
-            const company = companies.find(c => c.id === quest.companyId);
+            const company = quest.organization || companies.find(c => c.id === quest.companyId);
             return (
               <Link
                 key={quest.id}
@@ -240,9 +256,9 @@ export default function HomePage() {
                 className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all group flex flex-col"
               >
                 <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
-                  {company?.image || company?.images?.[0] ? (
+                  {company?.cover_image_url || company?.image || company?.images?.[0] ? (
                     <img
-                      src={company.image || company.images![0]}
+                      src={company.cover_image_url || company.image || company.images![0]}
                       alt={company.name}
                       className="w-full h-full object-cover"
                     />
@@ -292,8 +308,8 @@ export default function HomePage() {
                 <div className="p-5 flex-1 flex flex-col">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-6 h-6 rounded-full overflow-hidden border border-slate-100 flex-shrink-0">
-                      {company?.image ? (
-                        <img src={company.image} alt={company.name} className="w-full h-full object-cover" />
+                      {company?.cover_image_url || company?.image ? (
+                        <img src={company.cover_image_url || company.image} alt={company.name} className="w-full h-full object-cover" />
                       ) : (
                         <div className={`w-full h-full ${company?.logoColor || 'bg-slate-400'} flex items-center justify-center text-[8px] text-white font-black`}>
                           {company?.name.charAt(0)}
@@ -333,15 +349,15 @@ export default function HomePage() {
                 Our Vision
               </div>
               <h2 className="text-4xl md:text-5xl font-black text-white leading-tight tracking-tighter">
-                「非対称」が、<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 italic">新しい風</span>を吹き込む。
+                万人の正解はない。<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 italic">「凸凹（デコボコ）」</span>だから面白い。
               </h2>
               <p className="text-slate-400 text-lg leading-relaxed font-medium">
-                従来の「履歴書と条件」だけでのマッチングはもう古い。<br />
-                企業が持つ「本音」と、あなたが隠している「情熱」がぶつかったとき、
-                愛媛の新しい未来が動き出します。
+                弱みにもなりうる尖った特性、それこそが魅力の正体です。<br />
+                Ehime Baseは、あなたのその歪（いびつ）さが、<br />
+                カチッとはまる環境（コンテキスト）を見つけ出します。
               </p>
-              <div className="grid grid-cols-2 gap-6 pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
                 <div className="p-6 bg-white/5 rounded-3xl border border-white/10 hover:bg-white/10 transition-colors">
                   <div className="text-blue-400 font-black text-3xl mb-2">1,200+</div>
                   <div className="text-sm font-bold text-slate-300">Ehime Spirits</div>
@@ -352,9 +368,9 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="relative aspect-auto md:aspect-square">
-              <div className="absolute inset-0 bg-blue-500/10 rounded-[60px] transform rotate-6 scale-95" />
-              <div className="absolute inset-0 bg-white shadow-2xl rounded-[60px] overflow-hidden flex flex-col p-8 group hover:-rotate-1 transition-all duration-500">
+            <div className="relative w-full mt-12 md:mt-0">
+              <div className="absolute inset-0 bg-blue-500/10 rounded-[60px] transform rotate-6 scale-95 hidden md:block" />
+              <div className="relative w-full bg-white shadow-2xl rounded-[60px] overflow-hidden flex flex-col p-8 group hover:-rotate-1 transition-all duration-500">
                 <div className="flex-1 flex flex-col justify-center items-center text-center">
                   <div className="w-24 h-24 bg-blue-100 text-blue-600 rounded-[32px] flex items-center justify-center mb-8 shadow-inner transform group-hover:rotate-12 transition-transform">
                     <Users size={48} />
@@ -388,21 +404,7 @@ export default function HomePage() {
           <div className="flex gap-8 animate-scroll">
             {/* Duplicate companies for seamless loop */}
             {[...hotCompanies, ...hotCompanies, ...hotCompanies].map((c, idx) => (
-              <Link
-                key={`${c.id}-${idx}`}
-                href={`/companies/${c.id}`}
-                className="flex-shrink-0 w-64 opacity-90 hover:opacity-100 transition-all transform hover:scale-105 group"
-              >
-                {c.image ? (
-                  <div className="w-full aspect-[3/2] rounded-2xl overflow-hidden shadow-lg border-2 border-slate-200 group-hover:border-blue-400 group-hover:shadow-2xl transition-all">
-                    <img src={c.image} alt={c.name} className="w-full h-full object-cover" />
-                  </div>
-                ) : (
-                  <div className={`${c.logoColor} aspect-[3/2] rounded-2xl text-white font-black text-2xl shadow-lg group-hover:shadow-2xl transition-all flex items-center justify-center`}>
-                    {c.name.slice(0, 3)}
-                  </div>
-                )}
-              </Link>
+              <CompanyCarouselItem key={`${c.id}-${idx}`} company={c} />
             ))}
           </div>
         </div>

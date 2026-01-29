@@ -8,7 +8,7 @@ import {
     MapPin, Building2, BarChart3
 } from 'lucide-react';
 import Link from 'next/link';
-import { Course, Job, Company } from '@/lib/dummyData';
+// import { Course, Job, Company } from '@/lib/dummyData'; // Removed
 import { useAppStore } from '@/lib/appStore';
 import { getRecommendations } from '@/lib/recommendation';
 import StrengthsDiscovery from '@/components/analysis/StrengthsDiscovery';
@@ -42,7 +42,7 @@ export default function AnalysisPage() {
                 </div>
             </div>
 
-            <main className="max-w-4xl mx-auto px-6 py-12 space-y-12">
+            <main className="max-w-7xl mx-auto px-6 py-12 space-y-12">
                 <div className="text-center space-y-4">
                     <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">自己分析・資質診断</h1>
                     <p className="text-slate-500 font-bold text-lg max-w-2xl mx-auto">

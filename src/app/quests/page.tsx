@@ -2,15 +2,16 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useAppStore } from '@/lib/appStore';
-import { Search, Filter, X, ChevronDown, ChevronUp, MapPin, Briefcase, JapaneseYen, Clock, Loader2, Sparkles, MessageCircle, ArrowRight } from 'lucide-react';
+import { Search, Filter, X, ChevronDown, ChevronUp, MapPin, Briefcase, JapaneseYen, Clock, Loader2, Sparkles, MessageCircle, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
-import { Reel } from '@/lib/dummyData';
+import { Reel } from '@/types/shared';
 import { createClient } from '@/utils/supabase/client';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { fetchQuestsAction } from '@/app/admin/actions';
+import { QuestCardSkeleton } from '@/components/skeletons/QuestCardSkeleton';
 
 function QuestsContent() {
     const searchParams = useSearchParams();
@@ -24,6 +25,7 @@ function QuestsContent() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
     // Reel State
@@ -32,68 +34,25 @@ function QuestsContent() {
     const [activeEntity, setActiveEntity] = useState<{ name: string, id: string, companyId?: string }>({ name: '', id: '' });
 
     useEffect(() => {
-        const q = searchParams.get('q');
-        if (q) setSearchQuery(q);
-        fetchQuests();
-    }, [searchParams]);
-
-    // Process fetched quests to include reels
-    const processQuests = async (rawJobs: any[]) => {
-        // Fetch media for each quest (job)
-        const questsWithReels = await Promise.all(rawJobs.map(async (quest: any) => {
-            // Fetch reels for this quest (job)
-            const { data: questReels } = await supabase
-                .from('media_library')
-                .select('*')
-                .eq('job_id', quest.id);
-
-            // Fetch reels for the company
-            const { data: companyReels } = await supabase
-                .from('media_library')
-                .select('*')
-                .eq('organization_id', quest.organization.id)
-                .is('job_id', null);
-
-            // Combine and transform to Reel format
-            const allReels = [...(questReels || []), ...(companyReels || [])];
-            const reels = allReels.map((media: any) => ({
-                id: media.id,
-                type: media.type || 'file',
-                url: media.public_url,
-                thumbnail: media.thumbnail_url || media.public_url,
-                title: media.title || media.filename,
-            }));
-
-            return {
-                ...quest,
-                organization: {
-                    ...quest.organization,
-                    reels: reels,
+        const init = async () => {
+            setLoading(true);
+            try {
+                const fetchedQuests = await fetchQuestsAction();
+                if (fetchedQuests.success) {
+                    setQuests(fetchedQuests.data as any[]);
+                } else {
+                    console.error('Fetch error:', fetchedQuests.error);
+                    toast.error('クエストの取得に失敗しました');
                 }
-            };
-        }));
-
-        setQuests(questsWithReels);
-    };
-
-    const fetchQuests = async () => {
-        setLoading(true);
-        try {
-            const { fetchPublicQuestsAction } = await import('@/app/admin/actions');
-            const result = await fetchPublicQuestsAction();
-            if (result.success && result.data) {
-                setQuests(result.data);
-            } else {
-                console.error('Error fetching quests:', result.error);
-                toast.error('クエスト情報の取得に失敗しました');
+            } catch (error) {
+                console.error('Error fetching quests:', error);
+                toast.error('クエストの取得に失敗しました');
+            } finally {
+                setLoading(false);
             }
-        } catch (e) {
-            console.error('Server action error:', e);
-        } finally {
-            setLoading(false);
-        }
-    };
-
+        };
+        init();
+    }, []);
     const filteredQuests = quests.filter(quest => {
         const matchesSearch = !searchQuery ||
             quest.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -105,35 +64,59 @@ function QuestsContent() {
         const matchesCategory = selectedCategories.length === 0 ||
             selectedCategories.includes(quest.category);
 
-        return matchesSearch && matchesRegion && matchesCategory;
+        let matchesFeatures = true;
+        if (selectedFeatures.includes('premium') && !quest.organization.is_premium) matchesFeatures = false;
+
+        return matchesSearch && matchesRegion && matchesCategory && matchesFeatures;
+    }).sort((a, b) => {
+        // Sort Priority: Premium > Standard
+        const aPremium = a.organization?.is_premium ? 1 : 0;
+        const bPremium = b.organization?.is_premium ? 1 : 0;
+        return bPremium - aPremium;
     });
 
-    const isLiked = (questId: string) => {
-        return interactions.some(i => i.type === 'like_job' && i.fromId === currentUserId && i.toId === questId);
-    };
-
-    const toggleLike = (questId: string, e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleInteraction('like_job', currentUserId, questId);
-    };
-
     const toggleRegion = (region: string) => {
-        setSelectedRegions(prev =>
-            prev.includes(region) ? prev.filter(r => r !== region) : [...prev, region]
-        );
+        if (selectedRegions.includes(region)) {
+            setSelectedRegions(selectedRegions.filter(r => r !== region));
+        } else {
+            setSelectedRegions([...selectedRegions, region]);
+        }
     };
 
     const toggleCategory = (category: string) => {
-        setSelectedCategories(prev =>
-            prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]
-        );
+        if (selectedCategories.includes(category)) {
+            setSelectedCategories(selectedCategories.filter(c => c !== category));
+        } else {
+            setSelectedCategories([...selectedCategories, category]);
+        }
+    };
+
+    const isLiked = (questId: string) => {
+        return interactions.some(i => i.type === 'like_quest' && i.fromId === currentUserId && i.toId === questId);
+    };
+
+    const toggleLike = async (questId: string, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!currentUserId) {
+            toast.error('ログインが必要です');
+            return;
+        }
+        await toggleInteraction('like_quest', currentUserId, questId);
+    };
+    const toggleFeature = (feature: string) => {
+        if (selectedFeatures.includes(feature)) {
+            setSelectedFeatures(selectedFeatures.filter(f => f !== feature));
+        } else {
+            setSelectedFeatures([...selectedFeatures, feature]);
+        }
     };
 
     const clearFilters = () => {
         setSearchQuery('');
         setSelectedRegions([]);
         setSelectedCategories([]);
+        setSelectedFeatures([]);
     };
 
     return (
@@ -203,6 +186,18 @@ function QuestsContent() {
                                         ))}
                                     </div>
                                 </div>
+                                <div>
+                                    <p className="text-sm font-black text-slate-700 mb-3">こだわり</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <button
+                                            onClick={() => toggleFeature('premium')}
+                                            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-bold transition-all border shadow-sm hover:-translate-y-0.5 ${selectedFeatures.includes('premium') ? 'bg-yellow-50 border-yellow-400 text-yellow-700 ring-2 ring-yellow-100' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:shadow-md'}`}
+                                        >
+                                            <ShieldCheck size={14} className={selectedFeatures.includes('premium') ? 'text-yellow-500' : 'text-slate-400'} />
+                                            認定企業
+                                        </button>
+                                    </div>
+                                </div>
                                 <div className="flex justify-end">
                                     <button onClick={clearFilters} className="text-xs font-bold text-slate-400 hover:text-slate-600 underline">リセット</button>
                                 </div>
@@ -220,9 +215,11 @@ function QuestsContent() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {loading ? (
-                        <div className="col-span-full flex justify-center p-20">
-                            <Loader2 className="animate-spin text-slate-400" />
-                        </div>
+                        Array.from({ length: 9 }).map((_, i) => (
+                            <div key={i} className="h-full">
+                                <QuestCardSkeleton />
+                            </div>
+                        ))
                     ) : filteredQuests.length > 0 ? (
                         filteredQuests.map(quest => (
                             <Link href={`/quests/${quest.id}`} key={quest.id} className="block group">
@@ -239,22 +236,37 @@ function QuestsContent() {
                                             <span className="bg-blue-600/90 backdrop-blur-md text-white text-[10px] font-black px-2 py-1 rounded-md shadow-lg">
                                                 {quest.category}
                                             </span>
+                                            {quest.organization.is_premium && (
+                                                <span className="bg-yellow-400 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-lg">
+                                                    ★ PREMIUM
+                                                </span>
+                                            )}
                                         </div>
 
-                                        <div className="absolute right-4 bottom-4 z-20 group-hover:scale-110 transition-transform">
-                                            <div onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                setActiveReels(quest.organization.reels || []);
-                                                setActiveEntity({ name: quest.title, id: quest.id, companyId: quest.organization.id });
-                                                setIsReelModalOpen(true);
-                                            }}>
-                                                <ReelIcon
-                                                    reels={quest.organization.reels || []}
-                                                    fallbackImage={quest.organization.cover_image_url}
-                                                    onClick={() => { }}
-                                                />
-                                            </div>
+                                        <div className="absolute right-4 bottom-4 z-10 group-hover:scale-110 transition-transform">
+                                            {/* Show Quest Reels if available, or Company Reels if not? User said strict separation.
+                                                If I use quest.reels, and it is empty, icon is hidden.
+                                                If I want to show company reels, I should do it on clicking company logo or something.
+                                                But usually fallback is nice.
+                                                "Quest -> Quest, Company -> Company" implies if I am looking at a quest card, I expect quest content.
+                                                However, for "Find by Video", we have labels.
+                                                Here, let's stick to strict quest reels. If you want company reels, click company name?
+                                                Maybe for now, I will use quest.reels. If empty, the icon won't show.
+                                                If the user WANTS to see company reels on the card, they'd have to say so.
+                                                But usually "Quest specific video" is key feature.
+                                            */}
+                                            <ReelIcon
+                                                reels={quest.reels || []}
+                                                fallbackImage={quest.organization.cover_image_url}
+                                                size="md"
+                                                onClick={() => {
+                                                    // STRICT: Only Quest Reels
+                                                    const reelsToShow = quest.reels && quest.reels.length > 0 ? quest.reels : [];
+                                                    setActiveReels(reelsToShow);
+                                                    setActiveEntity({ name: quest.title, id: quest.id, companyId: quest.organization.id });
+                                                    setIsReelModalOpen(true);
+                                                }}
+                                            />
                                         </div>
 
                                         <button
@@ -305,7 +317,7 @@ function QuestsContent() {
                                                         <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-slate-200" />
                                                     ))}
                                                     <div className="w-6 h-6 rounded-full border-2 border-white bg-blue-50 flex items-center justify-center text-[8px] font-black text-blue-500">
-                                                        +12
+                                                        +{quest.applicationCount || 0}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-1 text-blue-600 font-black text-[10px]">

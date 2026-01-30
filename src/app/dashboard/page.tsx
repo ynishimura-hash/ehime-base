@@ -19,6 +19,7 @@ import { VALUE_CARDS } from '@/lib/constants/analysisData';
 import { createClient } from '@/utils/supabase/client';
 import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
 import { calculateProfileCompletion } from '@/lib/profileUtils';
+import { getYoutubeId } from '@/utils/youtube';
 
 export default function SeekerDashboard() {
     const {
@@ -520,22 +521,35 @@ export default function SeekerDashboard() {
 
                                 <div className="space-y-6">
                                     {recentlyViewedLessons.length > 0 ? (
-                                        recentlyViewedLessons.map(lesson => (
-                                            <div key={lesson?.id} className="group flex items-center gap-6 p-4 border border-slate-100 rounded-3xl hover:bg-slate-50 transition-all cursor-pointer">
-                                                <div className="w-24 h-16 bg-slate-100 rounded-2xl overflow-hidden relative shadow-sm">
-                                                    <img src="/api/placeholder/400/320" className="w-full h-full object-cover opacity-50" alt="" />
-                                                    <div className="absolute inset-0 flex items-center justify-center">
-                                                        <PlayCircle className="text-slate-400 group-hover:text-blue-600 transition-colors" size={24} />
+                                        recentlyViewedLessons.map(lesson => {
+                                            const videoId = getYoutubeId(lesson.url || lesson.youtubeUrl || lesson.youtube_url);
+                                            const thumbnailUrl = lesson.thumbnail_url || lesson.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
+                                            return (
+                                                <div key={lesson?.id} className="group flex items-center gap-6 p-4 border border-slate-100 rounded-3xl hover:bg-slate-50 transition-all cursor-pointer">
+                                                    <div className="w-24 h-16 bg-slate-100 rounded-2xl overflow-hidden relative shadow-sm">
+                                                        <img
+                                                            src={thumbnailUrl || "/api/placeholder/400/320"}
+                                                            className={`w-full h-full object-cover ${!thumbnailUrl ? "opacity-50" : ""}`}
+                                                            alt=""
+                                                            onError={(e) => {
+                                                                const target = e.target as HTMLImageElement;
+                                                                target.src = "/api/placeholder/400/320";
+                                                                target.classList.add("opacity-50");
+                                                            }}
+                                                        />
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <PlayCircle className="text-slate-400 group-hover:text-blue-600 transition-colors shadow-sm" size={24} />
+                                                        </div>
                                                     </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Resume Study</p>
+                                                        <h3 className="text-base font-black text-slate-800 line-clamp-1 group-hover:text-blue-600 transition-colors">{lesson?.title}</h3>
+                                                        <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Module: {lesson?.id ? lesson.id.toString().split('_')[0] : ''}</p>
+                                                    </div>
+                                                    <ArrowRight className="text-slate-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" size={20} />
                                                 </div>
-                                                <div className="flex-1">
-                                                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Resume Study</p>
-                                                    <h3 className="text-base font-black text-slate-800 line-clamp-1 group-hover:text-blue-600 transition-colors">{lesson?.title}</h3>
-                                                    <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Module: {lesson?.id.split('_')[0]}</p>
-                                                </div>
-                                                <ArrowRight className="text-slate-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" size={20} />
-                                            </div>
-                                        ))
+                                            );
+                                        })
                                     ) : (
                                         <div className="text-center py-12 space-y-4">
                                             <div className="w-16 h-16 bg-slate-50 text-slate-200 rounded-full flex items-center justify-center mx-auto">

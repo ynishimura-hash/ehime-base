@@ -598,9 +598,9 @@ export const useAppStore = create<AppState>()(
                 if (systemMessage) {
                     await supabase.from('messages').insert({
                         chat_id: chatId,
-                        sender_id: 'SYSTEM', // Special sender or company as fallback
+                        sender_id: userId, // Use user_id as sender (since RLS restricts to participants)
                         content: systemMessage,
-                        metadata: { is_system: true }
+                        metadata: { is_system: true, original_sender: 'SYSTEM' }
                     });
                 }
 

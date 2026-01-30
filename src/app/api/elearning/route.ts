@@ -21,9 +21,9 @@ export async function GET() {
             .from('courses')
             .select(`
                 *,
-                curriculums:course_curriculums(
+                curriculums: course_curriculums(
                     *,
-                    lessons:course_lessons(*)
+                    lessons: course_lessons(id, title, duration, youtube_url, thumbnail_url, type, curriculum_id)
                 )
             `)
             .order('order_index', { ascending: true })

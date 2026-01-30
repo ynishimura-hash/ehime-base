@@ -1,0 +1,75 @@
+'use server';
+
+import { getGeminiModel } from "@/lib/ai-client";
+
+interface AnalysisInput {
+    userName: string;
+    courseTitle: string;
+    courseDescription: string;
+    courseCategory: string;
+    userStrengths?: string[];
+    userValues?: string[];
+    userInterests?: string[];
+}
+
+export interface AffinityResult {
+    score: number; // 0-100
+    title: string; // "運命的な出会いかも？" etc.
+    reason: string;
+    careerBenefit: string;
+}
+
+export async function analyzeCourseAffinity(input: AnalysisInput): Promise<AffinityResult> {
+    try {
+        const model = getGeminiModel();
+
+        const prompt = `
+    あなたはキャリアアドバイザーAIです。以下のユーザー情報とeラーニング講座の情報を分析し、ユーザーにとってこの講座がどれくらいおすすめか、どのようなメリットがあるかを診断してください。
+
+    【ユーザー情報】
+    名前: ${input.userName}
+    強み: ${input.userStrengths?.join(', ') || '不明'}
+    価値観: ${input.userValues?.join(', ') || '不明'}
+    興味: ${input.userInterests?.join(', ') || '不明'}
+
+    【講座情報】
+    タイトル: ${input.courseTitle}
+    カテゴリ: ${input.courseCategory}
+    説明: ${input.courseDescription}
+
+    以下のJSON形式で出力してください。Markdownは使わないでください。
+    {
+      "score": 0〜100の整数（親和性スコア）,
+      "title": "キャッチーな短い見出し（20文字以内）",
+      "reason": "なぜこの講座がおすすめなのか、ユーザーの強みや興味と絡めて100文字程度で解説",
+      "careerBenefit": "このスキルを習得することで得られる具体的なキャリア上のメリットを50文字程度で"
+    }
+    `;
+
+        const result = await model.generateContent(prompt);
+        const response = result.response;
+        const text = response.text();
+
+        // Clean up JSON string if necessary (sometimes models wrap in ```json ... ```)
+        const jsonString = text.replace(/```json/g, '').replace(/```/g, '').trim();
+
+        const data = JSON.parse(jsonString);
+
+        return {
+            score: data.score || 70,
+            title: data.title || "スキルアップのチャンス",
+            reason: data.reason || "あなたのキャリアに役立つ講座です。",
+            careerBenefit: data.careerBenefit || "市場価値を高めることができます。"
+        };
+
+    } catch (error) {
+        console.error("AI Analysis Failed:", error);
+        // Fallback response
+        return {
+            score: 85,
+            title: "新たな可能性を開く",
+            reason: "あなたの現在の関心と、この講座の提供するスキルセットには一定の親和性が見られます。新しい視点を得る良い機会になるでしょう。",
+            careerBenefit: "幅広いスキルセットを持つことで、キャリアの選択肢が広がります。"
+        };
+    }
+}

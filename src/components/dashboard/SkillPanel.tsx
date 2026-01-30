@@ -65,7 +65,7 @@ export default function SkillPanel() {
         // 価値観を中央付近に配置
         unlockedValues.forEach((v, i) => {
             const angle = (i / unlockedValues.length) * Math.PI * 2;
-            const radius = 20; // 中央からの距離(%)
+            const radius = 15; // 中央からの距離(%)
             result.push({
                 id: `v_${v.id}`,
                 name: v.name,
@@ -87,7 +87,7 @@ export default function SkillPanel() {
                 valueRecs.forEach((rec, idx) => {
                     const offset = idx === 0 ? -0.2 : 0.2;
                     const angle = angleBase + offset;
-                    const radius = 40;
+                    const radius = 35;
                     const course = courses.find(c => c.id === rec.course_id);
                     const isCoursesLoaded = courses.length > 0;
 
@@ -110,7 +110,7 @@ export default function SkillPanel() {
                 // FALLBACK: DBにデータがない場合の暫定表示
                 [-0.2, 0.2].forEach((offset, idx) => {
                     const angle = angleBase + offset;
-                    const radius = 40;
+                    const radius = 35;
                     const seed = v.id * 100 + idx;
                     const courseIndex = courses.length > 0 ? Math.floor(seededRandom(seed) * courses.length) : -1;
                     const course = courseIndex >= 0 ? courses[courseIndex] : null;
@@ -162,6 +162,8 @@ export default function SkillPanel() {
     };
 
 
+
+
     return (
         <div
             className="relative w-full h-[600px] bg-slate-900 rounded-[3rem] overflow-hidden border border-slate-800 shadow-2xl group/panel"
@@ -170,7 +172,7 @@ export default function SkillPanel() {
             <div className="absolute inset-0 opacity-10 pointer-events-none"
                 style={{ backgroundImage: 'radial-gradient(#4f46e5 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }} />
 
-            <div className="absolute top-8 left-8 z-10 pointer-events-none">
+            <div className="absolute top-8 left-8 z-40 pointer-events-none">
                 <h3 className="text-white font-black text-xl flex items-center gap-2">
                     <Zap className="text-yellow-400" /> スキルパネル
                 </h3>
@@ -185,6 +187,7 @@ export default function SkillPanel() {
                         <RotateCcw size={16} />
                     </button>
                     <button onClick={handleZoomOut} className="p-3 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full transition-colors font-bold" title="縮小">-</button>
+
                 </div>
 
                 <div className="flex items-center gap-2 justify-end">
@@ -276,8 +279,13 @@ export default function SkillPanel() {
                                     )}
 
                                     {/* Label */}
-                                    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap text-center pointer-events-none">
-                                        <div className={`text-[8px] font-black uppercase tracking-widest ${node.type === 'value' ? 'text-indigo-400' : 'text-slate-500'}`}>
+                                    {/* Label - Dynamic Positioning based on Y coordinate */}
+                                    <div className={`
+                                        absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-center pointer-events-none transition-all
+                                        ${node.y < 50 ? '-top-14' : '-bottom-14'}
+                                        bg-slate-950/80 backdrop-blur-md border border-slate-700/50 px-3 py-1.5 rounded-lg z-30
+                                    `}>
+                                        <div className={`text-[8px] font-black uppercase tracking-widest ${node.type === 'value' ? 'text-indigo-400' : 'text-slate-500'} mb-0.5`}>
                                             {node.type}
                                         </div>
                                         <div className={`text-[10px] font-black tracking-tighter ${node.isUnlocked || node.type === 'recommendation' ? 'text-white' : 'text-slate-600'} drop-shadow-md`}>
@@ -287,7 +295,10 @@ export default function SkillPanel() {
 
                                     {/* Recommendation Tooltip - MAX Z-INDEX [9999] */}
                                     {node.type === 'recommendation' && (
-                                        <div className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 w-64 bg-slate-900/95 text-white text-xs p-4 rounded-xl border border-indigo-500/50 shadow-[0_0_40px_rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-[9999]">
+                                        <div className={`
+                                            absolute left-1/2 -translate-x-1/2 w-72 md:w-80 bg-slate-900/95 text-white text-xs p-4 rounded-xl border border-indigo-500/50 shadow-[0_0_40px_rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-[9999]
+                                            ${node.y < 50 ? 'top-full mt-4' : 'bottom-full mb-4'}
+                                        `}>
                                             <div className="flex items-center gap-2 mb-2 pb-2 border-b border-indigo-500/20">
                                                 <Sparkles size={12} className="text-indigo-400" />
                                                 <span className="font-black text-indigo-400 uppercase tracking-wider text-[10px]">AI Insight</span>
@@ -296,7 +307,12 @@ export default function SkillPanel() {
                                                 {node.aiMessage || `「${node.relatedValueName}」の資質を持つあなたへ。このコースで潜在能力を解放可能です。`}
                                             </p>
                                             {/* Pointer arrow with matching border/bg */}
-                                            <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 border-b border-r border-indigo-500/50 rotate-45"></div>
+                                            <div className={`
+                                                absolute left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 rotate-45
+                                                ${node.y < 50
+                                                    ? 'top-[-6px] border-t border-l border-indigo-500/50'
+                                                    : 'bottom-[-6px] border-b border-r border-indigo-500/50'}
+                                            `}></div>
                                         </div>
                                     )}
                                 </div>

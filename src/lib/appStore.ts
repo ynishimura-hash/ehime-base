@@ -178,6 +178,7 @@ interface AppState {
     deleteCourse: (id: string) => Promise<void>;
     fetchUserRecommendations: (userId: string) => Promise<void>;
     generateRecommendations: (userId: string, selectedValues: number[]) => Promise<void>;
+    resetRecommendations: (userId: string) => Promise<void>;
 
     // Data Sync Actions
     upsertCompany: (company: Company) => void;
@@ -733,9 +734,20 @@ export const useAppStore = create<AppState>()(
                 try {
                     const response = await fetch('/api/elearning');
                     const data = await response.json();
-                    set({ courses: data });
+
+                    if (Array.isArray(data)) {
+                        set({ courses: data });
+                    } else {
+                        console.error('Invalid courses data:', data);
+                        // If data has error property, log it
+                        if (data?.error) {
+                            console.error('API Error:', data.error);
+                        }
+                        set({ courses: [] });
+                    }
                 } catch (error) {
                     console.error('Failed to fetch courses:', error);
+                    set({ courses: [] });
                 } finally {
                     set({ isFetchingCourses: false });
                 }
@@ -816,6 +828,17 @@ export const useAppStore = create<AppState>()(
                     }
                 } catch (error) {
                     console.error('Failed to generate recommendations:', error);
+                }
+            },
+
+            resetRecommendations: async (userId) => {
+                try {
+                    await fetch(`/api/analysis/recommendations?userId=${userId}`, {
+                        method: 'DELETE'
+                    });
+                    set({ userRecommendations: [] });
+                } catch (error) {
+                    console.error('Failed to reset recommendations:', error);
                 }
             },
 

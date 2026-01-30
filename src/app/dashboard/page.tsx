@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getRecommendations } from '@/lib/recommendation';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import { calculateCategoryRadarData } from '@/lib/analysisUtils';
+import { VALUE_CARDS } from '@/lib/constants/analysisData';
 import { createClient } from '@/utils/supabase/client';
 import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
 
@@ -366,9 +367,14 @@ export default function SeekerDashboard() {
                                                 <div className="space-y-2">
                                                     <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">あなたの突出した資質</p>
                                                     <div className="flex flex-wrap gap-1.5">
-                                                        {(userAnalysis.selectedValues || []).slice(0, 3).map(valId => (
-                                                            <span key={valId} className="px-2 py-0.5 bg-white/10 rounded-md text-[9px] font-black">Value #{valId}</span>
-                                                        ))}
+                                                        {(userAnalysis.selectedValues || []).slice(0, 3).map(valId => {
+                                                            const card = VALUE_CARDS.find(c => c.id === valId);
+                                                            return (
+                                                                <span key={valId} className="px-2 py-0.5 bg-white/10 rounded-md text-[9px] font-black">
+                                                                    {card ? card.name : `Value #${valId}`}
+                                                                </span>
+                                                            );
+                                                        })}
                                                     </div>
                                                 </div>
                                             ) : (

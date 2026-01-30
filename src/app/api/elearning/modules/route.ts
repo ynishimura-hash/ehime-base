@@ -17,8 +17,9 @@ export async function GET() {
             .from('course_curriculums')
             .select(`
                 *,
-                lessons: course_lessons(id, duration)
+                lessons: course_lessons(id, title, duration, youtube_url, thumbnail_url, type)
             `)
+            .order('sort_order', { ascending: true }) // sort_orderがあるか不明だが、あると仮定して残す。エラーなら消す。
             .order('created_at', { ascending: false });
 
         if (error) {

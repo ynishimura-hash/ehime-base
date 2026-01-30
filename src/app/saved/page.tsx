@@ -125,8 +125,8 @@ export default function SavedJobsPage() {
                                 activeTab === 'job' ? '保存された求人はありません' :
                                     '保存された企業はありません'}
                         </p>
-                        <Link href={activeTab === 'company' ? '/companies' : '/jobs'} className="bg-zinc-900 text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-zinc-800 transition-colors">
-                            {activeTab === 'company' ? '企業を探す' : '探す'}
+                        <Link href={activeTab === 'company' ? '/companies' : activeTab === 'quest' ? '/quests' : '/jobs'} className="bg-zinc-900 text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-zinc-800 transition-colors">
+                            {activeTab === 'company' ? '企業を探す' : activeTab === 'quest' ? 'クエストを探す' : '求人を探す'}
                         </Link>
                     </div>
                 ) : (

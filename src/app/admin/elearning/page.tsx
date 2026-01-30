@@ -6,6 +6,45 @@ import { Plus, Folder, BookOpen, MoreVertical, Layout } from 'lucide-react';
 import AdminSortableList from '@/components/admin/common/AdminSortableList';
 import { ElearningService } from '@/services/elearning';
 
+
+const ModuleListItem = ({ mod }: { mod: any }) => {
+    const [imgError, setImgError] = useState(false);
+    const hasImage = (mod.image || mod.thumbnail_url) && !imgError;
+
+    return (
+        <Link
+            href={`/admin/elearning/courses/${mod.id}`}
+            className="flex items-center justify-between w-full p-3 hover:bg-slate-50 transition-colors rounded-xl group"
+        >
+            <div className="flex items-center gap-4">
+                {hasImage ? (
+                    <img
+                        src={mod.image || mod.thumbnail_url}
+                        alt={mod.title}
+                        className="w-10 h-10 rounded-lg object-cover shrink-0"
+                        onError={() => setImgError(true)}
+                    />
+                ) : (
+                    <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
+                        <BookOpen size={20} />
+                    </div>
+                )}
+                <div>
+                    <h3 className="font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">{mod.title}</h3>
+                    <p className="text-xs text-slate-400 font-bold mt-0.5">
+                        {mod.courseCount} Lessons
+                        <span className="mx-1.5">•</span>
+                        {mod.totalDuration || '0分'}
+                    </p>
+                </div>
+            </div>
+            <div className="p-2 text-slate-300 hover:text-slate-600">
+                <MoreVertical size={20} />
+            </div>
+        </Link>
+    );
+};
+
 export default function AdminElearningPage() {
     const [tracks, setTracks] = useState<any[]>([]);
     const [modules, setModules] = useState<any[]>([]);
@@ -162,38 +201,7 @@ export default function AdminElearningPage() {
                             items={modules}
                             keyExtractor={(item) => item.id}
                             onReorder={setModules}
-                            renderItem={(mod) => (
-                                <Link
-                                    href={`/admin/elearning/courses/${mod.id}`}
-                                    className="flex items-center justify-between w-full p-3 hover:bg-slate-50 transition-colors rounded-xl group"
-                                >
-                                    <div className="flex items-center gap-4">
-                                        {/* カバー画像サムネイルまたはデフォルトアイコン */}
-                                        {mod.image || mod.thumbnail_url ? (
-                                            <img
-                                                src={mod.image || mod.thumbnail_url}
-                                                alt={mod.title}
-                                                className="w-10 h-10 rounded-lg object-cover shrink-0"
-                                            />
-                                        ) : (
-                                            <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
-                                                <BookOpen size={20} />
-                                            </div>
-                                        )}
-                                        <div>
-                                            <h3 className="font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">{mod.title}</h3>
-                                            <p className="text-xs text-slate-400 font-bold mt-0.5">
-                                                {mod.courseCount} Lessons
-                                                <span className="mx-1.5">•</span>
-                                                {mod.totalDuration || '0分'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="p-2 text-slate-300 hover:text-slate-600">
-                                        <MoreVertical size={20} />
-                                    </div>
-                                </Link>
-                            )}
+                            renderItem={(mod) => <ModuleListItem mod={mod} />}
                         />
                         {modules.length === 0 && (
                             <div className="p-10 text-center text-slate-400 text-sm font-bold">

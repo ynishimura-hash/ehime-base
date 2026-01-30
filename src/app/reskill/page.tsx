@@ -624,34 +624,7 @@ export default function ReskillDashboardPage() {
                 </Link>
             </div>
 
-            {/* DEBUG PROBE */}
-            <div className="fixed bottom-2 left-2 bg-black/90 text-white p-4 rounded-xl text-xs z-[100] max-w-sm flex flex-col gap-2 shadow-2xl border border-white/20">
-                <div className="grid grid-cols-2 gap-x-8 gap-y-1">
-                    <span className="text-slate-400">Tracks:</span> <span className="font-mono">{tracks.length}</span>
-                    <span className="text-slate-400">Selected ID:</span> <span className="font-mono text-[10px]">{selectedTrackId?.slice(0, 8)}...</span>
-                    <span className="text-slate-400">Courses:</span> <span className="font-mono">{courses.length}</span>
-                    <span className="text-slate-400">Loading:</span> <span className={isLoading ? "text-yellow-400" : "text-green-400"}>{isLoading ? 'YES' : 'NO'}</span>
-                    <span className="text-slate-400">Error:</span> <span className="text-red-400">{error || '-'}</span>
-                </div>
-                <div className="flex gap-2 mt-2">
-                    <button
-                        onClick={() => {
-                            const current = selectedTrackId;
-                            setSelectedTrackId('');
-                            setTimeout(() => setSelectedTrackId(current), 50);
-                        }}
-                        className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg font-bold flex-1 transition-colors"
-                    >
-                        Retry Fetch
-                    </button>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg font-bold transition-colors"
-                    >
-                        Reload
-                    </button>
-                </div>
-            </div>
+
         </div>
     );
 }

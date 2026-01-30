@@ -172,6 +172,30 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
         }
     }
 
+    // Fallback: Fetch single module directly if not found in store (Direct URL access)
+    // Create local state for fetched course to avoid re-renders loop if we just set it to 'course' variable
+    const [fetchedCourse, setFetchedCourse] = React.useState<any>(null);
+
+    useEffect(() => {
+        if (!course && id && !fetchedCourse) {
+            console.log('Course not found in store, fetching directly:', id);
+            setLoading(true);
+            ElearningService.getModule(id)
+                .then(data => {
+                    if (data) {
+                        setFetchedCourse(data);
+                    }
+                })
+                .catch(err => console.error(err))
+                .finally(() => setLoading(false));
+        }
+    }, [course, id, fetchedCourse]);
+
+    // Use fetched course if main course logic outcome is null
+    if (!course && fetchedCourse) {
+        course = fetchedCourse;
+    }
+
     // Flatten lessons from curriculums if they exist
     const allLessons = course?.lessons || course?.curriculums?.flatMap((curr: any) => curr.lessons || []) || [];
 

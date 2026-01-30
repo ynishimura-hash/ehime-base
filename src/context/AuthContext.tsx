@@ -26,11 +26,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
             if (session?.user) {
                 // Fetch Profile Data
-                const { data: profile } = await supabase
+                // Fetch Profile Data
+                const { data: profile, error: profileError } = await supabase
                     .from('profiles')
                     .select('*')
                     .eq('id', session.user.id)
-                    .single();
+                    .maybeSingle();
+
+                if (profileError) {
+                    console.error('Error fetching profile:', profileError);
+                }
 
                 if (profile) {
                     // Sync Role (Mock logic for now, default to seeker if not specified)

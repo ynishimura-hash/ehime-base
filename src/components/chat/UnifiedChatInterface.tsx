@@ -60,8 +60,8 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
 
     const myselfId = activeRole === 'seeker' ? currentUserId : currentCompanyId;
 
-    // Helper to get settings
-    const getSettings = (chatId: string) => getChatSettingsHelper(myselfId, chatId);
+    // Helper to get settings - Use local state for reactivity
+    const getSettings = (chatId: string) => chatSettings.find(cs => cs.ownerId === myselfId && cs.chatId === chatId);
 
     // Filter & Sort Chats
     const processedChats = useMemo(() => {

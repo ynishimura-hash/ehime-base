@@ -373,9 +373,10 @@ export const useAppStore = create<AppState>()(
                 if (role === 'seeker') {
                     get().fetchUserAnalysis(userId);
                 }
-                // Always fetch interactions and users
+                // Always fetch interactions, users, and chats
                 get().fetchInteractions();
                 get().fetchUsers();
+                get().fetchChats();
             },
 
             resetState: () => {

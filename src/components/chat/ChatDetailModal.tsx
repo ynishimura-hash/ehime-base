@@ -239,7 +239,7 @@ export default function ChatDetailModal({
                     <div className="pt-2 border-t border-slate-100">
                         {isCompany ? (
                             <a
-                                href="#" // Link to Company Detail Page (needs actual implementation/route)
+                                href={`/companies/${partnerId}`} // Link to Company Detail Page
                                 className="block w-full py-3 bg-slate-900 text-white text-center font-bold rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
                             >
                                 <ExternalLink size={16} />

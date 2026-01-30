@@ -38,6 +38,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     const userRole = profile.user_type === 'company' ? 'company' : 'seeker';
                     setRoleState(userRole);
 
+                    // Fetch Company ID if user is company
+                    let companyId: string | undefined;
+                    if (userRole === 'company') {
+                        const { data: orgMember } = await supabase
+                            .from('organization_members')
+                            .select('organization_id')
+                            .eq('user_id', session.user.id)
+                            .single();
+                        if (orgMember) {
+                            companyId = orgMember.organization_id;
+                        }
+                    }
+
                     // Update AppStore
                     // Construct User object from profile
                     // Note: Schema doesn't have all fields yet, using defaults for now.
@@ -53,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         isOnline: true,
                     };
                     addUser(newUser);
-                    loginAs(userRole, session.user.id);
+                    loginAs(userRole, session.user.id, companyId); // Pass companyId
 
                     // Critical: Fetch all users and companies to ensure AppStore has latest data
                     // This fixes the "Infinite Loading" (missing profile) and "Dummy Admin Data" issues

@@ -522,6 +522,7 @@ export default function SeekerDashboard() {
                                 <div className="space-y-6">
                                     {recentlyViewedLessons.length > 0 ? (
                                         recentlyViewedLessons.map(lesson => {
+                                            if (!lesson) return null;
                                             const videoId = getYoutubeId(lesson.url || lesson.youtubeUrl || lesson.youtube_url);
                                             const thumbnailUrl = lesson.thumbnail_url || lesson.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
                                             return (

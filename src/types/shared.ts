@@ -86,6 +86,11 @@ export interface Lesson {
     quiz?: QuizQuestion[];
     order: number;
     material_url?: string;
+    // UI/DB Compatibility fields
+    url?: string;
+    youtube_url?: string;
+    thumbnail?: string;
+    thumbnail_url?: string;
 }
 
 export interface Curriculum {

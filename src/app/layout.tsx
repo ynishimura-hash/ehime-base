@@ -4,7 +4,7 @@ import { Toaster } from "sonner";
 import "./globals.css";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import { AuthProvider } from "@/context/AuthContext";
-import DebugRoleSwitcher from "@/components/debug/DebugRoleSwitcher";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +32,7 @@ export default function RootLayout({
         <AuthProvider>
           <LayoutWrapper>{children}</LayoutWrapper>
           <Toaster position="top-center" richColors />
-          <DebugRoleSwitcher />
+
         </AuthProvider>
       </body>
     </html>

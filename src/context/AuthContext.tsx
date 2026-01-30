@@ -38,6 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
 
                 if (profile) {
+                    console.log('Profile found:', profile.id, profile.user_type);
                     // Sync Role (Mock logic for now, default to seeker if not specified)
                     // In real app, might want to set activeRole based on user_type
                     const userRole = profile.user_type === 'company' ? 'company' : 'seeker';

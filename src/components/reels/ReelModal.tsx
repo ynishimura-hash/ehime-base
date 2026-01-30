@@ -5,8 +5,7 @@ import { X, Heart, Share2, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-
 import { Reel } from '@/types/shared';
 import Link from 'next/link';
 import { getYouTubeEmbedUrl, getYouTubeID } from '@/lib/videoUtils';
-
-
+import { useAppStore } from '@/lib/appStore';
 
 interface ReelModalProps {
     reels: Reel[];
@@ -29,8 +28,8 @@ export const ReelModal: React.FC<ReelModalProps> = ({
     entityType,
     companyId
 }) => {
+    const { interactions, toggleInteraction, currentUserId } = useAppStore();
     const [currentIndex, setCurrentIndex] = useState(initialReelIndex);
-    const [isLiked, setIsLiked] = useState(false);
     const touchStartY = useRef<number | null>(null);
     const [touchOffset, setTouchOffset] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
@@ -51,9 +50,6 @@ export const ReelModal: React.FC<ReelModalProps> = ({
         }
 
         const handlePopState = () => {
-            // If back button is pressed and we were open, close it.
-            // Note: When isOpen becomes false via parent, we don't need to do anything here strictly, 
-            // but if user hits back, this fires.
             if (isOpen) {
                 onClose();
             }
@@ -65,7 +61,7 @@ export const ReelModal: React.FC<ReelModalProps> = ({
             document.body.style.overflow = 'auto';
             window.removeEventListener('popstate', handlePopState);
         };
-    }, [isOpen]); // Re-run when isOpen changes
+    }, [isOpen]);
 
     useEffect(() => {
         setCurrentIndex(initialReelIndex);
@@ -100,6 +96,9 @@ export const ReelModal: React.FC<ReelModalProps> = ({
     if (!isOpen || !reels || reels.length === 0) return null;
 
     const currentReel = reels[currentIndex];
+
+    // Calculate Like State
+    const isLiked = interactions.some(i => i.type === 'like_reel' && i.fromId === currentUserId && i.toId === currentReel?.id);
 
     // Navigation Handlers
     const handleNext = () => {
@@ -141,9 +140,6 @@ export const ReelModal: React.FC<ReelModalProps> = ({
             } else { // Swipe Down -> Prev
                 if (currentIndex > 0) {
                     handlePrev();
-                } else {
-                    // Pull down to close? User didn't request, but standard behavior. 
-                    // For now just rubber band back if no prev.
                 }
             }
         }
@@ -281,16 +277,20 @@ export const ReelModal: React.FC<ReelModalProps> = ({
                 {/* Right Side Actions */}
                 <div className="absolute bottom-20 right-2 flex flex-col gap-6 items-center z-10">
                     <button
-                        onClick={(e) => { e.stopPropagation(); setIsLiked(!isLiked); }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            toggleInteraction('like_reel', currentUserId, currentReel.id);
+                        }}
                         className="flex flex-col items-center gap-1 group"
                     >
                         <div className={`p-3 rounded-full bg-black/40 backdrop-blur-sm transition-transform group-active:scale-95 ${isLiked ? 'text-red-500' : 'text-white'}`}>
                             <Heart size={28} fill={isLiked ? "currentColor" : "none"} />
                         </div>
                         <span className="text-white text-xs font-bold drop-shadow-md">
-                            {currentReel.likes + (isLiked ? 1 : 0)}
+                            {(currentReel.likes || 0) + (isLiked ? 1 : 0)} {/* Simplified: Just +1 if liked. Or verify if source already has it */}
                         </span>
                     </button>
+
 
                     <button
                         onClick={(e) => e.stopPropagation()}

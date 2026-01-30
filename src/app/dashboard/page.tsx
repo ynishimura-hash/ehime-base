@@ -18,6 +18,7 @@ import { calculateCategoryRadarData } from '@/lib/analysisUtils';
 import { VALUE_CARDS } from '@/lib/constants/analysisData';
 import { createClient } from '@/utils/supabase/client';
 import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
+import { calculateProfileCompletion } from '@/lib/profileUtils';
 
 export default function SeekerDashboard() {
     const {
@@ -163,17 +164,7 @@ export default function SeekerDashboard() {
     const activeJobs = recommendedJobs.filter(j => j.type === 'job').slice(0, 3);
 
     // Profile Completion Calculation
-    const profileFields = [
-        currentUser?.lastName,
-        currentUser?.firstName,
-        currentUser?.university,
-        currentUser?.faculty,
-        currentUser?.bio,
-        (currentUser?.tags?.length || 0) > 0,
-        (currentUser?.skills?.length || 0) > 0
-    ];
-    const filledFields = profileFields.filter(Boolean).length;
-    const profileCompletion = Math.round((filledFields / profileFields.length) * 100);
+    const profileCompletion = calculateProfileCompletion(currentUser);
 
     // Radar Data
     const hasDiagnosis = Object.keys(userAnalysis.diagnosisScores || {}).length > 0;
@@ -318,7 +309,7 @@ export default function SeekerDashboard() {
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">メッセージ</p>
                                     <p className="text-xl font-black text-slate-800">{userChats.length}</p>
                                 </Link>
-                                <Link href="/mypage" className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow group text-center">
+                                <Link href="/mypage/profile-checklist" className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow group text-center">
                                     <div className="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
                                         <Layout size={20} />
                                     </div>

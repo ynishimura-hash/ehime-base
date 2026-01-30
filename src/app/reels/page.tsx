@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
 import { Reel } from '@/types/shared';
-import { Film, Play, Search, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Film, Play, Search, Filter, X, ChevronDown, ChevronUp, Heart } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 
 // Helper for YouTube ID
@@ -20,8 +20,23 @@ const getYouTubeID = (url: string) => {
 
 function ReelsContent() {
     const searchParams = useSearchParams();
-    const { companies } = useAppStore();
+    const { companies, interactions, toggleInteraction, currentUserId, activeRole } = useAppStore();
     const [mediaReels, setMediaReels] = useState<any[]>([]);
+
+    // Helper for Likes
+    const isLiked = (reelId: string) => {
+        return interactions.some(i => i.type === 'like_reel' && i.fromId === currentUserId && i.toId === reelId);
+    };
+
+    const toggleLike = (reelId: string, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!currentUserId) {
+            // In a real app we might prompt login here
+            return;
+        }
+        toggleInteraction('like_reel', currentUserId, reelId);
+    };
 
     // Fetch Media Library
     useEffect(() => {
@@ -299,11 +314,8 @@ function ReelsContent() {
                                         />
                                     )
                                 )}
-
-                                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />
-
                                 {/* Entity Type Label */}
-                                <div className="absolute top-2 left-2">
+                                <div className="absolute top-2 left-2 z-10">
                                     <span className={`
                                         text-[10px] font-black px-2 py-0.5 rounded-md text-white shadow-sm border border-white/20
                                         ${item.type === 'quest' ? 'bg-gradient-to-r from-orange-400 to-pink-500' :
@@ -312,6 +324,18 @@ function ReelsContent() {
                                         {item.type === 'quest' ? 'QUEST' : item.type === 'job' ? 'JOB' : 'COMPANY'}
                                     </span>
                                 </div>
+
+                                {/* Like Button */}
+                                <button
+                                    onClick={(e) => toggleLike(item.reel.id, e)}
+                                    className="absolute top-2 right-2 z-20 bg-black/20 backdrop-blur-md p-2 rounded-full hover:bg-black/40 transition-all border border-white/10"
+                                >
+                                    <Heart size={18} className={isLiked(item.reel.id) ? 'text-pink-500 fill-pink-500' : 'text-white'} />
+                                </button>
+
+                                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />
+
+
 
                                 <div className="absolute center inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                     <div className="bg-white/20 backdrop-blur-sm p-3 rounded-full">

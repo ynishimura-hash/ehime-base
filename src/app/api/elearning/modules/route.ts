@@ -19,7 +19,7 @@ export async function GET() {
                 *,
                 lessons: course_lessons(id, title, duration, youtube_url, thumbnail_url, type)
             `)
-            .order('sort_order', { ascending: true }) // sort_orderがあるか不明だが、あると仮定して残す。エラーなら消す。
+            .order('order_index', { ascending: true }) // order_index to match DB schema
             .order('created_at', { ascending: false });
 
         if (error) {

@@ -161,7 +161,7 @@ const ANALYSIS_MAP: Record<string, FortuneResult> = {
 };
 
 export default function FortuneAnalysis() {
-    const { userAnalysis, setAnalysisResults, courses, fetchCourses, toggleFortuneIntegration, jobs, companies } = useAppStore();
+    const { userAnalysis, setAnalysisResults, courses, fetchCourses, toggleFortuneIntegration, jobs, companies, users, currentUserId } = useAppStore();
     const [step, setStep] = useState(0); // 0: Input, 1: Result
     const [birthDate, setBirthDate] = useState('');
     const [result, setResult] = useState<FortuneResult | null>(null);
@@ -172,6 +172,40 @@ export default function FortuneAnalysis() {
             fetchCourses();
         }
     }, [courses.length, fetchCourses]);
+
+    // Pre-fill birthDate from user profile and show result if available
+    useEffect(() => {
+        if (currentUserId && users.length > 0) {
+            const currentUser = users.find(u => u.id === currentUserId);
+            if (currentUser?.birthDate) {
+                const bDate = currentUser.birthDate;
+                setBirthDate(bDate);
+
+                // If analysis already exists, calculate and show result
+                if (userAnalysis.fortune?.dayMaster) {
+                    const index = calculateDayMasterIndex(bDate);
+                    const stem = JIKKAN[index];
+                    const res = ANALYSIS_MAP[stem];
+                    if (res) {
+                        setResult(res);
+                        setStep(1);
+
+                        // Recalculate recommendations silently for the view
+                        const recs = getRecommendations(
+                            { fortune: { dayMaster: res.dayMaster, traits: res.traits } },
+                            jobs, courses, companies
+                        );
+                        setRecommendations(recs);
+                    }
+                }
+            }
+        }
+    }, [currentUserId, users, userAnalysis.fortune?.dayMaster]); // Add dependencies correctly
+
+    const hasResult = !!userAnalysis.fortune?.dayMaster;
+
+    // ... calculateFortune ...
+
 
     const calculateFortune = () => {
         if (!birthDate) return;
@@ -191,7 +225,6 @@ export default function FortuneAnalysis() {
             });
 
             // ユーザープロフィールにも生年月日を保存
-            const currentUserId = useAppStore.getState().currentUserId;
             if (currentUserId) {
                 useAppStore.getState().updateUser(currentUserId, { birthDate });
             }
@@ -259,7 +292,11 @@ export default function FortuneAnalysis() {
                                         <div className="text-[10px] font-bold text-slate-400">診断結果に占いのエッセンスを掛け合わせます</div>
                                     </div>
                                     <button
-                                        onClick={toggleFortuneIntegration}
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            toggleFortuneIntegration();
+                                        }}
                                         className={`w-12 h-6 rounded-full transition-all relative ${userAnalysis.isFortuneIntegrated ? 'bg-indigo-600' : 'bg-slate-300'}`}
                                     >
                                         <motion.div
@@ -273,9 +310,12 @@ export default function FortuneAnalysis() {
                             <button
                                 onClick={calculateFortune}
                                 disabled={!birthDate}
-                                className="w-full bg-purple-600 text-white font-black py-4 rounded-2xl hover:bg-purple-500 transition-all active:scale-95 shadow-xl shadow-purple-500/20 disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-2"
+                                className={`w-full font-black py-4 rounded-2xl transition-all active:scale-95 shadow-xl flex items-center justify-center gap-2 ${hasResult
+                                    ? 'bg-blue-600 text-white hover:bg-blue-500 shadow-blue-500/20'
+                                    : 'bg-purple-600 text-white hover:bg-purple-500 shadow-purple-500/20 disabled:opacity-50 disabled:grayscale'
+                                    }`}
                             >
-                                分析を実行する <Sparkles size={18} />
+                                {hasResult ? '診断結果を見る' : '分析を実行する'} <Sparkles size={18} />
                             </button>
                         </div>
                     </motion.div>
@@ -286,6 +326,14 @@ export default function FortuneAnalysis() {
                         animate={{ opacity: 1, scale: 1 }}
                         className="relative z-10"
                     >
+                        <div className="flex justify-end mb-2">
+                            <button
+                                onClick={() => setStep(0)}
+                                className="text-xs font-bold text-slate-400 hover:text-purple-600 transition-colors flex items-center gap-1"
+                            >
+                                <ArrowRight size={14} className="rotate-180" /> もう一度診断する
+                            </button>
+                        </div>
                         <div className="flex flex-col md:flex-row gap-10 items-start">
                             <div className="md:w-1/3 text-center space-y-6">
                                 <div className="w-32 h-32 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl shadow-purple-500/30">

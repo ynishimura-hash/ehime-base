@@ -16,6 +16,7 @@ import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
 import { Reel } from '@/types/shared';
 import { createClient } from '@/utils/supabase/client';
+import { fetchPublicJobDetailAction } from '@/app/admin/actions';
 
 export default function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -47,30 +48,20 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
     useEffect(() => {
         const fetchJobData = async () => {
             setLoading(true);
+            const result = await fetchPublicJobDetailAction(id);
 
-            // 1. Fetch job details with organization Info
-            const { data: jobData, error: jobError } = await supabase
-                .from('jobs')
-                .select('*, organizations(*)')
-                .eq('id', id)
-                .single();
-
-            if (jobError || !jobData) {
-                console.error('Error fetching job:', jobError);
+            if (!result.success || !result.data) {
+                console.error('Error fetching job:', result.error);
                 setLoading(false);
                 return;
             }
 
+            const { job: jobData, company: companyData, reels } = result.data;
+
             setJob(jobData);
-            setCompany(jobData.organizations);
+            setCompany(companyData);
 
-            // 2. Fetch reels (associated with this job OR this company)
-            const { data: media } = await supabase
-                .from('media_library')
-                .select('*')
-                .or(`job_id.eq.${id},organization_id.eq.${jobData.organization_id}`);
-
-            const formattedReels = (media || []).map((m: any) => ({
+            const formattedReels = (reels || []).map((m: any) => ({
                 id: m.id,
                 url: m.public_url,
                 type: (m.type === 'youtube' ? 'youtube' : 'file') as 'youtube' | 'file',
@@ -119,33 +110,36 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
         );
     }
 
-    const handleApply = () => {
+    const handleApplyClick = () => {
         if (authStatus !== 'authenticated') {
-            setLoginPromptMessage('クエストへの参加申請にはログインが必要です');
+            setLoginPromptMessage('お申し込みにはログインが必要です');
             setIsLoginPromptOpen(true);
             return;
         }
         if (isApplied) return;
-        addInteraction({ type: 'apply', fromId: currentUserId, toId: id });
-        toast.success('クエストへの参加を申請しました！\n企業からの連絡をお待ちください');
-    };
-
-    const handleConsultClick = () => {
-        if (authStatus !== 'authenticated') {
-            setLoginPromptMessage('カジュアル面談の申し込みにはログインが必要です');
-            setIsLoginPromptOpen(true);
-            return;
-        }
         setIsConsultModalOpen(true);
     };
 
-    const handleConsultConfirm = async () => {
+    const handleApplyConfirm = async () => {
         setIsConsultModalOpen(false);
         // Ensure company exists in store for Chat UI to resolve name
         upsertCompany(company);
-        // Create chat in the unified store
-        const chatId = await createChat(company.id, currentUserId, `「${job.title}」について相談がしたいです。`);
-        toast.success('カジュアル面談の希望を送信しました');
+
+        // CREATE INTERACTION: This makes it visible on dashboards as an "Application"
+        toggleInteraction('apply', currentUserId, id);
+
+        // Create chat in the unified store with an initial message and a system message
+        const chatId = await createChat(
+            company.id,
+            currentUserId,
+            `「${job.title}」についてお話ししたいです。`,
+            'お申し込みありがとうございます。企業からの連絡をお待ちください。'
+        );
+
+        // Ensure chats are fetched before redirecting so the chat interface finds the new thread
+        await useAppStore.getState().fetchChats();
+
+        toast.success('お申し込みを送信しました');
         router.push(`/messages/${chatId}`);
     };
 
@@ -156,7 +150,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
             return;
         }
         toggleInteraction('like_job', currentUserId, id);
-        toast.success(isLiked ? '「気になる」を解除しました' : 'クエストを「気になる」リストに保存しました');
+        toast.success(isLiked ? '「気になる」を解除しました' : '求人を「気になる」リストに保存しました');
     };
 
     return (
@@ -238,11 +232,11 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                             </div>
                         </div>
 
-                        {/* Recommended Points - Keeping hardcoded for now as placeholders or template features */}
+                        {/* Recommended Points */}
                         <div className="bg-zinc-50 rounded-[2rem] p-6 border border-zinc-100">
                             <div className="flex items-center gap-2 mb-4 text-zinc-800">
                                 <CheckCircle2 className="text-amber-400" />
-                                <h3 className="text-lg font-black">このクエストのおすすめポイント</h3>
+                                <h3 className="text-lg font-black">この求人のおすすめポイント</h3>
                             </div>
                             <ul className="space-y-3">
                                 <li className="flex items-start gap-3">
@@ -329,22 +323,22 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
             </main>
 
             {/* Floating Action Bar (Mobile Only Style or Shared) */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 md:p-6 bg-white/80 backdrop-blur-xl border-t border-zinc-100 z-50">
-                <div className="max-w-4xl mx-auto flex items-center gap-4">
+            <div className="fixed bottom-0 left-0 right-0 md:left-64 p-4 md:p-6 bg-white/80 backdrop-blur-xl border-t border-zinc-100 z-50">
+                <div className="max-w-4xl mx-auto flex items-center justify-center gap-6 md:gap-8">
                     <button
                         onClick={() => {
                             toggleLike();
                         }}
-                        className={`hidden md:flex flex-col items-center justify-center p-2 hover:text-zinc-600 ${isLiked ? 'text-red-500' : 'text-zinc-400'}`}
+                        className={`flex flex-col items-center justify-center min-w-[64px] transition-all hover:scale-110 ${isLiked ? 'text-red-500' : 'text-zinc-400'}`}
                     >
                         <Heart size={24} fill={isLiked ? "currentColor" : "none"} />
-                        <span className="text-[10px] font-black">{isLiked ? '保存済み' : '気になる'}</span>
+                        <span className="text-[10px] font-black mt-1">{isLiked ? '保存済み' : '気になる'}</span>
                     </button>
 
                     <button
-                        onClick={handleApply}
+                        onClick={handleApplyClick}
                         disabled={isApplied}
-                        className={`flex-1 font-black py-4 rounded-2xl md:rounded-3xl transition-all flex items-center justify-center gap-2 shadow-xl ${isApplied ? 'bg-zinc-200 text-zinc-500 cursor-not-allowed' : 'bg-zinc-900 text-white hover:bg-zinc-800 shadow-zinc-200'}`}
+                        className={`w-full max-w-md font-black py-4 rounded-2xl md:rounded-3xl transition-all flex items-center justify-center gap-2 shadow-xl ${isApplied ? 'bg-zinc-200 text-zinc-500 cursor-not-allowed' : 'bg-zinc-900 text-white hover:bg-zinc-800 shadow-zinc-200'}`}
                     >
                         {isApplied ? (
                             <>
@@ -354,17 +348,9 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                         ) : (
                             <>
                                 <Zap size={20} className="text-eis-yellow" />
-                                クエストに参加する
+                                申し込む
                             </>
                         )}
-                    </button>
-
-                    <button
-                        onClick={handleConsultClick}
-                        className="w-14 h-14 md:w-auto md:px-8 bg-eis-yellow text-zinc-900 font-black rounded-2xl md:rounded-3xl flex items-center justify-center gap-2 hover:bg-yellow-400 transition-all shadow-xl shadow-yellow-100"
-                    >
-                        <MessageCircle size={24} />
-                        <span className="hidden md:block">カジュアル面談を希望する</span>
                     </button>
                 </div>
             </div>
@@ -372,7 +358,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
             <ConsultModal
                 isOpen={isConsultModalOpen}
                 onClose={() => setIsConsultModalOpen(false)}
-                onConfirm={handleConsultConfirm}
+                onConfirm={handleApplyConfirm}
                 companyName={company.name}
             />
 

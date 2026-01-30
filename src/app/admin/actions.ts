@@ -70,9 +70,32 @@ export async function fetchQuestsAction() {
 
         if (error) throw error;
 
+        // Fetch reels for these quests
+        const { data: allReels } = await supabaseAdmin
+            .from('media_library')
+            .select('*');
+
+        const dataWithReels = (data || []).map(quest => {
+            const questReels = (allReels || []).filter(r => r.job_id === quest.id);
+            const mappedReels = questReels.map(media => ({
+                id: media.id,
+                type: media.type || 'file',
+                url: media.public_url,
+                thumbnail: media.thumbnail_url || (media.type === 'youtube' ? null : media.public_url),
+                title: media.title || media.filename,
+                likes: 0,
+                entityType: 'job'
+            }));
+
+            return {
+                ...quest,
+                reels: mappedReels
+            };
+        });
+
         return {
             success: true,
-            data: data || []
+            data: dataWithReels
         };
     } catch (error) {
         console.error('Fetch Quests Error:', error);
@@ -546,6 +569,41 @@ export async function fetchPublicCompanyDetailAction(id: string) {
         };
     } catch (error: any) {
         console.error('fetchPublicCompanyDetailAction: ERROR', error);
+        return { success: false, error: error.message || String(error) };
+    }
+}
+
+export async function fetchPublicJobDetailAction(id: string) {
+    try {
+        console.log('fetchPublicJobDetailAction: fetching job details for', id);
+
+        const { data: job, error: jobError } = await supabaseAdmin
+            .from('jobs')
+            .select('*, organization:organizations(*)')
+            .eq('id', id)
+            .single();
+
+        if (jobError) throw jobError;
+
+        // Fetch reels
+        // Reels for this job OR this organization (if desired to show company reels on job page)
+        // Usually we want job-specific first, falling back to company?
+        // Query asks for OR, so we get both.
+        const { data: reels } = await supabaseAdmin
+            .from('media_library')
+            .select('*')
+            .or(`job_id.eq.${id},organization_id.eq.${job.organization_id}`);
+
+        return {
+            success: true,
+            data: {
+                job: job,
+                company: job.organization, // Flatten for convenience
+                reels: reels || []
+            }
+        };
+    } catch (error: any) {
+        console.error('fetchPublicJobDetailAction: ERROR', error);
         return { success: false, error: error.message || String(error) };
     }
 }

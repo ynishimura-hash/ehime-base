@@ -10,6 +10,7 @@ import { useGameStore } from '@/lib/gameStore';
 
 import { useRouter } from 'next/navigation';
 import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
+import { calculateProfileCompletion } from '@/lib/profileUtils';
 
 const DEMO_USER_ID = '061fbf87-f36e-4612-80b4-dedc77b55d5e';
 
@@ -211,20 +212,7 @@ export default function MyPage() {
 
                 <Link href="/mypage/profile-checklist" className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 rounded-xl shadow-lg flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform text-white mb-2">
                     <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center border-2 border-white/30 backdrop-blur-sm relative">
-                        {(() => {
-                            // Calculate Score Inline (Simplified for preview)
-                            // Ideally, this should be a hook or shared util, but for now we duplicate simple logic or just check basic fields
-                            let pts = 0;
-                            if (currentUser.name) pts++;
-                            if (currentUser.university) pts++;
-                            if (currentUser.bio) pts++;
-                            if (currentUser.image) pts++;
-                            if (currentUser.skills?.length) pts++;
-                            // Rough estimate for display
-                            const percent = Math.min(100, Math.round((pts / 5) * 100)); // Just a dummy mostly, better to rely on store or util
-                            // Actually let's just make it generic or use a Trophy icon if we can't calc easily here
-                            return <Target size={24} />;
-                        })()}
+                        <span className="text-sm font-black text-white">{calculateProfileCompletion(currentUser)}%</span>
                     </div>
                     <div className="flex-1">
                         <p className="text-[10px] font-bold opacity-80 uppercase tracking-widest">Profile Status</p>

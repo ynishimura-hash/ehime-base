@@ -102,7 +102,7 @@ export function ConsultModal({ isOpen, onClose, onConfirm, companyName }: Consul
                                 className="flex-1 py-3 px-4 rounded-xl font-bold bg-eis-navy text-white hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-zinc-200"
                             >
                                 <Send size={18} />
-                                カジュアル面談希望
+                                申し込む
                             </button>
                         </div>
                     </div>

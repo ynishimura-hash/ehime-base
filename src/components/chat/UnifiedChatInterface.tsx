@@ -525,6 +525,18 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
                                     <div ref={messagesEndRef} className="h-0" />
 
                                     {[...selectedChat.messages].reverse().map(msg => {
+                                        const isSystem = (msg as any).isSystem || msg.senderId === 'SYSTEM';
+
+                                        if (isSystem) {
+                                            return (
+                                                <div key={msg.id} className="flex justify-center my-2">
+                                                    <div className="bg-zinc-200/50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-zinc-200 shadow-sm">
+                                                        <p className="text-[11px] font-black text-zinc-500">{msg.text}</p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
+
                                         const isMe = msg.senderId === myselfId;
                                         const replyToMsg = msg.replyToId ? selectedChat.messages.find(m => m.id === msg.replyToId) : null;
 

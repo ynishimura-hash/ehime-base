@@ -16,6 +16,7 @@ import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
 import { Reel } from '@/types/shared';
 import { createClient } from '@/utils/supabase/client';
+import { fetchPublicJobDetailAction } from '@/app/admin/actions';
 
 export default function QuestDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -47,30 +48,20 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
     useEffect(() => {
         const fetchQuestData = async () => {
             setLoading(true);
+            const result = await fetchPublicJobDetailAction(id);
 
-            // 1. Fetch quest (job) details with organization Info
-            const { data: questData, error: jobError } = await supabase
-                .from('jobs')
-                .select('*, organizations(*)')
-                .eq('id', id)
-                .single();
-
-            if (jobError || !questData) {
-                console.error('Error fetching quest:', jobError);
+            if (!result.success || !result.data) {
+                console.error('Error fetching quest:', result.error);
                 setLoading(false);
                 return;
             }
 
+            const { job: questData, company: companyData, reels } = result.data;
+
             setQuest(questData);
-            setCompany(questData.organizations);
+            setCompany(companyData);
 
-            // 2. Fetch reels (associated with this quest OR this company)
-            const { data: media } = await supabase
-                .from('media_library')
-                .select('*')
-                .or(`job_id.eq.${id},organization_id.eq.${questData.organization_id}`);
-
-            const formattedReels = (media || []).map((m: any) => ({
+            const formattedReels = (reels || []).map((m: any) => ({
                 id: m.id,
                 url: m.public_url,
                 type: (m.type === 'youtube' ? 'youtube' : 'file') as 'youtube' | 'file',
@@ -82,8 +73,6 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
                 likes: 0
             }));
 
-            // Filter logic: If quest has specific reels, prioritize them? 
-            // Or show everything? For detail page, showing all related content is good.
             setActiveReels(formattedReels);
             setLoading(false);
         };
@@ -91,7 +80,7 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
         fetchQuestData();
     }, [id]);
 
-    const isLiked = hasInteraction('like_job', currentUserId, id);
+    const isLiked = hasInteraction('like_quest', currentUserId, id);
     const isApplied = hasInteraction('apply', currentUserId, id);
 
     const handleShare = () => {
@@ -121,31 +110,35 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
         );
     }
 
-    const handleApply = () => {
+    const handleApplyClick = () => {
         if (authStatus !== 'authenticated') {
-            setLoginPromptMessage('クエストへの参加にはログインが必要です');
+            setLoginPromptMessage('お申し込みにはログインが必要です');
             setIsLoginPromptOpen(true);
             return;
         }
         if (isApplied) return;
-        addInteraction({ type: 'apply', fromId: currentUserId, toId: id });
-        toast.success('クエストへの参加を申請しました！\n企業からの連絡をお待ちください');
-    };
-
-    const handleConsultClick = () => {
-        if (authStatus !== 'authenticated') {
-            setLoginPromptMessage('カジュアル面談の申し込みにはログインが必要です');
-            setIsLoginPromptOpen(true);
-            return;
-        }
         setIsConsultModalOpen(true);
     };
 
-    const handleConsultConfirm = async () => {
+    const handleApplyConfirm = async () => {
         setIsConsultModalOpen(false);
         upsertCompany(company);
-        const chatId = await createChat(company.id, currentUserId, `「${quest.title}」について相談がしたいです。`);
-        toast.success('カジュアル面談の希望を送信しました');
+
+        // CREATE INTERACTION: This makes it visible on dashboards as an "Application"
+        toggleInteraction('apply', currentUserId, id);
+
+        // Create chat with initial and system messages
+        const chatId = await createChat(
+            company.id,
+            currentUserId,
+            `「${quest.title}」についてお話ししたいです。`,
+            'お申し込みありがとうございます。企業からの連絡をお待ちください。'
+        );
+
+        // Ensure chats are fetched
+        await useAppStore.getState().fetchChats();
+
+        toast.success('お申し込みを送信しました');
         router.push(`/messages/${chatId}`);
     };
 
@@ -155,7 +148,7 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
             setIsLoginPromptOpen(true);
             return;
         }
-        toggleInteraction('like_job', currentUserId, id);
+        toggleInteraction('like_quest', currentUserId, id);
         toast.success(isLiked ? '「気になる」を解除しました' : 'クエストを「気になる」リストに保存しました');
     };
 
@@ -224,7 +217,20 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
                         </div>
                     </div>
 
-                    <div className="p-8 space-y-8">
+                    <div className="p-4 md:p-8 space-y-8">
+                        {/* Quest Content / Description */}
+                        <div>
+                            <h3 className="text-xl font-black text-slate-900 mb-4 flex items-center gap-2">
+                                <Info className="text-blue-600" />
+                                クエスト内容
+                            </h3>
+                            <div className="prose prose-slate max-w-none">
+                                <p className="text-zinc-700 leading-relaxed whitespace-pre-wrap font-medium">
+                                    {quest.content || quest.description || 'クエスト内容の詳細はありません。'}
+                                </p>
+                            </div>
+                        </div>
+
                         {/* Recommended Points */}
                         <div className="bg-zinc-50 rounded-[2rem] p-6 border border-zinc-100">
                             <div className="flex items-center gap-2 mb-4 text-zinc-800">
@@ -310,11 +316,6 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
                                 </div>
 
                                 <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100">
-                                    <span className="block text-xs text-zinc-400 font-black uppercase mb-1">詳細内容</span>
-                                    <p className="text-sm font-medium text-zinc-700 leading-relaxed whitespace-pre-wrap">{quest.description || '-'}</p>
-                                </div>
-
-                                <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100">
                                     <span className="block text-xs text-zinc-400 font-black uppercase mb-1">選考プロセス</span>
                                     <p className="text-sm font-bold text-zinc-700">{quest.selection_process || '書類選考 → 面談 → 参加決定'}</p>
                                 </div>
@@ -339,42 +340,34 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
             </main>
 
             {/* Floating Action Bar */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 md:p-6 bg-white/80 backdrop-blur-xl border-t border-zinc-100 z-50">
-                <div className="max-w-4xl mx-auto flex items-center gap-4">
+            <div className="fixed bottom-0 left-0 right-0 md:left-64 p-4 md:p-6 bg-white/80 backdrop-blur-xl border-t border-zinc-100 z-50">
+                <div className="max-w-4xl mx-auto flex items-center justify-center gap-6 md:gap-8">
                     <button
                         onClick={() => {
                             toggleLike();
                         }}
-                        className={`hidden md:flex flex-col items-center justify-center p-2 hover:text-zinc-600 ${isLiked ? 'text-red-500' : 'text-zinc-400'}`}
+                        className={`flex flex-col items-center justify-center min-w-[64px] transition-all hover:scale-110 ${isLiked ? 'text-red-500' : 'text-zinc-400'}`}
                     >
                         <Heart size={24} fill={isLiked ? "currentColor" : "none"} />
-                        <span className="text-[10px] font-black">{isLiked ? '保存済み' : '気になる'}</span>
+                        <span className="text-[10px] font-black mt-1">{isLiked ? '保存済み' : '気になる'}</span>
                     </button>
 
                     <button
-                        onClick={handleApply}
+                        onClick={handleApplyClick}
                         disabled={isApplied}
-                        className={`flex-1 font-black py-4 rounded-2xl md:rounded-3xl transition-all flex items-center justify-center gap-2 shadow-xl ${isApplied ? 'bg-zinc-200 text-zinc-500 cursor-not-allowed' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-slate-200'}`}
+                        className={`w-full max-w-md font-black py-4 rounded-2xl md:rounded-3xl transition-all flex items-center justify-center gap-2 shadow-xl ${isApplied ? 'bg-zinc-200 text-zinc-500 cursor-not-allowed' : 'bg-zinc-900 text-white hover:bg-zinc-800 shadow-zinc-200'}`}
                     >
                         {isApplied ? (
                             <>
                                 <CheckCircle2 size={20} />
-                                参加申し込み済み
+                                申し込み済み
                             </>
                         ) : (
                             <>
-                                <Zap size={20} className="text-yellow-400" />
-                                クエストに参加する
+                                <Zap size={20} className="text-eis-yellow" />
+                                申し込む
                             </>
                         )}
-                    </button>
-
-                    <button
-                        onClick={handleConsultClick}
-                        className="w-14 h-14 md:w-auto md:px-8 bg-yellow-400 text-zinc-900 font-black rounded-2xl md:rounded-3xl flex items-center justify-center gap-2 hover:bg-yellow-300 transition-all shadow-xl shadow-yellow-100"
-                    >
-                        <MessageCircle size={24} />
-                        <span className="hidden md:block">カジュアル面談</span>
                     </button>
                 </div>
             </div>
@@ -382,7 +375,7 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
             <ConsultModal
                 isOpen={isConsultModalOpen}
                 onClose={() => setIsConsultModalOpen(false)}
-                onConfirm={handleConsultConfirm}
+                onConfirm={handleApplyConfirm}
                 companyName={company.name}
             />
 

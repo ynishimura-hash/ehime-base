@@ -11,6 +11,7 @@ import { getFallbackAvatarUrl } from './avatarUtils';
 import { createClient } from '@/utils/supabase/client';
 import { fetchAdminStats, fetchQuestsAction, fetchJobsAction, fetchPublicCompaniesAction } from '@/app/admin/actions';
 import { fetchUserAnalysisAction, saveUserAnalysisAction } from '@/app/analysis/actions';
+import { toggleInteractionAction, resetInteractionsAction, fetchUserInteractionsAction } from '@/app/actions/interactions';
 import { VALUE_CARDS, DIAGNOSIS_QUESTIONS } from './constants/analysisData';
 
 // --- Types ---
@@ -61,6 +62,7 @@ export interface Message {
     isRead: boolean;
     attachment?: Attachment;
     replyToId?: string;
+    isSystem?: boolean;
 }
 
 export interface ChatThread {
@@ -72,7 +74,7 @@ export interface ChatThread {
 }
 
 export interface Interaction {
-    type: 'like_company' | 'like_job' | 'like_user' | 'apply' | 'scout' | 'like_quest';
+    type: 'like_company' | 'like_job' | 'like_user' | 'apply' | 'scout' | 'like_quest' | 'like_reel';
     fromId: string; // userId or companyId
     toId: string; // companyId, jobId, or userId
     timestamp: number;
@@ -142,18 +144,19 @@ interface AppState {
     updateUser: (userId: string, updates: Partial<User>) => void;
     addUser: (user: User) => void;
     toggleInteraction: (type: Interaction['type'], fromId: string, toId: string, metadata?: any) => void;
+    resetInteractions: (targetType?: 'quest' | 'job' | 'company' | 'reel') => Promise<void>;
+    fetchInteractions: () => Promise<void>;
 
     // Chat Actions
     sendMessage: (threadId: string, senderId: string, text: string, attachment?: Attachment, replyToId?: string) => Promise<void>;
     deleteMessage: (threadId: string, messageId: string) => void;
-    createChat: (companyId: string, userId: string, initialMessage?: string) => Promise<string>; // returns threadId
+    createChat: (companyId: string, userId: string, initialMessage?: string, systemMessage?: string) => Promise<string>; // returns threadId
     fetchChats: () => Promise<void>;
     markAsRead: (threadId: string, readerId: string) => void;
 
     // Interaction Actions
     addInteraction: (interaction: Omit<Interaction, 'timestamp'>) => void;
     removeInteraction: (type: Interaction['type'], fromId: string, toId: string) => void;
-    fetchInteractions: () => Promise<void>;
     // Job Actions
     addJob: (job: Job) => void;
     updateJob: (jobId: string, updates: Partial<Job>) => void;
@@ -449,46 +452,36 @@ export const useAppStore = create<AppState>()(
             // Generic Interaction
             toggleInteraction: async (type, fromId, toId, metadata) => {
                 const state = get();
-                const exists = state.interactions.find(
+                const exists = state.interactions.some(
                     i => i.type === type && i.fromId === fromId && i.toId === toId
                 );
 
                 // Optimistic Update
                 if (exists) {
-                    set({ interactions: state.interactions.filter(i => i !== exists) });
-                    toast.success('お気に入りから削除しました', { duration: 1500 });
+                    set({
+                        interactions: state.interactions.filter(
+                            i => !(i.type === type && i.fromId === fromId && i.toId === toId)
+                        )
+                    });
+                    if (type.startsWith('like_')) {
+                        toast.success('お気に入りから削除しました', { duration: 1500 });
+                    }
                 } else {
                     const newInteraction: Interaction = {
                         type, fromId, toId, metadata, timestamp: Date.now()
                     };
                     set({ interactions: [...state.interactions, newInteraction] });
-                    toast.success('お気に入りに保存しました！', { duration: 1500, icon: '❤️' });
+                    if (type.startsWith('like_')) {
+                        toast.success('お気に入りに保存しました！', { duration: 1500, icon: '❤️' });
+                    }
                 }
 
                 // DB Sync
                 try {
-                    const supabase = createClient();
-                    if (exists) {
-                        // Delete from DB (Use type + user_id + target_id match)
-                        const { error } = await supabase.from('interactions')
-                            .delete()
-                            .match({ user_id: fromId, type, target_id: toId });
-                        if (error) throw error;
-                    } else {
-                        // Insert to DB
-                        const { error } = await supabase.from('interactions').insert({
-                            user_id: fromId,
-                            type,
-                            target_id: toId,
-                            metadata: metadata || {}
-                        });
-                        if (error) throw error;
-                    }
+                    await toggleInteractionAction(type, fromId, toId, metadata);
                 } catch (error: any) {
                     console.error('Interaction sync failed:', error);
-                    toast.error(`保存に失敗しました: ${error.message || error.details || 'Unknown error'}`);
-                    // Revert state (complex without ID, so just fetching fresh might be better or complex rollback)
-                    // For now, let's just log. Perfect rollback requires keeping track of temp items.
+                    toast.error(`保存に失敗しました: ${error.message || 'Unknown error'}`);
                 }
             },
 
@@ -559,7 +552,7 @@ export const useAppStore = create<AppState>()(
                 })
             })),
 
-            createChat: async (companyId, userId, initialMessage) => {
+            createChat: async (companyId, userId, initialMessage, systemMessage) => {
                 const state = get();
                 const existing = state.chats.find(c => c.companyId === companyId && c.userId === userId);
                 if (existing) return existing.id;
@@ -598,6 +591,16 @@ export const useAppStore = create<AppState>()(
                         chat_id: chatId,
                         sender_id: senderId,
                         content: initialMessage
+                    });
+                }
+
+                // 3. Add System Message
+                if (systemMessage) {
+                    await supabase.from('messages').insert({
+                        chat_id: chatId,
+                        sender_id: 'SYSTEM', // Special sender or company as fallback
+                        content: systemMessage,
+                        metadata: { is_system: true }
                     });
                 }
 
@@ -641,6 +644,7 @@ export const useAppStore = create<AppState>()(
                                 text: m.content,
                                 timestamp: new Date(m.created_at).getTime(),
                                 isRead: m.is_read,
+                                isSystem: m.metadata?.is_system || m.sender_id === 'SYSTEM',
                                 attachment: m.attachment_url ? {
                                     id: m.id + '_att',
                                     type: m.attachment_type as 'image' | 'file',
@@ -1125,6 +1129,45 @@ export const useAppStore = create<AppState>()(
                     toast.error('分析データの保存に失敗しました');
                 }
             },
+
+
+            resetInteractions: async (targetType) => {
+                const { currentUserId, interactions, jobs } = get();
+                if (!currentUserId) return;
+
+                let newInteractions = [...interactions];
+
+                if (!targetType) {
+                    newInteractions = newInteractions.filter(i =>
+                        !(i.fromId === currentUserId && ['like_company', 'like_job', 'like_quest', 'like_reel'].includes(i.type))
+                    );
+                } else if (targetType === 'company') {
+                    newInteractions = newInteractions.filter(i => !(i.fromId === currentUserId && i.type === 'like_company'));
+                } else if (targetType === 'job' || targetType === 'quest') {
+                    newInteractions = newInteractions.filter(i => {
+                        if (i.fromId !== currentUserId) return true;
+                        if (i.type !== 'like_job' && i.type !== 'like_quest') return true;
+                        // Handle case where job might not be in store yet (fallback to optimistic removal based on logic?)
+                        const job = jobs.find(j => j.id === i.toId);
+                        if (!job) return true;
+                        return job.type !== targetType;
+                    });
+                } else if (targetType === 'reel') {
+                    newInteractions = newInteractions.filter(i => !(i.fromId === currentUserId && i.type === 'like_reel'));
+                }
+
+                set({ interactions: newInteractions });
+
+                try {
+                    await resetInteractionsAction(currentUserId, targetType);
+                    toast.success('リセットしました');
+                } catch (error) {
+                    console.error('Failed to reset interactions:', error);
+                    toast.error('リセットに失敗しました');
+                }
+            },
+
+
         }),
         {
             name: 'eis-app-store-v3',

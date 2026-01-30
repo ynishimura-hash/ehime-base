@@ -119,6 +119,8 @@ function QuestsContent() {
         setSelectedFeatures([]);
     };
 
+    const activeFilterCount = (selectedRegions.length) + (selectedCategories.length) + (selectedFeatures.length);
+
     return (
         <div className="min-h-screen bg-slate-50 pb-24 md:pb-0">
             {/* Header */}
@@ -134,26 +136,45 @@ function QuestsContent() {
                         </div>
                     </div>
 
-                    <div className="bg-slate-50 p-2 rounded-2xl border border-slate-200">
+                    <div className="bg-slate-50 p-2 rounded-2xl border border-slate-200 shadow-inner">
                         <div className="relative flex items-center">
-                            <div className="absolute left-4 text-slate-400">
+                            <div className="absolute left-4 text-slate-400 pointer-events-none">
                                 <Search size={20} />
                             </div>
                             <input
                                 type="text"
                                 placeholder="職種、キーワード、企業名で検索"
-                                className="w-full pl-12 pr-4 py-3 bg-transparent border-none focus:ring-0 font-bold text-slate-700"
+                                className="w-full pl-12 pr-4 py-3 bg-transparent border-none focus:ring-0 font-bold text-slate-700 placeholder:text-slate-400"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
-                            <button
-                                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-colors ${isFilterOpen || selectedRegions.length > 0 || selectedCategories.length > 0 ? 'bg-slate-800 text-white' : 'hover:bg-slate-200 text-slate-600'}`}
-                            >
-                                <Filter size={18} />
-                                フィルター
-                                {isFilterOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                            </button>
+                            <div className="flex items-center gap-2 pr-2">
+                                {(activeFilterCount > 0 || searchQuery) && (
+                                    <button
+                                        onClick={clearFilters}
+                                        className="p-2 hover:bg-slate-200 rounded-full text-slate-400 transition-colors"
+                                        title="検索条件をクリア"
+                                    >
+                                        <X size={20} />
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all whitespace-nowrap shadow-sm border ${isFilterOpen || activeFilterCount > 0
+                                        ? 'bg-slate-800 text-white border-slate-800 shadow-md transform scale-105'
+                                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                                        }`}
+                                >
+                                    <Filter size={18} />
+                                    <span className="hidden md:inline">絞り込み</span>
+                                    {activeFilterCount > 0 && (
+                                        <span className="bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-full ml-1 min-w-[18px] text-center font-bold">
+                                            {activeFilterCount}
+                                        </span>
+                                    )}
+                                    {isFilterOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                </button>
+                            </div>
                         </div>
 
                         {isFilterOpen && (
@@ -271,7 +292,7 @@ function QuestsContent() {
 
                                         <button
                                             onClick={(e) => toggleLike(quest.id, e)}
-                                            className="absolute top-4 right-4 z-10 bg-white/80 backdrop-blur-sm p-2 rounded-xl shadow-sm hover:bg-red-50 hover:scale-110 transition-all"
+                                            className="absolute top-4 right-4 z-10 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-sm hover:bg-red-50 hover:scale-110 transition-all"
                                         >
                                             <Heart size={20} className={`transition-colors ${isLiked(quest.id) ? 'text-red-500 fill-red-500' : 'text-slate-400'}`} />
                                         </button>

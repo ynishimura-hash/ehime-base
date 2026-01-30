@@ -587,209 +587,210 @@ function AdminManagementContent() {
         </div>
     );
 
-    const renderUsers = () => (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-black text-slate-900">ユーザー一覧 ({realUsers.length}件)</h2>
-                <div className="flex gap-2">
-                    <input
-                        type="file"
-                        accept=".csv"
-                        className="hidden"
-                        ref={usersFileInputRef}
-                        onChange={(e) => handleCsvUpload(e, 'user')}
-                    />
-                    <button
-                        onClick={() => usersFileInputRef.current?.click()}
-                        className="bg-slate-100 text-slate-700 px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-slate-200 transition-all cursor-pointer"
-                    >
-                        <Upload size={18} /> CSV登録
-                    </button>
-                    <button
-                        onClick={() => { setEditingItem({}); setEditMode('user'); setActionType('create'); setModalTab('basic'); }}
-                        className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all cursor-pointer"
-                    >
-                        <Plus size={18} /> 新規追加
-                    </button>
+    const renderUsers = () => {
+        const seekerUsers = realUsers.filter(u => u.user_type !== 'company' && u.user_type !== 'admin');
+        return (
+            <div className="space-y-4">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-black text-slate-900">ユーザー一覧 ({seekerUsers.length}件)</h2>
+                    <div className="flex gap-2">
+                        <input
+                            type="file"
+                            accept=".csv"
+                            className="hidden"
+                            ref={usersFileInputRef}
+                            onChange={(e) => handleCsvUpload(e, 'user')}
+                        />
+                        <button
+                            onClick={() => usersFileInputRef.current?.click()}
+                            className="bg-slate-100 text-slate-700 px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-slate-200 transition-all cursor-pointer"
+                        >
+                            <Upload size={18} /> CSV登録
+                        </button>
+                        <button
+                            onClick={() => { setEditingItem({}); setEditMode('user'); setActionType('create'); setModalTab('basic'); }}
+                            className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all cursor-pointer"
+                        >
+                            <Plus size={18} /> 新規追加
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
-                <table className="w-full text-left border-collapse">
-                    <thead className="bg-slate-50 border-b border-slate-200">
-                        <tr>
-                            <th className="px-6 py-4 w-12">
-                                <button onClick={() => toggleAll(realUsers.map(u => u.id))}>
-                                    {selectedIds.size === realUsers.length && realUsers.length > 0 ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
-                                </button>
-                            </th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">ユーザー</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">タイプ</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">登録日</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest text-right">アクション</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-bold">
-                        {realUsers.length === 0 && (
+                <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
-                                <td colSpan={5} className="px-6 py-20 text-center text-slate-400">
-                                    ユーザーが見つかりません
-                                </td>
-                            </tr>
-                        )}
-                        {realUsers.map(user => (
-                            <tr key={user.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(user.id) ? 'bg-blue-50/50' : ''}`}>
-                                <td className="px-6 py-4">
-                                    <button onClick={() => toggleSelection(user.id)}>
-                                        {selectedIds.has(user.id) ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
+                                <th className="px-6 py-4 w-12">
+                                    <button onClick={() => toggleAll(seekerUsers.map(u => u.id))}>
+                                        {selectedIds.size === seekerUsers.length && seekerUsers.length > 0 ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
                                     </button>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-3">
-                                        <img
-                                            src={user.avatar_url || getFallbackAvatarUrl(user.id, user.gender)}
-                                            className="w-10 h-10 rounded-full object-cover"
-                                            alt=""
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                if (!target.getAttribute('data-error-tried')) {
-                                                    target.setAttribute('data-error-tried', 'true');
-                                                    target.src = getFallbackAvatarUrl(user.id, user.gender);
-                                                } else {
-                                                    target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.full_name || user.name || 'U') + '&background=random';
-                                                }
-                                            }}
-                                        />
-                                        <div>
-                                            <div className="font-black text-slate-900">{user.full_name || user.name || 'No Name'}</div>
-                                            <div className="text-xs text-slate-500 font-bold">{user.email}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <span className={`px-2 py-1 rounded-lg text-xs font-black ${user.user_type === 'student' ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-600'}`}>
-                                        {user.user_type}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 text-xs font-bold text-slate-600">
-                                    {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <button
-                                        onClick={() => {
-                                            setEditingItem(user);
-                                            setEditMode('user');
-                                            setActionType('edit');
-                                            setModalTab('basic');
-                                            fetchRelatedData(user.id);
-                                        }}
-                                        className="p-2 text-slate-400 hover:text-blue-600"
-                                    >
-                                        <Edit3 size={18} />
-                                    </button>
-                                </td>
+                                </th>
+                                <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">ユーザー</th>
+                                <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">タイプ</th>
+                                <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">登録日</th>
+                                <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest text-right">アクション</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-            {renderBulkActions()}
-        </div >
-    );
-
-    const renderCompanyAccounts = () => (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-black text-slate-900">企業アカウント管理 ({realCompanies.length}件)</h2>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => { setEditingItem({}); setEditMode('company'); setActionType('create'); }}
-                        className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all cursor-pointer"
-                    >
-                        <Plus size={18} /> 新規アカウント発行
-                    </button>
-                </div>
-            </div>
-            <div className="mb-6 bg-white p-4 rounded-2xl border border-slate-200 flex items-center gap-3">
-                <Search size={20} className="text-slate-400" />
-                <input
-                    type="text"
-                    placeholder="企業名またはIDで検索..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-transparent border-none outline-none font-bold text-slate-900 text-sm placeholder:text-slate-400"
-                />
-                <button
-                    onClick={() => setFilterPremium(!filterPremium)}
-                    className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${filterPremium ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
-                >
-                    <Zap size={16} className={filterPremium ? 'fill-amber-700' : ''} />
-                    {filterPremium ? 'プレミアムのみ' : '全て表示'}
-                </button>
-            </div>
-            <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
-                <table className="w-full text-left border-collapse">
-                    <thead className="bg-slate-50 border-b border-slate-200">
-                        <tr>
-                            <th className="px-6 py-4 w-12">
-                                <button onClick={() => toggleAll(realCompanies.map(c => c.id))}>
-                                    {selectedIds.size === realCompanies.length && realCompanies.length > 0 ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
-                                </button>
-                            </th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">企業名 / ID</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">プラン</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">ステータス</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">アクション</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {realCompanies
-                            .filter(c => (c.name || '').toLowerCase().includes(searchQuery.toLowerCase()))
-                            .filter(c => !filterPremium || c.is_premium)
-                            .sort((a, b) => (b.is_premium === a.is_premium ? 0 : b.is_premium ? 1 : -1))
-                            .map(company => (
-                                <tr key={company.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(company.id) ? 'bg-blue-50/50' : ''}`}>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 font-bold">
+                            {seekerUsers.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-20 text-center text-slate-400">
+                                        ユーザーが見つかりません
+                                    </td>
+                                </tr>
+                            )}
+                            {seekerUsers.map(user => (
+                                <tr key={user.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(user.id) ? 'bg-blue-50/50' : ''}`}>
                                     <td className="px-6 py-4">
-                                        <button onClick={() => toggleSelection(company.id)}>
-                                            {selectedIds.has(company.id) ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
+                                        <button onClick={() => toggleSelection(user.id)}>
+                                            {selectedIds.has(user.id) ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
                                         </button>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div>
-                                            <div className="font-black text-slate-800">{company.name}</div>
-                                            <div className="text-[10px] font-bold text-slate-400 font-mono">{company.id}</div>
+                                        <div className="flex items-center gap-3">
+                                            <img
+                                                src={user.avatar_url || getFallbackAvatarUrl(user.id, user.gender)}
+                                                className="w-10 h-10 rounded-full object-cover"
+                                                alt=""
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement;
+                                                    if (!target.getAttribute('data-error-tried')) {
+                                                        target.setAttribute('data-error-tried', 'true');
+                                                        target.src = getFallbackAvatarUrl(user.id, user.gender);
+                                                    } else {
+                                                        target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.full_name || user.name || 'U') + '&background=random';
+                                                    }
+                                                }}
+                                            />
+                                            <div>
+                                                <div className="font-black text-slate-900">{user.full_name || user.name || 'No Name'}</div>
+                                                <div className="text-xs text-slate-500 font-bold">{user.email}</div>
+                                            </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded-lg text-xs font-black ${company.is_premium ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>
-                                            {company.is_premium ? 'Premium' : 'Free'}
+                                        <span className={`px-2 py-1 rounded-lg text-xs font-black ${user.user_type === 'student' ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-600'}`}>
+                                            {user.user_type}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <button
-                                            onClick={() => handleStatusToggle(company.id, 'company', company.status || 'approved')}
-                                            className={`px-3 py-1 rounded-full text-[10px] font-black border transition-all ${(company.status === 'private')
-                                                ? 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
-                                                : 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100'
-                                                }`}
-                                        >
-                                            {company.status === 'private' ? '停止中 (Private)' : '有効 (Active)'}
-                                        </button>
+                                    <td className="px-6 py-4 text-xs font-bold text-slate-600">
+                                        {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <button
-                                            onClick={() => { setEditingItem(company); setEditMode('company'); setActionType('edit'); }}
-                                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer"
+                                            onClick={() => {
+                                                setEditingItem(user);
+                                                setEditMode('user');
+                                                setActionType('edit');
+                                                setModalTab('basic');
+                                                fetchRelatedData(user.id);
+                                            }}
+                                            className="p-2 text-slate-400 hover:text-blue-600"
                                         >
                                             <Edit3 size={18} />
                                         </button>
                                     </td>
                                 </tr>
                             ))}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
+                {renderBulkActions()}
+            </div >
+        );
+    };
+
+    const renderCompanyAccounts = () => {
+        const companyStaffUsers = realUsers.filter(u => u.user_type === 'company');
+        return (
+            <div className="space-y-4">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-black text-slate-900">企業アカウント管理 ({companyStaffUsers.length}件)</h2>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => { setEditingItem({}); setEditMode('company'); setActionType('create'); }}
+                            className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all cursor-pointer"
+                        >
+                            <Plus size={18} /> 新規アカウント発行
+                        </button>
+                    </div>
+                </div>
+                <div className="mb-6 bg-white p-4 rounded-2xl border border-slate-200 flex items-center gap-3">
+                    <Search size={20} className="text-slate-400" />
+                    <input
+                        type="text"
+                        placeholder="企業名またはIDで検索..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="flex-1 bg-transparent border-none outline-none font-bold text-slate-900 text-sm placeholder:text-slate-400"
+                    />
+                    <button
+                        onClick={() => setFilterPremium(!filterPremium)}
+                        className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${filterPremium ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                    >
+                        <Zap size={16} className={filterPremium ? 'fill-amber-700' : ''} />
+                        {filterPremium ? 'プレミアムのみ' : '全て表示'}
+                    </button>
+                </div>
+                <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-slate-50 border-b border-slate-200">
+                            <tr>
+                                <th className="px-6 py-4 w-12">
+                                    <button onClick={() => toggleAll(companyStaffUsers.map(u => u.id))}>
+                                        {selectedIds.size === companyStaffUsers.length && companyStaffUsers.length > 0 ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
+                                    </button>
+                                </th>
+                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">担当者名 / メール</th>
+                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">企業名</th>
+                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">登録日</th>
+                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">アクション</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {companyStaffUsers
+                                .filter(u => (u.full_name || u.email || '').toLowerCase().includes(searchQuery.toLowerCase()))
+                                .map(user => (
+                                    <tr key={user.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(user.id) ? 'bg-blue-50/50' : ''}`}>
+                                        <td className="px-6 py-4">
+                                            <button onClick={() => toggleSelection(user.id)}>
+                                                {selectedIds.has(user.id) ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
+                                            </button>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div>
+                                                <div className="font-black text-slate-800">{user.full_name || 'No Name'}</div>
+                                                <div className="text-[10px] font-bold text-slate-400 font-mono">{user.email}</div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-xs font-black text-slate-600">
+                                            {user.company_name || '-'}
+                                        </td>
+                                        <td className="px-6 py-4 text-xs font-bold text-slate-600">
+                                            {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <button
+                                                onClick={() => {
+                                                    setEditingItem(user);
+                                                    setEditMode('user'); // Use user edit mode for company account profile
+                                                    setActionType('edit');
+                                                    setModalTab('basic');
+                                                    fetchRelatedData(user.id);
+                                                }}
+                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer"
+                                            >
+                                                <Edit3 size={18} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                        </tbody>
+                    </table>
+                </div>
+                {renderBulkActions()}
             </div>
-        </div>
-    );
+        );
+    };
 
     const renderCompanyInfos = () => (
         <div className="space-y-4">

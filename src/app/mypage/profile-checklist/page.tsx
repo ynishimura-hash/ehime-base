@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+import { calculateProfileCompletion, getProfileSectionStatus } from '@/lib/profileUtils';
+
 export default function ProfileChecklistPage() {
     const { users, currentUserId, authStatus } = useAppStore();
     const router = useRouter();
@@ -18,78 +20,41 @@ export default function ProfileChecklistPage() {
 
     useEffect(() => {
         if (!currentUser) return;
-
-        let points = 0;
-        let total = 0;
-
-        // 1. Basic Info (4 items)
-        const basicFields = ['name', 'university', 'faculty', 'graduationYear'];
-        basicFields.forEach(f => {
-            total++;
-            if ((currentUser as any)[f]) points++;
-        });
-
-        // 2. Self Intro (2 items)
-        const introFields = ['bio', 'image'];
-        introFields.forEach(f => {
-            total++;
-            if ((currentUser as any)[f]) points++;
-        });
-
-        // 3. Skills & Quals (3 items)
-        // Check if array has length or string is not empty
-        total++; // Skills
-        if (currentUser.skills && currentUser.skills.length > 0) points++;
-
-        total++; // Qualifications
-        if (currentUser.qualifications && currentUser.qualifications.length > 0) points++;
-
-        total++; // Portfolio
-        if (currentUser.portfolioUrl) points++;
-
-        // 4. Conditions (1 item - treat as one block for now or split)
-        // Let's split into 3 key conditions
-        total += 3;
-        if (currentUser.desiredConditions) {
-            if (currentUser.desiredConditions.industry && currentUser.desiredConditions.industry.length > 0) points++;
-            if (currentUser.desiredConditions.location && currentUser.desiredConditions.location.length > 0) points++;
-            if (currentUser.desiredConditions.salary) points++;
-        }
-
-        const percentage = Math.round((points / total) * 100);
+        const percentage = calculateProfileCompletion(currentUser);
         setScore(percentage);
-
     }, [currentUser]);
 
     if (!currentUser) return null;
+
+    const status = getProfileSectionStatus(currentUser);
 
     const sections = [
         {
             title: '基本プロフィール',
             icon: User,
             path: '/mypage/edit',
-            isComplete: !!(currentUser.name && currentUser.university && currentUser.faculty && currentUser.graduationYear),
+            isComplete: status.basic,
             description: '氏名、大学、学部、卒業年度'
         },
         {
             title: '自己紹介・アバター',
             icon: FileText,
             path: '/mypage/edit',
-            isComplete: !!(currentUser.bio && currentUser.image),
+            isComplete: status.intro,
             description: '自己PRとアイコン画像'
         },
         {
             title: 'スキル・資格・ポートフォリオ',
             icon: Briefcase,
             path: '/mypage/edit/skills',
-            isComplete: !!(currentUser.skills?.length && currentUser.qualifications?.length && currentUser.portfolioUrl),
+            isComplete: status.skills,
             description: '保有スキル、資格、作品URL'
         },
         {
             title: '希望条件',
             icon: Target,
             path: '/mypage/edit/conditions',
-            isComplete: !!(currentUser.desiredConditions?.industry?.length && currentUser.desiredConditions?.location?.length && currentUser.desiredConditions?.salary),
+            isComplete: status.conditions,
             description: '業種、勤務地、希望年収'
         }
     ];
@@ -173,8 +138,8 @@ export default function ProfileChecklistPage() {
                             href={section.path}
                             key={idx}
                             className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${section.isComplete
-                                    ? 'bg-white border-slate-100 shadow-sm'
-                                    : 'bg-blue-50 border-blue-200 shadow-md transform scale-[1.02]'
+                                ? 'bg-white border-slate-100 shadow-sm'
+                                : 'bg-blue-50 border-blue-200 shadow-md transform scale-[1.02]'
                                 }`}
                         >
                             <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${section.isComplete ? 'bg-slate-100 text-slate-400' : 'bg-blue-600 text-white'

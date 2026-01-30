@@ -41,13 +41,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     // Fetch Company ID if user is company
                     let companyId: string | undefined;
                     if (userRole === 'company') {
-                        const { data: orgMember } = await supabase
-                            .from('organization_members')
-                            .select('organization_id')
-                            .eq('user_id', session.user.id)
-                            .single();
-                        if (orgMember) {
-                            companyId = orgMember.organization_id;
+                        try {
+                            const { data: orgMember, error: orgError } = await supabase
+                                .from('organization_members')
+                                .select('organization_id')
+                                .eq('user_id', session.user.id)
+                                .maybeSingle(); // Use maybeSingle to avoid error on 0 rows
+
+                            if (orgMember) {
+                                companyId = orgMember.organization_id;
+                            }
+                            if (orgError) {
+                                console.error('Error fetching org member:', orgError);
+                            }
+                        } catch (e) {
+                            console.error('Exception fetching org member:', e);
                         }
                     }
 

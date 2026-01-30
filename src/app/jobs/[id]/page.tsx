@@ -125,22 +125,30 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
         // Ensure company exists in store for Chat UI to resolve name
         upsertCompany(company);
 
-        // CREATE INTERACTION: This makes it visible on dashboards as an "Application"
-        toggleInteraction('apply', currentUserId, id);
+        try {
+            setLoading(true); // Show loading state if possible, though UI might not reflect it immediately
 
-        // Create chat in the unified store with an initial message and a system message
-        const chatId = await createChat(
-            company.id,
-            currentUserId,
-            `「${job.title}」についてお話ししたいです。`,
-            'お申し込みありがとうございます。企業からの連絡をお待ちください。'
-        );
+            // 1. Create chat first. If this fails, we shouldn't mark as applied.
+            const chatId = await createChat(
+                company.id,
+                currentUserId,
+                `「${job.title}」についてお話ししたいです。`,
+                'お申し込みありがとうございます。企業からの連絡をお待ちください。'
+            );
 
-        // Ensure chats are fetched before redirecting so the chat interface finds the new thread
-        await useAppStore.getState().fetchChats();
+            // 2. CREATE INTERACTION: Only upon successful chat creation
+            toggleInteraction('apply', currentUserId, id);
 
-        toast.success('お申し込みを送信しました');
-        router.push(`/messages/${chatId}`);
+            // Ensure chats are fetched before redirecting so the chat interface finds the new thread
+            await useAppStore.getState().fetchChats();
+
+            toast.success('お申し込みを送信しました');
+            router.push(`/messages/${chatId}`);
+        } catch (error) {
+            console.error('Application failed:', error);
+            // Error is already toasted in createChat, but let's ensure loading is cleared
+            setLoading(false);
+        }
     };
 
     const toggleLike = () => {

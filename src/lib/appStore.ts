@@ -533,7 +533,7 @@ export const useAppStore = create<AppState>()(
 
                 if (error) {
                     console.error('Failed to send message:', error);
-                    toast.error('メッセージの送信に失敗しました');
+                    toast.error(`メッセージ送信エラー: ${error.message || error.code}`);
                     return;
                 }
 
@@ -578,7 +578,7 @@ export const useAppStore = create<AppState>()(
                         if (existingChat) return existingChat.id;
                     }
                     console.error('Failed to create chat:', chatError);
-                    toast.error('チャットの作成に失敗しました');
+                    toast.error(`チャット作成エラー: ${chatError.message || chatError.code}`);
                     throw chatError;
                 }
 

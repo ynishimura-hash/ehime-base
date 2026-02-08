@@ -66,10 +66,12 @@ export default function ChatDetailModal({
 
     if (!isOpen) return null;
 
+    const currentPriority = settings?.priority || 'medium';
+
     const PriorityButton = ({ level, label, color }: { level: 'high' | 'medium' | 'low', label: string, color: string }) => (
         <button
-            onClick={() => setPriority(settings?.priority === level ? null : level)}
-            className={`flex-1 py-2 rounded-lg border text-xs font-bold transition-all ${settings?.priority === level
+            onClick={() => setPriority(currentPriority === level ? null : level)}
+            className={`flex-1 py-2 rounded-lg border text-xs font-bold transition-all ${currentPriority === level
                 ? `bg-${color}-100 border-${color}-500 text-${color}-600`
                 : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
                 }`}
@@ -128,13 +130,17 @@ export default function ChatDetailModal({
                                 }}
                             />
                         )}
-                        {settings?.priority && (
-                            <div className={`absolute -bottom-2 -left-2 px-2 py-1 rounded-lg border-2 border-white text-xs font-bold text-white shadow-sm flex items-center justify-center z-10
-                                ${settings.priority === 'high' ? 'bg-red-500' : settings.priority === 'medium' ? 'bg-orange-500' : 'bg-blue-500'}
-                            `}>
-                                {settings.priority === 'high' ? '高' : settings.priority === 'medium' ? '中' : '低'}
-                            </div>
-                        )}
+                        {/* Always show badge, defaulting to Medium */}
+                        {(() => {
+                            const p = settings?.priority || 'medium';
+                            return (
+                                <div className={`absolute -bottom-2 -left-2 px-2 py-1 rounded-lg border-2 border-white text-xs font-bold text-white shadow-sm flex items-center justify-center z-10
+                                    ${p === 'high' ? 'bg-red-500' : p === 'medium' ? 'bg-orange-500' : 'bg-blue-500'}
+                                `}>
+                                    {p === 'high' ? '高' : p === 'medium' ? '中' : '低'}
+                                </div>
+                            );
+                        })()}
                     </div>
 
                     {/* Name & Alias */}
@@ -225,7 +231,7 @@ export default function ChatDetailModal({
                     <div>
                         <label className="text-xs font-bold text-slate-500 mb-2 block uppercase tracking-wider">メモ (100文字)</label>
                         <textarea
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                             rows={3}
                             maxLength={100}
                             placeholder="このユーザーに関するメモを入力..."

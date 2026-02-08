@@ -26,6 +26,10 @@ export async function GET(
             .single();
 
         if (error) {
+            // PGRST116: JSON object requested, multiple (or no) rows returned
+            if (error.code === 'PGRST116') {
+                return NextResponse.json({ error: 'Module not found' }, { status: 404 });
+            }
             console.error('API: Error fetching module:', error);
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
@@ -52,9 +56,11 @@ export async function GET(
             description: data.description || '',
             image: imageUrl,
             thumbnail_url: imageUrl,
+            category: data.category || '未分類',
             courseCount: data.lessons?.length || 0,
             tags: data.tags || [],
             viewCount: data.view_count || 0,
+            is_public: data.is_public,
             lessons: (data.lessons || [])
                 .sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
                 .map((l: any) => ({
@@ -77,5 +83,72 @@ export async function GET(
     } catch (error) {
         console.error('API module error:', error);
         return NextResponse.json({ error: 'Failed to fetch module' }, { status: 500 });
+    }
+}
+
+// PUT /api/elearning/modules/[id] - Update a module
+export async function PUT(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const { id } = await params;
+
+    try {
+        const body = await request.json();
+        console.log('API Module Update Body:', body);
+
+        // Filter allowed fields
+        const updates: any = {};
+        if (body.title !== undefined) updates.title = body.title;
+        if (body.description !== undefined) updates.description = body.description;
+        if (body.image !== undefined) updates.image = body.image;
+        if (body.is_public !== undefined) updates.is_public = body.is_public;
+        if (body.category !== undefined) updates.category = body.category;
+        // course_id can be null (for unlinking from track)
+        if ('course_id' in body) updates.course_id = body.course_id;
+
+        console.log('API Module Updates Applied:', updates);
+
+        const { error } = await supabase
+            .from('course_curriculums')
+            .update(updates)
+            .eq('id', id);
+
+        if (error) {
+            console.error('API: Error updating module:', error);
+            throw error;
+        }
+
+        return NextResponse.json({ success: true });
+
+    } catch (error) {
+        console.error('API update module error:', error);
+        return NextResponse.json({ error: 'Failed to update module' }, { status: 500 });
+    }
+}
+
+// DELETE /api/elearning/modules/[id] - Delete a module
+export async function DELETE(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const { id } = await params;
+
+    try {
+        const { error } = await supabase
+            .from('course_curriculums')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('API: Error deleting module:', error);
+            throw error;
+        }
+
+        return NextResponse.json({ success: true });
+
+    } catch (error) {
+        console.error('API delete module error:', error);
+        return NextResponse.json({ error: 'Failed to delete module' }, { status: 500 });
     }
 }

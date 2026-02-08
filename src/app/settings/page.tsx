@@ -64,6 +64,18 @@ export default function SettingsPage() {
                             {section.items.map((item, idx) => (
                                 <div
                                     key={item.label}
+                                    onClick={() => {
+                                        if (item.toggle) return; // Don't navigate for toggles
+                                        if (item.href === '/logout') {
+                                            // Handle logout specifically if needed, or just let it go to a logout page/handler
+                                            // But for now router.push is fine if /logout exists, but usually we want a handler.
+                                            // The user code has a separate Logout button at bottom, so this might be redundant or just a link.
+                                            // Let's assume standard navigation for now.
+                                            router.push(item.href);
+                                        } else if (item.href !== '#') {
+                                            router.push(item.href);
+                                        }
+                                    }}
                                     className={`p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors ${idx !== section.items.length - 1 ? 'border-b border-slate-50' : ''}`}
                                 >
                                     <div className="flex items-center gap-3">

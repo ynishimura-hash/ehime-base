@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const MODEL_NAME = 'gemini-2.0-flash-001';
+const MODEL_NAME = 'gemini-2.5-flash-lite';
 
 export async function POST(req: Request) {
     try {

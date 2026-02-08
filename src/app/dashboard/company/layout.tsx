@@ -12,7 +12,9 @@ import {
     LogOut,
     Menu,
     Zap,
-    User
+    User,
+    Heart,
+    BookOpen
 } from 'lucide-react';
 import { useAppStore } from '@/lib/appStore';
 
@@ -22,8 +24,10 @@ const sidebarItems = [
     { name: '求人・クエスト管理', icon: Briefcase, href: '/dashboard/company/jobs' },
     { name: '応募者管理 (ATS)', icon: Users, href: '/dashboard/company/applications' },
     { name: 'メンバー管理', icon: User, href: '/dashboard/company/members' },
+    { name: 'アプローチ管理', icon: Heart, href: '/dashboard/company/interactions' },
     { name: 'スカウト', icon: Zap, href: '/dashboard/company/scout' },
     { name: 'メッセージ', icon: MessageSquare, href: '/dashboard/company/messages' },
+    { name: '講座管理', icon: BookOpen, href: '/dashboard/company/courses' },
 ];
 
 export default function CompanyDashboardLayout({ children }: { children: React.ReactNode }) {

@@ -123,8 +123,8 @@ export async function analyzeCourseAffinity(input: AnalysisInput): Promise<Affin
 
         return affinityResult;
 
-    } catch (error) {
-        console.error("AI Analysis Failed:", error);
+    } catch (error: any) {
+        console.error("AI Analysis Failed:", error?.message || error, error?.statusText);
         return {
             score: 60,
             title: "興味があれば挑戦を",

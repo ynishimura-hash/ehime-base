@@ -385,7 +385,7 @@ export default function AdminContentPage() {
                     <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
                         コンテンツライブラリ
                         <span className="text-sm font-bold bg-slate-100 text-slate-500 px-3 py-1 rounded-full">
-                            {contents.length} items
+                            {totalItems} items total
                         </span>
                     </h1>
                     <p className="text-slate-500 font-bold mt-2">

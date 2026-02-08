@@ -32,8 +32,14 @@ export default function CompaniesPage() {
     React.useEffect(() => {
         const init = async () => {
             setLoading(true);
-            await fetchCompanies();
-            setLoading(false);
+            try {
+                await fetchCompanies();
+            } catch (e: any) {
+                if (e.name === 'AbortError' || e.message?.includes('aborted') || e.message?.includes('signal is aborted')) return;
+                console.error('Failed to fetch companies:', e);
+            } finally {
+                setLoading(false);
+            }
         };
         init();
     }, []);
@@ -242,28 +248,34 @@ export default function CompaniesPage() {
                         ))
                     ) : filteredCompanies.length > 0 ? (
                         filteredCompanies.map(company => (
-                            <Link
-                                href={`/companies/${company.id}`}
+                            <div
                                 key={company.id}
                                 className="block bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all border border-slate-100 group flex flex-col h-full relative"
                             >
+                                {/* Clickable Area Overlay */}
+                                <Link
+                                    href={`/companies/${company.id}`}
+                                    className="absolute inset-0 z-0"
+                                    aria-label={`${company.name}の詳細を見る`}
+                                />
 
+                                <div className="absolute top-4 right-4 z-10">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleInteraction('like_company', currentUserId, company.id);
+                                        }}
+                                        className="bg-white/80 backdrop-blur-sm p-2.5 rounded-full shadow-sm hover:bg-red-50 hover:scale-110 transition-all group/heart"
+                                    >
+                                        <Heart
+                                            size={20}
+                                            className={`transition-colors ${isLiked(company.id) ? 'text-red-500 fill-red-500' : 'text-slate-400 group-hover/heart:text-red-500'}`}
+                                        />
+                                    </button>
+                                </div>
 
-                                <button
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        toggleInteraction('like_company', currentUserId, company.id);
-                                    }}
-                                    className="absolute top-4 right-4 z-10 bg-white/80 backdrop-blur-sm p-3 rounded-full shadow-sm hover:bg-red-50 hover:scale-110 transition-all group/heart"
-                                >
-                                    <Heart
-                                        size={20}
-                                        className={`transition-colors ${isLiked(company.id) ? 'text-red-500 fill-red-500' : 'text-slate-300 group-hover/heart:text-red-500'}`}
-                                    />
-                                </button>
                                 {/* Larger Image Area */}
-                                <div className="relative aspect-video bg-slate-200 overflow-hidden">
+                                <div className="relative aspect-video bg-slate-200 overflow-hidden pointer-events-none">
                                     <img
                                         src={company.cover_image_url || company.image || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200'}
                                         alt={company.name}
@@ -274,7 +286,7 @@ export default function CompaniesPage() {
                                             ★ PREMIUM
                                         </div>
                                     )}
-                                    <div className="absolute right-4 bottom-4 z-20 group-hover:scale-110 transition-transform">
+                                    <div className="absolute right-4 bottom-4 z-20 group-hover:scale-110 transition-transform pointer-events-auto">
                                         <ReelIcon
                                             reels={company.reels || []}
                                             fallbackImage={company.cover_image_url || '/images/defaults/company_cover.jpg'}
@@ -288,7 +300,7 @@ export default function CompaniesPage() {
                                     </div>
                                 </div>
 
-                                <div className="p-6 flex-1 flex flex-col">
+                                <div className="p-6 flex-1 flex flex-col pointer-events-none">
                                     <div className="mb-4">
                                         <h3 className="text-xl font-black text-slate-800 mb-2 group-hover:text-blue-600 transition-colors line-clamp-1">
                                             {company.name}
@@ -320,7 +332,7 @@ export default function CompaniesPage() {
                                         )}
                                     </div>
                                 </div>
-                            </Link>
+                            </div>
                         ))
                     ) : (
                         <div className="col-span-1 sm:col-span-2 lg:col-span-3 text-center py-20">

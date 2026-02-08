@@ -13,37 +13,76 @@ import {
     ShieldCheck,
     FileText,
     Eye,
-    GraduationCap
+    GraduationCap,
+    UserCheck,  // 講師管理用
+    Scroll,     // 監査ログ用
+    Building2,  // 企業管理用
+    Video       // 動画管理用
 } from 'lucide-react';
 import { useAppStore } from '@/lib/appStore';
 
 const sidebarItems = [
     { name: 'ダッシュボード', icon: LayoutDashboard, href: '/admin' },
-    { name: '企業承認申請', icon: ShieldCheck, href: '/admin/approvals' },
-    { name: 'データ管理 (企業/求人)', icon: Database, href: '/admin/management' },
+    { name: 'ユーザー管理', icon: Users, href: '/admin/users' },
+    { name: 'データ管理', icon: Database, href: '/admin/management' },
     { name: 'e-ラーニング', icon: GraduationCap, href: '/admin/elearning' },
-    { name: '組織アカウント発行', icon: Users, href: '/organizations/register' },
+    { name: '企業承認申請', icon: ShieldCheck, href: '/admin/approvals' },
+    { name: '講師管理', icon: UserCheck, href: '/admin/instructors' },
+    { name: '組織アカウント発行', icon: Building2, href: '/admin/organizations/register' },
+    { name: 'アクションログ', icon: Scroll, href: '/admin/audit' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
     const { logout, activeRole } = useAppStore();
+    const [isAuthorized, setIsAuthorized] = React.useState<boolean | null>(null);
 
     React.useEffect(() => {
-        // Strict Auth Guard
-        // If not admin, redirect to login page (admin root handles the password input)
-        // We delay this slightly or ensure hydration to avoid redirect loops on refresh
+        let isMounted = true;
+
+        const checkAdminAccess = async () => {
+            try {
+                // APIで管理者チェック（サービスロール使用、RLSバイパス）
+                const response = await fetch('/api/admin/check-access', {
+                    method: 'GET',
+                });
+
+                if (!isMounted) return;
+
+                const result = await response.json();
+                console.log('Admin check result:', result);
+
+                if (result.isAdmin) {
+                    setIsAuthorized(true);
+                } else {
+                    console.log('Not admin, redirecting to /');
+                    window.location.replace('/');
+                }
+            } catch (error) {
+                console.error('Admin access check failed:', error);
+                if (isMounted) {
+                    window.location.replace('/');
+                }
+            }
+        };
+
+        checkAdminAccess();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    React.useEffect(() => {
+        // Strict Auth Guard for admin password (2段階目の認証)
         const checkAuth = () => {
-            // Access hydration state if available, or just rely on the effect timing
             const isHydrated = useAppStore.persist?.hasHydrated ? useAppStore.persist.hasHydrated() : true;
 
             if (isHydrated && activeRole !== 'admin') {
                 // Only redirect if on a child page AND not authenticated as admin
                 // Allow /admin page itself (the login page) to render
                 if (pathname !== '/admin') {
-                    // Check if this is a fresh page load or navigation
-                    // Add a small delay to avoid race conditions with store hydration
                     setTimeout(() => {
                         const currentRole = useAppStore.getState().activeRole;
                         if (currentRole !== 'admin') {
@@ -54,16 +93,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             }
         };
 
-        checkAuth();
-    }, [activeRole, pathname]);
+        if (isAuthorized) {
+            checkAuth();
+        }
+    }, [activeRole, pathname, isAuthorized]);
 
     const [isStoreLoaded, setIsStoreLoaded] = React.useState(false);
     React.useEffect(() => {
         setIsStoreLoaded(true);
     }, []);
 
-    // Prevent hydration mismatch or flash
-    if (!isStoreLoaded) return null;
+    // 認証チェック中またはハイドレーション待ち
+    if (!isStoreLoaded || isAuthorized === null) {
+        return (
+            <div className="h-screen flex items-center justify-center bg-slate-50">
+                <div className="text-center">
+                    <div className="animate-spin w-8 h-8 border-4 border-slate-200 border-t-slate-600 rounded-full mx-auto mb-4"></div>
+                    <p className="text-slate-500 font-bold">認証を確認中...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // 未認可の場合（リダイレクト中）
+    if (!isAuthorized) {
+        return null;
+    }
 
     const handleLogout = async () => {
         await logout();

@@ -5,7 +5,7 @@ import { useAppStore } from '@/lib/appStore';
 import {
     Building2, Briefcase, GraduationCap, Users,
     Search, Edit3, Trash2, Eye, X, CheckSquare, Square,
-    Plus, ChevronLeft, ChevronRight, Upload, Video, FileVideo, Save, ArrowRight, ExternalLink, Zap, Link as LinkIcon
+    Plus, ChevronLeft, ChevronRight, Upload, Video, FileVideo, Save, ArrowRight, ExternalLink, Zap, Link as LinkIcon, Sparkles, RefreshCcw
 } from 'lucide-react';
 
 import Link from 'next/link';
@@ -17,11 +17,13 @@ import { ReelIcon } from '@/components/reels/ReelIcon';
 import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
 // import { COMPANIES, JOBS } from '@/lib/dummyData'; // Removed
 import {
-    fetchAdminUsersAction,
     fetchAdminCompaniesAction,
     fetchAdminJobsAction,
     fetchAdminMediaAction,
-    updateMediaAction
+    updateMediaAction,
+    updateOrganizationVisibilityAction,
+    updateJobVisibilityAction,
+    updateJobHiringStatusAction
 } from '../actions';
 
 const supabaseClient = createClient();
@@ -29,7 +31,7 @@ const supabaseClient = createClient();
 function AdminManagementContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const currentTab = searchParams.get('tab') || 'users';
+    const currentTab = searchParams.get('tab') || 'company_infos';
     const {
         companies, jobs, activeRole, courses, users,
         fetchCourses, addCourses, updateCourse, deleteCourse
@@ -61,6 +63,103 @@ function AdminManagementContent() {
 
     const supabase = supabaseClient;
 
+    const [isAiLoading, setIsAiLoading] = useState(false);
+    const [importSource, setImportSource] = useState<'url' | 'pdf'>('url');
+    const [aiUrl, setAiUrl] = useState('');
+    const [fileData, setFileData] = useState<{ base64: string, mimeType: string } | null>(null);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64String = reader.result as string;
+            const base64Content = base64String.split(',')[1];
+            setFileData({
+                base64: base64Content,
+                mimeType: file.type
+            });
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleCompanyAiAutoFill = async () => {
+        if (!aiUrl && !editingItem.business_content) {
+            toast.error('URLまたは会社説明を入力してください');
+            return;
+        }
+
+        setIsAiLoading(true);
+        try {
+            const response = await fetch('/api/ai/company-profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ input: aiUrl || editingItem.business_content })
+            });
+
+            if (!response.ok) throw new Error('Generation failed');
+            const profile = await response.json();
+
+            setEditingItem((prev: any) => ({
+                ...prev,
+                ...profile,
+                name: profile.name || prev.name,
+                industry: profile.industry || prev.industry,
+                location: profile.location || prev.location,
+                business_content: profile.businessDetails || profile.description || prev.business_content,
+            }));
+
+            toast.success('AIが企業情報を自動生成しました！');
+        } catch (error) {
+            console.error(error);
+            toast.error('情報の生成に失敗しました');
+        } finally {
+            setIsAiLoading(false);
+        }
+    };
+
+    const handleJobAiAutoFill = async () => {
+        if (importSource === 'url' && !aiUrl) {
+            toast.error('URLを入力してください');
+            return;
+        }
+        if (importSource === 'pdf' && !fileData) {
+            toast.error('ファイルをアップロードしてください');
+            return;
+        }
+
+        setIsAiLoading(true);
+        try {
+            const payload = importSource === 'url'
+                ? { input: aiUrl }
+                : { base64Data: fileData?.base64, mimeType: fileData?.mimeType };
+
+            const response = await fetch('/api/ai/job-generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error('Generation failed');
+            const data = await response.json();
+
+            setEditingItem((prev: any) => ({
+                ...prev,
+                ...data,
+                description: data.description || prev.description,
+                content: data.description || prev.content,
+            }));
+
+            toast.success('求人情報を生成しました！');
+        } catch (error) {
+            console.error(error);
+            toast.error('生成に失敗しました');
+        } finally {
+            setIsAiLoading(false);
+        }
+    };
+
     React.useEffect(() => {
         console.log('AdminManagementContent: currentTab changed to:', currentTab);
         setSelectedIds(new Set()); // Clear selection on tab change
@@ -69,9 +168,7 @@ function AdminManagementContent() {
             fetchMedia();
             fetchCompanies();
             fetchJobs();
-        } else if (currentTab === 'users') {
-            fetchUsers();
-        } else if (currentTab === 'company_accounts' || currentTab === 'company_infos') {
+        } else if (currentTab === 'company_infos') {
             fetchCompanies();
             fetchMedia();
         } else if (currentTab === 'jobs' || currentTab === 'quests') {
@@ -90,18 +187,7 @@ function AdminManagementContent() {
         });
     }, [realUsers, realCompanies, realJobs, mediaItems]);
 
-    const fetchUsers = async () => {
-        console.log('fetchUsers: starting...');
-        const result = await fetchAdminUsersAction();
 
-        if (!result.success) {
-            console.warn('fetchUsers: FAILED', result.error);
-            setRealUsers(users || []);
-        } else {
-            console.log('fetchUsers: SUCCESS, count:', result.data?.length);
-            setRealUsers(result.data || []);
-        }
-    };
 
     const fetchRelatedData = async (userId: string) => {
         const { data: courses } = await supabase.from('course_progress').select('*, courses(*)').eq('user_id', userId);
@@ -587,210 +673,7 @@ function AdminManagementContent() {
         </div>
     );
 
-    const renderUsers = () => {
-        const seekerUsers = realUsers.filter(u => u.user_type !== 'company' && u.user_type !== 'admin');
-        return (
-            <div className="space-y-4">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-black text-slate-900">ユーザー一覧 ({seekerUsers.length}件)</h2>
-                    <div className="flex gap-2">
-                        <input
-                            type="file"
-                            accept=".csv"
-                            className="hidden"
-                            ref={usersFileInputRef}
-                            onChange={(e) => handleCsvUpload(e, 'user')}
-                        />
-                        <button
-                            onClick={() => usersFileInputRef.current?.click()}
-                            className="bg-slate-100 text-slate-700 px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-slate-200 transition-all cursor-pointer"
-                        >
-                            <Upload size={18} /> CSV登録
-                        </button>
-                        <button
-                            onClick={() => { setEditingItem({}); setEditMode('user'); setActionType('create'); setModalTab('basic'); }}
-                            className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all cursor-pointer"
-                        >
-                            <Plus size={18} /> 新規追加
-                        </button>
-                    </div>
-                </div>
-                <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-slate-50 border-b border-slate-200">
-                            <tr>
-                                <th className="px-6 py-4 w-12">
-                                    <button onClick={() => toggleAll(seekerUsers.map(u => u.id))}>
-                                        {selectedIds.size === seekerUsers.length && seekerUsers.length > 0 ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
-                                    </button>
-                                </th>
-                                <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">ユーザー</th>
-                                <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">タイプ</th>
-                                <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest">登録日</th>
-                                <th className="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-widest text-right">アクション</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 font-bold">
-                            {seekerUsers.length === 0 && (
-                                <tr>
-                                    <td colSpan={5} className="px-6 py-20 text-center text-slate-400">
-                                        ユーザーが見つかりません
-                                    </td>
-                                </tr>
-                            )}
-                            {seekerUsers.map(user => (
-                                <tr key={user.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(user.id) ? 'bg-blue-50/50' : ''}`}>
-                                    <td className="px-6 py-4">
-                                        <button onClick={() => toggleSelection(user.id)}>
-                                            {selectedIds.has(user.id) ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
-                                        </button>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <img
-                                                src={user.avatar_url || getFallbackAvatarUrl(user.id, user.gender)}
-                                                className="w-10 h-10 rounded-full object-cover"
-                                                alt=""
-                                                onError={(e) => {
-                                                    const target = e.target as HTMLImageElement;
-                                                    if (!target.getAttribute('data-error-tried')) {
-                                                        target.setAttribute('data-error-tried', 'true');
-                                                        target.src = getFallbackAvatarUrl(user.id, user.gender);
-                                                    } else {
-                                                        target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.full_name || user.name || 'U') + '&background=random';
-                                                    }
-                                                }}
-                                            />
-                                            <div>
-                                                <div className="font-black text-slate-900">{user.full_name || user.name || 'No Name'}</div>
-                                                <div className="text-xs text-slate-500 font-bold">{user.email}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded-lg text-xs font-black ${user.user_type === 'student' ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-600'}`}>
-                                            {user.user_type}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-xs font-bold text-slate-600">
-                                        {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button
-                                            onClick={() => {
-                                                setEditingItem(user);
-                                                setEditMode('user');
-                                                setActionType('edit');
-                                                setModalTab('basic');
-                                                fetchRelatedData(user.id);
-                                            }}
-                                            className="p-2 text-slate-400 hover:text-blue-600"
-                                        >
-                                            <Edit3 size={18} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                {renderBulkActions()}
-            </div >
-        );
-    };
 
-    const renderCompanyAccounts = () => {
-        const companyStaffUsers = realUsers.filter(u => u.user_type === 'company');
-        return (
-            <div className="space-y-4">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-black text-slate-900">企業アカウント管理 ({companyStaffUsers.length}件)</h2>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => { setEditingItem({}); setEditMode('company'); setActionType('create'); }}
-                            className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-blue-500 transition-all cursor-pointer"
-                        >
-                            <Plus size={18} /> 新規アカウント発行
-                        </button>
-                    </div>
-                </div>
-                <div className="mb-6 bg-white p-4 rounded-2xl border border-slate-200 flex items-center gap-3">
-                    <Search size={20} className="text-slate-400" />
-                    <input
-                        type="text"
-                        placeholder="企業名またはIDで検索..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="flex-1 bg-transparent border-none outline-none font-bold text-slate-900 text-sm placeholder:text-slate-400"
-                    />
-                    <button
-                        onClick={() => setFilterPremium(!filterPremium)}
-                        className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${filterPremium ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
-                    >
-                        <Zap size={16} className={filterPremium ? 'fill-amber-700' : ''} />
-                        {filterPremium ? 'プレミアムのみ' : '全て表示'}
-                    </button>
-                </div>
-                <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-slate-50 border-b border-slate-200">
-                            <tr>
-                                <th className="px-6 py-4 w-12">
-                                    <button onClick={() => toggleAll(companyStaffUsers.map(u => u.id))}>
-                                        {selectedIds.size === companyStaffUsers.length && companyStaffUsers.length > 0 ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
-                                    </button>
-                                </th>
-                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">担当者名 / メール</th>
-                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">企業名</th>
-                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">登録日</th>
-                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">アクション</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {companyStaffUsers
-                                .filter(u => (u.full_name || u.email || '').toLowerCase().includes(searchQuery.toLowerCase()))
-                                .map(user => (
-                                    <tr key={user.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.has(user.id) ? 'bg-blue-50/50' : ''}`}>
-                                        <td className="px-6 py-4">
-                                            <button onClick={() => toggleSelection(user.id)}>
-                                                {selectedIds.has(user.id) ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} className="text-slate-300" />}
-                                            </button>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div>
-                                                <div className="font-black text-slate-800">{user.full_name || 'No Name'}</div>
-                                                <div className="text-[10px] font-bold text-slate-400 font-mono">{user.email}</div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-xs font-black text-slate-600">
-                                            {user.company_name || '-'}
-                                        </td>
-                                        <td className="px-6 py-4 text-xs font-bold text-slate-600">
-                                            {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <button
-                                                onClick={() => {
-                                                    setEditingItem(user);
-                                                    setEditMode('user'); // Use user edit mode for company account profile
-                                                    setActionType('edit');
-                                                    setModalTab('basic');
-                                                    fetchRelatedData(user.id);
-                                                }}
-                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer"
-                                            >
-                                                <Edit3 size={18} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </div>
-                {renderBulkActions()}
-            </div>
-        );
-    };
 
     const renderCompanyInfos = () => (
         <div className="space-y-4">
@@ -845,7 +728,13 @@ function AdminManagementContent() {
                                 </button>
                             </th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">企業名</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">業界 / 所在地</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 flex-shrink-0 mr-2" />
+                                    <span>業界 / 所在地</span>
+                                </div>
+                            </th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">公開設定</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">編集</th>
                         </tr>
                     </thead>
@@ -899,6 +788,23 @@ function AdminManagementContent() {
                                                 <div className="text-[10px] font-bold text-slate-400">{company.location}</div>
                                             </div>
                                         </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <button
+                                            onClick={async () => {
+                                                const res = await updateOrganizationVisibilityAction(company.id, !company.is_public);
+                                                if (res.success) {
+                                                    toast.success('公開設定を更新しました');
+                                                    fetchCompanies();
+                                                }
+                                            }}
+                                            className={`px-3 py-1 rounded-full text-[10px] font-black border transition-all ${!company.is_public
+                                                ? 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
+                                                : 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100'
+                                                }`}
+                                        >
+                                            {!company.is_public ? '非公開' : '公開中'}
+                                        </button>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
@@ -983,7 +889,8 @@ function AdminManagementContent() {
                                 </div>
                             </th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">企業</th>
-                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">ステータス</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">ステータス</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">公開設定</th>
                             <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">操作</th>
                         </tr>
                     </thead>
@@ -1058,15 +965,39 @@ function AdminManagementContent() {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-sm font-bold text-slate-500">{realCompanies.find(c => c.id === job.organization_id)?.name || job.organization_id}</td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 text-center">
                                         <button
-                                            onClick={() => handleStatusToggle(job.id, 'job', job.is_active)}
-                                            className={`px-3 py-1 rounded-full text-[10px] font-black border transition-all ${!job.is_active
+                                            onClick={async () => {
+                                                const newStatus = job.hiring_status === 'open' ? 'closed' : 'open';
+                                                const res = await updateJobHiringStatusAction(job.id, newStatus);
+                                                if (res.success) {
+                                                    toast.success('募集ステータスを更新しました');
+                                                    fetchJobs();
+                                                }
+                                            }}
+                                            className={`px-3 py-1 rounded-full text-[10px] font-black border transition-all ${job.hiring_status === 'closed'
                                                 ? 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
                                                 : 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100'
                                                 }`}
                                         >
-                                            {!job.is_active ? 'Private' : 'Active'}
+                                            {job.hiring_status === 'closed' ? '受付終了' : '募集中'}
+                                        </button>
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        <button
+                                            onClick={async () => {
+                                                const res = await updateJobVisibilityAction(job.id, !job.is_public);
+                                                if (res.success) {
+                                                    toast.success('公開設定を更新しました');
+                                                    fetchJobs();
+                                                }
+                                            }}
+                                            className={`px-3 py-1 rounded-full text-[10px] font-black border transition-all ${!job.is_public
+                                                ? 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
+                                                : 'bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100'
+                                                }`}
+                                        >
+                                            {!job.is_public ? '非公開' : '公開中'}
                                         </button>
                                     </td>
                                     <td className="px-6 py-4 text-right">
@@ -1522,7 +1453,6 @@ function AdminManagementContent() {
                     }
 
                     toast.success('ユーザーを作成しました');
-                    fetchUsers();
                 } else {
                     // Update logic
                     const { error } = await supabase
@@ -1546,7 +1476,6 @@ function AdminManagementContent() {
                         .eq('id', editingItem.id);
                     if (error) throw error;
                     toast.success('更新しました');
-                    fetchUsers();
                 }
             } else if (editMode === 'company') {
                 if (actionType === 'create') {
@@ -1579,7 +1508,8 @@ function AdminManagementContent() {
                             description: editingItem.description,
                             logo_url: editingItem.logo_url,
                             cover_image_url: editingItem.cover_image_url,
-                            is_premium: editingItem.is_premium
+                            is_premium: editingItem.is_premium,
+                            user_id: editingItem.user_id // 紐付け更新
                         })
                         .eq('id', editingItem.id);
                     if (error) {
@@ -2299,6 +2229,37 @@ function AdminManagementContent() {
 
                     {editMode === 'company' && (
                         <div className="space-y-6">
+                            {/* AI Auto-fill Section */}
+                            <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 p-6 rounded-3xl space-y-4 shadow-sm">
+                                <div className="flex items-center gap-2 text-indigo-700 font-black">
+                                    <Zap size={20} className="text-indigo-500" />
+                                    <h3>AI 企業情報アシスタント</h3>
+                                </div>
+                                <p className="text-[10px] text-indigo-600/80 font-bold">
+                                    HPのURLを入力するだけで、会社概要や事業内容をAIが自動抽出します。
+                                </p>
+                                <div className="flex flex-col md:flex-row gap-2">
+                                    <div className="relative flex-1">
+                                        <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-300" size={16} />
+                                        <input
+                                            type="url"
+                                            placeholder="https://company-site.com"
+                                            value={aiUrl}
+                                            onChange={(e) => setAiUrl(e.target.value)}
+                                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-slate-900 placeholder:text-slate-400 text-xs font-bold"
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={handleCompanyAiAutoFill}
+                                        disabled={isAiLoading}
+                                        className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-black text-xs hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2 min-w-[140px] justify-center shadow-lg shadow-indigo-200 transition-all active:scale-95"
+                                    >
+                                        {isAiLoading ? <span className="animate-spin">⌛</span> : <Sparkles size={16} />}
+                                        {isAiLoading ? '解析中...' : 'AI自動生成'}
+                                    </button>
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <ImageUpload
                                     currentImageUrl={editingItem.logo_url}
@@ -2333,6 +2294,27 @@ function AdminManagementContent() {
                                 </label>
                             </div>
 
+                            {/* 企業アカウント紐付け */}
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">
+                                    企業アカウント紐付け
+                                    <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded ml-2 normal-case font-bold">任意</span>
+                                </label>
+                                <select
+                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900"
+                                    value={editingItem.user_id || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, user_id: e.target.value || null })}
+                                >
+                                    <option value="">紐付けしない</option>
+                                    {realUsers.filter(u => u.user_type === 'company').map(u => (
+                                        <option key={u.id} value={u.id}>
+                                            {u.full_name} ({u.email})
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-[10px] text-slate-400 font-bold mt-1">※この企業情報を管理するユーザーアカウントを選択します。選択すると、そのユーザーはログイン後にこの企業情報を編集できるようになります。</p>
+                            </div>
+
                             <div className="grid grid-cols-1 gap-4">
                                 <div>
                                     <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">企業名</label>
@@ -2359,9 +2341,69 @@ function AdminManagementContent() {
 
                     {editMode === 'job' && (
                         <div className="space-y-6">
+                            {/* AI Auto-fill Section */}
+                            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 p-6 rounded-3xl space-y-4 shadow-sm">
+                                <div className="flex items-center gap-2 text-indigo-700 font-black">
+                                    <Sparkles size={20} className="text-purple-500" />
+                                    <h3>AI 求人作成アシスタント</h3>
+                                </div>
+                                <p className="text-[10px] text-indigo-600/80 font-bold">
+                                    HPのURLまたは求人票(PDF/画像)から情報を自動解析します。
+                                </p>
+
+                                {/* Source Toggle */}
+                                <div className="flex bg-white/60 p-1 rounded-xl w-fit border border-indigo-100">
+                                    <button
+                                        onClick={() => setImportSource('url')}
+                                        className={`px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all ${importSource === 'url' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+                                    >
+                                        URLから
+                                    </button>
+                                    <button
+                                        onClick={() => setImportSource('pdf')}
+                                        className={`px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all ${importSource === 'pdf' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+                                    >
+                                        PDF/画像から
+                                    </button>
+                                </div>
+
+                                <div className="flex flex-col md:flex-row gap-2">
+                                    {importSource === 'url' ? (
+                                        <div className="relative flex-1">
+                                            <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-300" size={16} />
+                                            <input
+                                                type="url"
+                                                placeholder="https://example.com/jobs/123"
+                                                value={aiUrl}
+                                                onChange={(e) => setAiUrl(e.target.value)}
+                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-slate-900 placeholder:text-slate-400 text-xs font-bold"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="relative flex-1">
+                                            <Upload className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-300" size={16} />
+                                            <input
+                                                type="file"
+                                                accept=".pdf,image/*"
+                                                onChange={handleFileChange}
+                                                className="w-full pl-10 pr-4 py-2 rounded-xl border border-indigo-200 bg-white text-[10px] font-bold text-slate-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                            />
+                                        </div>
+                                    )}
+                                    <button
+                                        onClick={handleJobAiAutoFill}
+                                        disabled={isAiLoading}
+                                        className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-black text-xs hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2 min-w-[140px] justify-center shadow-lg shadow-indigo-200 transition-all active:scale-95"
+                                    >
+                                        {isAiLoading ? <RefreshCcw className="animate-spin" size={16} /> : <Sparkles size={16} />}
+                                        {isAiLoading ? '解析中...' : 'AI自動生成'}
+                                    </button>
+                                </div>
+                            </div>
+
                             <ImageUpload
                                 currentImageUrl={editingItem.cover_image_url || editingItem.cover_image}
-                                onImageUploaded={(url) => setEditingItem({ ...editingItem, cover_image_url: url, cover_image: url })}
+                                onImageUploaded={(url) => setEditingItem((prev: any) => ({ ...prev, cover_image_url: url, cover_image: url }))}
                                 label="カバー画像"
                                 folder="jobs"
                             />
@@ -2576,8 +2618,6 @@ function AdminManagementContent() {
 
                     <div className="flex gap-1 bg-slate-200 p-1.5 rounded-[2rem] self-start inline-flex flex-wrap shadow-inner">
                         {[
-                            { id: 'users', label: 'ユーザー', icon: Users },
-                            { id: 'company_accounts', label: '企業アカウント', icon: Building2 },
                             { id: 'company_infos', label: '企業情報', icon: Building2 },
                             { id: 'jobs', label: '求人', icon: Briefcase },
                             { id: 'quests', label: 'クエスト', icon: Zap },
@@ -2598,8 +2638,6 @@ function AdminManagementContent() {
                     </div>
 
                     <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
-                        {currentTab === 'users' && renderUsers()}
-                        {currentTab === 'company_accounts' && renderCompanyAccounts()}
                         {currentTab === 'company_infos' && renderCompanyInfos()}
                         {currentTab === 'jobs' && renderJobs('job')}
                         {currentTab === 'quests' && renderJobs('quest')}

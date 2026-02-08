@@ -1,0 +1,918 @@
+"use client";
+
+import React, { useEffect, useState } from 'react';
+import { createClient } from '@/utils/supabase/client';
+import { toast } from 'sonner';
+import {
+    Users, Shield, Building2, GraduationCap, User, Loader2,
+    ShieldCheck, ShieldX, UserPlus, X, Eye, EyeOff,
+    Search, ArrowUpDown, MoreHorizontal, Mail, Trash2, Ban, CheckCircle2,
+    CheckSquare, Square, KeyRound
+} from 'lucide-react';
+import { differenceInYears } from 'date-fns';
+
+// ユーザーの型定義
+type Profile = {
+    id: string;
+    email: string;
+    full_name: string;
+    user_type: 'student' | 'company' | 'specialist' | 'admin' | 'instructor' | 'partner';
+    avatar_url: string | null;
+    created_at: string;
+    dob: string | null;
+};
+
+// ユーザータイプの表示名とアイコン
+// student = ユーザー（社会人・学生）、partner = パートナー
+const userTypeConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
+    admin: { label: '管理者', icon: Shield, color: 'bg-red-100 text-red-700' },
+    company: { label: '企業', icon: Building2, color: 'bg-blue-100 text-blue-700' },
+    instructor: { label: '講師', icon: GraduationCap, color: 'bg-purple-100 text-purple-700' },
+    student: { label: 'ユーザー', icon: User, color: 'bg-green-100 text-green-700' },
+    partner: { label: 'パートナー', icon: User, color: 'bg-orange-100 text-orange-700' },
+};
+
+export default function AdminUsersPage() {
+    const supabase = createClient();
+    const [users, setUsers] = useState<Profile[]>([]); // 表示用（フィルタリング後）
+    const [rawUsers, setRawUsers] = useState<Profile[]>([]); // 取得した全データ
+    const [loading, setLoading] = useState(true);
+    const [processingId, setProcessingId] = useState<string | null>(null);
+    const [filter, setFilter] = useState<string>('student');
+
+    // 検索・ソート・選択
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'name_asc' | 'name_desc'>('newest');
+    const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+
+    // 新規ユーザー追加モーダル
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [addLoading, setAddLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [newUser, setNewUser] = useState({
+        email: '',
+        password: '',
+        fullName: '',
+        userType: 'student' as string,
+    });
+
+    // 新規管理者追加モーダル（既存ユーザーから選択）
+    const [showPromoteModal, setShowPromoteModal] = useState(false);
+    const [allUsers, setAllUsers] = useState<Profile[]>([]);
+    const [loadingAllUsers, setLoadingAllUsers] = useState(false);
+    const [promoteSearchQuery, setPromoteSearchQuery] = useState('');
+
+    // メール送信モーダル
+    const [showEmailModal, setShowEmailModal] = useState(false);
+    const [emailSubject, setEmailSubject] = useState('');
+    const [emailBody, setEmailBody] = useState('');
+    const [emailTemplate, setEmailTemplate] = useState('');
+
+    const EMAIL_TEMPLATES: Record<string, { subject: string, body: string }> = {
+        'invite': {
+            subject: '【重要】Ehime Baseへの招待',
+            body: '{{name}}様\n\nEhime Baseへようこそ！\n以下のリンクからログインしてください。\n\nhttps://ehime-base.com/login'
+        },
+        'notice': {
+            subject: '【お知らせ】システムメンテナンスについて',
+            body: '{{name}}様\n\nいつもご利用ありがとうございます。\n以下の日程でメンテナンスを行います。\n\n...'
+        }
+    };
+
+    // テンプレート適用
+    const applyTemplate = (key: string) => {
+        const template = EMAIL_TEMPLATES[key];
+        if (template) {
+            setEmailTemplate(key);
+            setEmailSubject(template.subject);
+            setEmailBody(template.body);
+        } else {
+            setEmailTemplate('');
+            setEmailSubject('');
+            setEmailBody('');
+        }
+    };
+
+    // アクション実行関数
+    const performAction = async (action: 'delete' | 'toggle_status' | 'reset_password', ids: string[], value?: any) => {
+        if (!confirm(`${ids.length}件のユーザーに対して操作を実行します。本当によろしいですか？`)) return;
+
+        setLoading(true);
+        try {
+            const res = await fetch('/api/admin/users/action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, userIds: ids, value })
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success(data.message);
+                fetchUsers();
+                setSelectedUserIds(new Set());
+            } else {
+                toast.error(data.error || 'エラーが発生しました');
+            }
+        } catch (e) {
+            console.error(e);
+            toast.error('エラーが発生しました');
+        }
+        setLoading(false);
+    };
+
+    // メール送信処理（モック）
+    const handleSendEmail = () => {
+        // ここで実際の送信APIを呼ぶ
+        console.log('Sending email to:', Array.from(selectedUserIds));
+        console.log('Subject:', emailSubject);
+        console.log('Body:', emailBody);
+
+        toast.success(`${selectedUserIds.size}名にメールを送信しました（デモ）`);
+        setShowEmailModal(false);
+        setSelectedUserIds(new Set());
+        setEmailSubject('');
+        setEmailBody('');
+    };
+
+    // 全ユーザーを取得（管理者昇格用）
+    const fetchAllNonAdminUsers = async () => {
+        setLoadingAllUsers(true);
+        try {
+            const response = await fetch('/api/admin/users?filter=all');
+            const data = await response.json();
+            if (!data.error) {
+                // 管理者以外のユーザーのみフィルタリング
+                setAllUsers((data.users || []).filter((u: Profile) => u.user_type !== 'admin'));
+            }
+        } catch (error) {
+            console.error(error);
+        }
+        setLoadingAllUsers(false);
+    };
+
+    // モーダルを開くとき全ユーザー取得
+    const handleOpenPromoteModal = () => {
+        setShowPromoteModal(true);
+        fetchAllNonAdminUsers();
+    };
+
+    // 検索フィルタリングされたユーザー（昇格用モーダル）
+    const filteredAllUsers = allUsers.filter(u =>
+        u.full_name?.toLowerCase().includes(promoteSearchQuery.toLowerCase()) ||
+        u.email?.toLowerCase().includes(promoteSearchQuery.toLowerCase())
+    );
+
+    const fetchUsers = async () => {
+        setLoading(true);
+        try {
+            // APIエンドポイント経由でデータ取得（RLSバイパス）
+            const response = await fetch(`/api/admin/users?filter=${filter}`);
+            const data = await response.json();
+
+            if (data.error) {
+                console.error(data.error);
+                toast.error('データの取得に失敗しました');
+                setUsers([]);
+                setRawUsers([]);
+            } else {
+                setRawUsers(data.users || []);
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error('データの取得に失敗しました');
+            setUsers([]);
+            setRawUsers([]);
+        }
+        setLoading(false);
+    };
+
+    // フィルタリングとソートの適用
+    useEffect(() => {
+        let result = [...rawUsers];
+
+        // 検索
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            result = result.filter(u =>
+                (u.full_name?.toLowerCase() || '').includes(query) ||
+                (u.email?.toLowerCase() || '').includes(query)
+            );
+        }
+
+        // ソート
+        result.sort((a, b) => {
+            if (sortOrder === 'newest') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            if (sortOrder === 'oldest') return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+            if (sortOrder === 'name_asc') return (a.full_name || '').localeCompare(b.full_name || '');
+            if (sortOrder === 'name_desc') return (b.full_name || '').localeCompare(a.full_name || '');
+            return 0;
+        });
+
+        setUsers(result);
+    }, [rawUsers, searchQuery, sortOrder]);
+
+    useEffect(() => {
+        fetchUsers();
+    }, [filter]);
+
+    // 全選択・解除
+    const handleSelectAll = () => {
+        if (selectedUserIds.size === users.length && users.length > 0) {
+            setSelectedUserIds(new Set());
+        } else {
+            setSelectedUserIds(new Set(users.map(u => u.id)));
+        }
+    };
+
+    // 個別選択
+    const toggleSelectUser = (id: string) => {
+        const newSet = new Set(selectedUserIds);
+        if (newSet.has(id)) {
+            newSet.delete(id);
+        } else {
+            newSet.add(id);
+        }
+        setSelectedUserIds(newSet);
+    };
+
+    // 年齢計算
+    const calculateAge = (dob: string | null) => {
+        if (!dob) return '-';
+        return differenceInYears(new Date(), new Date(dob)) + '歳';
+    };
+
+    // ユーザータイプを変更
+    const handleChangeUserType = async (id: string, newType: string) => {
+        setProcessingId(id);
+        const { error } = await supabase
+            .from('profiles')
+            .update({ user_type: newType })
+            .eq('id', id);
+
+        if (error) {
+            console.error(error);
+            toast.error('ユーザータイプの変更に失敗しました');
+        } else {
+            toast.success(`ユーザータイプを「${userTypeConfig[newType]?.label || newType}」に変更しました`);
+            fetchUsers();
+        }
+        setProcessingId(null);
+    };
+
+    // 新規ユーザー追加
+    const handleAddUser = async () => {
+        if (!newUser.email || !newUser.password) {
+            toast.error('メールアドレスとパスワードは必須です');
+            return;
+        }
+        if (newUser.password.length < 6) {
+            toast.error('パスワードは6文字以上にしてください');
+            return;
+        }
+
+        setAddLoading(true);
+        try {
+            const response = await fetch('/api/admin/create-user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newUser),
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                toast.error(data.error);
+            } else if (data.warning) {
+                toast.warning(data.warning);
+                setShowAddModal(false);
+                setNewUser({ email: '', password: '', fullName: '', userType: 'admin' });
+                fetchUsers();
+            } else {
+                toast.success('ユーザーを作成しました');
+                setShowAddModal(false);
+                setNewUser({ email: '', password: '', fullName: '', userType: 'admin' });
+                fetchUsers();
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error('ユーザー作成に失敗しました');
+        }
+        setAddLoading(false);
+    };
+
+    // ユーザータイプバッジ
+    const getUserTypeBadge = (type: string) => {
+        const config = userTypeConfig[type] || { label: type, icon: User, color: 'bg-slate-100 text-slate-700' };
+        const Icon = config.icon;
+        return (
+            <span className={`px-2 py-1 text-xs font-bold rounded-full flex items-center gap-1 ${config.color}`}>
+                <Icon size={12} />
+                {config.label}
+            </span>
+        );
+    };
+
+    return (
+        <div className="max-w-6xl mx-auto">
+            <div className="mb-8 flex items-start justify-between">
+                <div>
+                    <h1 className="text-2xl font-black text-slate-800 flex items-center gap-2">
+                        <Users className="text-blue-600" />
+                        ユーザー管理
+                    </h1>
+                    <p className="text-slate-500 font-bold mt-1">
+                        登録ユーザーの確認・権限変更を行います。
+                    </p>
+                </div>
+                <button
+                    onClick={() => setShowAddModal(true)}
+                    className="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                    <UserPlus size={18} />
+                    新規ユーザー追加
+                </button>
+            </div>
+
+
+            {/* 検索・ソート・一括操作バー */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200 mb-6 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="名前、メールアドレスで検索"
+                            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder:text-slate-400 text-slate-700"
+                        />
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <select
+                        value={sortOrder}
+                        onChange={(e) => setSortOrder(e.target.value as any)}
+                        className="px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    >
+                        <option value="newest">登録日が新しい順</option>
+                        <option value="oldest">登録日が古い順</option>
+                        <option value="name_asc">名前順 (昇順)</option>
+                        <option value="name_desc">名前順 (降順)</option>
+                    </select>
+
+                    {/* 一括操作メニュー（選択時のみ表示） */}
+                    {selectedUserIds.size > 0 && (
+                        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4">
+                            <span className="text-sm font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg">
+                                {selectedUserIds.size}件選択中
+                            </span>
+                            <div className="bg-slate-800 text-white rounded-lg flex items-center overflow-hidden">
+                                <button
+                                    onClick={() => setShowEmailModal(true)}
+                                    className="px-3 py-2 hover:bg-slate-700 transition-colors"
+                                    title="一括メール送信"
+                                >
+                                    <Mail size={16} />
+                                </button>
+                                <div className="w-[1px] h-4 bg-slate-600"></div>
+                                <button
+                                    onClick={() => performAction('delete', Array.from(selectedUserIds))}
+                                    className="px-3 py-2 hover:bg-slate-700 transition-colors text-red-400"
+                                    title="一括削除"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                                <div className="w-[1px] h-4 bg-slate-600"></div>
+                                <button className="px-3 py-2 hover:bg-slate-700 transition-colors" title="その他">
+                                    <MoreHorizontal size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <div className="flex gap-2 mb-6 flex-wrap">
+                {[
+                    { id: 'student', label: 'ユーザー', icon: User },
+                    { id: 'company', label: '企業', icon: Building2 },
+                    { id: 'instructor', label: '講師', icon: GraduationCap },
+                    { id: 'partner', label: 'パートナー', icon: User },
+                    { id: 'admin', label: '管理者', icon: Shield },
+                    { id: 'all', label: 'すべて', icon: Users },
+                ].map(tab => {
+                    const Icon = tab.icon;
+                    return (
+                        <button
+                            key={tab.id}
+                            onClick={() => setFilter(tab.id)}
+                            className={`px-4 py-2 font-bold rounded-xl transition-colors flex items-center gap-2 ${filter === tab.id
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                                }`}
+                        >
+                            <Icon size={16} />
+                            {tab.label}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* 管理者数サマリー */}
+            {filter === 'admin' && !loading && (
+                <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6 flex items-center justify-between">
+                    <p className="text-red-700 font-bold flex items-center gap-2">
+                        <Shield size={18} />
+                        現在の管理者数: {users.length}名
+                    </p>
+                    <button
+                        onClick={handleOpenPromoteModal}
+                        className="px-4 py-2 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors flex items-center gap-2"
+                    >
+                        <ShieldCheck size={16} />
+                        新規管理者を追加
+                    </button>
+                </div>
+            )}
+
+            {loading ? (
+                <div className="flex justify-center p-12">
+                    <Loader2 className="animate-spin text-slate-400" />
+                </div>
+            ) : users.length === 0 ? (
+                <div className="bg-white rounded-3xl p-12 text-center border border-slate-200">
+                    <Users className="mx-auto text-slate-300 mb-4" size={48} />
+                    <p className="text-slate-500 font-bold">
+                        該当するユーザーが見つかりません。
+                    </p>
+                </div>
+            ) : (
+                <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                    <table className="w-full">
+                        <thead className="bg-slate-50 border-b border-slate-200">
+                            <tr>
+                                <th className="px-6 py-3 w-10">
+                                    <button onClick={handleSelectAll} className="flex items-center justify-center text-slate-400 hover:text-slate-600">
+                                        {users.length > 0 && selectedUserIds.size === users.length ? (
+                                            <CheckSquare size={20} className="text-blue-600" />
+                                        ) : (
+                                            <Square size={20} />
+                                        )}
+                                    </button>
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">ユーザー</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">メールアドレス</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">年齢</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">タイプ</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">登録日</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">アクション</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {users.map((user) => (
+                                <tr key={user.id} className={`hover:bg-slate-50 transition-colors ${selectedUserIds.has(user.id) ? 'bg-blue-50/50' : ''}`}>
+                                    <td className="px-6 py-4">
+                                        <button onClick={() => toggleSelectUser(user.id)} className="flex items-center justify-center text-slate-400 hover:text-slate-600">
+                                            {selectedUserIds.has(user.id) ? (
+                                                <CheckSquare size={20} className="text-blue-600" />
+                                            ) : (
+                                                <Square size={20} />
+                                            )}
+                                        </button>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden flex items-center justify-center">
+                                                {user.avatar_url ? (
+                                                    <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <User className="text-slate-400" size={20} />
+                                                )}
+                                            </div>
+                                            <span className="font-bold text-slate-800">{user.full_name || '未設定'}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-600 font-medium">{user.email}</td>
+                                    <td className="px-6 py-4 text-slate-600 font-bold">{calculateAge(user.dob)}</td>
+                                    <td className="px-6 py-4">{getUserTypeBadge(user.user_type)}</td>
+                                    <td className="px-6 py-4 text-sm text-slate-500 font-medium">
+                                        {new Date(user.created_at).toLocaleDateString('ja-JP')}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="relative group">
+                                            <button className="p-2 hover:bg-slate-200 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
+                                                <MoreHorizontal size={18} />
+                                            </button>
+                                            {/* アクションメニュー（簡易版：後で本実装） */}
+                                            <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-xl border border-slate-100 p-1 z-10 hidden group-hover:block hover:block">
+                                                <button className="w-full text-left px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-lg flex items-center gap-2">
+                                                    <Eye size={14} /> 詳細を見る
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedUserIds(new Set([user.id]));
+                                                        setShowEmailModal(true);
+                                                    }}
+                                                    className="w-full text-left px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-lg flex items-center gap-2"
+                                                >
+                                                    <Mail size={14} /> メール送信
+                                                </button>
+                                                <button
+                                                    onClick={() => performAction('toggle_status', [user.id], user.user_type === 'admin' ? false : true)} // 実際はBanフラグなどを見る必要があるが今回は簡易的に
+                                                    className="w-full text-left px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-lg flex items-center gap-2"
+                                                >
+                                                    <Ban size={14} /> アカウント停止/再開
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        const newPwd = prompt('新しいパスワードを入力してください（6文字以上）');
+                                                        if (newPwd && newPwd.length >= 6) {
+                                                            performAction('reset_password', [user.id], newPwd);
+                                                        } else if (newPwd) {
+                                                            toast.error('パスワードは6文字以上にしてください');
+                                                        }
+                                                    }}
+                                                    className="w-full text-left px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-lg flex items-center gap-2"
+                                                >
+                                                    <KeyRound size={14} /> パスワード再設定
+                                                </button>
+                                                <div className="h-[1px] bg-slate-100 my-1"></div>
+                                                <button
+                                                    onClick={() => performAction('delete', [user.id])}
+                                                    className="w-full text-left px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2"
+                                                >
+                                                    <Trash2 size={14} /> 削除
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {/* 新規ユーザー追加モーダル */}
+            {showAddModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
+                                <UserPlus className="text-blue-600" />
+                                新規ユーザー追加
+                            </h2>
+                            <button
+                                onClick={() => setShowAddModal(false)}
+                                className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
+                            >
+                                <X size={20} className="text-slate-400" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-600 mb-2">
+                                    氏名
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newUser.fullName}
+                                    onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })}
+                                    placeholder="例: 山田太郎"
+                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 placeholder:text-slate-400"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-600 mb-2">
+                                    メールアドレス <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="email"
+                                    value={newUser.email}
+                                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                                    placeholder="例: ehime@example.com"
+                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 placeholder:text-slate-400"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-600 mb-2">
+                                    パスワード <span className="text-red-500">*</span>
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        value={newUser.password}
+                                        onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                                        placeholder="6文字以上"
+                                        className="w-full px-4 py-3 border border-slate-200 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 pr-12 text-slate-800 placeholder:text-slate-400"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600"
+                                    >
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-600 mb-2">
+                                    ユーザータイプ
+                                </label>
+                                <select
+                                    value={newUser.userType}
+                                    onChange={(e) => setNewUser({ ...newUser, userType: e.target.value })}
+                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white text-slate-800"
+                                >
+                                    <option value="student">ユーザー（社会人・学生）</option>
+                                    <option value="company">企業</option>
+                                    <option value="instructor">講師</option>
+                                    <option value="partner">パートナー</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 flex gap-3">
+                            <button
+                                onClick={() => setShowAddModal(false)}
+                                className="flex-1 px-4 py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors"
+                            >
+                                キャンセル
+                            </button>
+                            <button
+                                onClick={handleAddUser}
+                                disabled={addLoading}
+                                className="flex-1 px-4 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {addLoading ? (
+                                    <Loader2 className="animate-spin" size={18} />
+                                ) : (
+                                    <UserPlus size={18} />
+                                )}
+                                作成
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 新規管理者追加モーダル（既存ユーザーから選択） */}
+            {showPromoteModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl max-h-[80vh] flex flex-col">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
+                                <ShieldCheck className="text-red-600" />
+                                新規管理者を追加
+                            </h2>
+                            <button
+                                onClick={() => {
+                                    setShowPromoteModal(false);
+                                    setPromoteSearchQuery('');
+                                }}
+                                className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
+                            >
+                                <X size={20} className="text-slate-400" />
+                            </button>
+                        </div>
+
+                        <p className="text-slate-500 text-sm mb-4">
+                            既存のユーザーから管理者に昇格させるユーザーを選択してください。
+                        </p>
+
+                        {/* 検索ボックス */}
+                        <div className="mb-4">
+                            <input
+                                type="text"
+                                value={promoteSearchQuery}
+                                onChange={(e) => setPromoteSearchQuery(e.target.value)}
+                                placeholder="名前またはメールアドレスで検索..."
+                                className="w-full px-4 py-3 border border-slate-200 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+                            />
+                        </div>
+
+                        {/* ユーザーリスト */}
+                        <div className="flex-1 overflow-y-auto border border-slate-200 rounded-xl">
+                            {loadingAllUsers ? (
+                                <div className="flex justify-center p-8">
+                                    <Loader2 className="animate-spin text-slate-400" />
+                                </div>
+                            ) : filteredAllUsers.length === 0 ? (
+                                <div className="p-8 text-center text-slate-400 font-bold">
+                                    {promoteSearchQuery ? '該当するユーザーがいません' : '昇格できるユーザーがいません'}
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-slate-100">
+                                    {filteredAllUsers.map((user) => (
+                                        <div
+                                            key={user.id}
+                                            className="p-4 hover:bg-slate-50 flex items-center justify-between"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden flex items-center justify-center">
+                                                    {user.avatar_url ? (
+                                                        <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <User className="text-slate-400" size={20} />
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-slate-800">{user.full_name || '未設定'}</p>
+                                                    <p className="text-xs text-slate-400">{user.email}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                {getUserTypeBadge(user.user_type)}
+                                                <button
+                                                    onClick={async () => {
+                                                        await handleChangeUserType(user.id, 'admin');
+                                                        setShowPromoteModal(false);
+                                                        setPromoteSearchQuery('');
+                                                    }}
+                                                    disabled={processingId === user.id}
+                                                    className="px-3 py-1.5 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-1"
+                                                >
+                                                    {processingId === user.id ? (
+                                                        <Loader2 className="animate-spin" size={14} />
+                                                    ) : (
+                                                        <ShieldCheck size={14} />
+                                                    )}
+                                                    昇格
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-6">
+                            <button
+                                onClick={() => {
+                                    setShowPromoteModal(false);
+                                    setPromoteSearchQuery('');
+                                }}
+                                className="w-full px-4 py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors"
+                            >
+                                閉じる
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* メール送信モーダル */}
+            {showEmailModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
+                                <Mail className="text-blue-600" />
+                                メール送信 ({selectedUserIds.size}名)
+                            </h2>
+                            <button
+                                onClick={() => setShowEmailModal(false)}
+                                className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
+                            >
+                                <X size={20} className="text-slate-400" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-600 mb-2">テンプレート</label>
+                                <select
+                                    value={emailTemplate}
+                                    onChange={(e) => applyTemplate(e.target.value)}
+                                    className="w-full px-4 py-2 border border-slate-200 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white"
+                                >
+                                    <option value="">テンプレートを選択...</option>
+                                    {Object.entries(EMAIL_TEMPLATES).map(([key, tpl]) => (
+                                        <option key={key} value={key}>{tpl.subject}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-600 mb-2">件名</label>
+                                <input
+                                    type="text"
+                                    value={emailSubject}
+                                    onChange={(e) => setEmailSubject(e.target.value)}
+                                    className="w-full px-4 py-2 border border-slate-200 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                    placeholder="件名を入力"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-600 mb-2">本文</label>
+                                <textarea
+                                    value={emailBody}
+                                    onChange={(e) => setEmailBody(e.target.value)}
+                                    rows={8}
+                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
+                                    placeholder="本文を入力（{{name}}で宛名を差し込み）"
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-3 mt-4">
+                                <button
+                                    onClick={() => setShowEmailModal(false)}
+                                    className="px-4 py-2 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-50"
+                                >
+                                    キャンセル
+                                </button>
+                                <button
+                                    onClick={handleSendEmail}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 flex items-center gap-2"
+                                >
+                                    <Mail size={16} />
+                                    送信する
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* メール送信モーダル */}
+            {showEmailModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
+                                <Mail className="text-blue-600" />
+                                メール送信 ({selectedUserIds.size}名)
+                            </h2>
+                            <button
+                                onClick={() => setShowEmailModal(false)}
+                                className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
+                            >
+                                <X size={20} className="text-slate-400" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-600 mb-2">テンプレート</label>
+                                <select
+                                    value={emailTemplate}
+                                    onChange={(e) => applyTemplate(e.target.value)}
+                                    className="w-full px-4 py-2 border border-slate-200 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white"
+                                >
+                                    <option value="">テンプレートを選択...</option>
+                                    {Object.entries(EMAIL_TEMPLATES).map(([key, tpl]) => (
+                                        <option key={key} value={key}>{tpl.subject}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-600 mb-2">件名</label>
+                                <input
+                                    type="text"
+                                    value={emailSubject}
+                                    onChange={(e) => setEmailSubject(e.target.value)}
+                                    className="w-full px-4 py-2 border border-slate-200 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                    placeholder="件名を入力"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-600 mb-2">本文</label>
+                                <textarea
+                                    value={emailBody}
+                                    onChange={(e) => setEmailBody(e.target.value)}
+                                    rows={8}
+                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
+                                    placeholder="本文を入力（{{name}}で宛名を差し込み）"
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-3 mt-4">
+                                <button
+                                    onClick={() => setShowEmailModal(false)}
+                                    className="px-4 py-2 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-50"
+                                >
+                                    キャンセル
+                                </button>
+                                <button
+                                    onClick={handleSendEmail}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 flex items-center gap-2"
+                                >
+                                    <Mail size={16} />
+                                    送信する
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+

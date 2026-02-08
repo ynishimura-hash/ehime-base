@@ -9,7 +9,7 @@ import { useGameStore } from './gameStore';
 import { toast } from 'sonner';
 import { getFallbackAvatarUrl } from './avatarUtils';
 import { createClient } from '@/utils/supabase/client';
-import { fetchAdminStats, fetchQuestsAction, fetchJobsAction, fetchPublicCompaniesAction } from '@/app/admin/actions';
+import { fetchAdminStats, fetchQuestsAction, fetchJobsAction, fetchPublicCompaniesAction, fetchSystemSettingsAction, updateSystemSettingAction } from '@/app/admin/actions';
 import { fetchUserAnalysisAction, saveUserAnalysisAction } from '@/app/analysis/actions';
 import { toggleInteractionAction, resetInteractionsAction, fetchUserInteractionsAction } from '@/app/actions/interactions';
 import { VALUE_CARDS, DIAGNOSIS_QUESTIONS } from './constants/analysisData';
@@ -33,7 +33,7 @@ export interface User {
     graduationYear?: string;
     workHistory?: { company: string, role: string, duration: string, description: string }[];
     qualifications?: string[];
-    skills?: { name: string, level: 'beginner' | 'intermediate' | 'advanced' }[];
+    skills?: string[];
     portfolioUrl?: string;
     desiredConditions?: {
         salary?: string;
@@ -44,14 +44,18 @@ export interface User {
     birthDate?: string;
     publicValues?: number[]; // 公開設定にされたValueCardのID
     gender?: string;
+    userType?: 'student' | 'worker' | 'company' | 'specialist' | 'admin' | 'instructor' | 'partner';
+    occupationStatus?: 'student' | 'worker' | null;
+    schoolType?: 'junior_high' | 'high_school' | 'university' | 'graduate' | 'junior_college' | 'vocational' | 'technical_college' | 'other' | null;
 }
 
 export interface Attachment {
     id: string;
-    type: 'image' | 'file';
+    type: 'image' | 'file' | 'job' | 'quest' | 'company' | 'reel' | 'course';
     url: string;
     name: string;
     size?: string;
+    itemId?: string; // ID of the referenced content
 }
 
 export interface Message {
@@ -74,11 +78,13 @@ export interface ChatThread {
 }
 
 export interface Interaction {
+    id?: string;
     type: 'like_company' | 'like_job' | 'like_user' | 'apply' | 'scout' | 'like_quest' | 'like_reel';
     fromId: string; // userId or companyId
     toId: string; // companyId, jobId, or userId
     timestamp: number;
     metadata?: any; // e.g., scout message
+    isRead?: boolean;
 }
 
 export interface ChatSettings {
@@ -95,7 +101,7 @@ export interface ChatSettings {
 interface AppState {
     // Current Session Mode
     authStatus: 'guest' | 'authenticated' | 'unauthenticated';
-    activeRole: 'seeker' | 'company' | 'admin';
+    activeRole: 'seeker' | 'company' | 'admin' | 'instructor';
     personaMode: 'seeker' | 'reskill';
     currentUserId: string;
     currentCompanyId: string;
@@ -126,6 +132,7 @@ interface AppState {
     isFetchingUsers: boolean;
     isFetchingChats: boolean;
     isFetchingCourses: boolean;
+    isFetchingSystemSettings: boolean;
     lastMoneySimulationInput: LifePlanInput | null;
 
     // Baby Base Data
@@ -134,17 +141,21 @@ interface AppState {
     bbEvents: BabyBaseEvent[];
     bbArticles: LearningArticle[];
     bbPosts: SpecialistPost[];
+    systemSettings: Record<string, any>;
 
     // Actions
-    loginAs: (role: 'seeker' | 'company' | 'admin', userId?: string, companyId?: string) => void;
+    loginAs: (role: 'seeker' | 'company' | 'admin' | 'instructor', userId?: string, companyId?: string) => void;
     logout: () => Promise<void>;
     resetState: () => void;
-    switchRole: (role: 'seeker' | 'company' | 'admin') => void;
+    switchRole: (role: 'seeker' | 'company' | 'admin' | 'instructor') => void;
     setPersonaMode: (mode: 'seeker' | 'reskill') => void;
     updateUser: (userId: string, updates: Partial<User>) => void;
+    fetchSystemSettings: () => Promise<void>;
+    updateSystemSetting: (key: string, value: any) => Promise<void>;
     addUser: (user: User) => void;
     toggleInteraction: (type: Interaction['type'], fromId: string, toId: string, metadata?: any) => void;
-    resetInteractions: (targetType?: 'quest' | 'job' | 'company' | 'reel') => Promise<void>;
+    resetInteractions: (targetType?: 'quest' | 'job' | 'company' | 'reel' | 'approach') => Promise<void>;
+    markInteractionAsRead: (interactionId: string) => Promise<void>;
     fetchInteractions: () => Promise<void>;
 
     // Chat Actions
@@ -218,6 +229,21 @@ interface AppState {
     invitations: Invitation[];
     createInvitation: (orgId: string, role?: 'admin' | 'member') => Promise<string | null>; // Returns token
     consumeInvitation: (token: string, userId: string) => Promise<boolean>;
+    // Scout limit helpers
+    getMonthlyScoutCount: (companyId: string) => number;
+    canSendScout: (companyId: string) => boolean;
+    // Search Presets
+    searchPresets: SearchPreset[];
+    addSearchPreset: (preset: Omit<SearchPreset, 'id' | 'timestamp'>) => void;
+    deleteSearchPreset: (id: string) => void;
+}
+
+export interface SearchPreset {
+    id: string;
+    companyId: string;
+    name: string;
+    query: string;
+    timestamp: number;
 }
 
 export interface Invitation {
@@ -265,6 +291,8 @@ export const useAppStore = create<AppState>()(
             isFetchingUsers: false,
             isFetchingChats: false,
             isFetchingCourses: false,
+            isFetchingSystemSettings: false,
+            systemSettings: {},
 
             // Chat Preferences Defaults
             chatSortBy: 'date',
@@ -273,6 +301,7 @@ export const useAppStore = create<AppState>()(
             completedLessonIds: [],
             lastViewedLessonIds: [],
             userRecommendations: [],
+            searchPresets: [],
             isLessonSidebarOpen: true,
             lastMoneySimulationInput: null,
 
@@ -282,6 +311,7 @@ export const useAppStore = create<AppState>()(
             bbEvents: BB_EVENTS,
             bbArticles: BB_ARTICLES,
             bbPosts: BB_POSTS,
+            // systemSettings: {}, // Removing duplicate definition
 
             setChatSortBy: (sortBy) => set({ chatSortBy: sortBy }),
             toggleChatFilterPriority: (priority) => set((state) => {
@@ -366,13 +396,19 @@ export const useAppStore = create<AppState>()(
                     authStatus: 'authenticated',
                     activeRole: role,
                     currentUserId: userId,
-                    currentCompanyId: companyId || 'c_eis',
+                    currentCompanyId: companyId || (role === 'company' || role === 'instructor' ? 'c_eis' : ''),
                 });
 
-                // Fetch analysis if seeker login
+                // Fetch data based on role
                 if (role === 'seeker') {
                     get().fetchUserAnalysis(userId);
                 }
+
+                // Instructor/Company/Admin specific data
+                if (role === 'instructor' || role === 'company' || role === 'admin') {
+                    get().fetchCourses();
+                }
+
                 // Always fetch interactions, users, and chats
                 get().fetchInteractions();
                 get().fetchUsers();
@@ -401,17 +437,26 @@ export const useAppStore = create<AppState>()(
                 // 1. Reset State
                 get().resetState();
 
-                // 2. Call Supabase SignOut
+                // 2. Call Server Action to clear HttpOnly cookies
+                // Dynamic import to avoid build issues if mixed envs
+                try {
+                    const { logoutAction } = await import('@/app/actions/auth');
+                    await logoutAction();
+                } catch (e) {
+                    console.error('Server Action Logout failed:', e);
+                }
+
+                // 3. Call Client Supabase SignOut (Redundant but safe for local storage)
                 const supabase = createClient();
                 try {
                     await supabase.auth.signOut();
                 } catch (e) {
-                    console.error('Supabase SignOut failed', e);
+                    console.warn('Client Supabase SignOut warning (might be already signed out):', e);
                 }
             },
 
             updateUser: async (userId: string, updates: Partial<User>) => {
-                // 1. Update local state for immediate feedback
+                // 1. Update local state for immediate feedback (Optimistic Update)
                 set((state) => ({
                     users: state.users.map((u) => (u.id === userId ? { ...u, ...updates } : u)),
                 }));
@@ -422,22 +467,100 @@ export const useAppStore = create<AppState>()(
                 if (updates.name !== undefined) dbUpdates.full_name = updates.name;
                 if (updates.university !== undefined) dbUpdates.school_name = updates.university;
                 if (updates.faculty !== undefined) dbUpdates.department = updates.faculty;
+
+                // New mappings
+                // Note: using 'major' for department(学科) if exists.
+                // Assuming 'department' column is occupied by faculty.
+                if (updates.department !== undefined) dbUpdates.major = updates.department;
+                if (updates.workHistory !== undefined) dbUpdates.work_history = updates.workHistory;
+
                 if (updates.bio !== undefined) dbUpdates.bio = updates.bio;
                 if (updates.gender !== undefined) dbUpdates.gender = updates.gender;
                 if (updates.lastName !== undefined) dbUpdates.last_name = updates.lastName;
                 if (updates.firstName !== undefined) dbUpdates.first_name = updates.firstName;
-                if (updates.birthDate !== undefined) dbUpdates.dob = updates.birthDate;
+                // Empty string to null
+                if (updates.birthDate !== undefined) dbUpdates.dob = updates.birthDate || null;
                 if (updates.image !== undefined) dbUpdates.avatar_url = updates.image;
+                if (updates.graduationYear !== undefined) dbUpdates.graduation_year = updates.graduationYear;
+                if (updates.skills !== undefined) dbUpdates.skills = updates.skills;
+                if (updates.qualifications !== undefined) dbUpdates.qualifications = updates.qualifications;
+                if (updates.portfolioUrl !== undefined) dbUpdates.portfolio_url = updates.portfolioUrl;
+                if (updates.desiredConditions !== undefined) dbUpdates.desired_conditions = updates.desiredConditions;
+                if (updates.schoolType !== undefined) dbUpdates.school_type = updates.schoolType;
+                if (updates.occupationStatus !== undefined) dbUpdates.occupation_status = updates.occupationStatus;
 
                 if (Object.keys(dbUpdates).length > 0) {
-                    const { error } = await supabase
-                        .from('profiles')
-                        .update(dbUpdates)
-                        .eq('id', userId);
+                    console.log('AppStore: Starting DB update...', dbUpdates);
+                    try {
+                        const { error: updateError } = await supabase
+                            .from('profiles')
+                            .update(dbUpdates)
+                            .eq('id', userId);
 
-                    if (error) {
-                        console.error('Failed to sync profile update to DB:', error);
-                        toast.error('プロフィールの保存に失敗しました');
+                        if (updateError) {
+                            console.error('AppStore: DB update failed:', updateError);
+                            // Revert optimistic update
+                            set((state) => ({
+                                users: state.users.map((u) => {
+                                    // ideally revert to original
+                                    return u;
+                                })
+                            }));
+                            get().fetchUsers();
+                            throw new Error(updateError.message || 'Update failed');
+                        }
+
+                        console.log('AppStore: DB update completed successfully.');
+                    } catch (e: any) {
+                        console.error('AppStore: Unexpected error during DB update:', e);
+                        // toast.error is handled by caller or here?
+                        // Better to throw so caller handles UI state (loading)
+                        throw e;
+                    }
+
+                    // 2. Fetch latest data explicitly
+                    // ... (Fetch logic remains same, abstracted or kept)
+                    // Ensuring we fetch latest is good practice.
+                    try {
+                        const { data, error: fetchError } = await supabase
+                            .from('profiles')
+                            .select('*')
+                            .eq('id', userId)
+                            .single();
+
+                        if (!fetchError && data) {
+                            set((state) => ({
+                                users: state.users.map((u) => {
+                                    if (u.id === userId) {
+                                        return {
+                                            ...u,
+                                            name: data.full_name || u.name,
+                                            lastName: data.last_name || u.lastName,
+                                            firstName: data.first_name || u.firstName,
+                                            university: data.school_name || data.university || u.university,
+                                            faculty: data.department || u.faculty, // Mapping back
+                                            department: data.major || u.department, // Tentative mapping back
+                                            bio: data.bio || u.bio,
+                                            image: data.avatar_url || data.image || u.image,
+                                            gender: data.gender || u.gender,
+                                            birthDate: data.dob || data.birth_date || u.birthDate,
+                                            graduationYear: data.graduation_year || u.graduationYear,
+                                            qualifications: data.qualifications || u.qualifications,
+                                            skills: data.skills || u.skills,
+                                            workHistory: data.work_history || u.workHistory,
+                                            portfolioUrl: data.portfolio_url || u.portfolioUrl,
+                                            desiredConditions: data.desired_conditions || u.desiredConditions,
+                                            userType: data.user_type || u.userType,
+                                            occupationStatus: data.occupation_status || u.occupationStatus,
+                                            schoolType: data.school_type || u.schoolType,
+                                        };
+                                    }
+                                    return u;
+                                }),
+                            }));
+                        }
+                    } catch (e) {
+                        console.warn('AppStore: Error during re-fetch:', e);
                     }
                 }
             },
@@ -449,6 +572,37 @@ export const useAppStore = create<AppState>()(
             },
             switchRole: (role) => set({ activeRole: role }),
             setPersonaMode: (mode) => set({ personaMode: mode }),
+
+            getMonthlyScoutCount: (companyId) => {
+                const now = new Date();
+                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+
+                return get().interactions.filter(i =>
+                    i.type === 'scout' &&
+                    i.fromId === companyId &&
+                    i.timestamp >= startOfMonth
+                ).length;
+            },
+
+            canSendScout: (companyId) => {
+                return get().getMonthlyScoutCount(companyId) < 10;
+            },
+
+            addSearchPreset: (preset) => {
+                const id = Math.random().toString(36).substring(2, 9);
+                set((state) => ({
+                    searchPresets: [
+                        { ...preset, id, timestamp: Date.now() },
+                        ...state.searchPresets.filter(p => p.companyId === preset.companyId).slice(0, 2),
+                        ...state.searchPresets.filter(p => p.companyId !== preset.companyId)
+                    ]
+                }));
+                toast.success('検索条件を保存しました (最大3件)');
+            },
+
+            deleteSearchPreset: (id) => set((state) => ({
+                searchPresets: state.searchPresets.filter(p => p.id !== id)
+            })),
 
             // Generic Interaction
             toggleInteraction: async (type, fromId, toId, metadata) => {
@@ -479,24 +633,59 @@ export const useAppStore = create<AppState>()(
 
                 // DB Sync
                 try {
-                    await toggleInteractionAction(type, fromId, toId, metadata);
+                    const result = await toggleInteractionAction(type, fromId, toId, metadata);
+
+                    if (!result || !result.success) {
+                        const errorMessage = (result?.error as any)?.message || 'Server action failed';
+                        throw new Error(errorMessage);
+                    }
                 } catch (error: any) {
                     console.error('Interaction sync failed:', error);
                     toast.error(`保存に失敗しました: ${error.message || 'Unknown error'}`);
+
+                    // Revert Optimistic Update
+                    const currentState = get(); // Re-fetch state
+                    if (exists) {
+                        // Was "removed" optimistically, so add it back
+                        const restoredInteraction: Interaction = {
+                            type, fromId, toId, metadata, timestamp: Date.now()
+                        };
+                        set({ interactions: [...currentState.interactions, restoredInteraction] });
+                    } else {
+                        // Was "added" optimistically, so remove it
+                        set({
+                            interactions: currentState.interactions.filter(
+                                i => !(i.type === type && i.fromId === fromId && i.toId === toId)
+                            )
+                        });
+                    }
+                }
+            },
+
+            resetInteractions: async (targetType) => {
+                const { currentUserId } = get();
+                if (!currentUserId) return;
+                try {
+                    const { resetInteractionsAction } = await import('@/app/actions/interactions');
+                    const result = await resetInteractionsAction(currentUserId, targetType);
+                    if (!result.success) throw result.error;
+                    await get().fetchInteractions();
+                } catch (error) {
+                    console.error('Failed to reset interactions:', error);
                 }
             },
 
             fetchInteractions: async () => {
-                const { currentUserId, isFetching } = get();
-                if (!currentUserId || isFetching) return;
-                set({ isFetching: true });
+                const { currentUserId } = get();
+                if (!currentUserId) return;
 
                 try {
                     const supabase = createClient();
+                    // Fetch both interactions FROM the user and TO the user
                     const { data, error } = await supabase
                         .from('interactions')
                         .select('*')
-                        .eq('user_id', currentUserId);
+                        .or(`user_id.eq.${currentUserId},target_id.eq.${currentUserId}`);
 
                     if (error) {
                         console.error('Failed to fetch interactions:', error);
@@ -505,16 +694,43 @@ export const useAppStore = create<AppState>()(
 
                     if (data) {
                         const interactions: Interaction[] = data.map((i: any) => ({
+                            id: i.id,
                             type: i.type,
                             fromId: i.user_id,
                             toId: i.target_id,
                             metadata: i.metadata,
+                            isRead: i.is_read,
                             timestamp: new Date(i.created_at).getTime()
                         }));
                         set({ interactions });
                     }
-                } finally {
-                    set({ isFetching: false });
+                } catch (error) {
+                    console.error('fetchInteractions error:', error);
+                }
+            },
+
+            markInteractionAsRead: async (interactionId) => {
+                const { interactions } = get();
+
+                // Optimistic update
+                set({
+                    interactions: interactions.map(i =>
+                        i.id === interactionId ? { ...i, isRead: true } : i
+                    )
+                });
+
+                try {
+                    const { markInteractionAsReadAction } = await import('@/app/actions/interactions');
+                    const result = await markInteractionAsReadAction(interactionId);
+                    if (!result.success) throw result.error;
+                } catch (error) {
+                    console.error('Failed to mark interaction as read:', error);
+                    // Revert
+                    set({
+                        interactions: get().interactions.map(i =>
+                            i.id === interactionId ? { ...i, isRead: false } : i
+                        )
+                    });
                 }
             },
 
@@ -542,16 +758,52 @@ export const useAppStore = create<AppState>()(
                 get().fetchChats();
             },
 
-            deleteMessage: (threadId, messageId) => set((state) => ({
-                chats: state.chats.map(chat => {
-                    if (chat.id !== threadId) return chat;
-                    return {
-                        ...chat,
-                        messages: chat.messages.filter(m => m.id !== messageId),
-                        updatedAt: Date.now() // Optional: update timestamp on delete? Maybe not.
-                    };
-                })
-            })),
+            deleteMessage: async (threadId, messageId) => {
+                const state = get();
+                const chat = state.chats.find(c => c.id === threadId);
+                const message = chat?.messages.find(m => m.id === messageId);
+                const originalContent = message?.text || '';
+
+                // Optimistic Update
+                set((state) => ({
+                    chats: state.chats.map(chat => {
+                        if (chat.id !== threadId) return chat;
+                        return {
+                            ...chat,
+                            messages: chat.messages.map(m => {
+                                if (m.id !== messageId) return m;
+                                return {
+                                    ...m,
+                                    text: 'メッセージを取り消しました',
+                                    attachment: undefined, // Remove attachment from view
+                                    metadata: { deleted: true, original_content: originalContent }
+                                };
+                            }),
+                            updatedAt: Date.now()
+                        };
+                    })
+                }));
+
+                try {
+                    const supabase = createClient();
+                    const { error } = await supabase
+                        .from('messages')
+                        .update({
+                            content: 'メッセージを取り消しました',
+                            attachment_url: null,
+                            attachment_type: null,
+                            attachment_name: null,
+                            metadata: { deleted: true, original_content: originalContent }
+                        })
+                        .eq('id', messageId);
+
+                    if (error) throw error;
+                } catch (e) {
+                    console.error('Failed to delete message:', e);
+                    toast.error('メッセージの取り消しに失敗しました');
+                    // Revert logic could be added here if strict consistency is needed
+                }
+            },
 
             createChat: async (companyId, userId, initialMessage, systemMessage) => {
                 const state = get();
@@ -560,7 +812,19 @@ export const useAppStore = create<AppState>()(
 
                 const supabase = createClient();
 
-                // 1. Create Chat Room
+                // 1. Check DB for existing chat (to avoid RLS error on insert if it exists but not in state)
+                const { data: existingChatInDb } = await supabase
+                    .from('casual_chats')
+                    .select('id')
+                    .eq('company_id', companyId)
+                    .eq('user_id', userId)
+                    .single();
+
+                if (existingChatInDb) {
+                    return existingChatInDb.id;
+                }
+
+                // 2. Create Chat Room
                 const { data: chatData, error: chatError } = await supabase
                     .from('casual_chats')
                     .insert({ company_id: companyId, user_id: userId })
@@ -568,7 +832,7 @@ export const useAppStore = create<AppState>()(
                     .single();
 
                 if (chatError) {
-                    // Check if it already exists (constraint violation)
+                    // Check if it already exists (constraint violation) - Double check
                     if (chatError.code === '23505') { // unique_violation
                         const { data: existingChat } = await supabase
                             .from('casual_chats')
@@ -617,20 +881,72 @@ export const useAppStore = create<AppState>()(
                 try {
                     const supabase = createClient();
                     const { activeRole, currentUserId, currentCompanyId } = get();
+                    const myselfId = activeRole === 'seeker' ? currentUserId : currentCompanyId;
 
-                    // Fetch Logic depending on role
-                    // Since RLS policies handle visibility, we can just select all relevant chats
-                    const { data: chatsData, error } = await supabase
-                        .from('casual_chats')
-                        .select(`
-                            *,
-                            messages (*)
-                        `)
-                        .order('updated_at', { ascending: false });
+                    // 1. Fetch Chats
+                    let chatsData, error;
+                    try {
+                        const res = await supabase
+                            .from('casual_chats')
+                            .select(`
+                                *,
+                                messages (*)
+                            `)
+                            .order('updated_at', { ascending: false });
+                        chatsData = res.data;
+                        error = res.error;
+                    } catch (e: any) {
+                        if (e.name === 'AbortError' || e.message?.includes('aborted')) return;
+                        throw e;
+                    }
 
                     if (error) {
                         console.error('Failed to fetch chats:', error);
                         return;
+                    }
+
+                    // 2. Fetch Chat Settings (Persistence)
+                    // Initialize with existing settings so we don't wipe local state on server failure
+                    let fetchedSettings: ChatSettings[] | null = null;
+                    const backupKey = `eis_chat_settings_backup_${myselfId}`;
+
+                    if (myselfId) {
+                        try {
+                            const { fetchChatSettingsAction } = await import('@/app/actions/chat-settings');
+                            const settingsResult = await fetchChatSettingsAction(myselfId);
+
+                            if (settingsResult.success && settingsResult.data && settingsResult.data.length > 0) {
+                                console.log('[AppStore] Loaded settings from server:', settingsResult.data.length);
+                                fetchedSettings = settingsResult.data;
+                                // Update local backup with fresh server data
+                                if (typeof window !== 'undefined') {
+                                    localStorage.setItem(backupKey, JSON.stringify(fetchedSettings));
+                                }
+                            } else {
+                                console.log('[AppStore] Server settings empty/failed. Trying backup key:', backupKey);
+                                // Server returned nothing (or failed silent), try loading from backup
+                                if (typeof window !== 'undefined') {
+                                    const backup = localStorage.getItem(backupKey);
+                                    if (backup) {
+                                        console.log('[AppStore] Loaded settings from local backup:', backup);
+                                        fetchedSettings = JSON.parse(backup);
+                                    } else {
+                                        console.log('[AppStore] No local backup found for key:', backupKey);
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Failed to load chat settings:', e);
+                            // Fallback to backup on error
+                            if (typeof window !== 'undefined') {
+                                const backup = localStorage.getItem(backupKey);
+                                if (backup) {
+                                    fetchedSettings = JSON.parse(backup);
+                                }
+                            }
+                        }
+                    } else {
+                        console.warn('[AppStore] fetchChats called but myselfId is null/undefined. ActiveRole:', activeRole, 'UserId:', currentUserId, 'CompanyId:', currentCompanyId);
                     }
 
                     if (chatsData) {
@@ -654,23 +970,51 @@ export const useAppStore = create<AppState>()(
                                 } : undefined
                             })).sort((a: any, b: any) => a.timestamp - b.timestamp)
                         }));
-                        set({ chats: mappedChats });
+
+                        // Only update settings if we successfully fetched new ones from server
+                        // Otherwise (migration failed/server down), keep existing local settings (optimistic/persisted)
+                        set(state => ({
+                            chats: mappedChats,
+                            chatSettings: fetchedSettings || state.chatSettings
+                        }));
                     }
                 } finally {
                     set({ isFetchingChats: false });
                 }
             },
 
-            markAsRead: (threadId, readerId) => set(state => ({
-                chats: state.chats.map(chat => {
-                    if (chat.id !== threadId) return chat;
-                    // Mark messages NOT sent by reader as read
-                    const updatedMessages = chat.messages.map(m =>
-                        m.senderId !== readerId ? { ...m, isRead: true } : m
-                    );
-                    return { ...chat, messages: updatedMessages };
-                })
-            })),
+            markAsRead: async (threadId, readerId) => {
+                const supabase = createClient();
+
+                // 1. Optimistic UI Update first
+                set(state => ({
+                    chats: state.chats.map(chat => {
+                        if (chat.id !== threadId) return chat;
+                        // Mark messages NOT sent by reader as read
+                        const updatedMessages = chat.messages.map(m =>
+                            m.senderId !== readerId ? { ...m, isRead: true } : m
+                        );
+                        return { ...chat, messages: updatedMessages };
+                    })
+                }));
+
+                // 2. Database Update (Background)
+                try {
+                    const { error } = await supabase
+                        .from('messages')
+                        .update({ is_read: true })
+                        .eq('chat_id', threadId)
+                        .neq('sender_id', readerId)
+                        .eq('is_read', false); // Only update unread ones
+
+                    if (error) {
+                        console.error('markAsRead DB Error:', error);
+                        // Optional: Revert UI if needed, but for read status it's usually fine to ignore
+                    }
+                } catch (err) {
+                    console.error('markAsRead Exception:', err);
+                }
+            },
 
             addInteraction: (interaction) => set(state => ({
                 interactions: [...state.interactions, { ...interaction, timestamp: Date.now() }]
@@ -694,19 +1038,37 @@ export const useAppStore = create<AppState>()(
                 jobs: state.jobs.filter((j) => j.id !== jobId)
             })),
 
-            updateChatSettings: (ownerId, chatId, newSettings) => set(state => {
-                const existingIndex = state.chatSettings.findIndex(cs => cs.ownerId === ownerId && cs.chatId === chatId);
-                if (existingIndex > -1) {
-                    const updated = [...state.chatSettings];
-                    updated[existingIndex] = { ...updated[existingIndex], ...newSettings };
-                    return { chatSettings: updated };
-                } else {
-                    const newItem: ChatSettings = {
-                        ownerId, chatId, isPinned: false, isBlocked: false, isUnreadManual: false, priority: 'medium', memo: '', alias: '', ...newSettings
-                    };
-                    return { chatSettings: [...state.chatSettings, newItem] };
+            updateChatSettings: async (ownerId, chatId, newSettings) => {
+                // Optimistic Update
+                set(state => {
+                    const existingIndex = state.chatSettings.findIndex(cs => cs.ownerId === ownerId && cs.chatId === chatId);
+                    let updatedSettings = [...state.chatSettings];
+
+                    if (existingIndex > -1) {
+                        updatedSettings[existingIndex] = { ...updatedSettings[existingIndex], ...newSettings };
+                    } else {
+                        const newItem: ChatSettings = {
+                            ownerId, chatId, isPinned: false, isBlocked: false, isUnreadManual: false, priority: 'medium', memo: '', alias: '', ...newSettings
+                        };
+                        updatedSettings = [...updatedSettings, newItem];
+                    }
+
+                    // Save to local backup immediately
+                    if (typeof window !== 'undefined') {
+                        localStorage.setItem(`eis_chat_settings_backup_${ownerId}`, JSON.stringify(updatedSettings));
+                    }
+
+                    return { chatSettings: updatedSettings };
+                });
+
+                // Persist to Server
+                try {
+                    const { updateChatSettingsAction } = await import('@/app/actions/chat-settings');
+                    await updateChatSettingsAction(ownerId, chatId, newSettings);
+                } catch (e) {
+                    console.error('Failed to persist chat settings:', e);
                 }
-            }),
+            },
 
             completeLesson: (lessonId) => {
                 set(state => ({
@@ -737,22 +1099,24 @@ export const useAppStore = create<AppState>()(
                 set({ isFetchingCourses: true });
 
                 try {
-                    const response = await fetch('/api/elearning');
+                    // Use modules API to get course_curriculums (same as courses list page)
+                    const response = await fetch('/api/elearning/modules', {
+                        method: 'GET',
+                        cache: 'no-store'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch courses');
+                    }
+
                     const data = await response.json();
 
-                    if (Array.isArray(data)) {
-                        set({ courses: data });
-                    } else {
-                        console.error('Invalid courses data:', data);
-                        // If data has error property, log it
-                        if (data?.error) {
-                            console.error('API Error:', data.error);
-                        }
-                        set({ courses: [] });
-                    }
-                } catch (error) {
-                    console.error('Failed to fetch courses:', error);
-                    set({ courses: [] });
+                    // Filter to only public modules
+                    const publishedCourses = (data || []).filter((c: any) => c.is_public !== false);
+                    set({ courses: publishedCourses });
+                } catch (error: any) {
+                    if (error?.name === 'AbortError' || error?.message?.includes('aborted')) return;
+                    console.error('Error fetching courses:', error);
                 } finally {
                     set({ isFetchingCourses: false });
                 }
@@ -810,10 +1174,21 @@ export const useAppStore = create<AppState>()(
 
             fetchUserRecommendations: async (userId) => {
                 try {
-                    const response = await fetch(`/api/analysis/recommendations?userId=${userId}`);
+                    const response = await fetch(`/api/analysis/recommendations_v2?userId=${userId}`);
                     const data = await response.json();
                     if (Array.isArray(data)) {
                         set({ userRecommendations: data });
+
+                        // If empty, try to generate
+                        if (data.length === 0) {
+                            const state = get();
+                            const selectedValues = state.userAnalysis.selectedValues;
+                            // Ensure we have enough values to generate meaningful recommendations
+                            if (selectedValues && selectedValues.length > 0) {
+                                console.log('AppStore: No existing recommendations. Auto-generating...');
+                                await state.generateRecommendations(userId, selectedValues);
+                            }
+                        }
                     }
                 } catch (error) {
                     console.error('Failed to fetch recommendations:', error);
@@ -822,7 +1197,7 @@ export const useAppStore = create<AppState>()(
 
             generateRecommendations: async (userId, selectedValues) => {
                 try {
-                    const response = await fetch('/api/analysis/recommendations', {
+                    const response = await fetch('/api/analysis/recommendations_v2', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ userId, selectedValues })
@@ -838,7 +1213,7 @@ export const useAppStore = create<AppState>()(
 
             resetRecommendations: async (userId) => {
                 try {
-                    await fetch(`/api/analysis/recommendations?userId=${userId}`, {
+                    await fetch(`/api/analysis/recommendations_v2?userId=${userId}`, {
                         method: 'DELETE'
                     });
                     set({ userRecommendations: [] });
@@ -869,12 +1244,29 @@ export const useAppStore = create<AppState>()(
 
                 try {
                     const supabase = createClient();
-                    const { data, error } = await supabase.from('profiles').select('*');
+                    let data, error;
+                    try {
+                        const res = await supabase.from('profiles').select('*');
+                        data = res.data;
+                        error = res.error;
+                    } catch (e: any) {
+                        if (e.name === 'AbortError' || e.message?.includes('aborted')) return;
+                        throw e;
+                    }
+
                     if (error) {
+                        // Suppress AbortError logs
+                        if (error.message?.includes('Fetch is aborted') || error.message?.includes('aborted')) {
+                            return;
+                        }
                         console.error('Failed to fetch users:', error);
                         return;
                     }
                     if (data) {
+                        console.log('AppStore: fetchUsers success', data.length, 'users found');
+                        if (data.length > 0) {
+                            console.log('AppStore: User 0 keys:', Object.keys(data[0]));
+                        }
                         // Map Supabase profiles to AppStore User objects
                         const mappedUsers: User[] = data.map((p: any) => ({
                             id: p.id,
@@ -890,13 +1282,21 @@ export const useAppStore = create<AppState>()(
                             firstName: p.first_name,
                             birthDate: p.dob || p.birth_date,
                             gender: p.gender,
+                            graduationYear: p.graduation_year || '',
                             // Map other fields as necessary
-                            qualifications: [],
-                            skills: [],
+                            qualifications: p.qualifications || [],
+                            skills: p.skills || [],
+                            portfolioUrl: p.portfolio_url,
+                            desiredConditions: p.desired_conditions || undefined,
+                            userType: p.user_type,
+                            occupationStatus: p.occupation_status,
+                            schoolType: p.school_type,
                             workHistory: []
                         }));
                         set({ users: mappedUsers });
                     }
+                } catch (err) {
+                    console.error('Unexpected error in fetchUsers:', err);
                 } finally {
                     set({ isFetchingUsers: false });
                 }
@@ -916,8 +1316,12 @@ export const useAppStore = create<AppState>()(
                     if (result.success && result.data) {
                         set({ companies: result.data as any[] });
                     } else {
-                        console.error('Failed to fetch companies:', result.error);
+                        // Suppress specific error if it's already logged or handled
+                        console.warn('AppStore: fetchCompanies failed (likely schema missing):', result.error);
                     }
+                } catch (e: any) {
+                    if (e.name === 'AbortError' || e.message?.includes('aborted')) return;
+                    console.error('AppStore: fetchCompanies exception:', e);
                 } finally {
                     set({ isFetchingCompanies: false });
                 }
@@ -1031,6 +1435,7 @@ export const useAppStore = create<AppState>()(
                 const result = await fetchUserAnalysisAction(targetId);
 
                 if (!result.success || !result.data) {
+                    console.error('AppStore: fetchUserAnalysisAction failed:', result.error);
                     // If failed or no data, we keep current (likely dummy) data
                     return;
                 }
@@ -1076,6 +1481,33 @@ export const useAppStore = create<AppState>()(
                 // --------------------------
 
                 const data = result.data;
+
+                // Determine Day Master:
+                // Since DB doesn't have the column yet, we MUST calculate it from profile birthDate
+                let dayMaster = get().userAnalysis.fortune?.dayMaster; // Keep existing if any
+
+                // Try to calculate from user profile
+                const user = get().users.find(u => u.id === targetId);
+                console.log('AppStore: resolving dayMaster. User:', user?.id, 'BirthDate:', user?.birthDate);
+
+                if (user && user.birthDate) {
+                    try {
+                        // Dynamic import to avoid circular dependency issues if any, though standard import is better if possible
+                        const { calculateDayMasterIndex, JIKKAN } = await import('./fortune');
+                        const index = calculateDayMasterIndex(user.birthDate);
+                        dayMaster = JIKKAN[index];
+                        console.log('AppStore: Calculated DayMaster:', dayMaster);
+                    } catch (e) {
+                        console.error('AppStore: Failed to calculate dayMaster', e);
+                    }
+                }
+
+                // Fallback
+                if (!dayMaster) {
+                    dayMaster = '甲';
+                    console.log('AppStore: Used fallback DayMaster (甲)');
+                }
+
                 set(state => ({
                     userAnalysis: {
                         ...state.userAnalysis,
@@ -1084,7 +1516,7 @@ export const useAppStore = create<AppState>()(
                         publicValues: data.publicValues || state.userAnalysis.publicValues,
                         isFortuneIntegrated: data.isFortuneIntegrated ?? state.userAnalysis.isFortuneIntegrated,
                         fortune: {
-                            dayMaster: state.userAnalysis.fortune?.dayMaster || '甲',
+                            dayMaster: dayMaster,
                             traits: data.fortune?.traits || state.userAnalysis.fortune?.traits || []
                         }
                     }
@@ -1100,9 +1532,12 @@ export const useAppStore = create<AppState>()(
                     const result = await fetchJobsAction();
                     if (result.success && result.data) {
                         set({ jobs: result.data });
+                    } else {
+                        console.warn('AppStore: fetchJobs failed (likely schema missing):', result.error);
                     }
-                } catch (error) {
-                    console.error('Error fetching jobs in store:', error);
+                } catch (e: any) {
+                    if (e.name === 'AbortError' || e.message?.includes('aborted')) return;
+                    console.error('AppStore: fetchJobs exception:', e);
                 } finally {
                     set({ isFetchingJobs: false });
                 }
@@ -1131,47 +1566,51 @@ export const useAppStore = create<AppState>()(
                 }
             },
 
-
-            resetInteractions: async (targetType) => {
-                const { currentUserId, interactions, jobs } = get();
-                if (!currentUserId) return;
-
-                let newInteractions = [...interactions];
-
-                if (!targetType) {
-                    newInteractions = newInteractions.filter(i =>
-                        !(i.fromId === currentUserId && ['like_company', 'like_job', 'like_quest', 'like_reel'].includes(i.type))
-                    );
-                } else if (targetType === 'company') {
-                    newInteractions = newInteractions.filter(i => !(i.fromId === currentUserId && i.type === 'like_company'));
-                } else if (targetType === 'job' || targetType === 'quest') {
-                    newInteractions = newInteractions.filter(i => {
-                        if (i.fromId !== currentUserId) return true;
-                        if (i.type !== 'like_job' && i.type !== 'like_quest') return true;
-                        // Handle case where job might not be in store yet (fallback to optimistic removal based on logic?)
-                        const job = jobs.find(j => j.id === i.toId);
-                        if (!job) return true;
-                        return job.type !== targetType;
-                    });
-                } else if (targetType === 'reel') {
-                    newInteractions = newInteractions.filter(i => !(i.fromId === currentUserId && i.type === 'like_reel'));
-                }
-
-                set({ interactions: newInteractions });
+            fetchSystemSettings: async () => {
+                const { isFetchingSystemSettings } = get();
+                if (isFetchingSystemSettings) return;
+                set({ isFetchingSystemSettings: true });
 
                 try {
-                    await resetInteractionsAction(currentUserId, targetType);
-                    toast.success('リセットしました');
-                } catch (error) {
-                    console.error('Failed to reset interactions:', error);
-                    toast.error('リセットに失敗しました');
+                    const result = await fetchSystemSettingsAction();
+                    if (result.success && result.data) {
+                        const settingsMap: Record<string, any> = {};
+                        result.data.forEach((s: any) => {
+                            settingsMap[s.key] = s.value;
+                        });
+                        set({ systemSettings: settingsMap });
+                    }
+                } catch (e) {
+                    console.error('AppStore: fetchSystemSettings failed:', e);
+                } finally {
+                    set({ isFetchingSystemSettings: false });
                 }
             },
 
+            updateSystemSetting: async (key, value) => {
+                // Optimistic update
+                set((state) => ({
+                    systemSettings: { ...state.systemSettings, [key]: value }
+                }));
+
+                try {
+                    const result = await updateSystemSettingAction(key, value);
+                    if (!result.success) {
+                        toast.error(`設定の更新に失敗しました: ${result.error}`);
+                        // Sync back on failure
+                        get().fetchSystemSettings();
+                    }
+                } catch (e) {
+                    console.error('AppStore: updateSystemSetting failed:', e);
+                    get().fetchSystemSettings();
+                }
+            },
 
         }),
+
         {
             name: 'eis-app-store-v3',
+            version: 1, // Clear old cache
             partialize: (state) => ({
                 authStatus: state.authStatus,
                 activeRole: state.activeRole,
@@ -1187,7 +1626,7 @@ export const useAppStore = create<AppState>()(
                 chatSettings: state.chatSettings,
                 completedLessonIds: state.completedLessonIds,
                 lastViewedLessonIds: state.lastViewedLessonIds,
-                userRecommendations: state.userRecommendations,
+                // userRecommendations: state.userRecommendations, // Do not persist recommendations to ensure freshness
                 chatSortBy: state.chatSortBy,
                 chatFilterPriority: state.chatFilterPriority,
                 isCompactMode: state.isCompactMode,
@@ -1206,6 +1645,7 @@ export const useAppStore = create<AppState>()(
                     state.isFetchingUsers = false;
                     state.isFetchingChats = false;
                     state.isFetchingCourses = false;
+                    state.isFetchingSystemSettings = false;
                 }
             }
         }

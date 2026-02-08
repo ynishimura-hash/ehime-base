@@ -11,17 +11,19 @@ import { toast } from 'sonner';
 import { useAppStore } from '@/lib/appStore';
 import { useRouter } from 'next/navigation';
 import { ConsultModal } from '@/components/modals/ConsultModal';
+import { CompanyDetailModal } from '@/components/modals/CompanyDetailModal';
 import { LoginPromptModal } from '@/components/auth/LoginPromptModal';
 import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
 import { Reel } from '@/types/shared';
 import { createClient } from '@/utils/supabase/client';
-import { fetchPublicJobDetailAction } from '@/app/admin/actions';
+import { fetchPublicJobDetailAction, createApplicationAction } from '@/app/admin/actions';
+
 
 export default function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
-    const supabase = createClient();
+    // const supabase = createClient(); // Not needed if using server actions mostly, but good for auth check if needed
     const {
         authStatus,
         currentUserId,
@@ -30,13 +32,22 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
         hasInteraction,
         createChat,
         toggleInteraction,
-        upsertCompany
+        upsertCompany,
+        users
     } = useAppStore();
+
+    // ... (rest of code)
+
+
+
+    // Get current user object safely
+    const currentUser = users.find(u => u.id === currentUserId);
 
     const [job, setJob] = useState<any>(null);
     const [company, setCompany] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isConsultModalOpen, setIsConsultModalOpen] = useState(false);
+    const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
     const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
     const [loginPromptMessage, setLoginPromptMessage] = useState('');
 
@@ -133,20 +144,41 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                 company.id,
                 currentUserId,
                 `「${job.title}」についてお話ししたいです。`,
-                'お申し込みありがとうございます。企業からの連絡をお待ちください。'
+                'まずはあいさつをしましょう。\n企業から日程調整の連絡や面談の申し込みなど次のステップが提示されます。'
             );
 
-            // 2. CREATE INTERACTION: Only upon successful chat creation
-            toggleInteraction('apply', currentUserId, id);
+            if (!chatId) {
+                throw new Error("Chat creation failed");
+            }
+
+            // 2. Insert into 'applications' table (ATS Data) using Server Action
+            const appResult = await createApplicationAction(
+                job.id,
+                currentUserId,
+                job.organization_id || company.id
+            );
+
+            if (!appResult.success) {
+                console.error('ATS Application creation failed:', appResult.error);
+                throw new Error(`Application recording failed: ${appResult.error}`);
+            }
+
+            // 3. CREATE INTERACTION
+            await toggleInteraction('apply', currentUserId, id);
 
             // Ensure chats are fetched before redirecting so the chat interface finds the new thread
             await useAppStore.getState().fetchChats();
 
             toast.success('お申し込みを送信しました');
-            router.push(`/messages/${chatId}`);
+
+            // Force a small delay to ensure state updates propagate before navigation if needed
+            setTimeout(() => {
+                router.push(`/messages/${chatId}`);
+            }, 100);
+
         } catch (error) {
             console.error('Application failed:', error);
-            // Error is already toasted in createChat, but let's ensure loading is cleared
+            toast.error("申し込み処理中にエラーが発生しました。もう一度お試しください。");
             setLoading(false);
         }
     };
@@ -197,6 +229,14 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
                         <div className="absolute bottom-6 left-6 text-white px-2 pr-32">
+                            <button
+                                onClick={() => setIsCompanyModalOpen(true)}
+                                className="text-left group"
+                            >
+                                <span className="text-sm font-bold uppercase tracking-wide opacity-90 block mb-1 group-hover:underline group-hover:text-blue-200 transition-colors">
+                                    {company.name}
+                                </span>
+                            </button>
                             <span className="text-[10px] font-black uppercase tracking-widest opacity-80">{company.industry}</span>
                             <h2 className="text-2xl md:text-3xl font-black mt-1 leading-tight">{job.title}</h2>
                         </div>
@@ -206,7 +246,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                                 onClick={() => {
                                     toggleLike();
                                 }}
-                                className={`w-12 h-12 backdrop-blur-md rounded-2xl flex items-center justify-center transition-all ${isLiked ? 'bg-red-500 text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}
+                                className={`w-12 h-12 backdrop-blur-md rounded-full flex items-center justify-center transition-all shadow-lg ${isLiked ? 'bg-red-500 text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}
                             >
                                 <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
                             </button>
@@ -289,6 +329,16 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                             <h3 className="text-lg font-black text-zinc-800 border-l-4 border-slate-900 pl-4">募集要項</h3>
                             <div className="grid grid-cols-1 gap-6">
                                 <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100">
+                                    <span className="block text-xs text-zinc-400 font-black uppercase mb-1">企業名</span>
+                                    <button
+                                        onClick={() => setIsCompanyModalOpen(true)}
+                                        className="text-lg font-bold text-zinc-900 hover:text-blue-600 hover:underline transition-colors text-left"
+                                    >
+                                        {company.name}
+                                    </button>
+                                </div>
+
+                                <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100">
                                     <span className="block text-xs text-zinc-400 font-black uppercase mb-1">給与・報酬</span>
                                     <p className="text-lg font-bold text-zinc-900">{job.salary || job.reward || '経験・能力を考慮の上決定'}</p>
                                 </div>
@@ -368,6 +418,13 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                 onClose={() => setIsConsultModalOpen(false)}
                 onConfirm={handleApplyConfirm}
                 companyName={company.name}
+                currentUser={currentUser}
+            />
+
+            <CompanyDetailModal
+                isOpen={isCompanyModalOpen}
+                onClose={() => setIsCompanyModalOpen(false)}
+                company={company}
             />
 
             <LoginPromptModal

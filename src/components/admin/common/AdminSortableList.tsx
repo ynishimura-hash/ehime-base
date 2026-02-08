@@ -24,9 +24,10 @@ import { GripVertical } from 'lucide-react';
 interface SortableItemProps {
     id: string;
     children: React.ReactNode;
+    index: number;
 }
 
-export function SortableItem({ id, children }: SortableItemProps) {
+export function SortableItem({ id, children, index }: SortableItemProps) {
     const {
         attributes,
         listeners,
@@ -40,7 +41,8 @@ export function SortableItem({ id, children }: SortableItemProps) {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
-        zIndex: isDragging ? 100 : 'auto',
+        // Ensure earlier items are ON TOP of later items so dropdowns aren't hidden
+        zIndex: isDragging ? 1000 : (500 - index),
         position: 'relative' as const,
     };
 
@@ -94,8 +96,8 @@ export default function AdminSortableList<T>({ items, renderItem, keyExtractor, 
                 items={items.map(keyExtractor)}
                 strategy={verticalListSortingStrategy}
             >
-                {items.map((item) => (
-                    <SortableItem key={keyExtractor(item)} id={keyExtractor(item)}>
+                {items.map((item, index) => (
+                    <SortableItem key={keyExtractor(item)} id={keyExtractor(item)} index={index}>
                         {renderItem(item)}
                     </SortableItem>
                 ))}

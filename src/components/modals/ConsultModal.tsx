@@ -1,20 +1,38 @@
 import React, { useState } from 'react';
-import { X, Send, User, Pencil } from 'lucide-react';
-import { useUserStore } from '@/lib/store';
+import { X, Send, Pencil } from 'lucide-react';
+import { useAppStore } from '@/lib/appStore';
 import { EditProfileModal } from './EditProfileModal';
+import { toast } from 'sonner';
 
 interface ConsultModalProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: () => void;
     companyName: string;
+    currentUser?: any; // Optional passed user object
 }
 
-export function ConsultModal({ isOpen, onClose, onConfirm, companyName }: ConsultModalProps) {
-    const { userProfile } = useUserStore();
+export function ConsultModal({ isOpen, onClose, onConfirm, companyName, currentUser: propUser }: ConsultModalProps) {
+    const { currentUserId, users } = useAppStore();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+    // Use passed user specific prop if available, otherwise try to find in store
+    const storeUser = users.find(u => u.id === currentUserId);
+    const currentUser = propUser || storeUser;
+
     if (!isOpen) return null;
+
+    // Fallback if no user found (shouldn't happen if logged in, but safe fallback)
+    const displayUser = currentUser || {
+        name: 'ゲスト',
+        age: 20,
+        image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=guest',
+        tags: [],
+        bio: '',
+        desiredConditions: { location: ['未設定'] }
+    };
+
+    const location = displayUser.desiredConditions?.location?.[0] || '愛媛県';
 
     return (
         <>
@@ -60,46 +78,54 @@ export function ConsultModal({ isOpen, onClose, onConfirm, companyName }: Consul
 
                             <div className="flex items-center gap-4">
                                 <img
-                                    src={userProfile.avatar}
-                                    alt={userProfile.name}
+                                    src={displayUser.image}
+                                    alt={displayUser.name}
                                     className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm"
                                 />
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                        <span className="font-black text-zinc-800 text-lg">{userProfile.name}</span>
+                                        <span className="font-black text-zinc-800 text-lg">{displayUser.name}</span>
                                         <span className="text-xs font-bold text-zinc-500 bg-white px-2 py-0.5 rounded-full border border-blue-100">
-                                            {userProfile.age}歳
+                                            {displayUser.age}歳
                                         </span>
                                     </div>
-                                    <p className="text-xs text-zinc-500 mt-1 font-medium">{userProfile.location}</p>
+                                    <p className="text-xs text-zinc-500 mt-1 font-medium">{location}</p>
                                     <div className="flex flex-wrap gap-1 mt-2">
-                                        {userProfile.tags.map(tag => (
+                                        {(displayUser.tags || []).slice(0, 3).map((tag: string) => (
                                             <span key={tag} className="text-[10px] bg-white text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 font-bold">
                                                 {tag}
                                             </span>
                                         ))}
                                     </div>
                                     {/* Display Bio Preview if exists */}
-                                    {userProfile.bio && (
+                                    {displayUser.bio && (
                                         <p className="text-[10px] text-zinc-400 mt-2 line-clamp-2 border-t border-blue-100/50 pt-2">
-                                            {userProfile.bio}
+                                            {displayUser.bio}
                                         </p>
                                     )}
                                 </div>
                             </div>
                         </div>
 
-                        {/* Actions */}
+
                         <div className="flex gap-3 pt-2">
                             <button
                                 onClick={onClose}
-                                className="flex-1 py-3 px-4 rounded-xl font-bold text-zinc-500 hover:bg-zinc-50 transition-colors"
+                                className="flex-1 py-3 px-4 rounded-xl font-bold text-zinc-500 hover:bg-zinc-50 transition-colors cursor-pointer"
                             >
                                 キャンセル
                             </button>
                             <button
-                                onClick={onConfirm}
-                                className="flex-1 py-3 px-4 rounded-xl font-bold bg-eis-navy text-white hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-zinc-200"
+                                onClick={() => {
+                                    // Block Logic for Junior/High School Students
+                                    if (displayUser.occupationStatus === 'student' &&
+                                        (displayUser.schoolType === 'high_school' || displayUser.schoolType === 'junior_high')) {
+                                        toast.error('中学生・高校生の方は現在お申し込みいただけません。');
+                                        return;
+                                    }
+                                    onConfirm();
+                                }}
+                                className="flex-1 py-3 px-4 rounded-xl font-bold bg-eis-navy text-white hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-zinc-200 cursor-pointer"
                             >
                                 <Send size={18} />
                                 申し込む

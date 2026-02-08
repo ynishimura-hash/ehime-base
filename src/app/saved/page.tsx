@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/appStore';
-import { ChevronLeft, MapPin, Heart, ArrowRight, CheckCircle2, Building2, Briefcase, Zap, Video, Trash2, X } from 'lucide-react';
+import { ChevronLeft, MapPin, Heart, ArrowRight, CheckCircle2, Building2, Briefcase, Zap, Video, Trash2, X, Sparkles, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -11,7 +11,7 @@ import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
 import { Reel } from '@/types/shared';
 
-type Tab = 'quest' | 'job' | 'company' | 'reel';
+type Tab = 'quest' | 'job' | 'company' | 'reel' | 'approach';
 
 // Helper for YouTube ID
 const getYouTubeID = (url: string) => {
@@ -30,9 +30,15 @@ export default function SavedJobsPage() {
     const [hoveredReelIndex, setHoveredReelIndex] = useState<number | null>(null);
     const [activeEntity, setActiveEntity] = useState<{ name: string, id: string, entityType: 'company' | 'job' | 'quest', companyId?: string }>({ name: '', id: '', entityType: 'company' });
 
+    const receivedInteractions = React.useMemo(() => {
+        return interactions.filter(i =>
+            i.toId === currentUserId && (i.type === 'like_user' || i.type === 'scout')
+        ).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    }, [interactions, currentUserId]);
+
     // Reset Modal State
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-    const [resetTarget, setResetTarget] = useState<'all' | 'quest' | 'job' | 'company' | 'reel' | null>(null);
+    const [resetTarget, setResetTarget] = useState<'all' | 'quest' | 'job' | 'company' | 'reel' | 'approach' | null>(null);
 
 
     React.useEffect(() => {
@@ -119,7 +125,7 @@ export default function SavedJobsPage() {
         setIsReelModalOpen(true);
     };
 
-    const handleResetClick = (target: 'all' | 'quest' | 'job' | 'company' | 'reel' | null) => {
+    const handleResetClick = (target: 'all' | 'quest' | 'job' | 'company' | 'reel' | 'approach' | null) => {
         if (!target) return;
         // Check if there are items to delete
         const count = target === 'all'
@@ -149,6 +155,7 @@ export default function SavedJobsPage() {
             case 'job': return savedJobs.length;
             case 'company': return savedCompanies.length;
             case 'reel': return savedReels.length;
+            case 'approach': return receivedInteractions.length;
         }
     };
 
@@ -172,24 +179,25 @@ export default function SavedJobsPage() {
 
             <main className="max-w-xl mx-auto p-4 space-y-6">
                 {/* Tabs */}
-                <div className="flex bg-zinc-200/50 p-1 rounded-2xl mx-2 overflow-x-auto scrollbar-hide">
-                    {(['quest', 'job', 'company', 'reel'] as const).map((tab) => (
+                <div className="flex bg-zinc-200/50 p-1.5 rounded-2xl mx-2 overflow-x-auto scrollbar-hide">
+                    {(['quest', 'job', 'company', 'reel', 'approach'] as const).map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`flex-1 min-w-[80px] flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all ${activeTab === tab ? 'bg-white text-zinc-800 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'}`}
+                            className={`flex-1 min-w-[100px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-black transition-all ${activeTab === tab ? 'bg-white text-zinc-800 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'}`}
                         >
                             {tab === 'quest' && <Zap size={14} className={activeTab === tab ? 'text-eis-yellow' : ''} />}
                             {tab === 'job' && <Briefcase size={14} className={activeTab === tab ? 'text-blue-500' : ''} />}
                             {tab === 'company' && <Building2 size={14} className={activeTab === tab ? 'text-zinc-800' : ''} />}
                             {tab === 'reel' && <Video size={14} className={activeTab === tab ? 'text-purple-500' : ''} />}
-                            <span className="uppercase tracking-wider hidden sm:inline">
-                                {tab === 'quest' ? 'クエスト' : tab === 'job' ? '求人' : tab === 'company' ? '企業' : '動画'}
+                            {tab === 'approach' && <Sparkles size={14} className={activeTab === tab ? 'text-orange-500' : ''} />}
+                            <span className="uppercase tracking-wider hidden sm:inline whitespace-nowrap">
+                                {tab === 'quest' ? 'クエスト' : tab === 'job' ? '求人' : tab === 'company' ? '企業' : tab === 'reel' ? '動画' : 'アプローチ'}
                             </span>
-                            <span className="sm:hidden">
-                                {tab === 'quest' ? 'Q' : tab === 'job' ? '求' : tab === 'company' ? '企' : '動'}
+                            <span className="sm:hidden whitespace-nowrap">
+                                {tab === 'quest' ? 'Q' : tab === 'job' ? '求' : tab === 'company' ? '企' : tab === 'reel' ? '動' : 'ア'}
                             </span>
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded-md ml-1 ${activeTab === tab ? 'bg-zinc-100 text-zinc-600' : 'text-zinc-400'}`}>
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded-md ml-auto sm:ml-1 ${activeTab === tab ? 'bg-zinc-100 text-zinc-600' : 'text-zinc-400'}`}>
                                 {getCount(tab)}
                             </span>
                         </button>
@@ -248,18 +256,108 @@ export default function SavedJobsPage() {
                             {activeTab === 'quest' ? '保存されたクエストはありません' :
                                 activeTab === 'job' ? '保存された求人はありません' :
                                     activeTab === 'reel' ? '保存された動画はありません' :
-                                        '保存された企業はありません'}
+                                        activeTab === 'approach' ? '企業からのアプローチはまだありません' :
+                                            '保存された企業はありません'}
                         </p>
-                        <Link href={activeTab === 'company' ? '/companies' : activeTab === 'quest' ? '/quests' : activeTab === 'reel' ? '/reels' : '/jobs'} className="bg-zinc-900 text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-zinc-800 transition-colors">
+                        <Link href={activeTab === 'company' ? '/companies' : activeTab === 'quest' ? '/quests' : activeTab === 'reel' ? '/reels' : activeTab === 'approach' ? '/mypage/edit' : '/jobs'} className="bg-zinc-900 text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-zinc-800 transition-colors">
                             {activeTab === 'company' ? '企業を探す' :
                                 activeTab === 'quest' ? 'クエストを探す' :
                                     activeTab === 'reel' ? '動画を探す' :
-                                        '求人を探す'}
+                                        activeTab === 'approach' ? 'プロフィールを編集する' :
+                                            '求人を探す'}
                         </Link>
                     </div>
                 ) : (
                     <AnimatePresence mode="popLayout">
-                        {activeTab === 'company' ? (
+                        {activeTab === 'approach' ? (
+                            // Render Approaches (Received Likes/Scouts from Companies)
+                            receivedInteractions.map(interaction => {
+                                const company = companies.find(c => c.id === interaction.fromId);
+                                const isScout = interaction.type === 'scout';
+                                const message = interaction.metadata?.message;
+
+                                // Mark as read when rendered (simple approach)
+                                React.useEffect(() => {
+                                    if (!interaction.isRead && interaction.id) {
+                                        const timer = setTimeout(() => {
+                                            const { markInteractionAsRead } = useAppStore.getState();
+                                            markInteractionAsRead(interaction.id!);
+                                        }, 1000);
+                                        return () => clearTimeout(timer);
+                                    }
+                                }, [interaction.id, interaction.isRead]);
+
+                                return (
+                                    <motion.div
+                                        key={interaction.id}
+                                        layout
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                                        className={`group relative bg-white rounded-3xl p-5 shadow-sm border ${!interaction.isRead ? 'border-orange-200 bg-orange-50/10' : 'border-zinc-100'} hover:shadow-lg transition-all`}
+                                    >
+                                        {!interaction.isRead && (
+                                            <div className="absolute top-4 right-4 bg-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg shadow-orange-200 animate-pulse">
+                                                NEW
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-center gap-4 mb-4">
+                                            <div className="relative">
+                                                <img
+                                                    src={company?.cover_image_url || company?.image || '/images/defaults/default_company_cover.png'}
+                                                    alt={company?.name}
+                                                    className="w-14 h-14 rounded-2xl object-cover border border-zinc-100"
+                                                />
+                                                <div className={`absolute -bottom-1 -right-1 p-1 rounded-lg text-white shadow-sm ${isScout ? 'bg-orange-500' : 'bg-red-500'}`}>
+                                                    {isScout ? <Sparkles size={12} /> : <Heart size={12} fill="currentColor" />}
+                                                </div>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${isScout ? 'bg-orange-100 text-orange-600' : 'bg-red-100 text-red-600'}`}>
+                                                        {isScout ? 'スカウト受信' : '検討中リストへの追加'}
+                                                    </span>
+                                                    <span className="text-[10px] text-zinc-400 font-bold">
+                                                        {new Date(interaction.timestamp).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                                <h3 className="text-base font-black text-zinc-800 truncate leading-tight">{company?.name || '企業情報取得中...'}</h3>
+                                                <p className="text-xs text-zinc-500 font-bold mt-0.5">{company?.industry}</p>
+                                            </div>
+                                        </div>
+
+                                        {message && (
+                                            <div className="bg-zinc-50 rounded-2xl p-4 mb-4 relative">
+                                                <div className="absolute -top-2 left-4 w-4 h-4 bg-zinc-50 rotate-45 border-l border-t border-zinc-50" />
+                                                <p className="text-sm font-bold text-zinc-600 line-clamp-3 leading-relaxed">
+                                                    {message}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-center gap-2">
+                                            <Link
+                                                href={`/companies/${interaction.fromId}`}
+                                                className="flex-1 flex items-center justify-center gap-2 py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded-xl text-xs font-black transition-colors"
+                                            >
+                                                <Building2 size={14} />
+                                                企業詳細
+                                            </Link>
+                                            {isScout && (
+                                                <Link
+                                                    href="/messages"
+                                                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-eis-navy hover:bg-zinc-800 text-white rounded-xl text-xs font-black transition-all shadow-md active:scale-95"
+                                                >
+                                                    <MessageCircle size={14} />
+                                                    チャットで返信
+                                                </Link>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                );
+                            })
+                        ) : activeTab === 'company' ? (
                             // Render Companies
                             savedCompanies.map(company => (
                                 <motion.div

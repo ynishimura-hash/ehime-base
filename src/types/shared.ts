@@ -34,6 +34,10 @@ export interface Job {
     organization?: Company; // For UI convenience
     cover_image_url?: string; // Supabase field
     value_tags_ai?: any; // AI field
+    is_public: boolean;
+    hiring_status: 'open' | 'closed';
+    view_count?: number; // 閲覧数
+    applicationCount?: number; // 応募数
 }
 
 export interface Company {
@@ -64,6 +68,8 @@ export interface Company {
     cover_image_url?: string; // Supabase field
     logo_url?: string; // Supabase field
     status?: string;
+    is_public: boolean;
+    view_count?: number;
 }
 
 // E-Learning Types
@@ -115,9 +121,18 @@ export interface Course {
     level?: '初級' | '中級' | '上級'; // Optional
     duration?: string; // Optional
     image?: string; // Optional
+    thumbnail?: string; // コースサムネイル
+    thumbnail_url?: string; // Supabaseのサムネイル
     curriculums?: Curriculum[]; // Make optional
     lessons?: Lesson[]; // Add direct lessons support
     isFeatured?: boolean;
+    // New fields for approval and soft delete
+    created_by?: string;
+    instructor_id?: string;
+    is_official?: boolean;
+    status?: 'draft' | 'pending' | 'approved' | 'rejected';
+    updated_at?: string | number;
+    deleted_at?: string | null;
 }
 
 export interface LearningTrack {

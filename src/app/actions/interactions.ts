@@ -37,23 +37,35 @@ export async function toggleInteractionAction(
                     type,
                     user_id: fromId,
                     target_id: toId,
-                    metadata: metadata || {},
-                    timestamp: new Date().toISOString()
+                    metadata: metadata || {}
                 });
 
             if (error) throw error;
             return { success: true, action: 'added' };
         }
-    } catch (error) {
-        console.error('Error toggling interaction:', error);
-        return { success: false, error };
+    } catch (error: any) {
+        console.error('Error toggling interaction:', error, { type, fromId, toId });
+        return { success: false, error: error?.message || String(error) };
     }
 }
 
-export async function resetInteractionsAction(userId: string, targetType?: 'quest' | 'job' | 'company' | 'reel') {
+export async function resetInteractionsAction(userId: string, targetType?: 'quest' | 'job' | 'company' | 'reel' | 'approach') {
     const supabase = await createClient();
 
     try {
+        if (targetType === 'approach') {
+            // Delete interactions where target is user (Scout, Like User)
+            const { error } = await supabase
+                .from('interactions')
+                .delete()
+                .eq('target_id', userId)
+                .in('type', ['scout', 'like_user']);
+
+            if (error) throw error;
+            return { success: true };
+        }
+
+        // Following is logic for "My Actions" (user_id = me)
         let query = supabase
             .from('interactions')
             .delete()
@@ -62,27 +74,29 @@ export async function resetInteractionsAction(userId: string, targetType?: 'ques
         if (targetType === 'company') {
             await query.eq('type', 'like_company');
         } else if (targetType === 'job' || targetType === 'quest') {
+            // ... (Existing logic for job/quest filtering using joins is complex, simplifying if possible or keeping as is)
+            // The previous logic for job/quest was fetching jobs first. Let's keep it but formatted cleanly.
             const { data: interactions } = await supabase
                 .from('interactions')
                 .select('id, target_id')
                 .eq('user_id', userId)
                 .in('type', ['like_job', 'like_quest']);
 
-            if (!interactions) return { success: true };
+            if (!interactions || interactions.length === 0) return { success: true };
 
             const jobIds = interactions.map(i => i.target_id);
-            if (jobIds.length === 0) return { success: true };
-
+            // Fetch jobs to verify type
             const { data: jobs } = await supabase
                 .from('jobs')
                 .select('id, type')
                 .in('id', jobIds)
-                .eq('type', targetType);
+                .eq('type', targetType); // 'job' or 'quest'
 
             if (!jobs || jobs.length === 0) return { success: true };
 
             const targetJobIds = jobs.map(j => j.id);
 
+            // Re-query to delete specific ones
             const { error: delError } = await supabase
                 .from('interactions')
                 .delete()
@@ -92,17 +106,21 @@ export async function resetInteractionsAction(userId: string, targetType?: 'ques
 
             if (delError) throw delError;
             return { success: true };
+
+        } else if (targetType === 'reel') {
+            await query.eq('type', 'like_reel');
         } else {
-            query = query.in('type', ['like_company', 'like_job', 'like_quest']);
+            // Reset ALL "My Actions" (Favorites)
+            // approach is not included here because it is "Incoming"
+            query = query.in('type', ['like_company', 'like_job', 'like_quest', 'like_reel']);
             const { error } = await query;
             if (error) throw error;
         }
 
         return { success: true };
-
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error resetting interactions:', error);
-        return { success: false, error };
+        return { success: false, error: error?.message || String(error) };
     }
 }
 
@@ -128,8 +146,23 @@ export async function fetchUserInteractionsAction(userId: string) {
                 metadata: d.metadata || {}
             }))
         };
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error fetching interactions:', error);
-        return { success: false, error };
+        return { success: false, error: error?.message || String(error) };
+    }
+}
+export async function markInteractionAsReadAction(interactionId: string) {
+    const supabase = await createClient();
+    try {
+        const { error } = await supabase
+            .from('interactions')
+            .update({ is_read: true })
+            .eq('id', interactionId);
+
+        if (error) throw error;
+        return { success: true };
+    } catch (error: any) {
+        console.error('Error marking interaction as read:', error);
+        return { success: false, error: error?.message || String(error) };
     }
 }

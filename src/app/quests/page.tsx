@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useAppStore } from '@/lib/appStore';
-import { Search, Filter, X, ChevronDown, ChevronUp, MapPin, Briefcase, JapaneseYen, Clock, Loader2, Sparkles, MessageCircle, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Search, Filter, X, ChevronDown, ChevronUp, MapPin, Briefcase, JapaneseYen, Clock, Loader2, Sparkles, MessageCircle, ArrowRight, ShieldCheck, Users } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
@@ -243,9 +243,12 @@ function QuestsContent() {
                         ))
                     ) : filteredQuests.length > 0 ? (
                         filteredQuests.map(quest => (
-                            <Link href={`/quests/${quest.id}`} key={quest.id} className="block group">
+                            <div key={quest.id} className="block group relative h-full">
                                 <div className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-100 transition-all hover:shadow-xl hover:-translate-y-1 relative h-full flex flex-col">
-                                    <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
+                                    {/* 全体を覆うリンク: z-0 */}
+                                    <Link href={`/quests/${quest.id}`} className="absolute inset-0 z-0" />
+
+                                    <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 pointer-events-none">
                                         <img
                                             src={quest.cover_image_url || quest.organization.cover_image_url || 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800'}
                                             alt={quest.title}
@@ -253,8 +256,11 @@ function QuestsContent() {
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                                        <div className="absolute top-4 left-4 flex gap-2">
-                                            <span className="bg-blue-600/90 backdrop-blur-md text-white text-[10px] font-black px-2 py-1 rounded-md shadow-lg">
+                                        <div className="absolute top-4 left-4 flex items-center gap-2">
+                                            <span className={`backdrop-blur-md text-white text-[10px] font-black px-2 py-1 rounded-md shadow-lg ${quest.category === 'インターンシップ' ? 'bg-emerald-500/90' :
+                                                quest.category === '体験JOB' ? 'bg-blue-600/90' :
+                                                    'bg-slate-600/90'
+                                                }`}>
                                                 {quest.category}
                                             </span>
                                             {quest.organization.is_premium && (
@@ -264,24 +270,12 @@ function QuestsContent() {
                                             )}
                                         </div>
 
-                                        <div className="absolute right-4 bottom-4 z-10 group-hover:scale-110 transition-transform">
-                                            {/* Show Quest Reels if available, or Company Reels if not? User said strict separation.
-                                                If I use quest.reels, and it is empty, icon is hidden.
-                                                If I want to show company reels, I should do it on clicking company logo or something.
-                                                But usually fallback is nice.
-                                                "Quest -> Quest, Company -> Company" implies if I am looking at a quest card, I expect quest content.
-                                                However, for "Find by Video", we have labels.
-                                                Here, let's stick to strict quest reels. If you want company reels, click company name?
-                                                Maybe for now, I will use quest.reels. If empty, the icon won't show.
-                                                If the user WANTS to see company reels on the card, they'd have to say so.
-                                                But usually "Quest specific video" is key feature.
-                                            */}
+                                        <div className="absolute right-4 bottom-4 z-10 group-hover:scale-110 transition-transform pointer-events-auto">
                                             <ReelIcon
                                                 reels={quest.reels || []}
                                                 fallbackImage={quest.organization.cover_image_url}
                                                 size="md"
                                                 onClick={() => {
-                                                    // STRICT: Only Quest Reels
                                                     const reelsToShow = quest.reels && quest.reels.length > 0 ? quest.reels : [];
                                                     setActiveReels(reelsToShow);
                                                     setActiveEntity({ name: quest.title, id: quest.id, companyId: quest.organization.id });
@@ -292,13 +286,13 @@ function QuestsContent() {
 
                                         <button
                                             onClick={(e) => toggleLike(quest.id, e)}
-                                            className="absolute top-4 right-4 z-10 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-sm hover:bg-red-50 hover:scale-110 transition-all"
+                                            className="absolute top-4 right-4 z-10 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-sm hover:bg-red-50 hover:scale-110 transition-all cursor-pointer pointer-events-auto"
                                         >
                                             <Heart size={20} className={`transition-colors ${isLiked(quest.id) ? 'text-red-500 fill-red-500' : 'text-slate-400'}`} />
                                         </button>
                                     </div>
 
-                                    <div className="p-6 flex-1 flex flex-col">
+                                    <div className="p-6 flex-1 flex flex-col pointer-events-none">
                                         <div className="flex items-center gap-2 mb-3">
                                             <img
                                                 src={quest.organization.logo_url || quest.organization.cover_image_url}
@@ -333,22 +327,18 @@ function QuestsContent() {
                                             </div>
 
                                             <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                                                <div className="flex -space-x-2">
-                                                    {[1, 2, 3].map(i => (
-                                                        <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-slate-200" />
-                                                    ))}
-                                                    <div className="w-6 h-6 rounded-full border-2 border-white bg-blue-50 flex items-center justify-center text-[8px] font-black text-blue-500">
-                                                        +{quest.applicationCount || 0}
-                                                    </div>
+                                                <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px]">
+                                                    <Users size={12} className="text-slate-300" />
+                                                    <span>応募 {quest.applicationCount || 0}件</span>
                                                 </div>
-                                                <div className="flex items-center gap-1 text-blue-600 font-black text-[10px]">
-                                                    DETAIL <ArrowRight size={12} />
+                                                <div className="flex items-center gap-1 text-blue-600 font-black text-[10px] ml-auto">
+                                                    詳細 <ArrowRight size={12} />
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </Link>
+                            </div>
                         ))
                     ) : (
                         <div className="col-span-full text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">

@@ -24,6 +24,19 @@ export default function ProgressPage() {
         i => i.type === 'apply' && i.fromId === currentUserId
     );
 
+    // Fetch fresh data on mount
+    React.useEffect(() => {
+        const loadData = async () => {
+            // Refresh data to ensure cover images are present
+            await Promise.all([
+                useAppStore.getState().fetchJobs(),
+                useAppStore.getState().fetchCompanies(),
+                // useAppStore.getState().fetchUserInteractions(currentUserId)
+            ]);
+        };
+        loadData();
+    }, [currentUserId]);
+
     // Map interactions to job details
     const appliedJobs = appliedInteractions.map(interaction => {
         const job = jobs.find(j => j.id === interaction.toId);
@@ -64,54 +77,87 @@ export default function ProgressPage() {
                             </Link>
                         </div>
                     ) : (
-                        appliedJobs.map((job, idx) => (
-                            <motion.div
-                                key={`${job.id}-${idx}`}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.1 }}
-                                className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 space-y-4"
-                            >
-                                <div className="flex items-start justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 rounded-2xl overflow-hidden border border-slate-100">
-                                            <img src={job.company?.image} className="w-full h-full object-cover" alt="" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{job.company?.name}</p>
-                                            <h3 className="text-lg font-black text-slate-800 leading-tight">{job.title}</h3>
-                                        </div>
-                                    </div>
-                                    <div className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-black">
-                                        {job.status}
-                                    </div>
-                                </div>
+                        appliedJobs.map((job, idx) => {
+                            // Image Logic
+                            let displayImage = null;
+                            if (job.type === 'quest') {
+                                // 1. Job Cover -> 2. Company Cover -> 3. Company Logo
+                                displayImage = job.cover_image_url || job.organization?.cover_image_url || job.company?.image;
+                            } else {
+                                // Job/Internship: Company Logo
+                                displayImage = job.company?.image;
+                            }
 
-                                <div className="flex items-center gap-4 text-xs font-bold text-slate-400 border-t border-slate-50 pt-4">
-                                    <div className="flex items-center gap-1.5">
-                                        <Clock size={14} />
-                                        応用日: {new Date(job.appliedAt || '').toLocaleDateString('ja-JP')}
-                                    </div>
-                                    {job.type === 'quest' && (
-                                        <div className="flex items-center gap-1.5 text-amber-600">
-                                            <Zap size={14} fill="currentColor" />
-                                            クエスト
-                                        </div>
-                                    )}
-                                </div>
+                            return (
+                                <motion.div
+                                    key={`${job.id}-${idx}`}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: idx * 0.1 }}
+                                    className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 space-y-4"
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-12 h-12 rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center">
+                                                {/* 画像表示ロジック適用 */}
+                                                {displayImage ? (
+                                                    <img src={displayImage} className="w-full h-full object-cover" alt="" />
+                                                ) : (
+                                                    <Building2 className="text-slate-300" size={24} />
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{job.company?.name}</p>
+                                                <h3 className="text-lg font-black text-slate-800 leading-tight">{job.title}</h3>
 
-                                <div className="grid grid-cols-2 gap-3 mt-2">
-                                    <Link href={`/jobs/${job.id}`} className="flex-1 flex items-center justify-center gap-2 py-3 bg-slate-50 hover:bg-slate-100 rounded-2xl text-xs font-black text-slate-600 transition-all">
-                                        詳細を見る
-                                        <ArrowRight size={14} />
-                                    </Link>
-                                    <Link href={`/messages/${job.company?.id}`} className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 rounded-2xl text-xs font-black text-white transition-all shadow-lg shadow-blue-100">
-                                        <MessageSquare size={14} />
-                                        メッセージ
-                                    </Link>
-                                </div>
-                            </motion.div>
-                        ))
+                                                {/* クエストの場合はタグを表示 */}
+                                                {job.type === 'quest' && (
+                                                    <div className="flex flex-wrap gap-1 mt-1.5">
+                                                        {job.category && (
+                                                            <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md">
+                                                                {job.category}
+                                                            </span>
+                                                        )}
+                                                        {job.tags?.slice(0, 3).map(tag => (
+                                                            <span key={tag} className="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md">
+                                                                #{tag}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-black">
+                                            {job.status}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-4 text-xs font-bold text-slate-400 border-t border-slate-50 pt-4">
+                                        <div className="flex items-center gap-1.5">
+                                            <Clock size={14} />
+                                            応用日: {new Date(job.appliedAt || '').toLocaleDateString('ja-JP')}
+                                        </div>
+                                        {job.type === 'quest' && (
+                                            <div className="flex items-center gap-1.5 text-amber-600">
+                                                <Zap size={14} fill="currentColor" />
+                                                クエスト
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-3 mt-2">
+                                        <Link href={`/jobs/${job.id}`} className="flex-1 flex items-center justify-center gap-2 py-3 bg-slate-50 hover:bg-slate-100 rounded-2xl text-xs font-black text-slate-600 transition-all">
+                                            詳細を見る
+                                            <ArrowRight size={14} />
+                                        </Link>
+                                        <Link href={`/messages/${job.company?.id}`} className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 rounded-2xl text-xs font-black text-white transition-all shadow-lg shadow-blue-100">
+                                            <MessageSquare size={14} />
+                                            メッセージ
+                                        </Link>
+                                    </div>
+                                </motion.div>
+                            );
+                        })
                     )}
                 </div>
 

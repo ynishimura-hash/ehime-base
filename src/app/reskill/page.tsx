@@ -135,24 +135,31 @@ export default function ReskillDashboardPage() {
     const [tracks, setTracks] = useState<any[]>([]);
     const [selectedTrackId, setSelectedTrackId] = useState<string>('');
     const [courses, setCourses] = useState<any[]>([]); // Courses for the selected track
+    const [allModules, setAllModules] = useState<any[]>([]); // All public modules for "すべてのコース"
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [retryCount, setRetryCount] = useState(0);
 
-    // Fetch Initial Data (Tracks) - runs on mount and on retry
+    // Fetch Initial Data (Tracks & All Modules) - runs on mount and on retry
     React.useEffect(() => {
         let isActive = true;
 
         setIsLoading(true);
         setError(null);
 
-        const fetchTracks = async () => {
+        const fetchData = async () => {
             try {
-                console.log('ReskillDashboard: Fetching tracks...');
-                const fetchedTracks = await ElearningService.getTracks();
+                console.log('ReskillDashboard: Fetching data...');
+
+                // Parallel fetch
+                const [fetchedTracks, fetchedModules] = await Promise.all([
+                    ElearningService.getTracks(),
+                    fetch('/api/elearning/modules').then(res => res.ok ? res.json() : [])
+                ]);
 
                 if (!isActive) return;
 
+                // Process Tracks
                 const uiTracks = fetchedTracks.map((t: any) => ({
                     ...t,
                     image: t.image || '/illustrations/dx_roadmap.png',
@@ -161,6 +168,11 @@ export default function ReskillDashboardPage() {
 
                 console.log('ReskillDashboard: Loaded tracks:', uiTracks.length);
                 setTracks(uiTracks);
+
+                // Process Modules
+                console.log('ReskillDashboard: Loaded modules:', fetchedModules.length);
+                const publicModules = Array.isArray(fetchedModules) ? fetchedModules.filter((m: any) => m.is_public !== false) : [];
+                setAllModules(publicModules);
 
                 if (uiTracks.length > 0) {
                     setSelectedTrackId(uiTracks[0].id);
@@ -171,13 +183,13 @@ export default function ReskillDashboardPage() {
             } catch (e: any) {
                 if (!isActive) return;
 
-                console.error("Failed to load tracks:", e?.message || e);
-                setError(e.message || 'Failed to load tracks');
+                console.error("Failed to load dashboard data:", e?.message || e);
+                setError(e.message || 'Failed to load data');
                 setIsLoading(false);
             }
         };
 
-        fetchTracks();
+        fetchData();
 
         return () => { isActive = false; };
     }, [retryCount]);
@@ -476,7 +488,7 @@ export default function ReskillDashboardPage() {
                         </Link>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {courses.map((course) => {
+                        {allModules.map((course) => {
                             // Determine recommendation tag
                             const courseCategory = (course.title || '').toLowerCase();
                             const isDiagnosisRecommended = (() => {

@@ -1,20 +1,23 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Save, Sparkles, Globe, RefreshCcw, Zap, Building2, Phone, MapPin, Briefcase, FileText, Upload, Image as ImageIcon, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Save, Sparkles, Globe, RefreshCcw, Zap, Building2, Phone, MapPin, Briefcase, FileText, Upload, Image as ImageIcon, X, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/utils/supabase/client';
+import { useAppStore } from '@/lib/appStore';
 
 export default function CompanyProfileEditor() {
+    const { currentCompanyId } = useAppStore();
     const [isLoading, setIsLoading] = useState(false);
+    const [isFetching, setIsFetching] = useState(true);
     const [uploading, setUploading] = useState(false);
     const [url, setUrl] = useState('');
 
     // Form States
     const [formData, setFormData] = useState({
-        name: '株式会社サンプル',
-        industry: 'IT・通信',
-        location: '愛媛県松山市',
+        name: '',
+        industry: '',
+        location: '',
         description: '',
         url: '',
         // Expanded Fields
@@ -33,30 +36,140 @@ export default function CompanyProfileEditor() {
         rjpPositives: '',
         logo_url: '',
         cover_image_url: '',
+        is_public: false,
     });
+
+    // Fetch Data
+    useEffect(() => {
+        const fetchCompanyData = async () => {
+            if (!currentCompanyId) return;
+
+            setIsFetching(true);
+            const supabase = createClient();
+
+            try {
+                const { data, error } = await supabase
+                    .from('organizations')
+                    .select('*')
+                    .eq('id', currentCompanyId)
+                    .single();
+
+                if (error) throw error;
+                if (data) {
+                    setFormData({
+                        name: data.name || '',
+                        industry: data.industry || '',
+                        location: data.location || '',
+                        description: data.description || '',
+                        url: '', // input用なので空でもOKだが、websiteがあればそれを入れてもいい
+                        foundingYear: data.founding_year,
+                        capital: data.capital || '',
+                        employeeCount: data.employee_count || '',
+                        representative: data.representative || '',
+                        address: data.address || '',
+                        phone: data.phone || '',
+                        website: data.website || '',
+                        businessDetails: data.business_details || '',
+                        philosophy: data.philosophy || '',
+                        benefits: data.benefits || '',
+                        rjpNegatives: data.rjp_negatives || '',
+                        rjpPositives: data.rjp_positives || '',
+                        logo_url: data.logo_url || data.image || '', // Fallback to image if logo_url is missing
+                        cover_image_url: data.cover_image_url || '',
+                        is_public: data.is_public || false,
+                    });
+                    if (data.website) setUrl(data.website);
+                }
+            } catch (error) {
+                console.error('Failed to fetch company data:', error);
+                toast.error('企業情報の取得に失敗しました');
+            } finally {
+                setIsFetching(false);
+            }
+        };
+
+        fetchCompanyData();
+    }, [currentCompanyId]);
+
+    const handleSave = async (asPublic: boolean | undefined = undefined) => {
+        if (!currentCompanyId) return;
+
+        const toastId = toast.loading('保存中...');
+        const supabase = createClient();
+
+        try {
+            const updates: any = {
+                name: formData.name,
+                industry: formData.industry,
+                location: formData.location,
+                description: formData.description,
+                founding_year: formData.foundingYear,
+                capital: formData.capital,
+                employee_count: formData.employeeCount,
+                representative: formData.representative,
+                address: formData.address,
+                phone: formData.phone,
+                website: formData.website,
+                business_details: formData.businessDetails,
+                philosophy: formData.philosophy,
+                benefits: formData.benefits,
+                rjp_negatives: formData.rjpNegatives,
+                rjp_positives: formData.rjpPositives,
+                logo_url: formData.logo_url,
+                image: formData.logo_url, // Sync image for compatibility
+                cover_image_url: formData.cover_image_url,
+                updated_at: new Date().toISOString(),
+            };
+
+            if (asPublic !== undefined) {
+                updates.is_public = asPublic;
+                // Update local state to reflect the change immediately
+                setFormData(prev => ({ ...prev, is_public: asPublic }));
+            } else {
+                updates.is_public = formData.is_public;
+            }
+
+            const { error } = await supabase
+                .from('organizations')
+                .update(updates)
+                .eq('id', currentCompanyId);
+
+            if (error) throw error;
+
+            toast.dismiss(toastId);
+            toast.success(asPublic !== undefined
+                ? (asPublic ? '公開しました' : '非公開に設定しました')
+                : '保存しました');
+
+        } catch (error) {
+            console.error('Save error:', error);
+            toast.dismiss(toastId);
+            toast.error('保存に失敗しました');
+        }
+    };
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'logo_url' | 'cover_image_url') => {
         if (!e.target.files || e.target.files.length === 0) return;
 
         const file = e.target.files[0];
         const fileExt = file.name.split('.').pop();
-        const fileName = `${field}-${Date.now()}.${fileExt}`;
-        const filePath = `${fileName}`;
+        const fileName = `${currentCompanyId || 'unknown'}/${field}-${Date.now()}.${fileExt}`;
 
         setUploading(true);
         const toastId = toast.loading('画像をアップロード中...');
 
         try {
             const supabase = createClient();
+            // Ensure bucket exists or handle error - assuming 'company-assets' exists as per previous code
             const { error: uploadError } = await supabase.storage
                 .from('company-assets')
-                .upload(filePath, file);
+                .upload(fileName, file);
 
             if (uploadError) throw uploadError;
 
             const { data: { publicUrl } } = supabase.storage
                 .from('company-assets')
-                .getPublicUrl(filePath);
+                .getPublicUrl(fileName);
 
             handleChange(field, publicUrl);
             toast.dismiss(toastId);
@@ -112,6 +225,10 @@ export default function CompanyProfileEditor() {
         setFormData(prev => ({ ...prev, [key]: value }));
     };
 
+    if (isFetching) {
+        return <div className="flex h-screen items-center justify-center text-slate-400">読み込み中...</div>;
+    }
+
     return (
         <div className="max-w-4xl mx-auto space-y-8 pb-20">
             <div className="flex items-center justify-between">
@@ -121,15 +238,25 @@ export default function CompanyProfileEditor() {
                 </div>
                 <div className="flex gap-3">
                     <button
-                        onClick={() => toast.success('下書きを保存しました')}
+                        onClick={() => handleSave()}
                         className="bg-white border border-slate-200 text-slate-600 px-6 py-2.5 rounded-full font-bold text-sm hover:bg-slate-50 flex items-center gap-2"
+                        disabled={uploading}
                     >
                         <FileText size={18} />
                         下書き保存
                     </button>
                     <button
-                        onClick={() => toast.success('公開しました')}
+                        onClick={() => handleSave(!formData.is_public)}
+                        className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all flex items-center gap-2 border ${formData.is_public ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200'}`}
+                        disabled={uploading}
+                    >
+                        <Eye size={18} />
+                        {formData.is_public ? '公開中' : '非公開'}
+                    </button>
+                    <button
+                        onClick={() => handleSave(true)}
                         className="bg-slate-900 text-white px-6 py-2.5 rounded-full font-bold text-sm hover:bg-slate-800 flex items-center gap-2"
+                        disabled={uploading}
                     >
                         <Save size={18} />
                         公開する
@@ -141,7 +268,7 @@ export default function CompanyProfileEditor() {
             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 p-6 rounded-3xl space-y-4 shadow-sm">
                 <div className="flex items-center gap-2 text-blue-700 font-black">
                     <Sparkles size={20} />
-                    <h3>AI 自動入力アシスタント (Gemini 2.0 Flash)</h3>
+                    <h3>AI 自動入力アシスタント (Gemini 2.5 Flash Lite)</h3>
                 </div>
                 <p className="text-sm text-blue-600/80 font-bold">
                     URLや会社の特徴を入力するだけで、基本情報から「魅力・RJP」まで一括生成します。

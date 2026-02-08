@@ -2,11 +2,35 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Users, Heart, Eye, MessageSquare, TrendingUp, Zap, Briefcase } from 'lucide-react';
+import { Users, Heart, Eye, MessageSquare, TrendingUp, Zap, Briefcase, BookOpen } from 'lucide-react';
 import { useAppStore } from '@/lib/appStore';
+
+import { fetchPublicCompanyDetailAction } from '@/app/admin/actions';
+import { useState, useEffect } from 'react';
 
 export default function CompanyDashboardOverview() {
     const { interactions, getCompanyChats, currentCompanyId } = useAppStore();
+    const [viewCount, setViewCount] = useState<number>(0);
+    const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+    useEffect(() => {
+        if (!currentCompanyId) return;
+
+        const fetchStats = async () => {
+            try {
+                const result = await fetchPublicCompanyDetailAction(currentCompanyId);
+                if (result.success && result.data?.company) {
+                    setViewCount(result.data.company.view_count || 0);
+                }
+            } catch (error) {
+                console.error('Failed to fetch company stats:', error);
+            } finally {
+                setIsLoadingStats(false);
+            }
+        };
+
+        fetchStats();
+    }, [currentCompanyId]);
 
     // Calculate Real Stats
     const likeCount = interactions.filter(i => i.type === 'like_company' && i.toId === currentCompanyId).length;
@@ -16,10 +40,42 @@ export default function CompanyDashboardOverview() {
     }, 0);
 
     const stats = [
-        { label: '総閲覧数', value: '1,234', change: '+12%', icon: Eye, color: 'text-blue-500', bg: 'bg-blue-50' }, // Still mock for views
-        { label: '気になる', value: likeCount.toString(), change: 'Real-time', icon: Heart, color: 'text-red-500', bg: 'bg-red-50' },
-        { label: 'スカウト送信', value: scoutCount.toString(), change: 'Real-time', icon: Zap, color: 'text-yellow-600', bg: 'bg-yellow-50' },
-        { label: 'メッセージ', value: unreadMessages > 0 ? `未読 ${unreadMessages}` : '既読', change: 'Check now', icon: MessageSquare, color: 'text-green-500', bg: 'bg-green-50' },
+        {
+            label: '総閲覧数',
+            value: isLoadingStats ? '...' : viewCount.toLocaleString(),
+            change: 'Total Views',
+            icon: Eye,
+            color: 'text-blue-500',
+            bg: 'bg-blue-50',
+            href: `/companies/${currentCompanyId}`
+        },
+        {
+            label: '気になる',
+            value: likeCount.toString(),
+            change: 'Real-time',
+            icon: Heart,
+            color: 'text-red-500',
+            bg: 'bg-red-50',
+            href: '/dashboard/company/scout?tab=liked'
+        },
+        {
+            label: 'スカウト送信',
+            value: scoutCount.toString(),
+            change: 'Real-time',
+            icon: Zap,
+            color: 'text-yellow-600',
+            bg: 'bg-yellow-50',
+            href: '/dashboard/company/scout?tab=scouted'
+        },
+        {
+            label: 'メッセージ',
+            value: unreadMessages > 0 ? `未読 ${unreadMessages}` : '既読',
+            change: 'Check now',
+            icon: MessageSquare,
+            color: 'text-green-500',
+            bg: 'bg-green-50',
+            href: '/dashboard/company/messages'
+        },
     ];
 
     return (
@@ -32,7 +88,11 @@ export default function CompanyDashboardOverview() {
             {/* Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {stats.map((stat, i) => (
-                    <div key={i} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-32 md:h-40">
+                    <Link
+                        key={i}
+                        href={stat.href}
+                        className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-32 md:h-40 hover:shadow-md hover:-translate-y-1 transition-all group"
+                    >
                         <div className="flex justify-between items-start">
                             <div className={`p-2 rounded-xl ${stat.bg} ${stat.color}`}>
                                 <stat.icon size={20} />
@@ -43,9 +103,9 @@ export default function CompanyDashboardOverview() {
                         </div>
                         <div>
                             <p className="text-slate-400 text-xs font-bold mb-1">{stat.label}</p>
-                            <p className="text-2xl md:text-3xl font-black text-slate-800">{stat.value}</p>
+                            <p className="text-2xl md:text-3xl font-black text-slate-800 group-hover:text-blue-600 transition-colors">{stat.value}</p>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
 
@@ -71,6 +131,17 @@ export default function CompanyDashboardOverview() {
                     </div>
                     <h3 className="text-lg font-black text-slate-800 mb-1">学習進捗管理</h3>
                     <p className="text-sm text-slate-500 font-medium">社員のe-ラーニング受講状況<br />と成長を可視化</p>
+                </Link>
+
+                <Link href="/admin/elearning" className="block bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 bg-orange-50 text-orange-600 rounded-xl group-hover:bg-orange-100 transition-colors">
+                            <BookOpen size={24} />
+                        </div>
+                        <span className="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-md">Courses</span>
+                    </div>
+                    <h3 className="text-lg font-black text-slate-800 mb-1">講座管理</h3>
+                    <p className="text-sm text-slate-500 font-medium">自社専用の講座や<br />研修用教材の管理</p>
                 </Link>
             </div>
 

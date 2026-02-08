@@ -1,0 +1,91 @@
+
+
+[2026-02-08T10:13:30.163Z]
+Prompt Payload:
+[{"id":0,"value":"好奇心旺盛","course":"リスキル大学講座アーカイブ"},{"id":1,"value":"好奇心旺盛","course":"DX推進担当者育成カリキュラム"},{"id":2,"value":"飽きっぽい","course":"ITパスポート"},{"id":3,"value":"飽きっぽい","course":"リスキル大学講座アーカイブ"},{"id":4,"value":"独創的","course":"リスキル大学講座アーカイブ"},{"id":5,"value":"独創的","course":"ITパスポート"}] 
+Response:
+[
+  {
+    "id": 0,
+    "message": "好奇心旺盛なあなたへ。多様な講座で知的好奇心を満たしませんか？"
+  },
+  {
+    "id": 1,
+    "message": "好奇心旺盛なあなたに！DXスキルで未来を切り拓きましょう！"
+  },
+  {
+    "id": 2,
+    "message": "飽きっぽいあなたも夢中！ITパスポートで新しい挑戦を！"
+  },
+  {
+    "id": 3,
+    "message": "飽きっぽいあなたも大丈夫！多彩な講座で発見を楽しもう！"
+  },
+  {
+    "id": 4,
+    "message": "独創的なあなたへ。リスキル大学で新たな発想を生み出そう！"
+  },
+  {
+    "id": 5,
+    "message": "独創的なあなたに。ITパスポートであなたの個性を活かそう！"
+  }
+]
+
+
+[2026-02-08T10:15:13.990Z]
+Prompt Payload:
+[] 
+Response:
+[
+  {
+    "id": 1,
+    "message": "専門性を深め、キャリアアップを目指しましょう！"
+  },
+  {
+    "id": 2,
+    "message": "新しいスキルを身につけ、可能性を広げよう！"
+  },
+  {
+    "id": 3,
+    "message": "自己成長を促し、自信を高める学びを。"
+  },
+  {
+    "id": 4,
+    "message": "変化に対応できる柔軟な思考力を養います。"
+  },
+  {
+    "id": 5,
+    "message": "チームワークを強化し、協調性を育みます。"
+  },
+  {
+    "id": 6,
+    "message": "リーダーシップを発揮する力を養いましょう。"
+  },
+  {
+    "id": 7,
+    "message": "問題解決能力を向上させ、課題を克服！"
+  },
+  {
+    "id": 8,
+    "message": "創造性を刺激し、斬新なアイデアを生み出そう。"
+  },
+  {
+    "id": 9,
+    "message": "コミュニケーション能力を高め、円滑な関係を。"
+  },
+  {
+    "id": 10,
+    "message": "ストレスマネジメントで、心身の健康を保つ。"
+  }
+]
+AI Gen Failed: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent: [503 Service Unavailable] The model is overloaded. Please try again later.
+
+
+[2026-02-08T10:17:05.351Z]
+Prompt Payload:
+[{"id":0,"value":"独創的","course":"リスキル大学講座アーカイブ"},{"id":1,"value":"独創的","course":"ITパスポート"}] 
+Response:
+[
+  {"id": 0, "message": "独創性を活かせる！リスキル大学講座で新たな視点を。"},
+  {"id": 1, "message": "独創的な発想をITで形に。ITパスポートで未来を拓こう。"}
+]

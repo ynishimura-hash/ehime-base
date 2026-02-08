@@ -1,5 +1,71 @@
 import { createAdminClient } from '@/utils/supabase/admin';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { createServerClient } from '@supabase/ssr';
+
+// GETメソッド: ユーザー一覧取得（RLSバイパス）
+export async function GET(request: NextRequest) {
+    try {
+        // まず認証確認
+        const cookieStore = await cookies();
+        const supabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                cookies: {
+                    getAll() {
+                        return cookieStore.getAll();
+                    },
+                },
+            }
+        );
+
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const adminClient = createAdminClient();
+
+        // 管理者確認
+        const { data: adminProfile } = await adminClient
+            .from('profiles')
+            .select('user_type')
+            .eq('id', session.user.id)
+            .single();
+
+        if (!adminProfile || adminProfile.user_type !== 'admin') {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
+        // フィルター取得
+        const { searchParams } = new URL(request.url);
+        const filter = searchParams.get('filter') || 'all';
+
+        // サービスロールで全ユーザー取得（RLSバイパス）
+        let query = adminClient
+            .from('profiles')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (filter && filter !== 'all') {
+            query = query.eq('user_type', filter);
+        }
+
+        const { data: users, error } = await query;
+
+        if (error) {
+            console.error('Fetch users error:', error);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
+        return NextResponse.json({ users: users || [] });
+    } catch (error) {
+        console.error('Server error:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+}
 
 export async function POST(request: Request) {
     try {

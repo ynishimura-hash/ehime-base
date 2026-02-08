@@ -6,6 +6,9 @@ import { useAppStore, ChatThread, Attachment } from '@/lib/appStore';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import ChatDetailModal from './ChatDetailModal';
 import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
+import MessageItemCard from './MessageItemCard';
+import ItemSelectorModal from './ItemSelectorModal';
+import { LayoutGrid } from 'lucide-react';
 
 interface UnifiedChatInterfaceProps {
     mode: 'fullscreen' | 'embedded'; // fullscreen for Seeker, embedded for Company Dashboard
@@ -57,6 +60,14 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
     const [activeFilter, setActiveFilter] = useState<'all' | 'unread' | 'blocked'>('all');
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [showItemSelector, setShowItemSelector] = useState(false);
+
+    // Sync initialChatId with selectedChatId (e.g. when navigating from URL)
+    useEffect(() => {
+        if (initialChatId) {
+            setSelectedChatId(initialChatId);
+        }
+    }, [initialChatId]);
 
     const myselfId = activeRole === 'seeker' ? currentUserId : currentCompanyId;
 
@@ -126,22 +137,36 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
 
     // Mark as read & Logic for Unread Separator
     useEffect(() => {
-        if (selectedChatId && selectedChatId !== prevChatIdRef.current) {
-            const chat = chats.find(c => c.id === selectedChatId);
-            if (chat) {
-                const unreadMsgs = chat.messages.filter(m => m.senderId !== myselfId && !m.isRead);
-                if (unreadMsgs.length > 0) {
-                    setUnreadBoundaryMessageId(unreadMsgs[0].id);
-                } else {
-                    setUnreadBoundaryMessageId(null);
-                }
+        if (!selectedChatId) return;
 
-                markAsRead(selectedChatId, myselfId);
-                updateChatSettings(myselfId, selectedChatId, { isUnreadManual: false });
+        const chat = chats.find(c => c.id === selectedChatId);
+        if (!chat) return;
+
+        // 1. Identify Unread Messages for Separator
+        // Only set separator if we just switched to this chat (to avoid separator jumping around on new messages)
+        if (selectedChatId !== prevChatIdRef.current) {
+            const unreadMsgs = chat.messages.filter(m => m.senderId !== myselfId && !m.isRead);
+            if (unreadMsgs.length > 0) {
+                setUnreadBoundaryMessageId(unreadMsgs[0].id);
+            } else {
+                setUnreadBoundaryMessageId(null);
             }
             prevChatIdRef.current = selectedChatId;
         }
-    }, [selectedChatId, chats, markAsRead, myselfId, updateChatSettings]);
+
+        // 2. Mark as Read (If there are unread messages)
+        const hasUnread = chat.messages.some(m => m.senderId !== myselfId && !m.isRead);
+        if (hasUnread) {
+            void markAsRead(selectedChatId, myselfId);
+        }
+
+        // Also clear manual unread flag needed
+        const settings = getSettings(selectedChatId);
+        if (settings?.isUnreadManual) {
+            void updateChatSettings(myselfId, selectedChatId, { isUnreadManual: false });
+        }
+
+    }, [selectedChatId, chats, markAsRead, myselfId, updateChatSettings, getSettings]);
 
     // Close context menu on click outside
     useEffect(() => {
@@ -225,21 +250,23 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
         let partner = { name: '', image: '', isImageColor: false };
         if (activeRole === 'seeker') {
             const c = companies.find(c => c.id === chat.companyId);
-            // Fix: Prioritize image, then default image. Avoid forcing isImageColor.
-            // User requested a default image if no image is present.
-            const hasImage = !!c?.image;
-            const defaultImage = '/images/defaults/default_company_icon.png';
+            // Fix: Prioritize logo_url, then image, then default.
+            const companyAny = c as any;
+            const logoUrl = companyAny?.logo_url || c?.image;
+            const hasImage = !!logoUrl;
+            // Use the same default as dashboard
+            const defaultImage = '/images/defaults/default_company_logo.png';
 
             partner = {
                 name: c?.name || 'Unknown Company',
-                image: hasImage ? c.image : defaultImage,
-                isImageColor: false // Always use image (real or default) to ensure icon visibility
+                image: hasImage ? logoUrl : defaultImage,
+                isImageColor: false
             };
         } else {
             const u = users.find(u => u.id === chat.userId);
             partner = {
                 name: u?.name || 'Unknown User',
-                image: u?.image || '/images/defaults/default_user_icon.png', // Reasonable fallback if we had one, but stick to empty for now if not requested
+                image: u?.image || '/images/defaults/default_user_icon.png',
                 isImageColor: false
             };
         }
@@ -418,13 +445,16 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
                                         )}
 
                                         {/* Priority Badge (Bottom-Left) */}
-                                        {settings?.priority && (
-                                            <div className={`absolute -bottom-1 -left-1 px-1 rounded-md border border-white text-[8px] font-bold text-white shadow-sm flex items-center justify-center z-10
-                                                ${settings.priority === 'high' ? 'bg-red-500' : settings.priority === 'medium' ? 'bg-orange-500' : 'bg-blue-500'}
-                                            `}>
-                                                {settings.priority === 'high' ? '高' : settings.priority === 'medium' ? '中' : '低'}
-                                            </div>
-                                        )}
+                                        {(() => {
+                                            const p = settings?.priority || 'medium';
+                                            return (
+                                                <div className={`absolute -bottom-1 -left-1 px-1 rounded-md border border-white text-[8px] font-bold text-white shadow-sm flex items-center justify-center z-10
+                                                    ${p === 'high' ? 'bg-red-500' : p === 'medium' ? 'bg-orange-500' : 'bg-blue-500'}
+                                                `}>
+                                                    {p === 'high' ? '高' : p === 'medium' ? '中' : '低'}
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
 
                                     <div className="flex-1 min-w-0">
@@ -524,26 +554,21 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
                                     {/* Bottom spacer */}
                                     <div ref={messagesEndRef} className="h-0" />
 
-                                    {[...selectedChat.messages].reverse().map(msg => {
+                                    {[...selectedChat.messages].reverse().map((msg, index, array) => {
                                         const isSystem = (msg as any).isSystem || msg.senderId === 'SYSTEM';
-
-                                        if (isSystem) {
-                                            return (
-                                                <div key={msg.id} className="flex justify-center my-2">
-                                                    <div className="bg-zinc-200/50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-zinc-200 shadow-sm">
-                                                        <p className="text-[11px] font-black text-zinc-500">{msg.text}</p>
-                                                    </div>
-                                                </div>
-                                            );
-                                        }
-
                                         const isMe = msg.senderId === myselfId;
                                         const replyToMsg = msg.replyToId ? selectedChat.messages.find(m => m.id === msg.replyToId) : null;
+
+                                        // Date separator logic: Compare with the message that comes BEFORE it in chronological order
+                                        // Since we are mapping over a REVERSED array, the chronological "previous" message is at index + 1
+                                        const nextMsgIdx = index + 1;
+                                        const showDateSeparator = nextMsgIdx >= array.length ||
+                                            new Date(msg.timestamp).toDateString() !== new Date(array[nextMsgIdx].timestamp).toDateString();
 
                                         return (
                                             <React.Fragment key={msg.id}>
                                                 <div id={`msg-${msg.id}`} className={`flex gap-2 md:gap-3 ${isMe ? 'justify-end' : 'justify-start'} group`}>
-                                                    {!isMe && (
+                                                    {!isMe && !isSystem && (
                                                         partner.isImageColor ? (
                                                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs mt-1 shrink-0 ${partner.image}`}>
                                                                 {partner.name.slice(0, 1)}
@@ -568,112 +593,136 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
                                                         )
                                                     )}
 
-                                                    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[85%] md:max-w-sm`}>
-                                                        {/* Reply Quote */}
-                                                        {replyToMsg && (
-                                                            <div
-                                                                className={`text-[10px] text-slate-500 bg-black/5 px-2 py-1 rounded-t-lg mb-0.5 border-l-2 border-slate-300 w-full truncate cursor-pointer hover:bg-black/10 transition-colors`}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    document.getElementById(`msg-${replyToMsg.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                                                }}
-                                                            >
-                                                                <span className="font-bold mr-1">Reply to:</span>
-                                                                {replyToMsg.text || (replyToMsg.attachment ? `[${replyToMsg.attachment.type === 'image' ? '画像' : 'ファイル'}] ${replyToMsg.attachment.name}` : 'メッセージ')}
+                                                    {isSystem ? (
+                                                        <div className="flex-1 flex justify-center my-2">
+                                                            <div className="bg-zinc-200/50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-zinc-200 shadow-sm">
+                                                                <p className="text-[11px] font-black text-zinc-500">{msg.text}</p>
                                                             </div>
-                                                        )}
-
-                                                        <div className="flex items-end gap-2">
-                                                            {/* Timestamp/Read (Left side for ME) */}
-                                                            {isMe && (
-                                                                <div className="flex flex-col items-end text-[10px] text-slate-400 font-bold leading-tight mb-1">
-                                                                    {msg.isRead && <span className="text-slate-400">既読</span>}
-                                                                    <span>{new Date(msg.timestamp).getHours()}:{String(new Date(msg.timestamp).getMinutes()).padStart(2, '0')}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[85%] md:max-w-sm`}>
+                                                            {/* Reply Quote */}
+                                                            {replyToMsg && (
+                                                                <div
+                                                                    className={`text-[10px] text-slate-500 bg-black/5 px-2 py-1 rounded-t-lg mb-0.5 border-l-2 border-slate-300 w-full truncate cursor-pointer hover:bg-black/10 transition-colors`}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        document.getElementById(`msg-${replyToMsg.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                                    }}
+                                                                >
+                                                                    <span className="font-bold mr-1">Reply to:</span>
+                                                                    {replyToMsg.text || (replyToMsg.attachment ? `[${replyToMsg.attachment.type === 'image' ? '画像' : 'ファイル'}] ${replyToMsg.attachment.name}` : 'メッセージ')}
                                                                 </div>
                                                             )}
 
-                                                            {/* Message Bubble */}
-                                                            <div
-                                                                className={`p-3 md:p-4 rounded-2xl shadow-sm text-sm font-medium relative cursor-pointer select-text
-                                                                ${isMe
-                                                                        ? 'bg-gradient-to-tr from-blue-600 to-blue-500 text-white rounded-tr-none'
-                                                                        : 'bg-white text-slate-900 border border-slate-100 rounded-tl-none'
-                                                                    }`}
-                                                                onContextMenu={(e) => handleContextMenu(e, msg.id, msg.senderId)}
-                                                                onClick={(e) => {
-                                                                    if (window.getSelection()?.toString()) return;
-                                                                    handleReply(msg.id);
-                                                                }}
-                                                            >
-                                                                {/* Attachment Display */}
-                                                                {msg.attachment && (
-                                                                    <div className="mb-2">
-                                                                        {msg.attachment.type === 'image' ? (
-                                                                            <div className="relative group inline-block">
-                                                                                <a
-                                                                                    href={msg.attachment.url}
-                                                                                    target="_blank"
-                                                                                    rel="noopener noreferrer"
-                                                                                    className="block cursor-zoom-in"
-                                                                                    onClick={(e) => e.stopPropagation()}
-                                                                                >
-                                                                                    <img
-                                                                                        src={msg.attachment.url}
-                                                                                        alt="attachment"
-                                                                                        className="rounded-lg max-h-48 object-cover border border-black/10"
-                                                                                    />
-                                                                                </a>
-                                                                                <a
-                                                                                    href={msg.attachment.url}
-                                                                                    download={msg.attachment.name}
-                                                                                    className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 backdrop-blur-sm"
-                                                                                    title="Download"
-                                                                                    onClick={(e) => e.stopPropagation()}
-                                                                                >
-                                                                                    <Download size={16} />
-                                                                                </a>
-                                                                            </div>
-                                                                        ) : (
-                                                                            <div className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? 'bg-white/20' : 'bg-slate-50'}`}>
-                                                                                <a
-                                                                                    href={msg.attachment.url}
-                                                                                    target="_blank"
-                                                                                    rel="noopener noreferrer"
-                                                                                    className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity cursor-pointer"
-                                                                                    onClick={(e) => e.stopPropagation()}
-                                                                                >
-                                                                                    <div className="p-2 bg-white rounded-lg text-blue-500 shadow-sm">
-                                                                                        <FileText size={20} />
-                                                                                    </div>
-                                                                                    <div className="flex-1 min-w-0 text-left">
-                                                                                        <p className="truncate font-bold text-xs">{msg.attachment.name}</p>
-                                                                                        <p className="text-[10px] opacity-70">{msg.attachment.size}</p>
-                                                                                    </div>
-                                                                                </a>
-                                                                                <a
-                                                                                    href={msg.attachment.url}
-                                                                                    download={msg.attachment.name}
-                                                                                    className="p-2 hover:bg-black/10 rounded-full transition-colors shrink-0"
-                                                                                    onClick={(e) => e.stopPropagation()}
-                                                                                >
-                                                                                    <Download size={16} />
-                                                                                </a>
-                                                                            </div>
-                                                                        )}
+                                                            <div className="flex items-end gap-2">
+                                                                {/* Timestamp/Read (Left side for ME) */}
+                                                                {isMe && (
+                                                                    <div className="flex flex-col items-end text-[10px] text-slate-400 font-bold leading-tight mb-1">
+                                                                        {msg.isRead && <span className="text-slate-400">既読</span>}
+                                                                        <span>{new Date(msg.timestamp).getHours()}:{String(new Date(msg.timestamp).getMinutes()).padStart(2, '0')}</span>
                                                                     </div>
                                                                 )}
-                                                                {msg.text}
-                                                            </div>
 
-                                                            {/* Timestamp (Right side for Other) */}
-                                                            {!isMe && (
-                                                                <div className="flex flex-col items-start text-[10px] text-slate-400 font-bold leading-tight mb-1">
-                                                                    <span>{new Date(msg.timestamp).getHours()}:{String(new Date(msg.timestamp).getMinutes()).padStart(2, '0')}</span>
+                                                                {/* Message Bubble */}
+                                                                <div
+                                                                    className={`p-3 md:p-4 rounded-2xl shadow-sm text-sm font-medium relative cursor-pointer select-text
+                                                                ${isMe
+                                                                            ? 'bg-gradient-to-tr from-blue-600 to-blue-500 text-white rounded-tr-none'
+                                                                            : 'bg-white text-slate-900 border border-slate-100 rounded-tl-none'
+                                                                        }`}
+                                                                    onContextMenu={(e) => handleContextMenu(e, msg.id, msg.senderId)}
+                                                                    onClick={(e) => {
+                                                                        if (window.getSelection()?.toString()) return;
+                                                                        handleReply(msg.id);
+                                                                    }}
+                                                                >
+                                                                    {/* Item Card View */}
+                                                                    {msg.attachment && ['job', 'quest', 'company', 'reel', 'course'].includes(msg.attachment.type) && (
+                                                                        <MessageItemCard attachment={msg.attachment} isMe={isMe} />
+                                                                    )}
+
+                                                                    {/* Attachment Display */}
+                                                                    {msg.attachment && (msg.attachment.type === 'image' || msg.attachment.type === 'file') && (
+                                                                        <div className="mb-2">
+                                                                            {msg.attachment.type === 'image' ? (
+                                                                                <div className="relative group inline-block">
+                                                                                    <a
+                                                                                        href={msg.attachment.url}
+                                                                                        target="_blank"
+                                                                                        rel="noopener noreferrer"
+                                                                                        className="block cursor-zoom-in"
+                                                                                        onClick={(e) => e.stopPropagation()}
+                                                                                    >
+                                                                                        <img
+                                                                                            src={msg.attachment.url}
+                                                                                            alt="attachment"
+                                                                                            className="rounded-lg max-h-48 object-cover border border-black/10"
+                                                                                        />
+                                                                                    </a>
+                                                                                    <a
+                                                                                        href={msg.attachment.url}
+                                                                                        download={msg.attachment.name}
+                                                                                        className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 backdrop-blur-sm"
+                                                                                        title="Download"
+                                                                                        onClick={(e) => e.stopPropagation()}
+                                                                                    >
+                                                                                        <Download size={16} />
+                                                                                    </a>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? 'bg-white/20' : 'bg-slate-50'}`}>
+                                                                                    <a
+                                                                                        href={msg.attachment.url}
+                                                                                        target="_blank"
+                                                                                        rel="noopener noreferrer"
+                                                                                        className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity cursor-pointer"
+                                                                                        onClick={(e) => e.stopPropagation()}
+                                                                                    >
+                                                                                        <div className="p-2 bg-white rounded-lg text-blue-500 shadow-sm">
+                                                                                            <FileText size={20} />
+                                                                                        </div>
+                                                                                        <div className="flex-1 min-w-0 text-left">
+                                                                                            <p className="truncate font-bold text-xs">{msg.attachment.name}</p>
+                                                                                            <p className="text-[10px] opacity-70">{msg.attachment.size}</p>
+                                                                                        </div>
+                                                                                    </a>
+                                                                                    <a
+                                                                                        href={msg.attachment.url}
+                                                                                        download={msg.attachment.name}
+                                                                                        className="p-2 hover:bg-black/10 rounded-full transition-colors shrink-0"
+                                                                                        onClick={(e) => e.stopPropagation()}
+                                                                                    >
+                                                                                        <Download size={16} />
+                                                                                    </a>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                    {msg.text}
                                                                 </div>
-                                                            )}
+
+                                                                {/* Timestamp (Right side for Other) */}
+                                                                {!isMe && (
+                                                                    <div className="flex flex-col items-start text-[10px] text-slate-400 font-bold leading-tight mb-1">
+                                                                        <span>{new Date(msg.timestamp).getHours()}:{String(new Date(msg.timestamp).getMinutes()).padStart(2, '0')}</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Date Separator */}
+                                                {showDateSeparator && (
+                                                    <div className="flex justify-center my-6">
+                                                        <div className="bg-slate-200/50 backdrop-blur-sm px-4 py-1 rounded-full border border-slate-200/50">
+                                                            <p className="text-[10px] font-black text-slate-500">
+                                                                {new Date(msg.timestamp).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                )}
 
                                                 {/* Unread Separator */}
                                                 {msg.id === unreadBoundaryMessageId && (
@@ -745,6 +794,15 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
                                         >
                                             <Paperclip size={20} />
                                         </button>
+                                        {activeRole === 'company' && (
+                                            <button
+                                                onClick={() => setShowItemSelector(true)}
+                                                className="p-3 text-slate-400 hover:bg-slate-100 rounded-xl transition-colors hidden md:block"
+                                                title="コンテンツを添付"
+                                            >
+                                                <LayoutGrid size={20} />
+                                            </button>
+                                        )}
                                         <div className="flex-1 bg-slate-100 rounded-2xl p-1 flex items-center">
                                             <textarea
                                                 value={inputText}
@@ -855,6 +913,16 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
             )}
 
             {mode === 'fullscreen' && <MobileBottomNav />}
+
+            {/* Item Selector Modal for Company */}
+            {activeRole === 'company' && currentCompanyId && (
+                <ItemSelectorModal
+                    isOpen={showItemSelector}
+                    onClose={() => setShowItemSelector(false)}
+                    onSelect={(att) => setAttachment(att)}
+                    companyId={currentCompanyId}
+                />
+            )}
         </div>
     );
 }

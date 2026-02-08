@@ -18,6 +18,7 @@ import { Reel } from '@/types/shared';
 import { Loader2 } from 'lucide-react';
 
 import { fetchPublicCompanyDetailAction } from '@/app/admin/actions';
+import { incrementCompanyViewAction } from '@/app/actions/companies';
 
 export default function CompanyDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -37,6 +38,9 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
             setLoading(true);
 
             try {
+                // Increment view count (fire and forget)
+                incrementCompanyViewAction(id).catch(err => console.error('View increment failed', err));
+
                 // Use Server Action
                 const result = await fetchPublicCompanyDetailAction(id);
 
@@ -130,12 +134,6 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                 <span className="text-sm font-black text-zinc-800 uppercase tracking-tighter">企業詳細</span>
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={toggleLike}
-                        className={`p-2 rounded-full transition-colors ${isLiked ? 'bg-red-50 text-red-500' : 'hover:bg-zinc-100 text-zinc-400'}`}
-                    >
-                        <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
-                    </button>
-                    <button
                         onClick={handleShare}
                         className="p-2 hover:bg-zinc-100 rounded-full transition-colors text-zinc-600"
                     >
@@ -154,13 +152,22 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ id: st
                             <div className={`w-full h-full ${company.logo_color || 'bg-slate-300'}`} />
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                        <div className="absolute top-10 right-10 z-20">
+                        <div className="absolute top-6 right-6 flex flex-col gap-4 items-end z-20">
+                            <button
+                                onClick={toggleLike}
+                                className={`w-12 h-12 backdrop-blur-md rounded-full flex items-center justify-center transition-all shadow-lg ${isLiked ? 'bg-red-500 text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}
+                            >
+                                <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
+                            </button>
+
                             {reels.length > 0 && (
-                                <ReelIcon
-                                    reels={reels}
-                                    fallbackImage={company.cover_image_url}
-                                    onClick={() => setIsReelModalOpen(true)}
-                                />
+                                <div className="transition-transform hover:scale-110">
+                                    <ReelIcon
+                                        reels={reels}
+                                        fallbackImage={company.cover_image_url}
+                                        onClick={() => setIsReelModalOpen(true)}
+                                    />
+                                </div>
                             )}
                         </div>
 

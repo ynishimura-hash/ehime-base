@@ -10,10 +10,27 @@ import { Building2, Eye, EyeOff } from 'lucide-react';
 export default function CompanyLoginPage() {
     const router = useRouter();
     const supabase = createClient();
+    const { authStatus } = useAppStore();
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [showPassword, setShowPassword] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
+
+    React.useEffect(() => {
+        const checkSession = async () => {
+            if (authStatus === 'authenticated') {
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                        window.location.href = '/dashboard/company';
+                    } else {
+                        useAppStore.getState().resetState();
+                    }
+                } catch (e) { }
+            }
+        };
+        checkSession();
+    }, [authStatus]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

@@ -25,6 +25,7 @@ export interface DbCourse {
     // New fields
     view_count: number;
     tags: string[];
+    is_public: boolean;
 }
 
 // Interface matches DB 'course_curriculums' (Section/Module in UI - confusing naming in DB migration vs UI)
@@ -52,10 +53,14 @@ export const ElearningService = {
     },
 
     // 1. Get All Tracks - Uses API route for stability
-    async getTracks(): Promise<LearningTrack[]> {
-        console.log('ElearningService.getTracks: Fetching from API...');
+    async getTracks(includeUnpublished: boolean = false): Promise<LearningTrack[]> {
+        console.log('ElearningService.getTracks: Fetching from API...', { includeUnpublished });
 
-        const response = await fetch('/api/elearning/tracks', {
+        const url = includeUnpublished
+            ? '/api/elearning/tracks?showAll=true'
+            : '/api/elearning/tracks';
+
+        const response = await fetch(url, {
             method: 'GET',
             cache: 'no-store'
         });
@@ -69,6 +74,59 @@ export const ElearningService = {
         const tracks = await response.json();
         console.log(`ElearningService.getTracks: Success, found ${tracks.length} tracks`);
         return tracks;
+    },
+
+    // 1.5 Get Single Track (Curriculum) by ID
+    async getTrack(id: string): Promise<any | null> {
+        console.log('ElearningService.getTrack: Fetching track', id);
+        try {
+            const response = await fetch(`/api/elearning/tracks/${id}`, {
+                method: 'GET',
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                if (response.status === 404) return null;
+                const errorData = await response.json().catch(() => ({}));
+                console.error('ElearningService.getTrack: API error:', errorData);
+                return null;
+            }
+
+            return await response.json();
+        } catch (e) {
+            console.error('ElearningService.getTrack exception:', e);
+            return null;
+        }
+    },
+
+    // 1.6 Update Track (Curriculum)
+    async updateTrack(id: string, updates: any) {
+        console.log('ElearningService.updateTrack:', id, updates);
+
+        const response = await fetch(`/api/elearning/tracks/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to update track');
+        }
+    },
+
+    // 1.7 Delete Track (Curriculum)
+    async deleteTrack(id: string) {
+        console.log('ElearningService.deleteTrack:', id);
+
+        const response = await fetch(`/api/elearning/tracks/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to delete track');
+        }
     },
 
     // 2. Get Courses (Modules) for a Track - Uses API route for stability
@@ -116,10 +174,37 @@ export const ElearningService = {
         }
     },
 
-    // 2.6 Get Single Module (Standard User View) - APIルート経由でAbortError回避
-    async getModule(id: string): Promise<CurriculumDef | null> {
-        console.log(`ElearningService.getModule: Fetching module ${id} from API...`);
+    // 2.5a Get Modules Filtered by User (Company or Instructor)
+    async getModulesByUser(userId: string): Promise<CurriculumDef[]> {
+        console.log(`ElearningService.getModulesByUser: Fetching for user ${userId}...`);
+        // 実装メモ: 現時点ではDBにowner_idがないため、全件取得してフロントエンドでフィルタリングするか、
+        // サーバーサイドAPIを拡張してタグ等で管理することを検討。
+        // ここではAPI経由で全件取得し、将来的にクエリパラメータでフィルタリングできるようにする土台を作る。
+        try {
+            const response = await fetch(`/api/elearning/modules?userId=${userId}`, {
+                method: 'GET',
+                cache: 'no-store'
+            });
 
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('ElearningService.getModulesByUser: API error:', errorData);
+                throw new Error(errorData.error || 'Failed to fetch user modules');
+            }
+
+            const modules = await response.json();
+            // TODO: サーバーサイドでフィルタリングされていない場合、ここでuserIdに紐づくもののみを抽出する
+            // 現在はモック的に全件返すが、将来的に tags や metadata に userId を含める運用を想定
+            return modules;
+        } catch (e) {
+            console.error('ElearningService.getModulesByUser: Caught error:', e);
+            throw e;
+        }
+    },
+
+    // 2.6 Get Single Module (Course) by ID
+    async getModule(id: string): Promise<CurriculumDef | null> {
+        // console.log('ElearningService.getModule: Fetching module', id);
         try {
             const response = await fetch(`/api/elearning/modules/${id}`, {
                 method: 'GET',
@@ -127,78 +212,108 @@ export const ElearningService = {
             });
 
             if (!response.ok) {
+                // 404の場合はnullを返すだけでエラーにはしない
+                if (response.status === 404) return null;
+
                 const errorData = await response.json().catch(() => ({}));
                 console.error('ElearningService.getModule: API error:', errorData);
                 return null;
             }
 
             const module = await response.json();
-            console.log(`ElearningService.getModule: Success, found module "${module.title}" with ${module.lessons?.length || 0} lessons`);
             return module;
         } catch (e) {
-            console.error('ElearningService.getModule: Caught error:', e);
+            console.error('ElearningService.getModule exception:', e);
             return null;
         }
     },
 
     // 2.7 Update Module (Admin)
     async updateModule(id: string, updates: Partial<any>) {
-        console.log('ElearningService.updateModule:', id, updates);
-        const supabase = createClient();
-        const { error } = await supabase
-            .from('course_curriculums')
-            .update(updates)
-            .eq('id', id);
+        console.log('ElearningService.updateModule: sending to API...', id, updates);
 
-        if (error) {
-            console.error('Failed to update module:', error);
-            throw error;
+        const response = await fetch(`/api/elearning/modules/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to update module');
+        }
+    },
+
+    // 2.7.5 Delete Module (Admin)
+    async deleteModule(id: string) {
+        console.log('ElearningService.deleteModule:', id);
+
+        // Note: API route handles deletion of related lessons if implemented there, 
+        // or we call API. 
+        // Logic: Call API /api/elearning/modules/[id] with DELETE method.
+
+        const response = await fetch(`/api/elearning/modules/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to delete module');
+        }
+    },
+
+    // 2.8 Get Single Lesson with its Course Info - 直接API経由で取得
+    async getLesson(id: string): Promise<any | null> {
+        console.log(`ElearningService.getLesson: Fetching lesson ${id} from API...`);
+
+        try {
+            const response = await fetch(`/api/elearning/content/${id}`, {
+                method: 'GET',
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('ElearningService.getLesson: API error:', errorData);
+                return null;
+            }
+
+            const lesson = await response.json();
+            console.log(`ElearningService.getLesson: Success, found lesson "${lesson.title}"`);
+            return lesson;
+        } catch (e) {
+            console.error('ElearningService.getLesson: Caught error:', e);
+            return null;
         }
     },
 
 
     // 3. Admin: Get All Content (Flat list for content library)
     async getAllContent(page: number = 1, limit: number = 50, curriculumId?: string): Promise<{ data: ContentItem[], count: number }> {
-        const supabase = createClient();
+        console.log('ElearningService.getAllContent: Fetching from API...');
 
-        const from = (page - 1) * limit;
-        const to = from + limit - 1;
-
-        let query = supabase
-            .from('course_lessons')
-            .select(`
-                *,
-                curriculum: course_curriculums(title)
-            `, { count: 'exact' });
-
-        // Apply filters
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString()
+        });
         if (curriculumId) {
-            if (curriculumId === 'unassigned') {
-                query = query.is('curriculum_id', null);
-            } else {
-                query = query.eq('curriculum_id', curriculumId);
-            }
+            params.set('curriculumId', curriculumId);
         }
 
-        const { data, error, count } = await query
-            .order('created_at', { ascending: false })
-            .range(from, to);
+        const response = await fetch(`/api/elearning/content?${params.toString()}`, {
+            method: 'GET',
+            cache: 'no-store'
+        });
 
-        if (error) throw error;
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('ElearningService.getAllContent: API error:', errorData);
+            throw new Error(errorData.error || 'Failed to fetch content');
+        }
 
-        const mappedData = data.map((l: any) => ({
-            id: l.id,
-            title: l.title,
-            type: l.youtube_url ? 'video' : 'document',
-            url: l.youtube_url,
-            duration: l.duration,
-            category: l.curriculum?.title || 'Uncategorized',
-            createdAt: l.created_at,
-            quiz: l.quiz,
-            material_url: l.material_url
-        }));
-
-        return { data: mappedData, count: count || 0 };
+        const result = await response.json();
+        console.log(`ElearningService.getAllContent: Success, found ${result.data?.length || 0} items`);
+        return { data: result.data || [], count: result.count || 0 };
     },
 
     // 4. Admin: Create Content
@@ -214,6 +329,24 @@ export const ElearningService = {
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error || 'Failed to create content');
+        }
+
+        return await response.json();
+    },
+
+    // 4.5. Admin: Create Module (Course) linked to a Track
+    async createModule(module: { title: string, course_id: string, description?: string, order_index?: number }) {
+        console.log('ElearningService.createModule: sending to API...', module);
+
+        const response = await fetch('/api/elearning/modules', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(module)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to create module');
         }
 
         return await response.json();

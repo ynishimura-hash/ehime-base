@@ -5,18 +5,19 @@ import { useAppStore } from '@/lib/appStore';
 import {
     Users, Building2, Briefcase, GraduationCap,
     TrendingUp, ShieldCheck, Settings, Bell,
-    Search, ArrowUpRight, BarChart3, Clock, Star
+    Search, ArrowUpRight, BarChart3, Clock, Star, Database
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { fetchAdminStats } from './actions';
+import { fetchAdminStats, fetchRecentInteractionsAction } from './actions';
 import { createClient } from '@/utils/supabase/client';
 import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
 import { ALL_CONTENT } from '@/data/mock_elearning_data';
 
 export default function AdminDashboardPage() {
-    const { interactions, activeRole, courses, fetchCourses, users, currentUserId } = useAppStore();
+    const { interactions, activeRole, courses, fetchCourses, users, currentUserId, systemSettings, fetchSystemSettings, updateSystemSetting } = useAppStore();
     const [counts, setCounts] = React.useState({ users: 0, companies: 0, jobs: 0, learning: 0 });
+    const [recentInteractions, setRecentInteractions] = React.useState<any[]>([]);
 
     React.useEffect(() => {
         const validateSession = async () => {
@@ -27,6 +28,7 @@ export default function AdminDashboardPage() {
         const fetchStats = async () => {
             // Use Server Action to fetch data securely (bypassing RLS)
             const stats = await fetchAdminStats();
+            const interactionsResult = await fetchRecentInteractionsAction();
 
             if (courses.length === 0) fetchCourses();
 
@@ -36,9 +38,15 @@ export default function AdminDashboardPage() {
                 jobs: stats.jobs,
                 learning: ALL_CONTENT.length || 0
             });
+
+            if (interactionsResult.data) {
+                setRecentInteractions(interactionsResult.data);
+            }
+
+            fetchSystemSettings();
         };
         fetchStats();
-    }, [fetchCourses, courses.length]);
+    }, [fetchCourses, courses.length, fetchSystemSettings]);
 
     const [password, setPassword] = React.useState('');
     const { loginAs } = useAppStore();
@@ -102,9 +110,13 @@ export default function AdminDashboardPage() {
     return (
         <div className="flex flex-col h-full">
             <header className="bg-white border-b border-slate-200 h-20 sticky top-0 z-30 flex items-center justify-between px-8 shrink-0">
-                <div className="flex items-center gap-4 bg-slate-50 px-4 py-2.5 rounded-2xl border border-slate-200 flex-1 max-w-md">
+                <div className="flex items-center gap-4 bg-slate-50 px-4 py-2.5 rounded-2xl border border-slate-200 flex-1 max-w-md focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
                     <Search size={18} className="text-slate-400" />
-                    <input type="text" placeholder="データ全体を検索..." className="bg-transparent border-none font-bold text-sm outline-none w-full" />
+                    <input
+                        type="text"
+                        placeholder="データ全体を検索..."
+                        className="bg-transparent border-none font-bold text-sm text-slate-700 placeholder-slate-400 outline-none w-full"
+                    />
                 </div>
                 <div className="flex items-center gap-4">
                     <button className="p-3 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all relative">
@@ -152,8 +164,16 @@ export default function AdminDashboardPage() {
                         <h1 className="text-4xl font-black text-slate-900 tracking-tight">Overview</h1>
                         <p className="text-slate-500 font-bold mt-1">システム全体のステータスを確認しましょう。</p>
                     </div>
-                    <div className="hidden md:flex bg-white px-4 py-2 rounded-xl border border-slate-200 items-center gap-3 shadow-sm font-bold text-sm text-slate-600">
-                        <Clock size={16} className="text-blue-500" /> 最終更新: 2026/01/18 15:30
+                    <div className="hidden md:flex items-center gap-3">
+                        <Link
+                            href="/admin/audit"
+                            className="bg-white px-4 py-2 rounded-xl border border-slate-200 flex items-center gap-2 shadow-sm font-bold text-sm text-slate-600 hover:bg-slate-50 transition-all"
+                        >
+                            <Database size={16} className="text-blue-500" /> 監査ログを確認
+                        </Link>
+                        <div className="bg-white px-4 py-2 rounded-xl border border-slate-200 flex items-center gap-3 shadow-sm font-bold text-sm text-slate-600">
+                            <Clock size={16} className="text-blue-500" /> 最終更新: 2026/02/03 15:30
+                        </div>
                     </div>
                 </div>
 
@@ -195,7 +215,7 @@ export default function AdminDashboardPage() {
                             <button className="text-sm font-black text-blue-600 hover:underline">すべて表示</button>
                         </div>
                         <div className="space-y-6">
-                            {interactions.slice(-5).reverse().map((interaction, i) => (
+                            {recentInteractions.length > 0 ? recentInteractions.slice(0, 5).map((interaction, i) => (
                                 <div key={i} className="flex items-center gap-4 p-4 rounded-3xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 group">
                                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${interaction.type.includes('like') ? 'bg-rose-50 text-rose-500 group-hover:bg-rose-500 group-hover:text-white' :
                                         interaction.type === 'apply' ? 'bg-blue-50 text-blue-500 group-hover:bg-blue-500 group-hover:text-white' :
@@ -204,23 +224,31 @@ export default function AdminDashboardPage() {
                                         {interaction.type.includes('like') ? <Star size={20} /> : <ArrowUpRight size={20} />}
                                     </div>
                                     <div className="flex-1">
-                                        <p className="font-black text-slate-800">
-                                            {interaction.type === 'apply' ? '新しい求人応募がありました' :
-                                                interaction.type.includes('like') ? 'ユーザーが企業を「気になる」に追加しました' :
-                                                    'スカウトメッセージが送信されました'}
+                                        <p className="font-black text-slate-800 leading-snug">
+                                            {interaction.type === 'apply' ? (
+                                                <span><span className="text-blue-600">{interaction.fromName || 'ユーザー'}</span> が求人「{interaction.targetName}」に応募しました</span>
+                                            ) : interaction.type === 'like_company' ? (
+                                                <span><span className="text-rose-500">{interaction.fromName || 'ユーザー'}</span> が企業「{interaction.targetName}」をお気に入りに追加しました</span>
+                                            ) : interaction.type === 'like_job' ? (
+                                                <span><span className="text-rose-500">{interaction.fromName || 'ユーザー'}</span> が求人「{interaction.targetName}」をお気に入りに追加しました</span>
+                                            ) : interaction.type === 'like_quest' ? (
+                                                <span><span className="text-rose-500">{interaction.fromName || 'ユーザー'}</span> がクエスト「{interaction.targetName}」をお気に入りに追加しました</span>
+                                            ) : interaction.type === 'like_reel' ? (
+                                                <span><span className="text-rose-500">{interaction.fromName || 'ユーザー'}</span> が動画「{interaction.targetName}」をお気に入りに追加しました</span>
+                                            ) : interaction.type === 'like_user' ? (
+                                                <span><span className="text-emerald-600">{interaction.fromName || '企業'}</span> がユーザー「{interaction.targetName}」をお気に入りに追加しました</span>
+                                            ) : interaction.type === 'scout' ? (
+                                                <span><span className="text-emerald-600">{interaction.fromName || '企業'}</span> がユーザー「{interaction.targetName}」にスカウトを送信しました</span>
+                                            ) : (
+                                                <span>{interaction.type} action: {interaction.fromName} -&gt; {interaction.targetName}</span>
+                                            )}
                                         </p>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
-                                            ID: {interaction.fromId.slice(0, 8)} → {interaction.toId.slice(0, 8)}
-                                        </p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-xs font-bold text-slate-400">
-                                            {new Date(interaction.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        <p className="text-[10px] font-bold text-slate-400 mt-1">
+                                            {new Date(interaction.timestamp).toLocaleString('ja-JP')}
                                         </p>
                                     </div>
                                 </div>
-                            ))}
-                            {interactions.length === 0 && (
+                            )) : (
                                 <div className="py-20 text-center text-slate-400 font-bold">
                                     アクティビティはまだありません
                                 </div>
@@ -239,13 +267,40 @@ export default function AdminDashboardPage() {
                                     メンテナンスモードの切り替えや、システム全体の環境設定を行います。定期的なバックアップとデータ整合性の確認を推奨します。
                                 </p>
                             </div>
-                            <button className="mt-8 w-full py-4 bg-white/10 hover:bg-white/20 text-white font-black rounded-2xl transition-all border border-white/10 flex items-center justify-center gap-2 backdrop-blur-md">
+                            <button
+                                onClick={() => toast.info('システム設定の詳細ページは未実装です。下部のクイック設定をご利用ください。')}
+                                className="mt-8 w-full py-4 bg-white/10 hover:bg-white/20 text-white font-black rounded-2xl transition-all border border-white/10 flex items-center justify-center gap-2 backdrop-blur-md"
+                            >
                                 <Settings size={20} /> システム設定へ
                             </button>
                         </div>
                     </section>
-                </div>
-            </div>
-        </div>
+                </div >
+
+                {/* Quick Settings Section */}
+                <section className="bg-white rounded-[3rem] border border-slate-200 shadow-sm p-10 mt-8">
+                    <div className="flex items-center gap-3 mb-8">
+                        <Database className="text-blue-600" />
+                        <h3 className="text-2xl font-black text-slate-900">クイック設定</h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="flex items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                            <div>
+                                <p className="font-black text-slate-800">トップページの統計データを実数連動させる</p>
+                                <p className="text-sm font-bold text-slate-400 mt-1">
+                                    ONにするとDBの実際のユーザー数・クエスト数を表示し、OFFでは固定値を表示します。
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => updateSystemSetting('show_real_stats', !systemSettings['show_real_stats'])}
+                                className={`w-14 h-8 rounded-full transition-all relative ${systemSettings['show_real_stats'] ? 'bg-blue-600' : 'bg-slate-300'}`}
+                            >
+                                <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${systemSettings['show_real_stats'] ? 'right-1' : 'left-1'}`} />
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div >
+        </div >
     );
 }

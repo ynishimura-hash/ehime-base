@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, Plus, BookOpen, Clock, Tag, Image as ImageIcon, CheckCircle2, X } from 'lucide-react';
+import { ArrowLeft, Save, Plus, BookOpen, Clock, Tag, Image as ImageIcon, CheckCircle2, X, Trash2, Eye, EyeOff } from 'lucide-react';
 import AdminCurriculumManager, { CurriculumColumn, LessonItem } from '@/components/admin/elearning/AdminCurriculumManager';
 import { ImageUpload } from '@/components/ImageUpload';
 import ContentFormModal from '@/components/admin/elearning/ContentFormModal';
@@ -70,6 +70,33 @@ export default function AdminCourseDetailPage() {
     const [image, setImage] = useState<string>(''); // カバー画像URL
     const [chapters, setChapters] = useState<CurriculumColumn[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isPublic, setIsPublic] = useState(false);
+
+    const handleTogglePublish = async () => {
+        if (!params.id) return;
+        try {
+            await ElearningService.updateModule(params.id as string, { is_public: !isPublic });
+            setIsPublic(!isPublic);
+            alert(!isPublic ? '公開しました' : '非公開にしました');
+        } catch (e) {
+            console.error(e);
+            alert('更新に失敗しました');
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!params.id) return;
+        if (!confirm('本当に削除しますか？\nこの操作は取り消せません。')) return;
+
+        try {
+            await ElearningService.deleteModule(params.id as string);
+            alert('削除しました');
+            router.push('/admin/elearning');
+        } catch (e) {
+            console.error(e);
+            alert('削除に失敗しました');
+        }
+    };
 
     // Edit Modal State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -145,6 +172,12 @@ export default function AdminCourseDetailPage() {
         }
     };
 
+    // カテゴリオプション
+    const categoryOptions = [
+        '未分類', 'AI・自動化', 'マーケティング', 'デジタル基礎', 'Google',
+        'セキュリティ', '制作・開発', 'クリエイティブ', 'キャリア', '資格取得', 'アーカイブ'
+    ];
+
     // Load Data
     React.useEffect(() => {
         const load = async () => {
@@ -156,6 +189,8 @@ export default function AdminCourseDetailPage() {
                     setDescription(mod.description);
                     setTags(mod.tags || []);
                     setImage(mod.image || mod.thumbnail_url || '');
+                    setCategory(mod.category || '未分類');
+                    setIsPublic(!!mod.is_public);
 
                     // Transform flat lessons to chapters (group by category if possible, or single chapter)
                     // Since DB doesn't have chapters, we put all in one for now
@@ -199,9 +234,7 @@ export default function AdminCourseDetailPage() {
                 title,
                 description,
                 tags: updatedTags,
-                // image: image, // カラムが存在しないため送らない
-                // Note: Updating lessons hierarchy is complex, skipping for this specific task
-                // We focus on Tags and Image
+                category, // カテゴリを保存
             });
             alert('保存しました');
         } catch (e) {
@@ -233,12 +266,31 @@ export default function AdminCourseDetailPage() {
                         <p className="text-xs font-bold text-slate-400">ID: {params.id}</p>
                     </div>
                 </div>
-                <button
-                    onClick={handleSave}
-                    className="flex items-center gap-2 bg-slate-900 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-slate-700 transition-colors shadow-lg"
-                >
-                    <Save size={18} /> 保存する
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={handleDelete}
+                        className="p-2.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                        title="削除する"
+                    >
+                        <Trash2 size={20} />
+                    </button>
+                    <button
+                        onClick={handleTogglePublish}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold transition-colors ${isPublic
+                            ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                            : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                            }`}
+                    >
+                        {isPublic ? <Eye size={18} /> : <EyeOff size={18} />}
+                        {isPublic ? '公開中' : '非公開'}
+                    </button>
+                    <button
+                        onClick={handleSave}
+                        className="flex items-center gap-2 bg-slate-900 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-slate-700 transition-colors shadow-lg"
+                    >
+                        <Save size={18} /> 保存する
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -293,7 +345,19 @@ export default function AdminCourseDetailPage() {
                             folder="courses"
                         />
 
-                        {/* Note: Category/Level fields hidden as they are on Track level usually, or mock only */}
+                        {/* カテゴリ選択 */}
+                        <div>
+                            <label className="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">カテゴリ</label>
+                            <select
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                                className="w-full font-bold border-2 border-slate-100 rounded-xl px-4 py-3 focus:border-blue-500 outline-none transition-colors text-slate-900 bg-white"
+                            >
+                                {categoryOptions.map(opt => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                 </div>
 

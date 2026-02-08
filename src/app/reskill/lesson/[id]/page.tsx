@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { getYoutubeId } from '@/utils/youtube';
+import { ElearningService } from '@/services/elearning';
 
 export default function LessonPlayerPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -19,101 +21,191 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ id: str
         updateLastViewedLesson,
         isLessonCompleted,
         isLessonSidebarOpen: isSidebarOpen,
-        setLessonSidebarOpen: setIsSidebarOpen
+        setLessonSidebarOpen: setIsSidebarOpen,
+        isFetchingCourses
     } = useAppStore();
 
+    const [lesson, setLesson] = useState<any | null>(null);
+    const [course, setCourse] = useState<any | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [isQuizOpen, setIsQuizOpen] = useState(false);
     const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
     const [quizSubmitted, setQuizSubmitted] = useState(false);
     const [showCelebration, setShowCelebration] = useState(false);
 
+    // Initial load: Try Store first, then fallback to Service API
     useEffect(() => {
-        if (courses.length === 0) {
+        const loadLesson = async () => {
+            if (!id) return;
+            setIsLoading(true);
+
+            // 1. Try finding in store if available
+            if (courses.length > 0) {
+                const allLessons = courses.flatMap(c => c.lessons || []);
+                const foundLesson = allLessons.find(l => String(l.id) === String(id));
+                const foundCourse = courses.find(c => (c.lessons || []).some(l => String(l.id) === String(id)));
+
+                if (foundLesson && foundCourse) {
+                    console.log('Lesson found in AppStore');
+                    setLesson(foundLesson);
+                    setCourse(foundCourse);
+                    setIsLoading(false);
+                    return;
+                }
+            }
+
+            // 2. Fallback: Fetch directly from API
+            console.log('Fetching lesson directly from API...');
+            try {
+                const data = await ElearningService.getLesson(String(id));
+                if (data) {
+                    setLesson(data);
+                    if (data.course) {
+                        setCourse(data.course);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch lesson directly:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadLesson();
+    }, [id, courses.length]);
+
+    // Fetch courses in background if store is empty
+    useEffect(() => {
+        if (courses.length === 0 && !isFetchingCourses) {
             fetchCourses();
         }
-    }, [courses.length, fetchCourses]);
-
-    // Find lesson and course
-    const allLessons = courses.flatMap(c => (c.curriculums || []).flatMap(curr => curr.lessons));
-    const lesson = allLessons.find(l => l.id === id);
-    const course = courses.find(c => (c.curriculums || []).some(curr => curr.id === lesson?.curriculumId));
-    const curriculum = course?.curriculums?.find(curr => curr.id === lesson?.curriculumId);
+    }, [courses.length, fetchCourses, isFetchingCourses]);
 
     // --- YouTube API Integration ---
     const playerRef = useRef<any>(null);
+    const [isPlayerReady, setIsPlayerReady] = useState(false);
+    const [isApiLoaded, setIsApiLoaded] = useState(false);
 
-    const handleComplete = React.useCallback(() => {
-        if (!lesson) return;
-        completeLesson(lesson.id);
-        setShowCelebration(true);
-        toast.success('レッスンを完了しました！');
-        setTimeout(() => setShowCelebration(false), 3000);
-    }, [lesson, completeLesson]);
-
+    // Load YouTube API script
     useEffect(() => {
-        // Only proceed if we have a lesson
-        if (!lesson) return;
-
-        // Load YouTube API
         if (!(window as any).YT) {
             const tag = document.createElement('script');
             tag.src = "https://www.youtube.com/iframe_api";
             const firstScriptTag = document.getElementsByTagName('script')[0];
             firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-        }
 
-        // Initialize Player helper
-        const initPlayer = () => {
-            if (playerRef.current) {
-                playerRef.current.destroy();
-            }
-
-            const videoId = lesson.youtubeUrl.split('/').pop()?.split('?')[0];
-
-            playerRef.current = new (window as any).YT.Player('youtube-player', {
-                height: '100%',
-                width: '100%',
-                videoId: videoId,
-                playerVars: {
-                    'rel': 0,
-                    'modestbranding': 1,
-                },
-                events: {
-                    'onStateChange': (event: any) => {
-                        // YT.PlayerState.ENDED is 0
-                        if (event.data === 0) {
-                            handleComplete();
-                        }
-                    }
-                }
-            });
-        };
-
-        // If API already loaded, init now, otherwise wait for callback
-        if ((window as any).YT && (window as any).YT.Player) {
-            initPlayer();
+            (window as any).onYouTubeIframeAPIReady = () => {
+                setIsApiLoaded(true);
+            };
         } else {
-            (window as any).onYouTubeIframeAPIReady = initPlayer;
+            setIsApiLoaded(true);
         }
+    }, []);
 
-        return () => {
-            if (playerRef.current) {
-                playerRef.current.destroy();
-            }
-        };
-    }, [lesson?.id]); // Re-init when lesson changes
+    // Extract reliable YouTube ID
+    const videoId = lesson ? getYoutubeId(lesson.url || lesson.youtubeUrl || lesson.youtube_url) : null;
 
     useEffect(() => {
+        if (!videoId || !isApiLoaded || !(window as any).YT) return;
+
+        const onPlayerStateChange = (event: any) => {
+            // YT.PlayerState.ENDED is 0
+            if (event.data === 0) {
+                if (lesson && !isLessonCompleted(lesson.id)) {
+                    completeLesson(lesson.id);
+                    setShowCelebration(true);
+                    toast.success('レッスンを完了しました！', {
+                        description: `「${lesson.title}」を視聴完了しました。`,
+                        icon: <CheckCircle2 className="text-emerald-500" />
+                    });
+                    setTimeout(() => setShowCelebration(false), 3000);
+                }
+            }
+        };
+
+        if (playerRef.current) {
+            try {
+                if (typeof playerRef.current.destroy === 'function') {
+                    playerRef.current.destroy();
+                }
+            } catch (e) {
+                console.warn('Player destroy failed', e);
+            }
+        }
+
+        try {
+            playerRef.current = new (window as any).YT.Player('youtube-player', {
+                videoId: videoId,
+                playerVars: {
+                    autoplay: 1,
+                    modestbranding: 1,
+                    rel: 0,
+                },
+                events: {
+                    onReady: () => setIsPlayerReady(true),
+                    onStateChange: onPlayerStateChange,
+                },
+            });
+        } catch (error) {
+            console.error("Error initializing YouTube player:", error);
+        }
+
         if (lesson) {
             updateLastViewedLesson(lesson.id);
         }
-    }, [lesson?.id, updateLastViewedLesson]);
 
-    if (!lesson || !course) return <div>Lesson not found</div>;
+        return () => {
+            if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+                try {
+                    playerRef.current.destroy();
+                } catch (e) {
+                    console.error('Error destroying player:', e);
+                }
+            }
+        };
+    }, [videoId, isApiLoaded, lesson?.id, updateLastViewedLesson]);
+
+    const handleComplete = () => {
+        if (!lesson) return;
+        completeLesson(lesson.id);
+        setShowCelebration(true);
+        toast.success('レッスンを完了しました！');
+        setTimeout(() => setShowCelebration(false), 3000);
+    };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white p-4">
+                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
+                <p className="font-bold text-slate-400">レッスンを読み込み中...</p>
+            </div>
+        );
+    }
+
+    if (!lesson || !course) {
+        return (
+            <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white p-4">
+                <XCircle size={48} className="text-rose-500 mb-4" />
+                <h2 className="text-xl font-black mb-2">Lesson not found</h2>
+                <p className="text-slate-400 mb-6 text-center">レッスンが見つからないか、読み込みに失敗しました。</p>
+                <div className="flex gap-4">
+                    <Link href="/reskill" className="bg-slate-800 hover:bg-slate-700 px-6 py-3 rounded-xl font-bold transition-all">
+                        ダッシュボードに戻る
+                    </Link>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-xl font-bold transition-all"
+                    >
+                        再試行する
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     const handleQuizSubmit = () => {
         setQuizSubmitted(true);
-        const allCorrect = lesson.quiz?.every((q, idx) => selectedAnswers[q.id] === q.correctAnswerIndex);
+        const allCorrect = lesson.quiz?.every((q: any) => selectedAnswers[q.id] === q.correctAnswerIndex);
         if (allCorrect) {
             toast.success('正解です！よく理解できました。');
         } else {
@@ -121,12 +213,10 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ id: str
         }
     };
 
-    const nextLesson = allLessons.find(l =>
-        l.curriculumId === lesson.curriculumId && l.order === lesson.order + 1
-    ) || allLessons.find(l => {
-        const currIdx = (course.curriculums || []).findIndex(c => c.id === lesson.curriculumId);
-        return (course.curriculums || [])[currIdx + 1]?.lessons[0];
-    });
+    const allLessons = courses.flatMap(c => c.lessons || []);
+    const nextLesson = allLessons.find((l: any) =>
+        l.curriculumId === lesson.curriculum_id && l.order_index === (lesson.order_index || 0) + 1
+    );
 
     return (
         <div className="min-h-screen bg-slate-900 flex flex-col">
@@ -162,7 +252,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ id: str
                             <div className="flex-1">
                                 <h2 className="text-3xl font-black text-white mb-4 tracking-tight">{lesson.title}</h2>
                                 <p className="text-slate-400 font-medium leading-relaxed">
-                                    {lesson.description}
+                                    {lesson.description || '説明はありません。'}
                                 </p>
                             </div>
                             <div className="shrink-0 flex gap-3">
@@ -192,37 +282,36 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ id: str
 
                         {/* Interactive Tabs/Sections */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Attachments */}
-                            {lesson.attachments && lesson.attachments.length > 0 && (
+                            {/* Material URL as attachment fallback */}
+                            {lesson.material_url && (
                                 <div className="bg-slate-900 rounded-[2rem] p-8 border border-white/5">
                                     <h3 className="text-lg font-black text-white flex items-center gap-2 mb-6">
                                         <FileText className="text-blue-500" /> 学習資料
                                     </h3>
                                     <div className="space-y-3">
-                                        {lesson.attachments.map((file, idx) => (
-                                            <a
-                                                key={idx}
-                                                href={file.url}
-                                                className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all border border-white/5 group"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="bg-blue-500/20 p-2 rounded-lg text-blue-400 group-hover:scale-110 transition-transform">
-                                                        <FileText size={18} />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-bold text-white leading-none">{file.name}</p>
-                                                        <span className="text-[10px] text-slate-500 font-bold">{file.size}</span>
-                                                    </div>
+                                        <a
+                                            href={lesson.material_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all border border-white/5 group"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="bg-blue-500/20 p-2 rounded-lg text-blue-400 group-hover:scale-110 transition-transform">
+                                                    <FileText size={18} />
                                                 </div>
-                                                <Download size={18} className="text-slate-400" />
-                                            </a>
-                                        ))}
+                                                <div>
+                                                    <p className="text-sm font-bold text-white leading-none">資料を開く</p>
+                                                    <span className="text-[10px] text-slate-500 font-bold">External link</span>
+                                                </div>
+                                            </div>
+                                            <Download size={18} className="text-slate-400" />
+                                        </a>
                                     </div>
                                 </div>
                             )}
 
                             {/* Quiz Entry */}
-                            {lesson.quiz && (
+                            {lesson.quiz && Array.isArray(lesson.quiz) && lesson.quiz.length > 0 && (
                                 <div
                                     className={`bg-slate-900 rounded-[2rem] p-8 border ${isQuizOpen ? 'border-amber-500/30 ring-1 ring-amber-500/30' : 'border-white/5 hover:border-amber-500/20'} transition-all cursor-pointer`}
                                     onClick={() => !isQuizOpen && setIsQuizOpen(true)}
@@ -250,8 +339,8 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ id: str
                                     <button onClick={() => setIsQuizOpen(false)} className="text-slate-500 hover:text-white">Close</button>
                                 </div>
                                 <div className="space-y-10">
-                                    {lesson.quiz.map((q, qIdx) => (
-                                        <div key={q.id} className="space-y-4">
+                                    {lesson.quiz.map((q: any, qIdx: number) => (
+                                        <div key={q.id || qIdx} className="space-y-4">
                                             <div className="flex items-center gap-3">
                                                 <span className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-xs font-black text-slate-400">
                                                     Q{qIdx + 1}
@@ -261,7 +350,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ id: str
                                                 </p>
                                             </div>
                                             <div className="grid grid-cols-1 gap-3">
-                                                {q.options.map((opt, optIdx) => {
+                                                {(q.options || []).map((opt: string, optIdx: number) => {
                                                     const isSelected = selectedAnswers[q.id] === optIdx;
                                                     const isCorrect = optIdx === q.correctAnswerIndex;
                                                     let statusClass = 'bg-white/5 border-white/10 text-white hover:bg-white/10';
@@ -335,37 +424,27 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ id: str
                             <h3 className="font-black text-white text-lg tracking-tight">Curriculum Contents</h3>
                         </div>
                         <div className="flex-1 overflow-y-auto">
-                            {(course.curriculums || []).map((curr) => (
-                                <div key={curr.id}>
-                                    <div className="px-6 py-4 bg-white/5 border-b border-white/5">
-                                        <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">Step {curr.order}</span>
-                                        <h4 className="text-sm font-black text-slate-300">{curr.title}</h4>
+                            {(course.lessons || []).map((l: any) => (
+                                <Link
+                                    key={l.id}
+                                    href={`/reskill/lesson/${l.id}`}
+                                    className={`flex items-center gap-3 px-6 py-3 hover:bg-white/5 transition-colors group ${String(l.id) === String(id) ? 'bg-blue-600/10 text-blue-400 border-l-4 border-blue-600' : 'text-slate-400'
+                                        }`}
+                                >
+                                    <div className="shrink-0">
+                                        {isLessonCompleted(l.id) ? (
+                                            <CheckCircle2 size={18} className="text-emerald-500" />
+                                        ) : (
+                                            <PlayCircle size={18} className={String(l.id) === String(id) ? 'text-blue-600' : 'group-hover:text-white'} />
+                                        )}
                                     </div>
-                                    <div className="py-2">
-                                        {curr.lessons.map((l) => (
-                                            <Link
-                                                key={l.id}
-                                                href={`/reskill/lesson/${l.id}`}
-                                                className={`flex items-center gap-3 px-6 py-3 hover:bg-white/5 transition-colors group ${l.id === id ? 'bg-blue-600/10 text-blue-400 border-l-4 border-blue-600' : 'text-slate-400'
-                                                    }`}
-                                            >
-                                                <div className="shrink-0">
-                                                    {isLessonCompleted(l.id) ? (
-                                                        <CheckCircle2 size={18} className="text-emerald-500" />
-                                                    ) : (
-                                                        <PlayCircle size={18} className={l.id === id ? 'text-blue-600' : 'group-hover:text-white'} />
-                                                    )}
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <p className={`text-xs font-bold leading-snug line-clamp-2 ${l.id === id ? 'text-blue-400' : 'group-hover:text-slate-200'}`}>
-                                                        {l.title}
-                                                    </p>
-                                                    <span className="text-[10px] opacity-50">{l.duration}</span>
-                                                </div>
-                                            </Link>
-                                        ))}
+                                    <div className="min-w-0">
+                                        <p className={`text-xs font-bold leading-snug line-clamp-2 ${String(l.id) === String(id) ? 'text-blue-400' : 'group-hover:text-slate-200'}`}>
+                                            {l.title}
+                                        </p>
+                                        <span className="text-[10px] opacity-50">{l.duration}</span>
                                     </div>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     </aside>

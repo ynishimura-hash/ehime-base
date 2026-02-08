@@ -46,12 +46,14 @@ export async function GET() {
                 description: curr.description || '',
                 image: imageUrl,
                 thumbnail_url: imageUrl,
+                category: curr.category || '未分類',
                 courseCount: curr.lessons?.length || 0,
                 // Calculate Total Duration
                 totalDuration: calculateTotalDuration(curr.lessons || []),
                 lessons: [],
                 tags: curr.tags || [],
-                viewCount: curr.view_count || 0
+                viewCount: curr.view_count || 0,
+                is_public: curr.is_public
             };
         });
 
@@ -60,5 +62,40 @@ export async function GET() {
     } catch (error) {
         console.error('API modules error:', error);
         return NextResponse.json({ error: 'Failed to fetch modules' }, { status: 500 });
+    }
+}
+
+// POST /api/elearning/modules - Create a new module
+export async function POST(request: Request) {
+    try {
+        const body = await request.json();
+        console.log('API: Creating new module:', body);
+
+        if (!body.title || !body.course_id) {
+            return NextResponse.json({ error: 'Missing required fields: title, course_id' }, { status: 400 });
+        }
+
+        const { data, error } = await supabase
+            .from('course_curriculums')
+            .insert({
+                course_id: body.course_id,
+                title: body.title,
+                description: body.description || '',
+                order_index: body.order_index || 0,
+                is_public: false // Default to private
+            })
+            .select()
+            .single();
+
+        if (error) {
+            console.error('API: Error creating module:', error);
+            throw error;
+        }
+
+        return NextResponse.json(data);
+
+    } catch (error) {
+        console.error('API create module error:', error);
+        return NextResponse.json({ error: 'Failed to create module' }, { status: 500 });
     }
 }

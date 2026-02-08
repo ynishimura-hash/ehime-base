@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/appStore';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check, Target, MapPin, Building2, Banknote, Save } from 'lucide-react';
@@ -16,6 +16,14 @@ export default function ProfileEditConditionsPage() {
     // Simple strings/arrays for now
     const [locations, setLocations] = useState<string[]>(currentUser?.desiredConditions?.location || []);
     const [industries, setIndustries] = useState<string[]>(currentUser?.desiredConditions?.industry || []);
+
+    useEffect(() => {
+        if (currentUser) {
+            setSalary(currentUser.desiredConditions?.salary || '');
+            setLocations(currentUser.desiredConditions?.location || []);
+            setIndustries(currentUser.desiredConditions?.industry || []);
+        }
+    }, [currentUser]);
 
     if (!currentUser) return null;
 
@@ -81,8 +89,8 @@ export default function ProfileEditConditionsPage() {
                                 key={loc}
                                 onClick={() => toggleLocation(loc)}
                                 className={`py-3 rounded-xl font-bold text-sm transition-all border-2 relative overflow-hidden ${locations.includes(loc)
-                                        ? 'bg-orange-50 border-orange-500 text-orange-700'
-                                        : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
+                                    ? 'bg-orange-50 border-orange-500 text-orange-700'
+                                    : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
                                     }`}
                             >
                                 {loc}
@@ -111,8 +119,8 @@ export default function ProfileEditConditionsPage() {
                                 key={ind}
                                 onClick={() => toggleIndustry(ind)}
                                 className={`px-4 py-2 rounded-full font-bold text-sm transition-all border-2 ${industries.includes(ind)
-                                        ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
-                                        : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
+                                    ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
+                                    : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
                                     }`}
                             >
                                 {ind}
@@ -136,8 +144,8 @@ export default function ProfileEditConditionsPage() {
                                 key={range}
                                 onClick={() => setSalary(range)}
                                 className={`w-full text-left px-5 py-3 rounded-xl font-bold text-sm transition-all border-2 flex items-center justify-between ${salary === range
-                                        ? 'bg-emerald-50 border-emerald-500 text-emerald-700'
-                                        : 'bg-white border-slate-100 text-slate-500 hover:border-slate-200'
+                                    ? 'bg-emerald-50 border-emerald-500 text-emerald-700'
+                                    : 'bg-white border-slate-100 text-slate-500 hover:border-slate-200'
                                     }`}
                             >
                                 {range}

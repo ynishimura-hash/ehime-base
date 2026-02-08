@@ -147,7 +147,7 @@ export default function JobForm({ initialData, onSubmit, isSubmitting = false, s
                 <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 p-6 rounded-3xl space-y-6">
                     <div className="flex items-center gap-2 text-indigo-700 font-black">
                         <Sparkles size={20} />
-                        <h3>AI 求人作成アシスタント (Gemini 2.0 Flash)</h3>
+                        <h3>AI 求人作成アシスタント (Gemini 2.5 Flash Lite)</h3>
                     </div>
 
                     {/* Source Toggle */}
@@ -262,7 +262,7 @@ export default function JobForm({ initialData, onSubmit, isSubmitting = false, s
                 <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
                     <label className="block text-sm font-black text-slate-700">カテゴリー</label>
                     <div className="flex flex-wrap gap-2">
-                        {['新卒', '中途', 'アルバイト', '体験JOB', 'インターンシップ', '副業・兼業'].map(cat => (
+                        {['新卒', '中途', 'アルバイト', '体験JOB', 'ガクチカバイト', 'インターンシップ', '副業・兼業'].map(cat => (
                             <button
                                 key={cat}
                                 onClick={() => handleChange('category', cat as any)}

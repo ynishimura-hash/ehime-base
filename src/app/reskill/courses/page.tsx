@@ -5,7 +5,7 @@ import { useAppStore } from '@/lib/appStore';
 import {
     BookOpen, Search, Filter, Clock, ChevronRight,
     ChevronLeft, ArrowRight, GraduationCap,
-    Lightbulb, Layout as LayoutIcon
+    Lightbulb, Layout as LayoutIcon, ArrowUpDown
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -79,6 +79,7 @@ export default function CoursesListPage() {
     const [courses, setCourses] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('すべて');
+    const [sortBy, setSortBy] = useState<'newest' | 'title' | 'duration'>('newest');
     const [isLoading, setIsLoading] = useState(true);
 
     React.useEffect(() => {
@@ -98,23 +99,64 @@ export default function CoursesListPage() {
         fetchModules();
     }, []);
 
-    const categories = ['すべて', ...Array.from(new Set(courses.map(c => c.category).filter((c): c is string => !!c)))];
+    // 日本語形式の再生時間を分に変換（例: "1時間3分" → 63, "58分" → 58）
+    const parseDurationToMinutes = (duration: string): number => {
+        if (!duration) return 0;
+        let totalMinutes = 0;
+        const hourMatch = duration.match(/(\d+)時間/);
+        const minMatch = duration.match(/(\d+)分/);
+        if (hourMatch) totalMinutes += parseInt(hourMatch[1]) * 60;
+        if (minMatch) totalMinutes += parseInt(minMatch[1]);
+        return totalMinutes;
+    };
 
-    const filteredCourses = courses.filter((course: any) => {
-        const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            course.description.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = selectedCategory === 'すべて' || course.category === selectedCategory;
-        // Modules usually don't have is_published flag exposed in exact same way, but let's assume valid
-        // Also course_curriculums might not have 'category' directly populated in DB?
-        // Wait, 'category' is not a column in course_curriculums usually.
-        // It comes from 'courses' (Track) link if fetched.
-        // But /api/elearning/modules returns flattened objects.
-        // I need to ensure 'category' exists.
-        // If not, maybe use 'tags'? Or just 'General'?
-        // The mock data has 'category' on modules.
-        // Real DB might not.
-        return matchesSearch && matchesCategory;
-    });
+    // コースタイトルから動的にカテゴリを推測
+    const getCategoryFromTitle = (title: string): string => {
+        if (title.includes('AI') || title.includes('活用')) return 'AI・自動化';
+        if (title.includes('マーケティング') || title.includes('SNS')) return 'マーケティング';
+        if (title.includes('デジタル')) return 'デジタル基礎';
+        if (title.includes('Google') || title.includes('GAS') || title.includes('Apps Script')) return 'Google';
+        if (title.includes('セキュリティ')) return 'セキュリティ';
+        if (title.includes('アプリ') || title.includes('HP') || title.includes('制作')) return '制作・開発';
+        if (title.includes('動画')) return 'クリエイティブ';
+        if (title.includes('自動化') || title.includes('業務')) return 'AI・自動化';
+        if (title.includes('キャリア')) return 'キャリア';
+        if (title.includes('ITパスポート') || title.includes('資格')) return '資格取得';
+        if (title.includes('アーカイブ') || title.includes('リスキル')) return 'アーカイブ';
+        return 'その他';
+    };
+
+    // コースにカテゴリを付与
+    const coursesWithCategory = courses.map(course => ({
+        ...course,
+        derivedCategory: course.category || getCategoryFromTitle(course.title)
+    }));
+
+    const categories = ['すべて', ...Array.from(new Set(coursesWithCategory.map(c => c.derivedCategory).filter((c): c is string => !!c)))];
+
+    const filteredCourses = coursesWithCategory
+        .filter((course: any) => {
+            const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (course.description || '').toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesCategory = selectedCategory === 'すべて' || course.derivedCategory === selectedCategory;
+            return matchesSearch && matchesCategory;
+        })
+        .sort((a: any, b: any) => {
+            switch (sortBy) {
+                case 'newest':
+                    // viewCountが多い順（人気順として代用）
+                    return (b.viewCount || 0) - (a.viewCount || 0);
+                case 'title':
+                    return (a.title || '').localeCompare(b.title || '', 'ja');
+                case 'duration':
+                    // 再生時間順（短い順）- totalDurationを使用
+                    const durationA = parseDurationToMinutes(a.totalDuration || '');
+                    const durationB = parseDurationToMinutes(b.totalDuration || '');
+                    return durationA - durationB;
+                default:
+                    return 0;
+            }
+        });
 
     const getProgress = (courseId: string) => {
         const course = courses.find(c => c.id === courseId);
@@ -157,20 +199,35 @@ export default function CoursesListPage() {
                         />
                     </div>
                     <div className="w-full h-px bg-slate-100" />
-                    {/* Categories */}
-                    <div className="flex gap-2 overflow-x-auto pb-2 px-2 scrollbar-hide min-w-0 w-full">
-                        {categories.map(cat => (
-                            <button
-                                key={cat}
-                                onClick={() => setSelectedCategory(cat)}
-                                className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap ${selectedCategory === cat
-                                    ? 'bg-slate-900 text-white shadow-lg'
-                                    : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
-                                    }`}
+                    {/* Categories and Sort */}
+                    <div className="flex items-center justify-between gap-4 px-2 pb-2">
+                        <div className="flex gap-2 overflow-x-auto scrollbar-hide min-w-0 flex-1">
+                            {categories.map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setSelectedCategory(cat)}
+                                    className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap ${selectedCategory === cat
+                                        ? 'bg-slate-900 text-white shadow-lg'
+                                        : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                                        }`}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
+                        {/* Sort Dropdown */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                            <ArrowUpDown size={14} className="text-slate-400" />
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value as 'newest' | 'title' | 'duration')}
+                                className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-blue-500 cursor-pointer"
                             >
-                                {cat}
-                            </button>
-                        ))}
+                                <option value="newest">人気順</option>
+                                <option value="title">タイトル順</option>
+                                <option value="duration">再生時間順</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -180,7 +237,8 @@ export default function CoursesListPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {filteredCourses.map((course: any) => {
                         const progress = getProgress(course.id);
-                        const durationDisplay = getTotalDuration(course);
+                        // APIから直接totalDurationを使用
+                        const durationDisplay = course.totalDuration || '0分';
                         return (
                             <Link
                                 key={course.id}

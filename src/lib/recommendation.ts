@@ -91,11 +91,11 @@ export function getRecommendations(
     }
 
     // --- 最終結果の調整 ---
-    const finalJobs = Array.from(new Set(matchedJobs)).slice(0, 3);
+    const finalJobs = Array.from(new Set(matchedJobs)).slice(0, 20);
     const finalCourses = courses.slice(0, 2);
 
     return {
-        jobs: finalJobs.length > 0 ? finalJobs : jobs.slice(0, 3),
+        jobs: finalJobs.length > 0 ? finalJobs : jobs.slice(0, 20),
         courses: finalCourses
     };
 }

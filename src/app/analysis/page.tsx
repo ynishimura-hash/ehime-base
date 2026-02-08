@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import {
     Sparkles, ArrowLeft,
     Zap, Compass, Trophy,
@@ -15,9 +15,13 @@ import StrengthsDiscovery from '@/components/analysis/StrengthsDiscovery';
 import FortuneAnalysis from '@/components/analysis/FortuneAnalysis';
 import PreciseDiagnosis from '@/components/analysis/PreciseDiagnosis';
 
-export default function AnalysisPage() {
+import { useSearchParams } from 'next/navigation';
+
+function AnalysisContent() {
     const { userAnalysis, jobs, courses, companies, fetchCourses } = useAppStore();
-    const [activeTab, setActiveTab] = useState<'simple' | 'precise' | 'fortune'>('simple');
+    const searchParams = useSearchParams();
+    const initialTab = searchParams.get('tab') as 'simple' | 'precise' | 'fortune' || 'simple';
+    const [activeTab, setActiveTab] = useState<'simple' | 'precise' | 'fortune'>(initialTab);
 
     React.useEffect(() => {
         if (courses.length === 0) {
@@ -171,5 +175,15 @@ export default function AnalysisPage() {
 
             </main>
         </div>
+    );
+}
+
+export default function AnalysisPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>}>
+            <AnalysisContent />
+        </Suspense>
     );
 }

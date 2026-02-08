@@ -34,8 +34,12 @@ export default function SkillPanel() {
         userRecommendations,
         fetchUserRecommendations,
         generateRecommendations,
-        currentUserId
+        resetRecommendations,
+        currentUserId,
+        isFetchingCourses // Added
     } = useAppStore();
+
+    const [isResetting, setIsResetting] = React.useState(false);
 
     // Ensure courses and recommendations are loaded
     React.useEffect(() => {
@@ -55,12 +59,34 @@ export default function SkillPanel() {
         }
     }, [currentUserId, userAnalysis?.selectedValues, userRecommendations.length, generateRecommendations]);
 
+    // Timeout handling for loading state
+    const [isTimeout, setIsTimeout] = React.useState(false);
+
+    React.useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (isFetchingCourses) {
+            setIsTimeout(false);
+            timer = setTimeout(() => {
+                setIsTimeout(true);
+                // Force stop loading visually if it takes too long
+                console.warn('SkillPanel: Loading timeout reached.');
+            }, 5000); // 5 seconds timeout
+        }
+        return () => clearTimeout(timer);
+    }, [isFetchingCourses]);
+
+    // Derived loading state that respects timeout
+    const isLoading = isFetchingCourses && !isTimeout;
+
     const nodes = useMemo(() => {
         const result: SkillNode[] = [];
 
         // 1. 解放された価値観（selectedValues）を抽出
         const selectedIds = userAnalysis.selectedValues || [];
         const unlockedValues = VALUE_CARDS.filter(c => selectedIds.includes(c.id) && c.isPositive);
+
+        console.log('SkillPanel: selectedIds', selectedIds);
+        console.log('SkillPanel: unlockedValues', unlockedValues.map(v => ({ id: v.id, name: v.name })));
 
         // 価値観を中央付近に配置
         unlockedValues.forEach((v, i) => {
@@ -77,37 +103,74 @@ export default function SkillPanel() {
         });
 
         // 2. 推奨コースを配置
+        const addedCourseIds = new Set<string>();
+
         unlockedValues.forEach((v, i) => {
             const angleBase = (i / unlockedValues.length) * Math.PI * 2;
 
             // DBデータがある場合はDBから、ない場合はフォールバックで生成
             const valueRecs = userRecommendations.filter(r => r.value_id === v.id);
+            // 有効なコースIDを持つレコメンドのみにフィルタリング
+            const validRecs = valueRecs.filter(r => courses.some(c => String(c.id) === String(r.course_id)));
 
-            if (valueRecs.length > 0) {
-                valueRecs.forEach((rec, idx) => {
+            // DEBUG: Log matching issues
+            console.log(`SkillPanel DEBUG [${v.name}]:`, {
+                valueRecsCount: valueRecs.length,
+                validRecsCount: validRecs.length,
+                valueRecsCourseIds: valueRecs.map(r => r.course_id),
+                coursesIds: courses.slice(0, 5).map(c => c.id),
+                reasonMessages: valueRecs.map(r => r.reason_message)
+            });
+
+            if (validRecs.length > 0) {
+                // 有効なレコメンドがある場合
+                console.log('SkillPanel: validRecs', validRecs);
+                validRecs.forEach((rec, idx) => {
+                    // 重複チェック (本来APIで排除されるはずだが、念のため)
+                    if (addedCourseIds.has(String(rec.course_id))) {
+                        return;
+                    }
+
                     const offset = idx === 0 ? -0.2 : 0.2;
                     const angle = angleBase + offset;
                     const radius = 35;
-                    const course = courses.find(c => c.id === rec.course_id);
-                    const isCoursesLoaded = courses.length > 0;
+                    const course = courses.find(c => String(c.id) === String(rec.course_id));
 
-                    // Only add node if course exists or we are potentially still loading
-                    if (course || !isCoursesLoaded) {
+                    if (course) {
+                        addedCourseIds.add(String(rec.course_id));
                         result.push({
                             id: rec.id,
-                            name: course?.title || 'Loading...',
+                            name: course.title,
                             type: 'recommendation',
                             isUnlocked: completedLessonIds.includes(rec.course_id),
                             x: 50 + Math.cos(angle) * radius,
                             y: 50 + Math.sin(angle) * radius,
                             courseId: rec.course_id,
                             relatedValueName: v.name,
-                            aiMessage: rec.reason_message
+                            // Use DB reason if available, otherwise generic
+                            aiMessage: rec.reason_message || `あなたの「${v.name}」という価値観には、このコースがおすすめです。`
                         });
                     }
                 });
+            } else if (isLoading) {
+                // ロード中は仮のノードを表示
+                [-0.2, 0.2].forEach((offset, idx) => {
+                    const angle = angleBase + offset;
+                    const radius = 35;
+                    result.push({
+                        id: `loading_${v.id}_${idx}`,
+                        name: 'Loading...',
+                        type: 'recommendation',
+                        isUnlocked: false,
+                        x: 50 + Math.cos(angle) * radius,
+                        y: 50 + Math.sin(angle) * radius,
+                        courseId: '',
+                        relatedValueName: v.name,
+                        aiMessage: '読み込み中...'
+                    });
+                });
             } else {
-                // FALLBACK: DBにデータがない場合の暫定表示
+                // FALLBACK: データがない、または無効なデータしかない場合はデモ表示
                 [-0.2, 0.2].forEach((offset, idx) => {
                     const angle = angleBase + offset;
                     const radius = 35;
@@ -125,7 +188,7 @@ export default function SkillPanel() {
                             y: 50 + Math.sin(angle) * radius,
                             courseId: course.id,
                             relatedValueName: v.name,
-                            aiMessage: "（DB未接続のため、デモ用のおすすめを表示しています）"
+                            aiMessage: "（デモ用のおすすめを表示しています）"
                         });
                     }
                 });
@@ -133,7 +196,7 @@ export default function SkillPanel() {
         });
 
         return result;
-    }, [userAnalysis.selectedValues, courses, completedLessonIds, userRecommendations]);
+    }, [userAnalysis.selectedValues, courses, completedLessonIds, userRecommendations, isFetchingCourses, isLoading]);
 
     // 簡易的なコネクション生成（近いもの同士を結ぶ）
     const connections = useMemo(() => {
@@ -198,6 +261,35 @@ export default function SkillPanel() {
                     <div className="w-2 h-2 rounded-full bg-slate-700" />
                     <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Potential</span>
                 </div>
+
+                {/* DEV: Reset Recommendations Button */}
+                <button
+                    onClick={async () => {
+                        if (!currentUserId || isResetting) return;
+                        setIsResetting(true);
+                        try {
+                            console.log('SkillPanel: Resetting recommendations...');
+                            await resetRecommendations(currentUserId);
+                            // Wait to ensure DELETE is fully processed
+                            await new Promise(resolve => setTimeout(resolve, 500));
+
+                            const selectedValues = userAnalysis?.selectedValues || [];
+                            console.log('SkillPanel: Generating new recommendations for values:', selectedValues);
+                            if (selectedValues.length > 0) {
+                                await generateRecommendations(currentUserId, selectedValues);
+                            }
+                            // Reload page to get fresh data
+                            window.location.reload();
+                        } finally {
+                            setIsResetting(false);
+                        }
+                    }}
+                    disabled={isResetting}
+                    className="mt-4 px-3 py-2 bg-red-600/80 hover:bg-red-500 text-white text-[10px] font-bold rounded-lg transition-colors disabled:opacity-50 pointer-events-auto"
+                    title="レコメンドをリセットして再生成"
+                >
+                    {isResetting ? '再生成中...' : '🔄 AI再生成'}
+                </button>
             </div>
 
             {/* Draggable Area */}

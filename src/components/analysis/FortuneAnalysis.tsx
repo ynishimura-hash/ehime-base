@@ -181,30 +181,43 @@ export default function FortuneAnalysis() {
                 const bDate = currentUser.birthDate;
                 setBirthDate(bDate);
 
-                // If analysis already exists, calculate and show result
-                if (userAnalysis.fortune?.dayMaster) {
-                    const index = calculateDayMasterIndex(bDate);
-                    const stem = JIKKAN[index];
-                    const res = ANALYSIS_MAP[stem];
-                    if (res) {
-                        setResult(res);
-                        setStep(1);
+                // もし既に結果が表示されているなら何もしない
+                if (result) return;
 
-                        // Recalculate recommendations silently for the view
-                        const recs = getRecommendations(
-                            { fortune: { dayMaster: res.dayMaster, traits: res.traits } },
-                            jobs, courses, companies
-                        );
-                        setRecommendations(recs);
+                // プロフィールの生年月日を使って自動計算
+                const index = calculateDayMasterIndex(bDate);
+                const stem = JIKKAN[index];
+                const res = ANALYSIS_MAP[stem];
+
+                if (res) {
+                    setResult(res);
+                    setStep(1);
+
+                    // 分析結果がまだStoreにない場合は保存も行う
+                    if (!userAnalysis.fortune?.dayMaster) {
+                        setAnalysisResults({
+                            fortune: {
+                                dayMaster: res.dayMaster,
+                                traits: res.traits
+                            }
+                        });
                     }
+
+                    // Recalculate recommendations silently for the view
+                    const recs = getRecommendations(
+                        { fortune: { dayMaster: res.dayMaster, traits: res.traits } },
+                        jobs, courses, companies
+                    );
+                    setRecommendations(recs);
                 }
             }
         }
-    }, [currentUserId, users, userAnalysis.fortune?.dayMaster]); // Add dependencies correctly
+    }, [currentUserId, users, result]); // resultが変わったら再実行しないようにガードはあるが、依存配列には含めておく方が安全（ただしループ注意）
 
-    const hasResult = !!userAnalysis.fortune?.dayMaster;
+    // 実際には result がある場合は即returnしているのでループはしないはず
 
-    // ... calculateFortune ...
+    const hasResult = !!result || !!userAnalysis.fortune?.dayMaster;
+
 
 
     const calculateFortune = () => {

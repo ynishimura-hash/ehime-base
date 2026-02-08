@@ -132,7 +132,7 @@ const LessonPreviewItem = ({ lesson, index, isCompleted }: { lesson: any, index:
 
 export default function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const { isLessonCompleted, courses, fetchCourses, userAnalysis, users, currentUserId } = useAppStore();
+    const { isLessonCompleted, courses, fetchCourses, userAnalysis, users, currentUserId, isFetchingCourses } = useAppStore();
     const [loading, setLoading] = React.useState(true);
 
     // Get current user name safely
@@ -145,12 +145,12 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
             ElearningService.incrementViewCount(id);
         }
 
-        if (courses.length === 0) {
+        if (courses.length === 0 && !isFetchingCourses) {
             fetchCourses().finally(() => setLoading(false));
-        } else {
+        } else if (courses.length > 0) {
             setLoading(false);
         }
-    }, [id, courses.length, fetchCourses]);
+    }, [id, courses.length, fetchCourses, isFetchingCourses]);
 
     // First try to find as a top-level course (from /reskill/courses page)
     let course = Array.isArray(courses) ? courses.find((c: any) => c.id === id) : undefined;
@@ -172,27 +172,44 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
         }
     }
 
-    // Fallback: Fetch single module directly if not found in store (Direct URL access)
+    // Fallback: Fetch single course directly if not found in store OR if it has no lessons
     // Create local state for fetched course to avoid re-renders loop if we just set it to 'course' variable
     const [fetchedCourse, setFetchedCourse] = React.useState<any>(null);
 
+    // コースがストアにあってもレッスンがなければ詳細を取得する
+    const storeCourseHasNoLessons = course && (!course.lessons || course.lessons.length === 0) &&
+        (!course.curriculums || course.curriculums.every((c: any) => !c.lessons || c.lessons.length === 0));
+
     useEffect(() => {
-        if (!course && id && !fetchedCourse) {
-            console.log('Course not found in store, fetching directly:', id);
+        // Wait for main courses fetch to complete before trying fallback
+        const needsFetch = (!course || storeCourseHasNoLessons) && id && !fetchedCourse && !isFetchingCourses;
+
+        if (needsFetch) {
+            console.log('Course needs detailed fetch:', id, { courseExists: !!course, hasNoLessons: storeCourseHasNoLessons });
             setLoading(true);
+            // まずmodulesから取得を試す（コース一覧もmodulesを使用）
             ElearningService.getModule(id)
-                .then(data => {
-                    if (data) {
+                .then((data: any) => {
+                    if (data && !data.error) {
                         setFetchedCourse(data);
+                    } else {
+                        // modulesで見つからない場合はcoursesを試す
+                        return fetch(`/api/elearning/courses/${id.toLowerCase()}`)
+                            .then(res => res.ok ? res.json() : null)
+                            .then(courseData => {
+                                if (courseData && !courseData.error) {
+                                    setFetchedCourse(courseData);
+                                }
+                            });
                     }
                 })
                 .catch(err => console.error(err))
                 .finally(() => setLoading(false));
         }
-    }, [course, id, fetchedCourse]);
+    }, [course, storeCourseHasNoLessons, id, fetchedCourse, isFetchingCourses]);
 
-    // Use fetched course if main course logic outcome is null
-    if (!course && fetchedCourse) {
+    // Use fetched course if it has more data (lessons) than store course
+    if (fetchedCourse) {
         course = fetchedCourse;
     }
 

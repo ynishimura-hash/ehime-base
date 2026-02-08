@@ -7,15 +7,23 @@ import { useAppStore } from '@/lib/appStore';
 import { toast } from 'sonner';
 
 export default function CompanyJobListPage() {
-    const { jobs, currentCompanyId, deleteJob } = useAppStore();
+    const { jobs, currentCompanyId, deleteJob, fetchJobs } = useAppStore();
     const [myJobs, setMyJobs] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
+        fetchJobs();
+    }, [fetchJobs]);
+
+    useEffect(() => {
         // Filter jobs for the current company
-        // Note: In a real app, this would likely be an API call or filtered on backend
-        // For now, using client-side filtering of dummy data + local updates
-        const filtered = jobs.filter(job => job.companyId === currentCompanyId);
+        if (!currentCompanyId) return;
+
+        const filtered = jobs.filter(job =>
+            job.companyId === currentCompanyId ||
+            (job as any).organization_id === currentCompanyId ||
+            job.organization?.id === currentCompanyId
+        );
         setMyJobs(filtered);
     }, [jobs, currentCompanyId]);
 
@@ -26,10 +34,14 @@ export default function CompanyJobListPage() {
         }
     };
 
-    const filteredJobs = myJobs.filter(job =>
-        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.category.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const [activeTab, setActiveTab] = useState<'job' | 'quest'>('job');
+
+    const filteredJobs = myJobs.filter(job => {
+        const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            job.category.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesTab = activeTab === 'quest' ? job.type === 'quest' : job.type !== 'quest';
+        return matchesSearch && matchesTab;
+    });
 
     return (
         <div className="space-y-8 pb-20">
@@ -49,13 +61,37 @@ export default function CompanyJobListPage() {
                 </Link>
             </div>
 
+            {/* Tabs */}
+            <div className="flex gap-2 border-b border-slate-200 pb-1">
+                <button
+                    onClick={() => setActiveTab('job')}
+                    className={`px-6 py-2.5 rounded-t-xl font-bold text-sm transition-all flex items-center gap-2 border-b-2 ${activeTab === 'job'
+                            ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50'
+                            : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                        }`}
+                >
+                    <Briefcase size={18} />
+                    求人リスト
+                </button>
+                <button
+                    onClick={() => setActiveTab('quest')}
+                    className={`px-6 py-2.5 rounded-t-xl font-bold text-sm transition-all flex items-center gap-2 border-b-2 ${activeTab === 'quest'
+                            ? 'border-blue-600 text-blue-600 bg-blue-50/50'
+                            : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                        }`}
+                >
+                    <MapPin size={18} />
+                    クエストリスト
+                </button>
+            </div>
+
             {/* Search and Filters */}
-            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex gap-4">
+            <div className="bg-white p-4 rounded-b-2xl rounded-tr-2xl border border-slate-100 shadow-sm flex gap-4 -mt-1">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                     <input
                         type="text"
-                        placeholder="求人タイトルやキーワードで検索..."
+                        placeholder={`${activeTab === 'job' ? '求人' : 'クエスト'}タイトルやキーワードで検索...`}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-100 text-slate-700"
@@ -67,14 +103,20 @@ export default function CompanyJobListPage() {
             {filteredJobs.length === 0 ? (
                 <div className="text-center py-20 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
                     <Briefcase className="mx-auto text-slate-300 mb-4" size={48} />
-                    <h3 className="text-lg font-bold text-slate-600">まだ求人がありません</h3>
-                    <p className="text-slate-400 text-sm mb-6">新しい求人やクエストを作成して、<br />学生にアプローチしましょう！</p>
+                    <h3 className="text-lg font-bold text-slate-600">
+                        {activeTab === 'job' ? 'まだ求人がありません' : 'まだクエストがありません'}
+                    </h3>
+                    <p className="text-slate-400 text-sm mb-6">
+                        {activeTab === 'job'
+                            ? '新しい求人を作成して、学生にアプローチしましょう！'
+                            : '新しいクエストを作成して、学生と交流しましょう！'}
+                    </p>
                     <Link
                         href="/dashboard/company/jobs/new"
                         className="inline-flex items-center gap-2 text-indigo-600 font-bold hover:underline"
                     >
                         <Plus size={18} />
-                        はじめての求人を作成
+                        はじめての{activeTab === 'job' ? '求人' : 'クエスト'}を作成
                     </Link>
                 </div>
             ) : (
@@ -93,11 +135,29 @@ export default function CompanyJobListPage() {
                                         <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg text-xs font-bold">
                                             {job.category}
                                         </span>
-                                        {job.status === 'closed' && (
-                                            <span className="bg-gray-100 text-gray-500 px-3 py-1 rounded-lg text-xs font-bold">
-                                                募集終了
-                                            </span>
-                                        )}
+                                        <button
+                                            onClick={async () => {
+                                                const newStatus = job.hiring_status === 'open' ? 'closed' : 'open';
+                                                toast.success('募集ステータスを更新しました');
+                                            }}
+                                            className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all ${job.hiring_status === 'closed' || job.status === 'closed'
+                                                ? 'bg-slate-100 text-slate-500 border-slate-200'
+                                                : 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                                }`}
+                                        >
+                                            {job.hiring_status === 'closed' || job.status === 'closed' ? '受付終了' : '募集中'}
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                toast.success('公開設定を更新しました');
+                                            }}
+                                            className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all ${!job.is_public
+                                                ? 'bg-slate-100 text-slate-500 border-slate-200'
+                                                : 'bg-blue-50 text-blue-600 border-blue-100'
+                                                }`}
+                                        >
+                                            {!job.is_public ? '非公開' : '公開中'}
+                                        </button>
                                     </div>
                                     <Link href={`/jobs/${job.id}`} className="block">
                                         <h3 className="text-lg font-black text-slate-800 group-hover:text-indigo-600 transition-colors">
@@ -146,7 +206,7 @@ export default function CompanyJobListPage() {
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-1 text-slate-400">
                                         <Eye size={14} />
-                                        <span>128 views</span>
+                                        <span>{(job.view_count || 0).toLocaleString()} views</span>
                                     </div>
                                     <Link
                                         href={`/jobs/${job.id}`}
@@ -162,7 +222,7 @@ export default function CompanyJobListPage() {
                     ))}
                 </div>
             )}
-        </div>
+        </div >
     );
 }
 

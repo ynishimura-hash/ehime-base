@@ -174,7 +174,6 @@ function SortableLesson({ lesson, onEdit, onPlay }: { lesson: LessonItem, onEdit
                 <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
                     <span className="font-bold bg-slate-100 px-1.5 py-0.5 rounded text-[10px] flex items-center gap-1">
                         <Clock size={10} />
-                        <Clock size={10} />
                         {lesson.duration}
                     </span>
                     {lesson.hasQuiz && (

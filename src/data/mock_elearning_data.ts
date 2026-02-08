@@ -31,6 +31,8 @@ export interface CurriculumDef {
     lessons: ContentItem[];
     viewCount?: number;
     tags?: string[];
+    category?: string;
+    is_public?: boolean;
 }
 
 export interface CourseDef {

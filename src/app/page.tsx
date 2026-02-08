@@ -10,7 +10,7 @@ import { CompanyCarouselItem } from '@/components/home/CompanyCarouselItem';
 
 export default function HomePage() {
   const router = useRouter();
-  const { authStatus, activeRole, jobs, companies, users, currentUserId, fetchJobs, fetchCompanies } = useAppStore();
+  const { authStatus, activeRole, jobs, companies, users, currentUserId, fetchJobs, fetchCompanies, fetchUsers, systemSettings, fetchSystemSettings } = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArea, setSelectedArea] = useState('all');
   const [selectedIndustry, setSelectedIndustry] = useState('all');
@@ -20,6 +20,8 @@ export default function HomePage() {
   useEffect(() => {
     fetchJobs();
     fetchCompanies();
+    fetchUsers();
+    fetchSystemSettings();
   }, []);
 
   // Redirect Company to Dashboard immediately
@@ -99,8 +101,8 @@ export default function HomePage() {
             alt="Banner"
             className="w-full h-full object-cover opacity-80"
           />
-          {/* Visual Flare */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
+          {/* Visual Flare Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-900/40 via-transparent to-slate-900/80" />
         </div>
 
         {/* Hero Content - Relative for flow */}
@@ -110,10 +112,10 @@ export default function HomePage() {
               <Sparkles size={12} />
               New Experience in Ehime
             </div>
-            <h1 className="text-2xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-4 md:mb-6 tracking-tight leading-tight drop-shadow-2xl">
-              あなたの<span className="text-blue-400">「可能性」</span>を<br className="block md:hidden" />見つける場所。
+            <h1 className="text-[10vw] sm:text-[9vw] md:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-4 md:mb-6 tracking-tighter leading-[1.15] drop-shadow-2xl px-4">
+              <span className="inline-block whitespace-nowrap">あなたの<span className="text-blue-400 [text-shadow:1px_1px_0_#2563eb,-1px_-1px_0_#2563eb,1px_-1px_0_#2563eb,-1px_1px_0_#2563eb,0_0_12px_rgba(255,255,255,0.8)]">｢可能性｣</span>を</span><br className="block md:hidden" />見つける場所。
             </h1>
-            <p className="text-slate-200 text-sm md:text-xl font-bold drop-shadow-lg leading-relaxed">
+            <p className="text-slate-200 text-base md:text-xl font-bold drop-shadow-lg leading-relaxed">
               Ehime Baseで<br className="md:hidden" />あなたの「魅力」を発見する。
             </p>
           </div>
@@ -174,23 +176,23 @@ export default function HomePage() {
             </button>
           </form>
 
-          <div className="mt-6 flex flex-wrap justify-center items-center gap-3 text-white/80 text-xs font-bold">
-            <span>人気のキーワード:</span>
+          <div className="mt-8 flex flex-wrap justify-center items-center gap-2 md:gap-3 text-white/80 text-[10px] md:text-xs font-bold max-w-sm md:max-w-none px-4">
+            <span className="w-full md:w-auto mb-1 md:mb-0">人気のキーワード:</span>
             <span
               onClick={() => { setSearchQuery('短期体験'); router.push('/quests?q=短期体験'); }}
-              className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full hover:bg-white/20 cursor-pointer transition-colors border border-white/10"
+              className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full hover:bg-white/20 cursor-pointer transition-colors border border-white/10"
             >
               #短期体験
             </span>
             <span
               onClick={() => { setSearchQuery('農業'); router.push('/quests?q=農業'); }}
-              className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full hover:bg-white/20 cursor-pointer transition-colors border border-white/10"
+              className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full hover:bg-white/20 cursor-pointer transition-colors border border-white/10"
             >
               #農業DX
             </span>
             <span
               onClick={() => { setSearchQuery('未経験'); router.push('/quests?q=未経験'); }}
-              className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full hover:bg-white/20 cursor-pointer transition-colors border border-white/10"
+              className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full hover:bg-white/20 cursor-pointer transition-colors border border-white/10"
             >
               #未経験OK
             </span>
@@ -232,17 +234,17 @@ export default function HomePage() {
 
       {/* 4. Pick Up Quests */}
       <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="flex items-end justify-between mb-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-10 gap-6 md:gap-0">
           <div>
-            <h2 className="text-3xl font-black text-slate-900 mb-2 flex items-center gap-3 tracking-tighter drop-shadow-sm">
-              <Sparkles className="text-amber-500" size={28} />
+            <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-2 flex items-center gap-3 tracking-tighter drop-shadow-sm">
+              <Sparkles className="text-amber-500" size={24} />
               注目のクエスト
             </h2>
-            <p className="text-slate-600 font-bold">1日から体験できる、新しい出会いの形。</p>
+            <p className="text-slate-500 text-xs md:text-sm font-bold">1日から体験できる、新しい出会いの形。</p>
           </div>
-          <Link href="/quests" className="flex items-center gap-2 text-blue-600 font-black text-sm hover:gap-4 transition-all">
+          <Link href="/quests" className="flex items-center gap-2 text-blue-600 font-black text-xs md:text-sm hover:gap-4 transition-all self-start md:self-auto">
             すべてのクエストを見る
-            <ArrowRight size={18} />
+            <ArrowRight size={16} />
           </Link>
         </div>
 
@@ -305,28 +307,28 @@ export default function HomePage() {
                     </div>
                   )}
                 </div>
-                <div className="p-5 flex-1 flex flex-col">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 rounded-full overflow-hidden border border-slate-100 flex-shrink-0">
+                <div className="p-3.5 md:p-5 flex-1 flex flex-col">
+                  <div className="flex items-center gap-2 mb-2 md:mb-3">
+                    <div className="w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-slate-100 flex-shrink-0">
                       {company?.cover_image_url || company?.image ? (
                         <img src={company.cover_image_url || company.image} alt={company.name} className="w-full h-full object-cover" />
                       ) : (
-                        <div className={`w-full h-full ${company?.logoColor || 'bg-slate-400'} flex items-center justify-center text-[8px] text-white font-black`}>
+                        <div className={`w-full h-full ${company?.logoColor || 'bg-slate-400'} flex items-center justify-center text-[7px] md:text-[8px] text-white font-black`}>
                           {company?.name.charAt(0)}
                         </div>
                       )}
                     </div>
-                    <span className="text-[10px] font-black text-slate-400 group-hover:text-blue-600 transition-colors uppercase tracking-wider">{company?.name}</span>
+                    <span className="text-[9px] md:text-[10px] font-black text-slate-400 group-hover:text-blue-600 transition-colors uppercase tracking-wider truncate">{company?.name}</span>
                   </div>
-                  <h3 className="font-black text-slate-800 leading-tight mb-4 group-hover:text-blue-600 transition-colors line-clamp-2 min-h-[3rem]">
+                  <h3 className="font-extrabold text-slate-800 text-xs md:text-base leading-snug md:leading-tight mb-3 md:mb-4 group-hover:text-blue-600 transition-colors line-clamp-2 h-[2.5rem] md:h-[3rem]">
                     {quest.title}
                   </h3>
-                  <div className="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-slate-800 font-black text-xs">
-                      <span className="text-amber-500"><Wallet size={14} /></span>
+                  <div className="mt-auto pt-3 md:pt-4 border-t border-slate-50 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-slate-800 font-extrabold text-[10px] md:text-xs">
+                      <span className="text-amber-500"><Wallet size={12} className="md:w-[14px] md:h-[14px]" /></span>
                       {quest.reward}
                     </div>
-                    <div className="text-slate-300 group-hover:text-blue-500 transition-colors">
+                    <div className="text-slate-300 group-hover:text-blue-500 transition-colors hidden md:block">
                       <ChevronRight size={18} />
                     </div>
                   </div>
@@ -348,43 +350,51 @@ export default function HomePage() {
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-white font-bold text-xs tracking-widest uppercase">
                 Our Vision
               </div>
-              <h2 className="text-4xl md:text-5xl font-black text-white leading-tight tracking-tighter">
-                万人の正解はない。<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 italic">「凸凹（デコボコ）」</span>だから面白い。
+              <h2 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tighter">
+                万人の正解はない。<span className="inline-block whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 italic">「凸凹（デコボコ）」</span>だから面白い。
               </h2>
-              <p className="text-slate-400 text-lg leading-relaxed font-medium">
-                弱みにもなりうる尖った特性、それこそが魅力の正体です。<br />
-                Ehime Baseは、あなたのその歪（いびつ）さが、<br />
-                カチッとはまる環境（コンテキスト）を見つけ出します。
+              <p className="text-slate-400 text-base md:text-lg leading-relaxed font-medium">
+                弱みにもなりうる尖った特性、それこそが魅力の正体です。Ehime Baseは、あなたのその歪（いびつ）さが、カチッとはまる環境を見つけ出します。
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
                 <div className="p-6 bg-white/5 rounded-3xl border border-white/10 hover:bg-white/10 transition-colors">
-                  <div className="text-blue-400 font-black text-3xl mb-2">1,200+</div>
-                  <div className="text-sm font-bold text-slate-300">Ehime Spirits</div>
+                  <div className="text-blue-400 font-black text-3xl mb-2">
+                    {systemSettings['show_real_stats']
+                      ? users.length.toLocaleString()
+                      : '1,200'}+
+                  </div>
+                  <div className="text-sm font-bold text-slate-300">Users</div>
                 </div>
                 <div className="p-6 bg-white/5 rounded-3xl border border-white/10 hover:bg-white/10 transition-colors">
-                  <div className="text-indigo-400 font-black text-3xl mb-2">350+</div>
+                  <div className="text-indigo-400 font-black text-3xl mb-2">
+                    {systemSettings['show_real_stats']
+                      ? jobs.filter(j => j.type === 'quest').length.toLocaleString()
+                      : '350'}+
+                  </div>
                   <div className="text-sm font-bold text-slate-300">Active Quests</div>
                 </div>
               </div>
             </div>
             <div className="relative w-full mt-12 md:mt-0">
               <div className="absolute inset-0 bg-blue-500/10 rounded-[60px] transform rotate-6 scale-95 hidden md:block" />
-              <div className="relative w-full bg-white shadow-2xl rounded-[60px] overflow-hidden flex flex-col p-8 group hover:-rotate-1 transition-all duration-500">
-                <div className="flex-1 flex flex-col justify-center items-center text-center">
-                  <div className="w-24 h-24 bg-blue-100 text-blue-600 rounded-[32px] flex items-center justify-center mb-8 shadow-inner transform group-hover:rotate-12 transition-transform">
-                    <Users size={48} />
+              <div className="relative w-full bg-white shadow-2xl rounded-[60px] overflow-hidden flex flex-col p-6 md:p-10 group hover:-rotate-1 transition-all duration-500">
+                <div className="flex-1 flex flex-col justify-center items-start text-left w-full">
+                  <div className="w-20 h-20 md:w-24 md:h-24 bg-blue-100 text-blue-600 rounded-[30px] md:rounded-[32px] flex items-center justify-center mb-6 md:mb-8 shadow-inner transform group-hover:rotate-12 transition-transform self-center">
+                    <Users size={40} className="md:w-12 md:h-12" />
                   </div>
-                  <h3 className="text-2xl font-black text-slate-800 mb-4 tracking-tighter">まずはカジュアルに<br />「体験」から始めよう</h3>
-                  <p className="text-slate-500 font-bold mb-8">
-                    本採用の前に、1日だけ働いてみる。<br />
-                    会社の「中の人」とランチを食べてみる。<br />
-                    そんな小さな仕掛けをたくさん用意しています。
+                  <h3 className="text-xl md:text-2xl font-black text-slate-800 mb-4 tracking-tighter w-full text-left">
+                    まずはカジュアルに<br className="block md:hidden" />「体験」から始めよう
+                  </h3>
+                  <p className="text-slate-500 text-sm md:text-base font-bold mb-8 leading-relaxed text-left w-full">
+                    本採用の前に、1日だけ働いてみる。会社の「中の人」とランチを食べてみる。そんな小さな仕掛けをたくさん用意しています。
                   </p>
-                  <button className="w-full bg-slate-900 text-white font-black py-5 rounded-3xl hover:bg-blue-600 transition-all flex items-center justify-center gap-2 shadow-xl shadow-slate-200">
+                  <Link
+                    href="/quests"
+                    className="w-full bg-slate-900 text-white font-black py-5 rounded-3xl hover:bg-blue-600 transition-all flex items-center justify-center gap-2 shadow-xl shadow-slate-200"
+                  >
                     詳細ガイドをチェック
-                    <ArrowRight />
-                  </button>
+                    <ArrowRight size={20} />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -395,7 +405,10 @@ export default function HomePage() {
       {/* 6. Featured Companies - Full Width Auto-Scrolling Carousel */}
       <section className="w-full py-24 bg-white overflow-hidden">
         <div className="text-center mb-16 max-w-7xl mx-auto px-6">
-          <h2 className="text-3xl font-black text-slate-900 mb-4 tracking-tight drop-shadow-sm">参加している魅力的な企業</h2>
+          <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-4 tracking-tight drop-shadow-sm">
+            <span className="inline-block">参加している</span>
+            <span className="inline-block">魅力的な企業</span>
+          </h2>
           <div className="w-20 h-1 bg-blue-500 mx-auto rounded-full" />
         </div>
 

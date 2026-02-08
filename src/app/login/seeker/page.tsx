@@ -11,10 +11,31 @@ import { motion } from 'framer-motion';
 export default function SeekerLoginPage() {
     const router = useRouter();
     const supabase = createClient();
+    const { authStatus } = useAppStore();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    React.useEffect(() => {
+        const checkSession = async () => {
+            if (authStatus === 'authenticated') {
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                        window.location.href = '/dashboard';
+                    } else {
+                        // Stale state detected (Authenticated in store, but no session)
+                        // Reset store to allow login
+                        useAppStore.getState().resetState();
+                    }
+                } catch (e) {
+                    // Ignore abort errors
+                }
+            }
+        };
+        checkSession();
+    }, [authStatus]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

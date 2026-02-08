@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/appStore';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Plus, X, Briefcase, Award, Link as LinkIcon, Save } from 'lucide-react';
-import { getFallbackAvatarUrl } from '@/lib/avatarUtils';
+import { ArrowLeft, X, Briefcase, Award, Link as LinkIcon, Save } from 'lucide-react';
+import ItemSelectionModal from '@/components/modals/ItemSelectionModal';
+import { SKILLS_LIST, QUALIFICATIONS_LIST } from '@/data/masterData';
 
 export default function ProfileEditSkillsPage() {
     const { users, currentUserId, updateUser } = useAppStore();
@@ -13,29 +14,37 @@ export default function ProfileEditSkillsPage() {
     const currentUser = users.find(u => u.id === currentUserId);
 
     // Initial State
-    const [skills, setSkills] = useState<string[]>(currentUser?.skills?.map(s => s.name) || []);
-    const [newSkill, setNewSkill] = useState('');
-
+    const [skills, setSkills] = useState<string[]>(currentUser?.skills || []);
     const [qualifications, setQualifications] = useState<string[]>(currentUser?.qualifications || []);
-    const [newQual, setNewQual] = useState('');
-
     const [portfolioUrl, setPortfolioUrl] = useState(currentUser?.portfolioUrl || '');
+
+    useEffect(() => {
+        if (currentUser) {
+            setSkills(currentUser.skills || []);
+            setQualifications(currentUser.qualifications || []);
+            setPortfolioUrl(currentUser.portfolioUrl || '');
+        }
+    }, [currentUser]);
+
+    // Modal State
+    const [isSkillModalOpen, setIsSkillModalOpen] = useState(false);
+    const [isQualModalOpen, setIsQualModalOpen] = useState(false);
 
     if (!currentUser) return null;
 
     const handleSave = () => {
         updateUser(currentUserId, {
-            skills: skills.map(s => ({ name: s, level: 'intermediate' })), // Default to intermediate for now
+            skills: skills,
             qualifications,
             portfolioUrl
         });
         router.push('/mypage/profile-checklist');
     };
 
-    const addSkill = () => {
-        if (newSkill.trim() && !skills.includes(newSkill.trim())) {
-            setSkills([...skills, newSkill.trim()]);
-            setNewSkill('');
+    const handleAddSkill = (newSkills: string[]) => {
+        const uniqueSkills = newSkills.filter(s => !skills.includes(s));
+        if (uniqueSkills.length > 0) {
+            setSkills([...skills, ...uniqueSkills]);
         }
     };
 
@@ -43,10 +52,10 @@ export default function ProfileEditSkillsPage() {
         setSkills(skills.filter(s => s !== skill));
     };
 
-    const addQual = () => {
-        if (newQual.trim() && !qualifications.includes(newQual.trim())) {
-            setQualifications([...qualifications, newQual.trim()]);
-            setNewQual('');
+    const handleAddQual = (newQuals: string[]) => {
+        const uniqueQuals = newQuals.filter(q => !qualifications.includes(q));
+        if (uniqueQuals.length > 0) {
+            setQualifications([...qualifications, ...uniqueQuals]);
         }
     };
 
@@ -88,16 +97,17 @@ export default function ProfileEditSkillsPage() {
                     </div>
 
                     <div className="flex gap-2">
-                        <input
-                            type="text"
-                            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold text-sm focus:outline-none focus:border-blue-500"
-                            placeholder="例: Photoshop, 営業, 簿記"
-                            value={newSkill}
-                            onChange={(e) => setNewSkill(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && addSkill()}
-                        />
-                        <button onClick={addSkill} className="bg-slate-800 text-white w-10 h-10 rounded-xl flex items-center justify-center hover:bg-slate-700">
-                            <Plus size={20} />
+                        <div
+                            onClick={() => setIsSkillModalOpen(true)}
+                            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-400 text-sm cursor-pointer hover:bg-slate-100 transition-colors"
+                        >
+                            追加するスキルを選択...
+                        </div>
+                        <button
+                            onClick={() => setIsSkillModalOpen(true)}
+                            className="px-4 rounded-xl font-bold text-sm flex items-center justify-center bg-slate-800 text-white hover:bg-slate-700 transition-colors"
+                        >
+                            追加
                         </button>
                     </div>
                 </div>
@@ -121,16 +131,17 @@ export default function ProfileEditSkillsPage() {
                     </div>
 
                     <div className="flex gap-2">
-                        <input
-                            type="text"
-                            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold text-sm focus:outline-none focus:border-emerald-500"
-                            placeholder="例: 普通自動車免許, 英検2級"
-                            value={newQual}
-                            onChange={(e) => setNewQual(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && addQual()}
-                        />
-                        <button onClick={addQual} className="bg-slate-800 text-white w-10 h-10 rounded-xl flex items-center justify-center hover:bg-slate-700">
-                            <Plus size={20} />
+                        <div
+                            onClick={() => setIsQualModalOpen(true)}
+                            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-400 text-sm cursor-pointer hover:bg-slate-100 transition-colors"
+                        >
+                            追加する資格を選択...
+                        </div>
+                        <button
+                            onClick={() => setIsQualModalOpen(true)}
+                            className="px-4 rounded-xl font-bold text-sm flex items-center justify-center bg-slate-800 text-white hover:bg-slate-700 transition-colors"
+                        >
+                            追加
                         </button>
                     </div>
                 </div>
@@ -141,14 +152,17 @@ export default function ProfileEditSkillsPage() {
                         <div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center">
                             <LinkIcon size={20} />
                         </div>
-                        <h2 className="font-black text-lg">ポートフォリオ・リンク</h2>
+                        <h2 className="font-black text-lg">
+                            ポートフォリオ・リンク
+                            <span className="text-sm font-normal text-slate-400 ml-2">(任意)</span>
+                        </h2>
                     </div>
 
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-slate-400 uppercase">URLを入力</label>
                         <input
                             type="text"
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-sm focus:outline-none focus:border-purple-500"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800 text-sm focus:outline-none focus:border-purple-500 placeholder-slate-400"
                             placeholder="https://..."
                             value={portfolioUrl}
                             onChange={(e) => setPortfolioUrl(e.target.value)}
@@ -156,10 +170,29 @@ export default function ProfileEditSkillsPage() {
                     </div>
                 </div>
 
-                <button onClick={handleSave} className="w-full bg-slate-900 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 transition-transform">
-                    保存して戻る
-                </button>
+                <div className="pb-8">
+                    <button onClick={handleSave} className="w-full bg-slate-900 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 transition-transform">
+                        保存して戻る
+                    </button>
+                </div>
             </div>
+
+            {/* Modals */}
+            <ItemSelectionModal
+                isOpen={isSkillModalOpen}
+                onClose={() => setIsSkillModalOpen(false)}
+                onSelect={handleAddSkill}
+                title="スキル・経験"
+                items={SKILLS_LIST}
+            />
+            <ItemSelectionModal
+                isOpen={isQualModalOpen}
+                onClose={() => setIsQualModalOpen(false)}
+                onSelect={handleAddQual}
+                title="保有資格"
+                items={QUALIFICATIONS_LIST}
+            />
         </div>
     );
 }
+

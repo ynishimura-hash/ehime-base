@@ -4,13 +4,14 @@ import React, { use, useState, useEffect } from 'react';
 import {
     Heart, MessageCircle,
     Zap, Info, CheckCircle2,
-    ChevronLeft, Share2, Loader2, MapPin, JapaneseYen, Clock, Users
+    ChevronLeft, Share2, Loader2, MapPin, Coins, Clock, Users
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { useAppStore } from '@/lib/appStore';
 import { useRouter } from 'next/navigation';
 import { ConsultModal } from '@/components/modals/ConsultModal';
+import { CompanyDetailModal } from '@/components/modals/CompanyDetailModal';
 import { LoginPromptModal } from '@/components/auth/LoginPromptModal';
 import { ReelIcon } from '@/components/reels/ReelIcon';
 import { ReelModal } from '@/components/reels/ReelModal';
@@ -30,13 +31,18 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
         hasInteraction,
         createChat,
         toggleInteraction,
-        upsertCompany
+        upsertCompany,
+        users
     } = useAppStore();
+
+    // Get current user object safely
+    const currentUser = users.find(u => u.id === currentUserId);
 
     const [quest, setQuest] = useState<any>(null);
     const [company, setCompany] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isConsultModalOpen, setIsConsultModalOpen] = useState(false);
+    const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
     const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
     const [loginPromptMessage, setLoginPromptMessage] = useState('');
 
@@ -124,22 +130,39 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
         setIsConsultModalOpen(false);
         upsertCompany(company);
 
-        // CREATE INTERACTION: This makes it visible on dashboards as an "Application"
-        toggleInteraction('apply', currentUserId, id);
+        try {
+            setLoading(true);
 
-        // Create chat with initial and system messages
-        const chatId = await createChat(
-            company.id,
-            currentUserId,
-            `「${quest.title}」についてお話ししたいです。`,
-            'お申し込みありがとうございます。企業からの連絡をお待ちください。'
-        );
+            // CREATE INTERACTION: This makes it visible on dashboards as an "Application"
+            toggleInteraction('apply', currentUserId, id);
 
-        // Ensure chats are fetched
-        await useAppStore.getState().fetchChats();
+            // Create chat with initial and system messages
+            const chatId = await createChat(
+                company.id,
+                currentUserId,
+                `「${quest.title}」についてお話ししたいです。`,
+                'まずはあいさつをしましょう。\n企業から日程調整の連絡や面談の申し込みなど次のステップが提示されます。'
+            );
 
-        toast.success('お申し込みを送信しました');
-        router.push(`/messages/${chatId}`);
+            if (!chatId) {
+                throw new Error("Chat creation failed");
+            }
+
+            // Ensure chats are fetched
+            await useAppStore.getState().fetchChats();
+
+            toast.success('お申し込みを送信しました');
+
+            // Force a small delay to ensure state updates propagate before navigation if needed
+            setTimeout(() => {
+                router.push(`/messages/${chatId}`);
+            }, 100);
+
+        } catch (error) {
+            console.error("Application error:", error);
+            toast.error("申し込み処理中にエラーが発生しました。もう一度お試しください。");
+            setLoading(false);
+        }
     };
 
     const toggleLike = () => {
@@ -188,6 +211,14 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
                         <div className="absolute bottom-6 left-6 text-white px-2 pr-32">
+                            <button
+                                onClick={() => setIsCompanyModalOpen(true)}
+                                className="text-left group"
+                            >
+                                <span className="text-sm font-bold uppercase tracking-wide opacity-90 block mb-1 group-hover:underline group-hover:text-blue-200 transition-colors">
+                                    {company.name}
+                                </span>
+                            </button>
                             <span className="text-[10px] font-black uppercase tracking-widest opacity-80">{company.industry}</span>
                             <h2 className="text-2xl md:text-3xl font-black mt-1 leading-tight">{quest.title}</h2>
                         </div>
@@ -291,9 +322,19 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
                             <h3 className="text-lg font-black text-zinc-800 border-l-4 border-slate-900 pl-4">募集要項</h3>
                             <div className="grid grid-cols-1 gap-6">
                                 <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100">
+                                    <span className="block text-xs text-zinc-400 font-black uppercase mb-1">企業名</span>
+                                    <button
+                                        onClick={() => setIsCompanyModalOpen(true)}
+                                        className="text-lg font-bold text-zinc-900 hover:text-blue-600 hover:underline transition-colors text-left"
+                                    >
+                                        {company.name}
+                                    </button>
+                                </div>
+
+                                <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100">
                                     <span className="block text-xs text-zinc-400 font-black uppercase mb-1">報酬・対価</span>
                                     <p className="text-lg font-bold text-zinc-900 flex items-center gap-2">
-                                        <JapaneseYen size={18} className="text-zinc-400" />
+                                        <Coins size={18} className="text-zinc-400" />
                                         {quest.reward || '経験・スキル'}
                                     </p>
                                 </div>
@@ -377,6 +418,13 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
                 onClose={() => setIsConsultModalOpen(false)}
                 onConfirm={handleApplyConfirm}
                 companyName={company.name}
+                currentUser={currentUser}
+            />
+
+            <CompanyDetailModal
+                isOpen={isCompanyModalOpen}
+                onClose={() => setIsCompanyModalOpen(false)}
+                company={company}
             />
 
             <LoginPromptModal

@@ -25,7 +25,7 @@ export function calculateProfileCompletion(user: User | undefined | null): numbe
         if ((user as any)[f]) points++;
     });
 
-    // 3. Skills & Quals (3 items)
+    // 3. Skills & Quals (2 items)
     // Skills
     total++;
     if (user.skills && user.skills.length > 0) points++;
@@ -33,10 +33,6 @@ export function calculateProfileCompletion(user: User | undefined | null): numbe
     // Qualifications
     total++;
     if (user.qualifications && user.qualifications.length > 0) points++;
-
-    // Portfolio
-    total++;
-    if (user.portfolioUrl) points++;
 
     // 4. Conditions (3 items)
     total += 3;
@@ -64,7 +60,7 @@ export function getProfileSectionStatus(user: User | undefined | null) {
     return {
         basic: !!(user.name && user.university && user.faculty && user.graduationYear),
         intro: !!(user.bio && user.image),
-        skills: !!(user.skills?.length && user.qualifications?.length && user.portfolioUrl),
+        skills: !!(user.skills?.length && user.qualifications?.length),
         conditions: !!(user.desiredConditions?.industry?.length && user.desiredConditions?.location?.length && user.desiredConditions?.salary)
     };
 }

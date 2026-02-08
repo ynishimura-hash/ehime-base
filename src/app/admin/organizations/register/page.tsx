@@ -88,7 +88,7 @@ export default function OrganizationRegistration() {
                 description: '確認メールを送信しました。'
             });
 
-            router.push('/organizations/pending');
+            router.push('/admin/approvals');
 
         } catch (error: any) {
             console.error(error);

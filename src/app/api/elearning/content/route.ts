@@ -12,6 +12,64 @@ if (!supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+// GET /api/elearning/content - Get all lessons with pagination
+export async function GET(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const page = parseInt(searchParams.get('page') || '1');
+        const limit = parseInt(searchParams.get('limit') || '50');
+        const curriculumId = searchParams.get('curriculumId');
+
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+
+        let query = supabase
+            .from('course_lessons')
+            .select(`
+                *,
+                curriculum: course_curriculums(title)
+            `, { count: 'exact' });
+
+        // Apply filters
+        if (curriculumId) {
+            if (curriculumId === 'unassigned') {
+                query = query.is('curriculum_id', null);
+            } else {
+                query = query.eq('curriculum_id', curriculumId);
+            }
+        }
+
+        const { data, error, count } = await query
+            .order('created_at', { ascending: false })
+            .range(from, to);
+
+        if (error) {
+            console.error('API: Error fetching content:', error);
+            throw error;
+        }
+
+        // Map to frontend format
+        const mappedData = (data || []).map((l: any) => ({
+            id: l.id,
+            title: l.title,
+            type: l.youtube_url ? 'video' : 'document',
+            url: l.youtube_url,
+            duration: l.duration,
+            category: l.curriculum?.title || 'Uncategorized',
+            createdAt: l.created_at,
+            quiz: l.quiz,
+            material_url: l.material_url,
+            thumbnail: l.thumbnail_url
+        }));
+
+        return NextResponse.json({ data: mappedData, count: count || 0 });
+
+    } catch (error: any) {
+        console.error('API Error getAllContent:', error);
+        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    }
+}
+
 export async function POST(request: Request) {
     try {
         const body = await request.json();

@@ -6,15 +6,15 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// GET /api/elearning/tracks/[trackId]/courses - Get courses for a specific track
+// GET /api/elearning/tracks/[id]/courses - Get courses for a specific track
 export async function GET(
     request: Request,
-    context: { params: Promise<{ trackId: string }> }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { trackId } = await context.params;
+        const { id } = await context.params;
 
-        if (!trackId) {
+        if (!id) {
             return NextResponse.json({ error: 'Track ID required' }, { status: 400 });
         }
 
@@ -24,7 +24,7 @@ export async function GET(
                 *,
                 lessons: course_lessons(*)
             `)
-            .eq('course_id', trackId)
+            .eq('course_id', id)
             .order('order_index', { ascending: true })
             .order('created_at', { ascending: true });
 

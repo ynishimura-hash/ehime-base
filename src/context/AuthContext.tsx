@@ -108,6 +108,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         console.log('Syncing diagnosis result:', profile.diagnosis_result);
                         setAnalysisResults(profile.diagnosis_result);
                     }
+
+                    // Fetch detailed analysis from user_analysis table
+                    console.log('AuthProvider: Triggering fetchUserAnalysis for', session.user.id);
+                    useAppStore.getState().fetchUserAnalysis(session.user.id);
                 }
             } else if (event === 'SIGNED_OUT') {
                 useAppStore.getState().resetState();

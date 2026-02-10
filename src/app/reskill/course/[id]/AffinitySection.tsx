@@ -64,7 +64,27 @@ export const AffinitySection = ({ course, courseId, userId, userAnalysis, userNa
         );
     }
 
-    if (!result) return null;
+    if (!result || !userAnalysis || (Array.isArray(userAnalysis?.selectedValues) && userAnalysis.selectedValues.length === 0)) {
+        return (
+            <div className="bg-white border-2 border-dashed border-slate-200 rounded-2xl p-8 mb-8 text-center flex flex-col items-center gap-4">
+                <div className="bg-indigo-50 p-4 rounded-full text-indigo-500">
+                    <BrainCircuit size={32} />
+                </div>
+                <div>
+                    <h3 className="text-base font-black text-slate-800 mb-1">AI親和性分析を利用しましょう</h3>
+                    <p className="text-xs text-slate-500 font-medium">
+                        自己分析を完了すると、あなたの強みとこの講座の相性をAIが具体的に解説します。
+                    </p>
+                </div>
+                <button
+                    onClick={() => window.location.href = '/analysis'}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black px-6 py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all flex items-center gap-2"
+                >
+                    <Sparkles size={14} /> 自己分析（10分）を始める
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-gradient-to-br from-indigo-50/80 to-blue-50/80 backdrop-blur-sm border border-blue-100/50 rounded-2xl p-6 mb-8 relative overflow-hidden group hover:shadow-lg transition-all duration-500">

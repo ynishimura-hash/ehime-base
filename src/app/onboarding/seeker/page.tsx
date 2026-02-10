@@ -378,9 +378,52 @@ export default function OnboardingSeekerPage() {
         }
 
         // Step 2 Validation (Personal Info)
-        if (step === 2 && (!lastName || !firstNameReal || !gender || !phone || !dob)) {
-            toast.error('必須項目を入力してください');
-            return;
+        if (step === 2) {
+            if (!lastName || !firstNameReal || !gender || !phone || !dobYear || !dobMonth || !dobDay) {
+                toast.error('必須項目を入力してください');
+                return;
+            }
+
+            // Date Validation
+            const year = parseInt(dobYear);
+            const month = parseInt(dobMonth);
+            const day = parseInt(dobDay);
+
+            if (isNaN(year) || isNaN(month) || isNaN(day)) {
+                toast.error('生年月日を正しく入力してください');
+                return;
+            }
+
+            if (month < 1 || month > 12) {
+                toast.error('月は1〜12の間で入力してください');
+                return;
+            }
+
+            // Check for valid date (e.g. prevent 2/30, 4/31)
+            const date = new Date(year, month - 1, day);
+            if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+                toast.error('存在しない日付です (例: 2月30日など)');
+                return;
+            }
+
+            // Future date check
+            if (new Date() < date) {
+                toast.error('未来の日付は入力できません');
+                return;
+            }
+
+            // Reasonable range check
+            if (year < 1900) {
+                toast.error('正しい西暦を入力してください');
+                return;
+            }
+
+            // Phone Validation
+            const cleanPhone = phone.replace(/-/g, '');
+            if (!/^\d{10,11}$/.test(cleanPhone)) {
+                toast.error('電話番号を正しく入力してください');
+                return;
+            }
         }
 
         // Transition to Survey (Step 4) or Finish

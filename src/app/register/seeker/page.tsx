@@ -51,8 +51,14 @@ export default function RegisterSeekerPage() {
             // }
 
             console.log('Proceeding to Supabase SignUp...');
+
+            // Create a timeout promise
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Request timed out')), 20000) // 20s timeout
+            );
+
             // Sign Up with Redirect to Onboarding
-            const { data, error: authError } = await supabase.auth.signUp({
+            const signUpPromise = supabase.auth.signUp({
                 email: cleanEmail,
                 password,
                 options: {
@@ -64,12 +70,17 @@ export default function RegisterSeekerPage() {
                     emailRedirectTo: `${window.location.origin}/auth/callback`,
                 }
             });
+
+            // Race the signUp against the timeout
+            const result: any = await Promise.race([signUpPromise, timeoutPromise]);
+            const { data, error: authError } = result;
+
             console.log('SignUp result:', { data, authError });
 
             if (authError) throw authError;
 
             // Check if email confirmation is disabled (Auto-confirm)
-            if (data.session) {
+            if (data?.session) {
                 toast.success('登録完了！', { description: 'セットアップへ進みます' });
 
                 // Force hard navigation AND pass tokens manually to guarantee restoration

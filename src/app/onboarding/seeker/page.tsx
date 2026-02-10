@@ -288,20 +288,25 @@ export default function OnboardingSeekerPage() {
                 headers['Authorization'] = `Bearer ${accessToken}`;
             }
 
+            console.log('Sending request to /api/onboarding/complete...');
             const response = await fetch('/api/onboarding/complete', {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify({
                     profileData
                 }),
+                // Add signal if needed, but usually not required for simple fetch
             });
 
+            console.log('Response status:', response.status);
             const result = await response.json();
 
             if (!response.ok) {
-                console.error('Onboarding API failed:', result.error);
-                throw new Error(result.error);
+                console.error('Onboarding API failed:', result);
+                throw new Error(result.error || 'Unknown API Error');
             }
+
+            console.log('Onboarding API success:', result);
 
             // Gender-aware Avatar Generation
             const imageUrl = getFallbackAvatarUrl(currentUserId, gender);
@@ -364,8 +369,12 @@ export default function OnboardingSeekerPage() {
             }, 2000);
 
         } catch (error: any) {
-            console.error('Onboarding Error:', error);
-            toast.error('保存に失敗しました', { description: error.message });
+            console.error('Onboarding Error Details:', error);
+            if (error.name === 'AbortError') {
+                toast.error('通信が中断されました。再試行してください。');
+            } else {
+                toast.error('保存に失敗しました', { description: error.message || '不明なエラーが発生しました' });
+            }
             setLoading(false);
         }
     };

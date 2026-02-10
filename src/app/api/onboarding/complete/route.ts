@@ -48,6 +48,23 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: rpcError.message }, { status: 500 });
         }
 
+        // 3. Sync to Auth Metadata (Display Name)
+        // This ensures the name appears in Supabase Auth Dashboard
+        if (safeProfileData.full_name) {
+            const { error: updateAuthError } = await supabase.auth.updateUser({
+                data: {
+                    full_name: safeProfileData.full_name,
+                    name: safeProfileData.full_name // Some providers use 'name'
+                }
+            });
+            if (updateAuthError) {
+                console.warn('Failed to sync auth metadata:', updateAuthError);
+                // Don't fail the request, just log it
+            } else {
+                console.log('Synced auth metadata for user:', user.id);
+            }
+        }
+
         return NextResponse.json({ success: true, userId: user.id });
 
     } catch (err: any) {

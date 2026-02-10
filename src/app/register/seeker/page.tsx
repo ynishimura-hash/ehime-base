@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
+import { useAppStore } from '@/lib/appStore';
 import { toast } from 'sonner';
 import {
     Mail, Lock, Loader2, ArrowRight, CheckCircle
@@ -16,9 +17,24 @@ export default function RegisterSeekerPage() {
     const router = useRouter();
     const supabase = createClient();
 
-    // Sign Up Form Data
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    // Proactive Cleanup on Mount
+    useEffect(() => {
+        console.log('--- DEBUG_SIGNUP_V3 ---');
+        const clearSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                console.log('Stale session detected on mount. Clearing...');
+                await supabase.auth.signOut();
+                useAppStore.getState().resetState();
+                // Optional: hard reload if session was found to be extra safe
+                // window.location.reload(); 
+            }
+        };
+        clearSession();
+    }, []);
 
     const handleSignUp = async () => {
         if (!email || !password || password.length < 8) {
@@ -29,12 +45,16 @@ export default function RegisterSeekerPage() {
         setLoading(true);
 
         try {
+            console.log('handleSignUp start [V3]');
             // Force logout any existing/stale session before trying to register
-            console.log('Ensuring clean session (Signing out)...');
-            await supabase.auth.signOut();
+            console.log('Ensuring clean session (force signOut)...');
+            await supabase.auth.signOut().catch((e: any) => console.warn('signOut error:', e));
+
+            // Clear store
+            useAppStore.getState().resetState();
 
             // Wait slightly for session to clear
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => setTimeout(r, 1000));
 
             // Check email duplication
             const cleanEmail = email.trim();
@@ -57,11 +77,11 @@ export default function RegisterSeekerPage() {
             //     return;
             // }
 
-            console.log('Proceeding to Supabase SignUp...');
+            console.log('Proceeding to Supabase SignUp with:', cleanEmail);
 
             // Create a timeout promise
             const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Request timed out')), 20000) // 20s timeout
+                setTimeout(() => reject(new Error('SUPABASE_SIGNUP_TIMEOUT')), 30000) // 30s timeout
             );
 
             // Sign Up with Redirect to Onboarding

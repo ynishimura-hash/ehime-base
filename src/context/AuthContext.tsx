@@ -25,13 +25,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             data: { subscription },
         } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
             if (session?.user) {
-                // Fetch Profile Data
-                // Fetch Profile Data
-                const { data: profile, error: profileError } = await supabase
+                // Fetch Profile Data with Timeout
+                const profilePromise = supabase
                     .from('profiles')
                     .select('*')
                     .eq('id', session.user.id)
                     .maybeSingle();
+
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('PROFILE_FETCH_TIMEOUT')), 10000)
+                );
+
+                console.log('AuthProvider: Fetching profile for', session.user.id);
+                let profile: any = null;
+                let profileError: any = null;
+
+                try {
+                    const result: any = await Promise.race([profilePromise, timeoutPromise]);
+                    profile = result.data;
+                    profileError = result.error;
+                } catch (err) {
+                    console.error('AuthProvider: Profile fetch timed out or failed:', err);
+                }
 
                 if (profileError) {
                     console.error('Error fetching profile:', profileError);

@@ -31,24 +31,24 @@ export default function RegisterSeekerPage() {
         try {
             // Check email duplication
             const cleanEmail = email.trim();
-            console.log('Checking email via RPC:', cleanEmail);
-            const { data: emailExists, error: checkError } = await supabase.rpc('check_email_exists', { email_check: cleanEmail });
-            console.log('Email check result:', { emailExists, checkError });
+            // console.log('Checking email via RPC:', cleanEmail);
+            // const { data: emailExists, error: checkError } = await supabase.rpc('check_email_exists', { email_check: cleanEmail });
+            // console.log('Email check result:', { emailExists, checkError });
 
-            if (checkError) {
-                console.error('Email check RPC failed:', checkError);
-                throw checkError;
-            }
+            // if (checkError) {
+            //     console.error('Email check RPC failed:', checkError);
+            //     // throw checkError; // Don't block if RPC fails
+            // }
 
-            if (emailExists) {
-                console.log('Email already exists');
-                toast.warning('このメールアドレスは既に登録されています', {
-                    description: 'ログインページへ移動してください。',
-                    duration: 5000,
-                });
-                setLoading(false);
-                return;
-            }
+            // if (emailExists) {
+            //     console.log('Email already exists');
+            //     toast.warning('このメールアドレスは既に登録されています', {
+            //         description: 'ログインページへ移動してください。',
+            //         duration: 5000,
+            //     });
+            //     setLoading(false);
+            //     return;
+            // }
 
             console.log('Proceeding to Supabase SignUp...');
             // Sign Up with Redirect to Onboarding

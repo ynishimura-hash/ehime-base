@@ -173,8 +173,9 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
 
             // Force a small delay to ensure state updates propagate before navigation if needed
             setTimeout(() => {
+                console.log('Redirecting to chat:', `/messages/${chatId}`);
                 router.push(`/messages/${chatId}`);
-            }, 100);
+            }, 500);
 
         } catch (error) {
             console.error('Application failed:', error);

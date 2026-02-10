@@ -122,6 +122,31 @@ export async function POST(request: NextRequest) {
                     }
                 }
 
+                // 4. 監査ログの記録 (成功時のみ)
+                try {
+                    await adminClient.from('audit_logs').insert({
+                        user_id: session.user.id, // 操作者（管理者）
+                        action: action === 'toggle_status' ? (value ? 'reject' : 'approve') : // status toggle is logically ban/unban, mapping reset/update is straight forward
+                            action === 'reset_password' ? 'update' :
+                                action === 'update_profile' ? 'update' :
+                                    action, // delete maps directly
+                        table_name: 'profiles', // Mostly operating on profiles/users
+                        record_id: userId,
+                        description:
+                            action === 'delete' ? 'ユーザーを削除しました' :
+                                action === 'toggle_status' ? `ステータスを変更しました (Ban: ${value})` :
+                                    action === 'reset_password' ? 'パスワードをリセットしました' :
+                                        action === 'update_profile' ? 'プロフィールを更新しました' :
+                                            `アクションを実行しました: ${action}`,
+                        new_data: action === 'update_profile' ? value :
+                            action === 'toggle_status' ? { banned: value } :
+                                null
+                    });
+                } catch (logError) {
+                    console.error(`Failed to log audit for ${userId}:`, logError);
+                    // Don't fail the main action just because logging failed, but log strictly
+                }
+
                 results.push({ id: userId, status: 'success' });
             } catch (err: any) {
                 console.error(`Action ${action} failed for ${userId}:`, err);

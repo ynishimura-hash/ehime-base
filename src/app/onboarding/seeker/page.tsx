@@ -449,6 +449,7 @@ export default function OnboardingSeekerPage() {
                             <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1 block text-center">属性を選択 <span className="text-red-500 ml-1">必須</span></label>
                             <div className="grid grid-cols-2 gap-4">
                                 <button
+                                    type="button"
                                     onClick={() => setOccupationStatus('student')}
                                     className={`p-6 rounded-2xl border-2 text-center transition-all ${occupationStatus === 'student' ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md ring-2 ring-blue-100' : 'border-slate-100 text-slate-400 hover:border-blue-200 hover:bg-slate-50'}`}
                                 >
@@ -456,6 +457,7 @@ export default function OnboardingSeekerPage() {
                                     <div className="font-black text-lg">学生</div>
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => setOccupationStatus('worker')}
                                     className={`p-6 rounded-2xl border-2 text-center transition-all ${occupationStatus === 'worker' ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md ring-2 ring-blue-100' : 'border-slate-100 text-slate-400 hover:border-blue-200 hover:bg-slate-50'}`}
                                 >
@@ -506,6 +508,7 @@ export default function OnboardingSeekerPage() {
                                     {['male', 'female', 'other'].map((g) => (
                                         <button
                                             key={g}
+                                            type="button"
                                             onClick={() => setGender(g)}
                                             className={`p-3 rounded-xl border-2 text-center transition-all font-bold text-sm ${gender === g
                                                 ? 'border-blue-500 bg-blue-50 text-blue-700'
@@ -758,6 +761,7 @@ export default function OnboardingSeekerPage() {
                 <div className="flex gap-4 pt-4">
                     {step > 1 && (
                         <button
+                            type="button"
                             onClick={() => setStep(step - 1)}
                             className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black py-4 rounded-2xl transition-all"
                         >
@@ -768,14 +772,22 @@ export default function OnboardingSeekerPage() {
                     {step === 4 ? (
                         <>
                             <button
-                                onClick={() => handleCompleteOnboarding(true)} // Skip
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleCompleteOnboarding(true);
+                                }} // Skip
                                 disabled={loading}
                                 className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold py-4 rounded-2xl transition-all"
                             >
                                 スキップ
                             </button>
                             <button
-                                onClick={() => handleCompleteOnboarding(false)} // Submit Quest
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleCompleteOnboarding(false);
+                                }} // Submit Quest
                                 disabled={loading}
                                 className="flex-[2] bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-black py-4 rounded-2xl transition-all flex items-center justify-center gap-2 group shadow-lg shadow-orange-200 active:scale-95"
                             >
@@ -785,6 +797,7 @@ export default function OnboardingSeekerPage() {
                         </>
                     ) : (
                         <button
+                            type="button"
                             onClick={nextStep}
                             disabled={loading}
                             className="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl transition-all flex items-center justify-center gap-2 group active:scale-95 disabled:opacity-70 shadow-lg shadow-blue-200"

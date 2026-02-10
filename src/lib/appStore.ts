@@ -159,7 +159,7 @@ interface AppState {
     fetchInteractions: () => Promise<void>;
 
     // Chat Actions
-    sendMessage: (threadId: string, senderId: string, text: string, attachment?: Attachment, replyToId?: string) => Promise<void>;
+    sendMessage: (threadId: string, senderId: string, text: string, attachment?: Attachment, replyToId?: string, fileToUpload?: File) => Promise<void>;
     deleteMessage: (threadId: string, messageId: string) => void;
     createChat: (companyId: string, userId: string, initialMessage?: string, systemMessage?: string) => Promise<string>; // returns threadId
     fetchChats: () => Promise<void>;
@@ -492,10 +492,20 @@ export const useAppStore = create<AppState>()(
                 if (Object.keys(dbUpdates).length > 0) {
                     console.log('AppStore: Starting DB update...', dbUpdates);
                     try {
-                        const { error: updateError } = await supabase
+                        // Create a promise for the update
+                        const updatePromise = supabase
                             .from('profiles')
                             .update(dbUpdates)
                             .eq('id', userId);
+
+                        // Create a promise that rejects after 10 seconds
+                        const timeoutPromise = new Promise((_, reject) =>
+                            setTimeout(() => reject(new Error('Update timeout')), 10000)
+                        );
+
+                        // Race them
+                        const result: any = await Promise.race([updatePromise, timeoutPromise]);
+                        const { error: updateError } = result;
 
                         if (updateError) {
                             console.error('AppStore: DB update failed:', updateError);
@@ -734,28 +744,109 @@ export const useAppStore = create<AppState>()(
                 }
             },
 
-            sendMessage: async (threadId, senderId, text, attachment, replyToId) => {
-                const supabase = createClient();
-                const newMessage = {
-                    chat_id: threadId,
-                    sender_id: senderId,
-                    content: text,
-                    attachment_url: attachment?.url,
-                    attachment_type: attachment?.type,
-                    attachment_name: attachment?.name,
-                    is_read: false
-                };
+            sendMessage: async (threadId, senderId, text, attachment, replyToId, fileToUpload) => {
+                const tempId = `temp-${Date.now()}`;
+                console.log('Sending message:', { threadId, senderId, text, attachment: attachment ? 'present' : 'none', file: fileToUpload ? 'present' : 'none' });
 
-                const { data, error } = await supabase.from('messages').insert(newMessage).select().single();
+                // 1. Optimistic Update
+                const previewUrl = fileToUpload ? URL.createObjectURL(fileToUpload) : attachment?.url;
 
-                if (error) {
+                const optimisticAttachment = fileToUpload ? {
+                    id: `temp-att-${Date.now()}`,
+                    type: fileToUpload.type.startsWith('image/') ? 'image' : 'file',
+                    url: previewUrl || '',
+                    name: fileToUpload.name,
+                    size: `${(fileToUpload.size / 1024).toFixed(1)} KB`
+                } : attachment;
+
+                set(state => ({
+                    chats: state.chats.map(chat => {
+                        if (chat.id !== threadId) return chat;
+
+                        const newMessage: any = {
+                            id: tempId,
+                            senderId: senderId,
+                            text: text,
+                            timestamp: Date.now(),
+                            isRead: false,
+                            isSystem: false,
+                            attachment: optimisticAttachment
+                        };
+
+                        return {
+                            ...chat,
+                            messages: [...chat.messages, newMessage],
+                            updatedAt: Date.now()
+                        };
+                    }).sort((a: any, b: any) => b.updatedAt - a.updatedAt)
+                }));
+
+                try {
+                    const supabase = createClient();
+
+                    let attachmentUrl = attachment?.url;
+                    let attachmentName = attachment?.name;
+                    let attachmentType = attachment?.type;
+
+                    // 2. Upload File if present
+                    if (fileToUpload) {
+                        const formData = new FormData();
+                        formData.append('file', fileToUpload);
+                        formData.append('chatId', threadId);
+
+                        const uploadRes = await fetch('/api/upload/messages', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!uploadRes.ok) {
+                            const err = await uploadRes.json();
+                            throw new Error(err.error || 'Upload failed');
+                        }
+
+                        const uploadData = await uploadRes.json();
+                        attachmentUrl = uploadData.url;
+                        attachmentName = uploadData.name;
+                        // Map MIME type to Attachment type
+                        attachmentType = fileToUpload.type.startsWith('image/') ? 'image' : 'file';
+                    } else {
+                        // If no file upload, perform blob URL check for safety
+                        if (attachmentUrl?.startsWith('blob:')) {
+                            console.warn('Cannot persist blob URL without file object');
+                            attachmentUrl = undefined;
+                        }
+                    }
+
+                    const newMessagePayload = {
+                        chat_id: threadId,
+                        sender_id: senderId,
+                        content: text,
+                        attachment_url: attachmentUrl,
+                        attachment_type: attachmentType,
+                        attachment_name: attachmentName,
+                        is_read: false
+                    };
+
+                    const { error } = await supabase.from('messages').insert(newMessagePayload).select().single();
+
+                    if (error) throw error;
+
+                    // 3. Sync
+                    await get().fetchChats();
+
+                } catch (error: any) {
                     console.error('Failed to send message:', error);
                     toast.error(`メッセージ送信エラー: ${error.message || error.code}`);
-                    return;
-                }
 
-                // Optimistic update or fetch
-                get().fetchChats();
+                    // Revert Optimistic Update
+                    set(state => ({
+                        chats: state.chats.map(chat =>
+                            chat.id === threadId
+                                ? { ...chat, messages: chat.messages.filter(m => m.id !== tempId) }
+                                : chat
+                        )
+                    }));
+                }
             },
 
             deleteMessage: async (threadId, messageId) => {
@@ -1000,15 +1091,17 @@ export const useAppStore = create<AppState>()(
 
                 // 2. Database Update (Background)
                 try {
-                    const { error } = await supabase
-                        .from('messages')
-                        .update({ is_read: true })
-                        .eq('chat_id', threadId)
-                        .neq('sender_id', readerId)
-                        .eq('is_read', false); // Only update unread ones
+                    // Use API route to bypass RLS issues (Service Role)
+                    console.log('Calling markAsRead API:', { chatId: threadId, readerId });
+                    const response = await fetch('/api/messages/mark-read', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chatId: threadId, readerId })
+                    });
 
-                    if (error) {
-                        console.error('markAsRead DB Error:', error);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        console.error('markAsRead API Error:', errorData);
                         // Optional: Revert UI if needed, but for read status it's usually fine to ignore
                     }
                 } catch (err) {

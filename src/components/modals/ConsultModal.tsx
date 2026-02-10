@@ -34,6 +34,25 @@ export function ConsultModal({ isOpen, onClose, onConfirm, companyName, currentU
 
     const location = displayUser.desiredConditions?.location?.[0] || '愛媛県';
 
+    // Calculate Age from birthDate if available
+    const calculateAge = (birthDate?: string | Date, fallback?: number) => {
+        if (!birthDate) return fallback || 20;
+        try {
+            const birth = new Date(birthDate);
+            const today = new Date();
+            let age = today.getFullYear() - birth.getFullYear();
+            const m = today.getMonth() - birth.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+            return age;
+        } catch (e) {
+            return fallback || 20;
+        }
+    };
+
+    const displayAge = calculateAge(displayUser.birthDate, displayUser.age);
+
     return (
         <>
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -86,7 +105,7 @@ export function ConsultModal({ isOpen, onClose, onConfirm, companyName, currentU
                                     <div className="flex items-center gap-2">
                                         <span className="font-black text-zinc-800 text-lg">{displayUser.name}</span>
                                         <span className="text-xs font-bold text-zinc-500 bg-white px-2 py-0.5 rounded-full border border-blue-100">
-                                            {displayUser.age}歳
+                                            {displayAge}歳
                                         </span>
                                     </div>
                                     <p className="text-xs text-zinc-500 mt-1 font-medium">{location}</p>
@@ -116,6 +135,7 @@ export function ConsultModal({ isOpen, onClose, onConfirm, companyName, currentU
                                 キャンセル
                             </button>
                             <button
+                                type="button"
                                 onClick={() => {
                                     // Block Logic for Junior/High School Students
                                     if (displayUser.occupationStatus === 'student' &&

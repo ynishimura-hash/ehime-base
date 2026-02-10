@@ -11,6 +11,8 @@ import { createClient } from '@/utils/supabase/client';
 import { toast } from 'sonner';
 import Cropper from 'react-easy-crop';
 import getCroppedImg from '@/utils/canvasUtils';
+import ItemSelectionModal from '@/components/modals/ItemSelectionModal';
+import { SKILLS_LIST, QUALIFICATIONS_LIST } from '@/data/masterData';
 
 export default function ProfileEditPage() {
     const { users, currentUserId, updateUser } = useAppStore();
@@ -134,6 +136,10 @@ export default function ProfileEditPage() {
     const [zoom, setZoom] = useState(1);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
 
+    // Modal State
+    const [isSkillModalOpen, setIsSkillModalOpen] = useState(false);
+    const [isQualModalOpen, setIsQualModalOpen] = useState(false);
+
     // Validated Types for array inputs
     // UI Local State for array inputs
     const [newTag, setNewTag] = useState('');
@@ -151,7 +157,16 @@ export default function ProfileEditPage() {
     };
     const removeTag = (tag: string) => setForm({ ...form, tags: form.tags?.filter(t => t !== tag) });
 
-    const addQual = () => {
+    const handleAddQual = (newQuals: string[]) => {
+        const currentQuals = form.qualifications || [];
+        const uniqueQuals = newQuals.filter(q => !currentQuals.includes(q));
+        if (uniqueQuals.length > 0) {
+            setForm({ ...form, qualifications: [...currentQuals, ...uniqueQuals] });
+        }
+    };
+
+    // Legacy manual add (optional keep or replace)
+    const addQualManual = () => {
         if (newQual.trim() && !form.qualifications?.includes(newQual.trim())) {
             setForm({ ...form, qualifications: [...(form.qualifications || []), newQual.trim()] });
             setNewQual('');
@@ -159,7 +174,21 @@ export default function ProfileEditPage() {
     };
     const removeQual = (q: string) => setForm({ ...form, qualifications: form.qualifications?.filter(t => t !== q) });
 
-    const addSkill = (e?: React.FormEvent) => {
+    const handleAddSkill = (newSkills: string[]) => {
+        const currentSkills = form.skills || [];
+        // Extract names if objects (legacy support)
+        const currentNames = currentSkills.map(s => typeof s === 'string' ? s : (s as any).name);
+
+        const uniqueSkills = newSkills.filter(s => !currentNames.includes(s));
+        if (uniqueSkills.length > 0) {
+            setForm(prev => ({
+                ...prev,
+                skills: [...(prev.skills || []), ...uniqueSkills]
+            }));
+        }
+    };
+
+    const addSkillManual = (e?: React.FormEvent) => {
         e?.preventDefault(); // Prevent form submission
         if (newSkillName.trim()) {
             setForm(prev => ({
@@ -301,8 +330,13 @@ export default function ProfileEditPage() {
                 router.back();
             }, 500);
         } catch (error: any) {
-            console.error(error);
-            toast.error(`エラーが発生しました: ${error.message || 'Unknown error'}`);
+            console.error('Save failed:', error);
+            // If timeout or specific error
+            if (error.message === 'Update timeout') {
+                toast.error('保存処理がタイムアウトしました。通信環境を確認してください。');
+            } else {
+                toast.error(`エラーが発生しました: ${error.message || 'Unknown error'}`);
+            }
         } finally {
             setIsSaving(false);
         }
@@ -672,11 +706,11 @@ export default function ProfileEditPage() {
                                     type="text"
                                     value={newQual}
                                     onChange={e => setNewQual(e.target.value)}
-                                    onKeyDown={(e) => handleKeyDown(e, addQual)}
+                                    onKeyDown={(e) => handleKeyDown(e, addQualManual)}
                                     className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800 focus:outline-none focus:border-blue-500"
                                     placeholder="資格名..."
                                 />
-                                <button type="button" onClick={() => addQual()} className="p-3 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 transition-colors">
+                                <button type="button" onClick={() => setIsQualModalOpen(true)} className="p-3 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 transition-colors">
                                     <Plus size={20} />
                                 </button>
                             </div>
@@ -698,11 +732,11 @@ export default function ProfileEditPage() {
                                     type="text"
                                     value={newSkillName}
                                     onChange={e => setNewSkillName(e.target.value)}
-                                    onKeyDown={(e) => handleKeyDown(e, () => addSkill())}
+                                    onKeyDown={(e) => handleKeyDown(e, (e) => addSkillManual(e))}
                                     className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-800 focus:outline-none focus:border-blue-500"
                                     placeholder="スキル名..."
                                 />
-                                <button type="button" onClick={(e) => addSkill(e)} className="p-3 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 transition-colors">
+                                <button type="button" onClick={() => setIsSkillModalOpen(true)} className="p-3 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 transition-colors">
                                     <Plus size={20} />
                                 </button>
                             </div>
@@ -750,6 +784,22 @@ export default function ProfileEditPage() {
                     )}
                 </button>
             </div>
+
+            {/* Modals */}
+            <ItemSelectionModal
+                isOpen={isSkillModalOpen}
+                onClose={() => setIsSkillModalOpen(false)}
+                onSelect={handleAddSkill}
+                title="スキル・経験"
+                items={SKILLS_LIST}
+            />
+            <ItemSelectionModal
+                isOpen={isQualModalOpen}
+                onClose={() => setIsQualModalOpen(false)}
+                onSelect={handleAddQual}
+                title="保有資格"
+                items={QUALIFICATIONS_LIST}
+            />
 
             {/* Crop Modal */}
             {imageSrc && (

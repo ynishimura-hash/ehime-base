@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useMemo } from 'react';
+import { toast } from 'sonner';
 import { Search, MoreHorizontal, Send, Paperclip, Phone, ChevronLeft, MessageSquare, FileText, Download, X, Copy, Reply, Trash2, RotateCcw, Pin, Ban, ChevronDown } from 'lucide-react';
 import { useAppStore, ChatThread, Attachment } from '@/lib/appStore';
 import MobileBottomNav from '@/components/MobileBottomNav';
@@ -118,6 +119,8 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
 
     const selectedChat = chats.find(c => c.id === selectedChatId);
 
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
     // Context Menu State
     const [contextMenu, setContextMenu] = useState<{ x: number, y: number, messageId: string, isMe: boolean } | null>(null);
     const [partialCopyText, setPartialCopyText] = useState<string | null>(null);
@@ -180,17 +183,26 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
     }, []);
 
 
-    const handleSend = () => {
-        if ((!inputText.trim() && !attachment) || !selectedChatId) return;
-        sendMessage(selectedChatId, myselfId, inputText, attachment || undefined, replyToId || undefined);
+    const handleSend = (e?: React.SyntheticEvent) => {
+        e?.preventDefault();
+        if ((!inputText.trim() && !fileInputRef.current && !attachment) || !selectedChatId) return;
+        sendMessage(selectedChatId, myselfId, inputText, attachment || undefined, replyToId || undefined, selectedFile || undefined);
         setInputText('');
         setAttachment(null);
+        setSelectedFile(null);
         setReplyToId(null);
     };
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
+
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error('ファイルサイズは5MB以下にしてください');
+                if (fileInputRef.current) fileInputRef.current.value = '';
+                return;
+            }
+
             const isImage = file.type.startsWith('image/');
             const newAttachment: Attachment = {
                 id: `att_${Date.now()}`,
@@ -200,6 +212,9 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
                 size: `${(file.size / 1024).toFixed(1)} KB`
             };
             setAttachment(newAttachment);
+            setSelectedFile(file);
+
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
@@ -789,6 +804,7 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
                                             accept="image/*,.pdf,.doc,.docx"
                                         />
                                         <button
+                                            type="button"
                                             onClick={() => fileInputRef.current?.click()}
                                             className="p-3 text-slate-400 hover:bg-slate-100 rounded-xl transition-colors hidden md:block"
                                         >
@@ -819,6 +835,7 @@ export default function UnifiedChatInterface({ mode, initialChatId }: UnifiedCha
                                             />
                                         </div>
                                         <button
+                                            type="button"
                                             onClick={handleSend}
                                             className="p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"
                                         >

@@ -34,19 +34,21 @@ export default function AdminAuditLogPage() {
 
     const fetchLogs = async () => {
         setLoading(true);
-        const supabase = createClient();
-        const { data, error } = await supabase
-            .from('audit_logs')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(100);
-
-        if (error) {
-            console.error('Error fetching logs:', error);
-        } else {
-            setLogs(data || []);
+        try {
+            const response = await fetch('/api/admin/system/audit');
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error fetching logs:', errorData);
+                // Handle error state gracefully (maybe show toast)
+            } else {
+                const data = await response.json();
+                setLogs(data || []);
+            }
+        } catch (error) {
+            console.error('Exception fetching logs:', error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const getActionIcon = (action: string) => {

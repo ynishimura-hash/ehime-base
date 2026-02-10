@@ -1527,9 +1527,14 @@ export const useAppStore = create<AppState>()(
                 // Use Server Action to fetch data securely
                 const result = await fetchUserAnalysisAction(targetId);
 
-                if (!result.success || !result.data) {
+                if (!result.success) {
                     console.error('AppStore: fetchUserAnalysisAction failed:', result.error);
-                    // If failed or no data, we keep current (likely dummy) data
+                    return;
+                }
+
+                if (!result.data) {
+                    // This is expected for new users who haven't completed the analysis
+                    console.log('AppStore: No previous analysis data found for user.');
                     return;
                 }
 

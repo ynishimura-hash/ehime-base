@@ -115,14 +115,18 @@ const TEXT_TEMPLATES: Record<Relationship, { opening: string[], advice: string[]
     }
 };
 
-export const generateFortuneMessage = (dayMaster: string | undefined, userName?: string): { message: string, advice: string, luckyColor: string, luckyItem: string } | null => {
-    console.log('generateFortuneMessage called with:', { dayMaster, userName });
-    if (!dayMaster) {
-        console.warn('generateFortuneMessage: dayMaster is falsy');
+export const generateFortuneMessage = (dayMasterInput: string | undefined, userName?: string): { message: string, advice: string, luckyColor: string, luckyItem: string } | null => {
+    console.log('generateFortuneMessage called with:', { dayMasterInput, userName });
+    if (!dayMasterInput) {
+        console.warn('generateFortuneMessage: dayMasterInput is falsy');
         return null;
     }
+
+    // Extract the first character as the stem (handles descriptive strings like "戊 (つちのえ) - 山")
+    const dayMaster = dayMasterInput.trim().charAt(0);
+
     if (!STEMS.includes(dayMaster)) {
-        console.warn(`generateFortuneMessage: dayMaster "${dayMaster}" is not in STEMS`, STEMS);
+        console.warn(`generateFortuneMessage: normalized dayMaster "${dayMaster}" (from "${dayMasterInput}") is not in STEMS`, STEMS);
         return null;
     }
 

@@ -87,7 +87,17 @@ export default function RegisterSeekerPage() {
 
         } catch (error: any) {
             console.error('Registration Error:', error);
-            toast.error('登録に失敗しました', { description: error.message });
+            if (error.message?.includes('User already registered') || error.message?.includes('already registered')) {
+                toast.warning('このメールアドレスは既に登録されています', {
+                    description: 'ログインページからログインしてください。',
+                    action: {
+                        label: 'ログインへ',
+                        onClick: () => router.push('/login/seeker')
+                    }
+                });
+            } else {
+                toast.error('登録に失敗しました', { description: error.message });
+            }
         } finally {
             setLoading(false);
         }

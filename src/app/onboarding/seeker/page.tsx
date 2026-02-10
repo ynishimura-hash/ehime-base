@@ -314,9 +314,13 @@ export default function OnboardingSeekerPage() {
             // --- FIX: Manually update AppStore to prevent race condition on Dashboard ---
             const { upsertUser, fetchUsers, loginAs } = useAppStore.getState();
 
-            // Save Avatar URL to DB (Fire and forget, but important)
-            // We try to update 'avatar_url' or 'image' column
-            await supabase.from('profiles').update({ avatar_url: imageUrl }).eq('id', currentUserId);
+            // Save Avatar URL to DB (Non-blocking / Log errors but don't stop flow)
+            supabase.from('profiles').update({ avatar_url: imageUrl }).eq('id', currentUserId)
+                .then(({ error }) => {
+                    if (error) console.error('Background Avatar Update Failed:', error);
+                    else console.log('Background Avatar Update Success');
+                })
+                .catch(err => console.error('Background Avatar Update Exception:', err));
 
             // optimistic sync of what we know
             const optimisticUser: any = {
@@ -363,10 +367,12 @@ export default function OnboardingSeekerPage() {
                 });
             }
 
+            // Force stop loading before redirect to give feedback
+            setLoading(false);
+
             setTimeout(() => {
                 router.push('/dashboard');
-                // router.refresh(); // Removed to avoid resetting the store state we just set
-            }, 2000);
+            }, 1500);
 
         } catch (error: any) {
             console.error('Onboarding Error Details:', error);

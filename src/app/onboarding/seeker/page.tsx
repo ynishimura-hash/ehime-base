@@ -316,11 +316,11 @@ export default function OnboardingSeekerPage() {
 
             // Save Avatar URL to DB (Non-blocking / Log errors but don't stop flow)
             supabase.from('profiles').update({ avatar_url: imageUrl }).eq('id', currentUserId)
-                .then(({ error }) => {
+                .then(({ error }: { error: any }) => {
                     if (error) console.error('Background Avatar Update Failed:', error);
                     else console.log('Background Avatar Update Success');
                 })
-                .catch(err => console.error('Background Avatar Update Exception:', err));
+                .catch((err: any) => console.error('Background Avatar Update Exception:', err));
 
             // optimistic sync of what we know
             const optimisticUser: any = {

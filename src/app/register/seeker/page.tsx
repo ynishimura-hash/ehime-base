@@ -29,6 +29,13 @@ export default function RegisterSeekerPage() {
         setLoading(true);
 
         try {
+            // Force logout any existing/stale session before trying to register
+            console.log('Ensuring clean session (Signing out)...');
+            await supabase.auth.signOut();
+
+            // Wait slightly for session to clear
+            await new Promise(r => setTimeout(r, 500));
+
             // Check email duplication
             const cleanEmail = email.trim();
             // console.log('Checking email via RPC:', cleanEmail);
